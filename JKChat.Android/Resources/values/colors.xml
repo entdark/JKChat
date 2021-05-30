@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#323544</color>
+    <color name="colorPrimaryDark">#323544</color>
+    <color name="colorAccent">#94ECE9</color>
+	<color name="accent_translucent">#7f94ECE9</color>
+	<color name="toolbar">#323444</color>
+	<color name="toolbar_title">#8BD9FF</color>
+	<color name="toolbar_subtitle">#828282</color>
+	<color name="background">#222D66</color>
+	<color name="item_background">#26C4C4C4</color>
+	<color name="regular_text">#AAD8DD</color>
+	<color name="connected">#95DC21</color>
+	<color name="connecting">#ECA314</color>
+	<color name="disconnected">#B52525</color>
+	<color name="chat_text">#FFFFFF</color>
+	<color name="chat_type_circle">#4F4F4F</color>
+	<color name="chat_type_common">#E600FF00</color>
+	<color name="chat_type_team">#00FFFF</color>
+	<color name="chat_type_private">#FF00FF</color>
+	<color name="message_block">#323544</color>
+	<color name="message_text">#C8C8C8</color>
+	<color name="message_placeholder_text">#828282</color>
+	<color name="dialog_window_background">#7F181818</color>
+	<color name="dialog_background">#495076</color>
+	<color name="dialog_title_background">#3A4374</color>
+	<color name="dialog_title">#94ECE9</color>
+	<color name="dialog_button">#FFAD00</color>
+	<color name="dialog_input">#E5E5E5</color>
+	<color name="dialog_text">#E5E5E5</color>
+	<color name="dialog_selection">#8CFFAD00</color>
+</resources>

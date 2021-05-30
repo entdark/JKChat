@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina5_9" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ChatViewController">
+            <connections>
+                <outlet property="ChatTableView" destination="175" id="name-outlet-175"/>
+                <outlet property="ChatTypeButton" destination="1670" id="name-outlet-1670"/>
+                <outlet property="ChatTypeCommonButton" destination="1276" id="name-outlet-1276"/>
+                <outlet property="ChatTypePrivateButton" destination="1428" id="name-outlet-1428"/>
+                <outlet property="ChatTypeStackView" destination="1046" id="name-outlet-1046"/>
+                <outlet property="ChatTypeTeamButton" destination="1417" id="name-outlet-1417"/>
+                <outlet property="MessageTextView" destination="1903" id="name-outlet-1903"/>
+                <outlet property="MessageView" destination="3687" id="name-outlet-3687"/>
+                <outlet property="SendButton" destination="2313" id="name-outlet-2313"/>
+                <outlet property="ViewBottomConstraint" destination="uab-qN-vGf" id="name-outlet-uab-qN-vGf"/>
+                <outlet property="view" destination="1" id="RRd-Eg-VrN"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="1">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0BW-om-Vsj">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="778"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3687">
+                            <rect key="frame" x="0.0" y="676.33333333333337" width="375" height="101.66666666666663"/>
+                            <subviews>
+                                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="882">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
+                                    <subviews>
+                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="1046">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                            <subviews>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1276">
+                                                    <rect key="frame" x="0.0" y="0.0" width="125" height="44"/>
+                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
+                                                    <state key="normal" title="COMMON" image="Images/ChatTypeCommon.png">
+                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </state>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1417">
+                                                    <rect key="frame" x="125" y="0.0" width="125" height="44"/>
+                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
+                                                    <state key="normal" title="TEAM" image="Images/ChatTypeTeam.png">
+                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </state>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1428">
+                                                    <rect key="frame" x="250" y="0.0" width="125" height="44"/>
+                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
+                                                    <state key="normal" title="PRIVATE" image="Images/ChatTypePrivate.png">
+                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    </state>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="44" id="1077"/>
+                                            </constraints>
+                                        </stackView>
+                                        <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="1120">
+                                            <rect key="frame" x="0.0" y="44" width="375" height="57.666666666666657"/>
+                                            <subviews>
+                                                <view autoresizesSubviews="NO" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3295">
+                                                    <rect key="frame" x="0.0" y="4" width="51" height="50"/>
+                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="51" id="3317"/>
+                                                    </constraints>
+                                                </view>
+                                                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" text="Lorem ipsum dolor sit er elit lamet," translatesAutoresizingMaskIntoConstraints="NO" id="1903" customClass="PlaceholderTextView">
+                                                    <rect key="frame" x="51" y="0.0" width="280" height="57.666666666666664"/>
+                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" id="1914"/>
+                                                    </constraints>
+                                                    <color key="textColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="18"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                </textView>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3401">
+                                                    <rect key="frame" x="331" y="4" width="44" height="50"/>
+                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="44" id="3402"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="1141"/>
+                                            </constraints>
+                                        </stackView>
+                                    </subviews>
+                                    <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </stackView>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
+                                    <rect key="frame" x="0.0" y="57.666666666666629" width="51" height="44"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" constant="51" id="1691"/>
+                                        <constraint firstAttribute="height" constant="44" id="2165"/>
+                                    </constraints>
+                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="12"/>
+                                    <state key="normal" image="Images/ChatTypeCommon.png">
+                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </state>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2313">
+                                    <rect key="frame" x="331" y="57.666666666666629" width="44" height="44"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="44" id="2334"/>
+                                        <constraint firstAttribute="width" constant="44" id="2376"/>
+                                    </constraints>
+                                    <state key="normal" image="Images/Send.png">
+                                        <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </state>
+                                </button>
+                            </subviews>
+                            <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstItem="882" firstAttribute="height" secondItem="3687" secondAttribute="height" id="03b-pB-LVS"/>
+                                <constraint firstAttribute="bottom" secondItem="1670" secondAttribute="bottom" id="I4C-qC-8Br"/>
+                                <constraint firstItem="882" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="Leh-MI-ibv"/>
+                                <constraint firstItem="882" firstAttribute="top" secondItem="3687" secondAttribute="top" id="Oot-hr-0xe"/>
+                                <constraint firstAttribute="trailing" secondItem="882" secondAttribute="trailing" id="S1d-rN-fLp"/>
+                                <constraint firstItem="1670" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="TmO-VE-aJo"/>
+                                <constraint firstAttribute="bottom" secondItem="882" secondAttribute="bottom" id="VME-Z0-GfI"/>
+                                <constraint firstAttribute="bottom" secondItem="2313" secondAttribute="bottom" id="Ycn-yd-nIY"/>
+                                <constraint firstAttribute="trailing" secondItem="2313" secondAttribute="trailing" id="gl7-BT-wsp"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="3687" secondAttribute="trailing" id="Xbx-3a-Iwi"/>
+                        <constraint firstItem="3687" firstAttribute="leading" secondItem="0BW-om-Vsj" secondAttribute="leading" id="Zg1-nc-20S"/>
+                        <constraint firstAttribute="bottom" secondItem="3687" secondAttribute="bottom" id="qCS-2M-hf0"/>
+                    </constraints>
+                </view>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="778"/>
+                    <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <color key="tintColor" red="0.039215686274509803" green="0.37647058823529411" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                </tableView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KtL-wy-5qa">
+                    <rect key="frame" x="0.0" y="778" width="375" height="34"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="NOh-Zt-4h4"/>
+            <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="KtL-wy-5qa" firstAttribute="top" secondItem="NOh-Zt-4h4" secondAttribute="bottom" id="1sS-Qk-Pc1"/>
+                <constraint firstItem="KtL-wy-5qa" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="9rE-dh-OpY"/>
+                <constraint firstItem="175" firstAttribute="top" secondItem="1" secondAttribute="top" id="OBO-Qg-MoO"/>
+                <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="0BW-om-Vsj" secondAttribute="bottom" id="P0O-tp-Fs7"/>
+                <constraint firstItem="0BW-om-Vsj" firstAttribute="top" secondItem="1" secondAttribute="top" id="Vpf-8U-gBg"/>
+                <constraint firstItem="0BW-om-Vsj" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="cYK-8w-CnP"/>
+                <constraint firstAttribute="bottom" secondItem="KtL-wy-5qa" secondAttribute="bottom" id="uGI-Wh-lgf"/>
+                <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="uab-qN-vGf"/>
+                <constraint firstItem="175" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="wRR-VV-sYN"/>
+                <constraint firstItem="KtL-wy-5qa" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="x9j-9q-oWD"/>
+                <constraint firstAttribute="trailing" secondItem="0BW-om-Vsj" secondAttribute="trailing" id="yNL-jZ-lB9"/>
+                <constraint firstItem="175" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="zYm-M2-3RO"/>
+            </constraints>
+            <point key="canvasLocation" x="195" y="0.0"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="Images/ChatTypeCommon.png" width="15" height="15"/>
+        <image name="Images/ChatTypePrivate.png" width="15.333330154418945" height="15"/>
+        <image name="Images/ChatTypeTeam.png" width="15.333330154418945" height="15"/>
+        <image name="Images/Send.png" width="20" height="15.666669845581055"/>
+    </resources>
+</document>

@@ -1,0 +1,254 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <ProjectGuid>{0E16FA34-571C-4DF8-B707-9BB82BFCC7E6}</ProjectGuid>
+    <ProjectTypeGuids>{FEACFBD2-3405-455C-9665-78FE426C6842};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TemplateGuid>{440aa056-593a-4519-8708-27081dee632f}</TemplateGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>JKChat.iOS</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <AssemblyName>JKChat.iOS</AssemblyName>
+    <MtouchEnableSGenConc>true</MtouchEnableSGenConc>
+    <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <ProvisioningType>manual</ProvisioningType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <MtouchArch>x86_64</MtouchArch>
+    <MtouchLink>None</MtouchLink>
+    <MtouchDebug>true</MtouchDebug>
+    <MtouchI18n>west</MtouchI18n>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <MtouchLink>None</MtouchLink>
+    <MtouchArch>x86_64</MtouchArch>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <MtouchArch>ARM64</MtouchArch>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <CodesignKey>iPhone Developer</CodesignKey>
+    <MtouchDebug>true</MtouchDebug>
+    <LangVersion>8.0</LangVersion>
+    <CodesignProvision>
+    </CodesignProvision>
+    <MtouchI18n>west</MtouchI18n>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\iPhone\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <MtouchArch>ARM64</MtouchArch>
+    <CodesignKey>iPhone Distribution</CodesignKey>
+    <LangVersion>8.0</LangVersion>
+    <MtouchI18n>west</MtouchI18n>
+    <CodesignProvision>
+    </CodesignProvision>
+    <MtouchDebug>false</MtouchDebug>
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <AppExtensionDebugBundleId />
+    <LaunchForBackgroundFetch>false</LaunchForBackgroundFetch>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ChatTableView.cs" />
+    <Compile Include="Controls\JKDialog\JKDialogViewController.cs" />
+    <Compile Include="Controls\JKDialog\JKDialogViewController.designer.cs">
+      <DependentUpon>JKDialogViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\JKDialog\Cells\JKDialogViewCell.cs" />
+    <Compile Include="Controls\JKDialog\Cells\JKDialogViewCell.designer.cs">
+      <DependentUpon>JKDialogViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\PlaceholderTextView.cs" />
+    <Compile Include="Helpers\DeviceInfo.cs" />
+    <Compile Include="Helpers\iOSExtensions.cs" />
+    <Compile Include="LinkerPleaseInclude.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="AppDelegate.cs" />
+    <Compile Include="Services\DialogService.cs" />
+    <Compile Include="Setup.cs" />
+    <Compile Include="Theme\Color.cs" />
+    <Compile Include="Theme\Font.cs" />
+    <Compile Include="ValueConverters\ColourTextValueConverter.cs" />
+    <Compile Include="ValueConverters\ConnectionColorValueConverter.cs" />
+    <Compile Include="ValueConverters\DialogSelectionValueConverter.cs" />
+    <Compile Include="ViewSources\ChatTableViewSource.cs" />
+    <Compile Include="Views\Base\BaseViewController.cs" />
+    <Compile Include="Views\Base\IKeyboardViewController.cs" />
+    <Compile Include="Views\Chat\Cells\ChatViewCell.cs" />
+    <Compile Include="Views\Chat\Cells\ChatViewCell.designer.cs">
+      <DependentUpon>ChatViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Chat\ChatViewController.cs" />
+    <Compile Include="Views\Chat\ChatViewController.designer.cs">
+      <DependentUpon>ChatViewController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Main\MainViewController.cs" />
+    <Compile Include="Views\ServerList\Cells\ServerListViewCell.cs" />
+    <Compile Include="Views\ServerList\Cells\ServerListViewCell.designer.cs">
+      <DependentUpon>ServerListViewCell.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ServerList\ServerListViewController.cs" />
+    <Compile Include="Views\ServerList\ServerListViewController.designer.cs">
+      <DependentUpon>ServerListViewController.cs</DependentUpon>
+    </Compile>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\anewhope_regular.ttf">
+      <Link>Resources\Fonts\anewhope_regular.ttf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\arial_regular.ttf">
+      <Link>Resources\Fonts\arial_regular.ttf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\ergoe_bold.TTF">
+      <Link>Resources\Fonts\ergoe_bold.TTF</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\ergoe_medium.ttf">
+      <Link>Resources\Fonts\ergoe_medium.ttf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\ergoe_regular.ttf">
+      <Link>Resources\Fonts\ergoe_regular.ttf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="..\JKChat.Core\Resources\Fonts\ocrastd_regular.otf">
+      <Link>Resources\Fonts\ocrastd_regular.otf</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </BundleResource>
+    <BundleResource Include="Resources\Images\GameType%402x.png" />
+    <BundleResource Include="Resources\Images\GameType%403x.png" />
+    <BundleResource Include="Resources\Images\Map%402x.png" />
+    <BundleResource Include="Resources\Images\Map%403x.png" />
+    <BundleResource Include="Resources\Images\Password%402x.png" />
+    <BundleResource Include="Resources\Images\Password%403x.png" />
+    <BundleResource Include="Resources\Images\Ping%402x.png" />
+    <BundleResource Include="Resources\Images\Ping%403x.png" />
+    <BundleResource Include="Resources\Images\Players%402x.png" />
+    <BundleResource Include="Resources\Images\Players%403x.png" />
+    <BundleResource Include="Resources\Images\Back%402x.png" />
+    <BundleResource Include="Resources\Images\Back%403x.png" />
+    <BundleResource Include="Resources\Images\ChatTypeCommon%402x.png" />
+    <BundleResource Include="Resources\Images\ChatTypeCommon%403x.png" />
+    <BundleResource Include="Resources\Images\ChatTypePrivate%402x.png" />
+    <BundleResource Include="Resources\Images\ChatTypePrivate%403x.png" />
+    <BundleResource Include="Resources\Images\ChatTypeTeam%402x.png" />
+    <BundleResource Include="Resources\Images\ChatTypeTeam%403x.png" />
+    <BundleResource Include="Resources\Images\Send%402x.png" />
+    <BundleResource Include="Resources\Images\Send%403x.png" />
+    <InterfaceDefinition Include="Controls\JKDialog\JKDialogViewController.xib" />
+    <InterfaceDefinition Include="Controls\JKDialog\Cells\JKDialogViewCell.xib" />
+    <None Include="Info.plist" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Entitlements.plist" />
+    <InterfaceDefinition Include="LaunchScreen.storyboard" />
+    <InterfaceDefinition Include="Views\ServerList\ServerListViewController.xib" />
+    <InterfaceDefinition Include="Views\ServerList\Cells\ServerListViewCell.xib" />
+    <InterfaceDefinition Include="Views\Chat\ChatViewController.xib" />
+    <InterfaceDefinition Include="Views\Chat\Cells\ChatViewCell.xib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="MonoTouch.Dialog-1" />
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="Xamarin.iOS" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MvvmCross">
+      <Version>7.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmCross.Plugin.Messenger">
+      <Version>7.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="MvvmCross.Plugin.Visibility">
+      <Version>7.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.7.335</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Contents.json">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon1024.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon167.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon120.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon152.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon180.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon29.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon40.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon58.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon76.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon80.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon87.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon20.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+    <ImageAsset Include="Assets.xcassets\AppIcon.appiconset\Icon60.png">
+      <Visible>false</Visible>
+    </ImageAsset>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\JKChat.Core\JKChat.Core.csproj">
+      <Project>{4315dbfa-acd5-44b9-abb0-f9bccd27598f}</Project>
+      <Name>JKChat.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
+</Project>
