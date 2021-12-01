@@ -17,7 +17,6 @@ namespace JKChat.Android.Views.ServerList {
 	[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
 	public class ServerListFragment : BaseFragment<ServerListViewModel> {
 		private MvxRecyclerView recyclerView;
-		private IParcelable recyclerViewSavedState;
 
 		public ServerListFragment() : base(Resource.Layout.server_list_page) {}
 
