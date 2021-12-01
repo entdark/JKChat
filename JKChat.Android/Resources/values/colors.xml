@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#323544</color>
-    <color name="colorPrimaryDark">#323544</color>
-    <color name="colorAccent">#94ECE9</color>
-	<color name="accent_translucent">#7f94ECE9</color>
+    <color name="primary">#323544</color>
+    <color name="primary_dark">#323544</color>
+    <color name="accent">#94ECE9</color>
+	<color name="accent_translucent">#7F94ECE9</color>
 	<color name="toolbar">#323444</color>
 	<color name="toolbar_title">#8BD9FF</color>
 	<color name="toolbar_subtitle">#828282</color>

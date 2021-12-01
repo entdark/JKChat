@@ -28,8 +28,8 @@ namespace JKChat.Android.Views.ServerList {
 			recyclerView.Adapter = new RestoreStateRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView);
 
 			var refreshLayout = view.FindViewById<MvxSwipeRefreshLayout>(Resource.Id.mvxswiperefreshlayout);
-			refreshLayout.SetColorSchemeResources(Resource.Color.colorAccent);
-			refreshLayout.SetProgressBackgroundColorSchemeResource(Resource.Color.colorPrimary);
+			refreshLayout.SetColorSchemeResources(Resource.Color.accent);
+			refreshLayout.SetProgressBackgroundColorSchemeResource(Resource.Color.primary);
 		}
 
 		public override void OnResume() {
