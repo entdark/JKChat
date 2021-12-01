@@ -131,7 +131,7 @@
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7251">
                                     <rect key="frame" x="0.0" y="150.33333333333331" width="270" height="44"/>
                                     <subviews>
-                                        <tableView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="none" rowHeight="44" estimatedRowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="7299">
+                                        <tableView opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="44" estimatedRowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="7299">
                                             <rect key="frame" x="0.0" y="0.0" width="270" height="44"/>
                                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                             <color key="separatorColor" red="0.58039215686274515" green="0.92549019607843142" blue="0.9137254901960784" alpha="0.30196078431372547" colorSpace="custom" customColorSpace="sRGB"/>
