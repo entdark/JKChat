@@ -42,33 +42,36 @@ namespace JKChat.Core.Helpers {
 						uriStringBuilder.Append(value[i]);
 					}
 					if ((value[i] == ' ' || i+1 >= value.Length) && uriStringBuilder.Length > 0) {
-						const string webUrls = @"^(?:https?://|s?ftps?://)?(?!www | www\.)[A-Za-z0-9_-]+\.+.+$";
+						const string webUrls = @"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Za-z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Za-z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Za-z0-9+&@#\/%=~_|$])";
 						const string schemeSep = "://";
+						const string telScheme = "tel:";
+						const string mailtoScheme = "mailto:";
 						string uriStr = uriStringBuilder.ToString();
-						var match = Regex.Match(uriStr, webUrls);
+						var match = Regex.Match(uriStr, webUrls, RegexOptions.IgnoreCase | RegexOptions.Multiline);
 						/* valid:
 						 * www.site.com
-						 * site.com
 						 * http(s)://site.com
+						 * ftp://site.com
+						 * file://site.com
 						 * scheme://path
 						 */
-						if (match.Success || (uriStr.Contains(schemeSep) && !uriStr.StartsWith(schemeSep))) {
-							if (!uriStr.Contains(schemeSep)) {
+						if (match.Success
+							|| (uriStr.Contains(schemeSep, StringComparison.OrdinalIgnoreCase) && !uriStr.StartsWith(schemeSep, StringComparison.OrdinalIgnoreCase))
+							|| uriStr.StartsWith(telScheme, StringComparison.OrdinalIgnoreCase)
+							|| uriStr.StartsWith(mailtoScheme, StringComparison.OrdinalIgnoreCase)) {
+							if (!uriStr.Contains(schemeSep, StringComparison.OrdinalIgnoreCase)) {
 								//site.com -> https://site.com
 								uriStr = "https://" + uriStr;
 							}
 							if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri result)) {
-								if (result.Scheme == "print" && value.IndexOf("^֎", StringComparison.Ordinal) >= 0) {
-									goto skip;
+								if (result.Scheme != "print" || value.IndexOf("^֎", StringComparison.Ordinal) < 0) {
+									int startOffset = value[i] == ' ' ? 1 : 0;
+									uriAttributes.Add(new AttributeData<Uri>() {
+										Start = stringBuilder.Length - uriStringBuilder.Length - startOffset,
+										Length = uriStringBuilder.Length,
+										Value = result
+									});
 								}
-								int startOffset = value[i] == ' ' ? 1 : 0;
-								uriAttributes.Add(new AttributeData<Uri>() {
-									Start = stringBuilder.Length - uriStringBuilder.Length - startOffset,
-									Length = uriStringBuilder.Length,
-									Value = result
-								});
-skip:
-								;
 							}
 						}
 						uriStringBuilder.Clear();
