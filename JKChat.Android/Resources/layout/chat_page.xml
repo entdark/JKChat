@@ -15,10 +15,9 @@
             android:id="@+id/mvxrecyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="15dp"
             android:clipToPadding="false"
             android:layout_weight="1"
-            app:MvxItemTemplate="@layout/chat_item"
+            app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
             app:MvxBind="ItemsSource Items; ItemLongClick LongPressCommand"/>
         <LinearLayout
             android:orientation="vertical"

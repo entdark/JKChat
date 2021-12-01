@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
-using System.Reflection.Emit;
 
 using CoreGraphics;
 
@@ -10,10 +8,9 @@ using Foundation;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.iOS.Controls;
 using JKChat.iOS.Helpers;
-using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
+using JKChat.iOS.Views.Chat.Cells;
 
-using MvvmCross.Binding.Extensions;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
 using UIKit;
@@ -26,19 +23,14 @@ namespace JKChat.iOS.ViewSources {
 		public IKeyboardViewController ViewControllerWithKeyboard { get; set; }
 		public NSLayoutConstraint ViewBottomConstraint { get; set; }
 		protected bool NewDragging { get; set; }
-		public ChatTableViewSource(IntPtr handle) : base(handle) {
-			Initialize();
-		}
-
-		public ChatTableViewSource(UITableView tableView, Type cellType, string cellIdentifier = null) : base(tableView, cellType, cellIdentifier) {
-			Initialize();
-		}
 
 		public ChatTableViewSource(UITableView tableView, string nibName, string cellIdentifier = null, NSBundle bundle = null, bool registerNibForCellReuse = true) : base(tableView, nibName, cellIdentifier, bundle, registerNibForCellReuse) {
-			Initialize();
+			Initialize(tableView);
 		}
 
-		private void Initialize() {
+		private void Initialize(UITableView tableView) {
+			tableView.RegisterNibForCellReuse(ChatMessageViewCell.Nib, ChatMessageViewCell.Key);
+			tableView.RegisterNibForCellReuse(ChatInfoViewCell.Nib, ChatInfoViewCell.Key);
 			this.UseAnimations = true;
 			this.AddAnimation = UITableViewRowAnimation.Top;
 			this.RemoveAnimation = UITableViewRowAnimation.Bottom;
@@ -141,5 +133,14 @@ namespace JKChat.iOS.ViewSources {
 		public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) {
 			return EstimatedHeight(tableView, indexPath);
 		}*/
+
+		protected override UITableViewCell GetOrCreateCellFor(UITableView tableView, NSIndexPath indexPath, object item) {
+			if (item is ChatMessageItemVM) {
+				return tableView.DequeueReusableCell(ChatMessageViewCell.Key);
+			} else if (item is ChatInfoItemVM) {
+				return tableView.DequeueReusableCell(ChatInfoViewCell.Key);
+			}
+			return base.GetOrCreateCellFor(tableView, indexPath, item);
+		}
 	}
 }

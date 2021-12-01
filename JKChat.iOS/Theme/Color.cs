@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Foundation;
-using UIKit;
+﻿using UIKit;
 
 namespace JKChat.iOS {
-	public static partial class Theme {
+    public static partial class Theme {
 		public static class Color {
 			public static readonly UIColor Accent = UIColor.FromRGB(148, 236, 233);
 			public static readonly UIColor Background = UIColor.FromRGB(34, 45, 102);
@@ -20,6 +14,8 @@ namespace JKChat.iOS {
 			public static readonly UIColor Placeholder = UIColor.FromRGB(130, 130, 130);
 			public static readonly UIColor DialogSelection = UIColor.FromRGBA(255, 173, 0, 140);
 			public static readonly UIColor DialogSeparator = UIColor.FromRGBA(148, 236, 233, 0);
+			public static readonly UIColor ChatInfoGradientStart = UIColor.FromRGBA(0, 255, 255, 66);
+			public static readonly UIColor ChatInfoGradientEnd = UIColor.FromRGBA(0, 255, 255, 0);
 		}
 	}
 }

@@ -1,14 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+
+using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Chat.Items {
-	public class ChatItemVM {
-		public string PlayerName { get; private set; }
-		public string Message { get; private set; }
-		public ChatItemVM(string playerName, string message) {
-			PlayerName = playerName;
-			Message = message;
+	public abstract class ChatItemVM : MvxNotifyPropertyChanged {
+		public string Time { get; private set; } = DateTime.Now.ToString("t");
+
+		public Type ThisVMType => this.GetType();
+
+		private Type topVMType;
+		public Type TopVMType {
+			get => topVMType;
+			set => SetProperty(ref topVMType, value);
+		}
+
+		private Type bottomVMType;
+		public Type BottomVMType {
+			get => bottomVMType;
+			set => SetProperty(ref bottomVMType, value);
 		}
 	}
 }

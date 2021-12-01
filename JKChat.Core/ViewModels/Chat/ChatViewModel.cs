@@ -98,8 +98,16 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private async Task SelectionChangedExecute(ChatItemVM item) {
+			string text;
+			if (item is ChatMessageItemVM messageItem) {
+				text = messageItem.Message;
+			} else if (item is ChatInfoItemVM infoItem) {
+				text = infoItem.Text;
+			} else {
+				return;
+			}
 			var uriAttributes = new List<AttributeData<Uri>>();
-			ColourTextHelper.CleanString(item?.Message, uriAttributes);
+			ColourTextHelper.CleanString(text, uriAttributes: uriAttributes);
 			Uri uri;
 			if (uriAttributes.Count > 1) {
 				var dialogList = new DialogListViewModel();
@@ -146,17 +154,24 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private async Task LongPressExecute(ChatItemVM item) {
-			string message = item?.Message;
-			if (string.IsNullOrEmpty(message)) {
+			string text;
+			if (item is ChatMessageItemVM messageItem) {
+				text = messageItem.Message;
+			} else if (item is ChatInfoItemVM infoItem) {
+				text = infoItem.Text;
+			} else {
 				return;
 			}
-			await Clipboard.SetTextAsync(ColourTextHelper.CleanString(item.Message));
+			if (string.IsNullOrEmpty(text)) {
+				return;
+			}
+			await Clipboard.SetTextAsync(ColourTextHelper.CleanString(text));
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Message is Copied",
 //				Message = "To copy message with color codes click \"With Colors\"",
 				LeftButton = "With Colors",
 				LeftClick = (_) => {
-					Clipboard.SetTextAsync(item.Message);
+					Clipboard.SetTextAsync(text);
 				},
 				RightButton = "OK",
 				Type = JKDialogType.Title// | JKDialogType.Message

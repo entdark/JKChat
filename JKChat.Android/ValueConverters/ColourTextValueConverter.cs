@@ -8,7 +8,6 @@ using Android.Text;
 using Android.Text.Style;
 using Android.Views;
 
-using JKChat.Core;
 using JKChat.Core.Helpers;
 
 using MvvmCross.Converters;
@@ -28,26 +27,8 @@ namespace JKChat.Android.ValueConverters {
 				uriAttributes = new List<AttributeData<Uri>>();
 			}
 
-			string cleanStr = ColourTextHelper.CleanString(value, uriAttributes, colorAttributes);
+			string cleanStr = ColourTextHelper.CleanString(value, colorAttributes, uriAttributes);
 			var spannable = new SpannableString(cleanStr);
-
-			int index = value.IndexOf("^؉", StringComparison.Ordinal);
-			int index2 = value.IndexOf("^؊", StringComparison.Ordinal);
-			if (index == 0 && index2 > 0) {
-				spannable.SetSpan(new RelativeSizeSpan(0.57f), 0, index2 - 2, SpanTypes.ExclusiveExclusive);
-			}
-
-			index = value.IndexOf("^֎", StringComparison.Ordinal);
-			if (index >= 0) {
-				index2 = value.IndexOf("^֎^", StringComparison.Ordinal);
-				if (value.StartsWith("^؉", StringComparison.Ordinal)) {
-					index -= 4;
-				}
-				spannable.SetSpan(new RelativeSizeSpan(0.7f), index, cleanStr.Length, SpanTypes.ExclusiveExclusive);
-				if (index2 < 0) {
-					spannable.SetSpan(new StyleSpan(TypefaceStyle.Italic), index, cleanStr.Length, SpanTypes.ExclusiveExclusive);
-				}
-			}
 
 			foreach (var colorAttribute in colorAttributes) {
 				spannable.SetSpan(new ForegroundColorSpan(GetColor(colorAttribute.Value)), colorAttribute.Start, colorAttribute.Start+colorAttribute.Length, SpanTypes.ExclusiveExclusive);
@@ -65,8 +46,6 @@ namespace JKChat.Android.ValueConverters {
 
 		private static Color GetColor(int code) {
 			switch (code) {
-			case '֎':
-				return new Color(128, 128, 128);
 			case 0:
 			case 8:
 				return new Color(0, 0, 0);

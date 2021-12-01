@@ -95,8 +95,7 @@ namespace JKChat.iOS.Views.Chat {
 			MessageView.RemoveFromSuperview();
 			inputAccessoryView.AddAccessoryView(MessageView);
 //			ChatTypeStackView.Hidden = true;
-			ChatTableView.RegisterNibForCellReuse(ChatViewCell.Nib, ChatViewCell.Key);
-			ChatTableView.ExtraContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
+//			ChatTableView.ExtraContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
 			ChatTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive;
 			ChatTableView.KeyboardViewController = this;
 			ChatTableView.RowHeight = UITableView.AutomaticDimension;
@@ -225,7 +224,7 @@ const float deltaTappedPos = 5.0f;
 
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
-			var source = new ChatTableViewSource(ChatTableView, ChatViewCell.Key) {
+			var source = new ChatTableViewSource(ChatTableView, ChatMessageViewCell.Key) {
 				ViewControllerWithKeyboard = this,
 				ViewBottomConstraint = ViewBottomConstraint
 			};

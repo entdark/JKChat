@@ -77,6 +77,8 @@
     <Compile Include="Services\ForegroundGameClientsService.cs" />
     <Compile Include="Setup.cs" />
     <Compile Include="SplashActivity.cs" />
+    <Compile Include="TemplateSelectors\ChatItemTemplateSelector.cs" />
+    <Compile Include="ValueConverters\ChatMessageMarginValueConverter.cs" />
     <Compile Include="ValueConverters\ChatTypeIconValueConverter.cs" />
     <Compile Include="ValueConverters\ColourTextValueConverter.cs" />
     <Compile Include="ValueConverters\ConnectionIconValueConverter.cs" />
@@ -206,11 +208,6 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\connected_background.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\chat_item.xml">
-      <SubType>Designer</SubType>
-    </AndroidResource>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\font\arial.xml" />
@@ -359,6 +356,15 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\scrollbar_thumb.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\chat_info_item.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\chat_message_item.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\chat_info_background.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

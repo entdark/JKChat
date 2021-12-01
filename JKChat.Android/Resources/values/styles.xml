@@ -56,11 +56,17 @@
 
 	<style name="ChatText">
 		<item name="android:textColor">@color/chat_text</item>
-	</style>
-	<style name="ChatText.13">
 		<item name="android:textSize">13sp</item>
+		<item name="android:fontFamily">@font/ocrastd_regular</item>
 	</style>
-	<style name="ChatText.13.Regular">
+
+	<style name="ChatInfoText" parent="ChatText">
+		<item name="android:textSize">12sp</item>
+	</style>
+
+	<style name="ChatTimeText">
+		<item name="android:textColor">@color/chat_time_text</item>
+		<item name="android:textSize">10sp</item>
 		<item name="android:fontFamily">@font/ocrastd_regular</item>
 	</style>
 

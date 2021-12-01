@@ -284,7 +284,7 @@ namespace JKChat.Core.Models {
 			separator += 3;
 			string playerName = fullMessage.Substring(0, separator).Replace("\u0019", string.Empty);
 			string message = utf8FullMessage.Substring(separator, utf8FullMessage.Length-separator).Replace("\u0019", string.Empty);
-			var chatItem = new ChatItemVM(AddTimeStamp(playerName), message);
+			var chatItem = new ChatMessageItemVM(playerName, message);
 			AddItem(chatItem);
 		}
 
@@ -308,24 +308,32 @@ namespace JKChat.Core.Models {
 			stringBuilder.Replace("\u0019", string.Empty);
 			string fullMessage = stringBuilder.ToString();
 
-			var chatItem = new ChatItemVM(AddTimeStamp(playerName), fullMessage);
+			var chatItem = new ChatMessageItemVM(playerName, fullMessage);
 			AddItem(chatItem);
 		}
 
 		private void AddToPrint(Command command) {
-			string fullMessage = command.Argv(1);
-			var chatItem = new ChatItemVM($"{AddTimeStamp("^֎print:")}", $"^֎^7{fullMessage}");
+			string text = command.Argv(1).TrimEnd('\n');
+			var chatItem = new ChatInfoItemVM(text);
 			AddItem(chatItem);
-		}
-
-		private string AddTimeStamp(string forString) {
-			return $"^؉{DateTime.Now.ToString("t")}^؊ {forString}";
 		}
 
 		private void AddItem(ChatItemVM item) {
 			lock (pendingItems) {
 				lock (Items) {
-					if (DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null) {
+					bool pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
+					var items = pending ? pendingItems : Items;
+					if (items.Count > 0) {
+						ChatItemVM prevItem = null;
+						if (DeviceInfo.Platform == DevicePlatform.Android) {
+							prevItem = items[items.Count - 1];
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+							prevItem = items[0];
+						}
+						prevItem.BottomVMType = item.ThisVMType;
+						item.TopVMType = prevItem.ThisVMType;
+					}
+					if (pending) {
 						pendingItems.Add(item);
 					} else {
 						Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() => {

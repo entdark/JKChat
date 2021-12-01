@@ -103,9 +103,9 @@
     <Compile Include="ViewSources\ChatTableViewSource.cs" />
     <Compile Include="Views\Base\BaseViewController.cs" />
     <Compile Include="Views\Base\IKeyboardViewController.cs" />
-    <Compile Include="Views\Chat\Cells\ChatViewCell.cs" />
-    <Compile Include="Views\Chat\Cells\ChatViewCell.designer.cs">
-      <DependentUpon>ChatViewCell.cs</DependentUpon>
+    <Compile Include="Views\Chat\Cells\ChatMessageViewCell.cs" />
+    <Compile Include="Views\Chat\Cells\ChatMessageViewCell.designer.cs">
+      <DependentUpon>ChatMessageViewCell.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\Chat\ChatViewController.cs" />
     <Compile Include="Views\Chat\ChatViewController.designer.cs">
@@ -173,7 +173,12 @@
     <InterfaceDefinition Include="Views\ServerList\ServerListViewController.xib" />
     <InterfaceDefinition Include="Views\ServerList\Cells\ServerListViewCell.xib" />
     <InterfaceDefinition Include="Views\Chat\ChatViewController.xib" />
-    <InterfaceDefinition Include="Views\Chat\Cells\ChatViewCell.xib" />
+    <InterfaceDefinition Include="Views\Chat\Cells\ChatMessageViewCell.xib" />
+    <InterfaceDefinition Include="Views\Chat\Cells\ChatInfoViewCell.xib" />
+    <Compile Include="Views\Chat\Cells\ChatInfoViewCell.cs" />
+    <Compile Include="Views\Chat\Cells\ChatInfoViewCell.designer.cs">
+      <DependentUpon>ChatInfoViewCell.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoTouch.Dialog-1" />
