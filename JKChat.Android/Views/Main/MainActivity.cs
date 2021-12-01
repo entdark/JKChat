@@ -96,8 +96,8 @@ namespace JKChat.Android.Views.Main {
 			ActivityManager manager = (ActivityManager)GetSystemService(Context.ActivityService);
 			foreach (var service in manager.GetRunningServices(int.MaxValue)) {
 				string className = service.Service.ClassName;
-				if (className.Equals(serviceClass.Name)
-					|| (className.Contains(serviceClass.Name)/* && className.Contains("md5")*/)) {
+				if (className.Equals(serviceClass.Name, StringComparison.OrdinalIgnoreCase)
+					|| (className.Contains(serviceClass.Name, StringComparison.OrdinalIgnoreCase)/* && className.Contains("md5")*/)) {
 					return true;
 				}
 			}
