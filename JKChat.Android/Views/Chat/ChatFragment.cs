@@ -120,7 +120,7 @@ namespace JKChat.Android.Views.Chat {
 
 		public override bool OnOptionsItemSelected(IMenuItem item) {
 			if (ViewModel == null) {
-				base.OnOptionsItemSelected(item);
+				return base.OnOptionsItemSelected(item);
 			}
 			Task.Run(ViewModel.OfferDisconnect);
 			return true;
