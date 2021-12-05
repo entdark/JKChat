@@ -348,11 +348,11 @@ const float deltaTappedPos = 5.0f;
 				contentOffset ??= ChatTableView.ContentOffset;//-NavigationController.NavigationBar.Frame.Height;
 				ChatTableView.ContentOffset = new CGPoint(contentOffset.Value.X, contentOffset.Value.Y + DeviceInfo.SafeAreaInsets.Bottom - safeAreaInsets.Bottom + offsetY.Value);
 			}
-            void resize() {
-                ResizeInputAccessoryView();
-                RespaceTitleView();
-                RecountTableInsets();
-            }
+			void resize() {
+				ResizeInputAccessoryView();
+				RespaceTitleView();
+				RecountTableInsets();
+			}
 			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
 				coordinator.AnimateAlongsideTransition((_) => {
 					setContentOffset();
