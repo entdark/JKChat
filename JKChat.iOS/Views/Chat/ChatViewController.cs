@@ -317,7 +317,7 @@ const float deltaTappedPos = 5.0f;
 		}
 
 		private void RespaceTitleView() {
-			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
+			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f.iPhoneX(2.0f);
 		}
 
 		private void RecountTableInsets() {
