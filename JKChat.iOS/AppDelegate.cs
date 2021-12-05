@@ -46,12 +46,22 @@ namespace JKChat.iOS
 
 		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
 		{
-			// create a new window instance based on the screen size
-/*			Window = new UIWindow(UIScreen.MainScreen.Bounds);
-			Window.RootViewController = new UIViewController();
-
-			// make the window visible
-			Window.MakeKeyAndVisible();*/
+			var titleTextAttributes = new UIStringAttributes() {
+				ForegroundColor = Theme.Color.Title,
+				Font = Theme.Font.ANewHope(13.0f)
+			};
+			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+				var appearance = new UINavigationBarAppearance();
+				appearance.ConfigureWithOpaqueBackground();
+				appearance.BackgroundColor = Theme.Color.NavigationBar;
+				appearance.TitleTextAttributes = titleTextAttributes;
+				UINavigationBar.Appearance.StandardAppearance = appearance;
+				UINavigationBar.Appearance.ScrollEdgeAppearance = appearance;
+			} else {
+				UINavigationBar.Appearance.TitleTextAttributes = titleTextAttributes;
+				UINavigationBar.Appearance.BarTintColor = Theme.Color.NavigationBar;
+				UINavigationBar.Appearance.Translucent = false;
+			}
 
 			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
 

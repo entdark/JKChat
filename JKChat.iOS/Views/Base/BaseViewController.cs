@@ -43,14 +43,6 @@ namespace JKChat.iOS.Views.Base {
 			base.LoadView();
 
 			if (NavigationController != null) {
-				var titleTextAttributes = new UIStringAttributes {
-					ForegroundColor = Theme.Color.Title,
-					Font = Theme.Font.ANewHope(13.0f)
-				};
-				NavigationController.NavigationBar.TitleTextAttributes = titleTextAttributes;
-				NavigationController.NavigationBar.BarTintColor = Theme.Color.NavigationBar;
-				NavigationController.NavigationBar.Translucent = false;
-
 				if (NavigationController.ViewControllers.Length > 1) {
 					var backImage = UIImage.FromFile("Images/Back.png").ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
 					var barButtonItem = new UIBarButtonItem(backImage, UIBarButtonItemStyle.Plain, async (sender, ev) => {

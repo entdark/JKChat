@@ -44,6 +44,9 @@ namespace JKChat.iOS.ViewSources {
 				if ((ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame.Y > initialKeyboardFrame.Y) {
 					if (dinsetY == nfloat.MinValue) {
 						dinsetY = chatTableView.ContentOffset.Y + chatTableView.ContentInset.Bottom + chatTableView.ExtraContentInset.Bottom;
+						if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+							dinsetY += (ViewControllerWithKeyboard as UIViewController).NavigationController.NavigationBar.Frame.Height + DeviceInfo.SafeAreaInsets.Top;
+						}
 						initialContentOffset = scrollView.ContentOffset;
 					}
 					nfloat dy = dyLast =((ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame.Y - initialKeyboardFrame.Y)/* + DeviceInfo.SafeAreaInsets.Bottom*/;

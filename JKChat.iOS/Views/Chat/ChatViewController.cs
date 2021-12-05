@@ -321,22 +321,56 @@ const float deltaTappedPos = 5.0f;
 		}
 
 		private void RecountTableInsets() {
-			ChatTableView.ContentInset = new UIEdgeInsets(0.0f - DeviceInfo.SafeAreaInsets.Bottom, 0.0f, 0.0f + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, 0.0f);
-			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f - DeviceInfo.SafeAreaInsets.Bottom, 0.0f, 0.0f + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, 0.0f);
+			nfloat top = -DeviceInfo.SafeAreaInsets.Bottom,
+				bottom = -DeviceInfo.SafeAreaInsets.Bottom;
+			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+				top += DeviceInfo.SafeAreaInsets.Top + NavigationController.NavigationBar.Frame.Height;
+				bottom += -DeviceInfo.SafeAreaInsets.Top - NavigationController.NavigationBar.Frame.Height;
+			}
+			ChatTableView.ContentInset = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
+			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
 //			this.View.LayoutIfNeeded();
 		}
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
+			//holy shit, Apple, really?
+			nfloat? offsetY = null;
+			CGPoint? contentOffset = null;
+			var safeAreaInsets = DeviceInfo.SafeAreaInsets;
+			if (DeviceInfo.iPhoneX && toSize.Width > toSize.Height) {
+				offsetY = -safeAreaInsets.Top;//NavigationController.NavigationBar.Frame.Height;
+			} else if (!DeviceInfo.iPhoneX && toSize.Width < toSize.Height) {
+				offsetY = NavigationController.NavigationBar.Frame.Height;
+			}
 			base.ViewWillTransitionToSize(toSize, coordinator);
-			ResizeInputAccessoryView();
-			RespaceTitleView();
-			RecountTableInsets();
+			void setContentOffset() {
+				offsetY ??= DeviceInfo.iPhoneX ? DeviceInfo.SafeAreaInsets.Top : -NavigationController.NavigationBar.Frame.Height;
+				contentOffset ??= ChatTableView.ContentOffset;//-NavigationController.NavigationBar.Frame.Height;
+				ChatTableView.ContentOffset = new CGPoint(contentOffset.Value.X, contentOffset.Value.Y + DeviceInfo.SafeAreaInsets.Bottom - safeAreaInsets.Bottom + offsetY.Value);
+			}
+            void resize() {
+                ResizeInputAccessoryView();
+                RespaceTitleView();
+                RecountTableInsets();
+            }
+			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+				coordinator.AnimateAlongsideTransition((_) => {
+					setContentOffset();
+				}, (_) => {
+					setContentOffset();
+					resize();
+				});
+			} else {
+				resize();
+			}
 		}
 
 		public override void ViewSafeAreaInsetsDidChange() {
 			base.ViewSafeAreaInsetsDidChange();
-			ResizeInputAccessoryView();
-			RecountTableInsets();
+			if (!UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+				ResizeInputAccessoryView();
+				RecountTableInsets();
+			}
 		}
 
 		protected override void KeyboardWillShowNotification(NSNotification notification) {
