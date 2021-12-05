@@ -7,7 +7,7 @@ using CoreGraphics;
 using Foundation;
 
 using JKChat.Core.ViewModels.Chat.Items;
-
+using JKChat.iOS.Helpers;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
@@ -50,11 +50,11 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
             gradientLayer = new CAGradientLayer {
                 LayerType = CAGradientLayerType.Axial,
-                Colors = new CGColor[] { Theme.Color.ChatInfoGradientStart.CGColor, Theme.Color.ChatInfoGradientEnd.CGColor },
+                Colors = new CGColor []{ Theme.Color.ChatInfoGradientStart.CGColor, Theme.Color.ChatInfoGradientEnd.CGColor },
                 StartPoint = new CGPoint(0.0f, 0.5f),
                 EndPoint = new CGPoint(1.0f, 0.5f)
             };
-            BackgroundView.Layer.AddSublayer(gradientLayer);
+            this.Layer.AddSublayer(gradientLayer);
         }
 
 		public override void LayoutSubviews() {
@@ -66,7 +66,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
             if (gradientLayer == null || BackgroundView == null) {
                 return;
             }
-            gradientLayer.Frame = new CGRect(0.0f, 0.0f, BackgroundView.Bounds.Width, Frame.Height);
+            gradientLayer.Frame = new CGRect(0.0f, 0.0f, DeviceInfo.SafeAreaInsets.Left + BackgroundView.Bounds.Width, Frame.Height);
         }
     }
 }
