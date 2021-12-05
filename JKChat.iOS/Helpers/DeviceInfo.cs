@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using CoreGraphics;
-
-using Foundation;
+﻿using CoreGraphics;
 
 using UIKit;
 
@@ -17,5 +10,7 @@ namespace JKChat.iOS.Helpers {
 			? safeAreaInsets
 			: UIEdgeInsets.Zero;
 		public static bool IsPortrait => UIDevice.CurrentDevice.Orientation == UIDeviceOrientation.Portrait || UIDevice.CurrentDevice.Orientation == UIDeviceOrientation.PortraitUpsideDown;
+		public static bool iPhoneX => UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone
+			&& SafeAreaInsets.Top > 24.0f;
 	}
 }
