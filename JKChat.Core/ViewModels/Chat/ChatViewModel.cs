@@ -196,7 +196,9 @@ namespace JKChat.Core.ViewModels.Chat {
 				break;
 			case ChatType.Private:
 				var dialogList = new DialogListViewModel();
-				dialogList.Items.AddRange(gameClient.ClientInfo.Where(ci => ci.InfoValid).Select(SetupItem));
+				if (gameClient.ClientInfo != null) {
+					dialogList.Items.AddRange(gameClient.ClientInfo.Where(ci => ci.InfoValid).Select(SetupItem));
+				}
 				int id = -1;
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Private Message",
