@@ -1,10 +1,11 @@
 # JKChat
-A mobile application for Android and iOS to chat and remote control Jedi Knight: Jedi Academy and Jedi Knight II: Jedi Outcast games.
+A mobile application for Android and iOS to chat in and remote control Jedi Knight: Jedi Academy and Jedi Knight II: Jedi Outcast games.
 The application is based on Xamarin.Android and Xamarin.iOS frameworks and uses MvvmCross to share a lot of code and build the fastest Xamarin mobile applications.
 
 # Screenshots
-![iOS](https://i.imgur.com/1URvRol.png)
-![Android](https://i.imgur.com/JL5ADwr.png)
+| iOS | Android |
+| --- | --- |
+| <img src="https://i.imgur.com/MckvhrP.png" height="768"/> | <img src="https://i.imgur.com/tuEqmqu.png" height="768"/> |
 
 ## License
 Dual license:
