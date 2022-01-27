@@ -57,6 +57,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					});
 				}*/
 				item.Set(message.ServerInfo, message.Status);
+				cacheService.UpdateRecentServer(item);
 			}
 		}
 

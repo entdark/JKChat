@@ -36,6 +36,11 @@ namespace JKChat.Core.Services {
 			}
 		}
 
+		public async Task UpdateRecentServer(ServerListItemVM server) {
+			var recentServer = await connection.GetAsync<RecentServer>(server.ServerInfo.Address.ToString());
+			await connection.UpdateAsync(recentServer);
+		}
+
 		public async Task<ICollection<ServerListItemVM>> LoadRecentServers() {
 			return (await connection.Table<RecentServer>().ToArrayAsync())
 				.OrderBy(recentServer => recentServer.LastConnected)

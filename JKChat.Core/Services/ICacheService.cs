@@ -10,5 +10,6 @@ namespace JKChat.Core.Services {
 		Task SaveRecentServer(ServerListItemVM server);
 		Task SaveRecentServers(IList<ServerListItemVM> servers);
 		Task<ICollection<ServerListItemVM>> LoadRecentServers();
+		Task UpdateRecentServer(ServerListItemVM server);
 	}
 }
