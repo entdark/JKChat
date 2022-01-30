@@ -210,15 +210,16 @@ namespace JKChat.Core.Models {
 		private async void ServerCommandExecuted(CommandEventArgs commandEventArgs) {
 			var command = commandEventArgs.Command;
 			string cmd = command.Argv(0);
-			if (string.Compare(cmd, "chat", true) == 0 || string.Compare(cmd, "tchat", true) == 0) {
+			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
+				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
 				AddToChat(command, commandEventArgs.UTF8Command);
-			} else if (string.Compare(cmd, "lchat", true) == 0 || string.Compare(cmd, "ltchat", true) == 0) {
+			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
 				AddToLocationChat(command, commandEventArgs.UTF8Command);
-			} else if (string.Compare(cmd, "print", true) == 0) {
+			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
-				if (string.Compare(command.Argv(1), 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, true) == 0) {
+				if (string.Compare(command.Argv(1), 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Invalid Password";
-				} else if (string.Compare(command.Argv(1), 0, "@@@SERVER_IS_FULL", 0, 17, true) == 0) {
+				} else if (string.Compare(command.Argv(1), 0, "@@@SERVER_IS_FULL", 0, 17, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Server is Full";
 				} else {
 					AddToPrint(command);
@@ -237,11 +238,11 @@ namespace JKChat.Core.Models {
 				if (close) {
 					await navigationService.Close(ViewModel);
 				}
-			} else if (string.Compare(cmd, "disconnect", true) == 0) {
+			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
 				string reason;
-				if (string.Compare(command.Argv(1), 0, "@@@WAS_KICKED", 0, 13, true) == 0) {
+				if (string.Compare(command.Argv(1), 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You were kicked";
-				} else if (string.Compare(command.Argv(1), 0, "@@@DISCONNECTED", 0, 15, true) == 0) {
+				} else if (string.Compare(command.Argv(1), 0, "@@@DISCONNECTED", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You disconnected";
 				} else {
 					reason = command.Argv(1);

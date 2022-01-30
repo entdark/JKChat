@@ -142,7 +142,9 @@ namespace JKChat.Core.ViewModels.Chat {
 //			foreach (var uriAttribute in uriAttributes) {
 //				uri = uriAttribute.Value;
 				try {
-					if (string.Compare(uri.Scheme, "http", true) != 0 || string.Compare(uri.Scheme, "https", true) != 0 || string.Compare(uri.Scheme, "ftp", true) != 0) {
+					if (string.Compare(uri.Scheme, "http", StringComparison.OrdinalIgnoreCase) != 0
+					|| string.Compare(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase) != 0
+					|| string.Compare(uri.Scheme, "ftp", StringComparison.OrdinalIgnoreCase) != 0) {
 						throw new Exception();
 					}
 					await Browser.OpenAsync(uri, BrowserLaunchMode.External);
