@@ -301,12 +301,13 @@ namespace JKChat.Core.Models {
 			string playerName = name.Replace("\u0019", string.Empty);
 
 			var stringBuilder = new StringBuilder();
-			stringBuilder.Append("^7<");
-			stringBuilder.Append(location);
-			stringBuilder.Append("> ^");
-			stringBuilder.Append(colour);
-			stringBuilder.Append(message);
-			stringBuilder.Replace("\u0019", string.Empty);
+			stringBuilder
+				.Append("^7<")
+				.Append(location)
+				.Append("> ^")
+				.Append(colour)
+				.Append(message)
+				.Replace("\u0019", string.Empty);
 			string fullMessage = stringBuilder.ToString();
 
 			var chatItem = new ChatMessageItemVM(playerName, fullMessage);
