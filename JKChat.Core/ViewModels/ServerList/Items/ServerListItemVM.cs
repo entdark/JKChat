@@ -90,6 +90,12 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 				return "Capture the Flag";
 			case JKClient.GameType.CTY:
 				return "CTY";
+			case JKClient.GameType.OneFlagCTF:
+				return "1 Flag CTF";
+			case JKClient.GameType.Obelisk:
+				return "Obelisk";
+			case JKClient.GameType.Harvester:
+				return "Harvester";
 			}
 		}
 
@@ -116,6 +122,12 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 				return JKClient.GameType.CTF;
 			case "CTY":
 				return JKClient.GameType.CTY;
+			case "1 Flag CTF":
+				return JKClient.GameType.OneFlagCTF;
+			case "Obelisk":
+				return JKClient.GameType.Obelisk;
+			case "Harvester":
+				return JKClient.GameType.Harvester;
 			}
 		}
 	}

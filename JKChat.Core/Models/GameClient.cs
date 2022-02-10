@@ -85,9 +85,9 @@ namespace JKChat.Core.Models {
 			lifetime.LifetimeChanged += LifetimeChanged;
 			pendingItems = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
 			ServerInfo = serverInfo;
-			Client = new JKClient.JKClient() {
+			Client = new JKClient.JKClient(JKClient.JKClient.GetKnownClientHandler(serverInfo)) {
 				Name = Settings.PlayerName,
-				JAGuid = Settings.PlayerId
+				Guid = Settings.PlayerId
 			};
 			Client.ServerCommandExecuted += ServerCommandExecuted;
 			Client.ServerInfoChanged += ServerInfoChanged;

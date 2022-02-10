@@ -16,7 +16,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
 	public class ServerListViewModel : BaseViewModel {
-		private ServerBrowser serverBrowser;
+		private ServerBrowser []serverBrowsers;
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
@@ -42,10 +42,24 @@ namespace JKChat.Core.ViewModels.ServerList {
 			SelectionChangedCommand = new MvxAsyncCommand<ServerListItemVM>(SelectionChangedExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
 			Items = new MvxObservableCollection<ServerListItemVM>();
-			serverBrowser = new ServerBrowser();
+			InitServerBrowsers();
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
+		}
+
+		private void InitServerBrowsers() {
+			if (serverBrowsers != null) {
+				return;
+			}
+			serverBrowsers = new ServerBrowser[] {
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol25)),
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol26)),
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol15)),
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol16)),
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol68)),
+				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol71))
+			};
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
@@ -68,7 +82,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			IsRefreshing = true;
 			try {
 				var recentServers = await cacheService.LoadRecentServers();
-				var servers = await serverBrowser.RefreshList();
+				var servers = serverBrowsers.AsParallel().SelectMany(s => s.RefreshList().Result).Distinct(new ServerInfoComparer());
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
 					var newItems = new MvxObservableCollection<ServerListItemVM>(serverItems);
@@ -108,7 +122,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		public override Task Initialize() {
-			serverBrowser.Start(ExceptionCallback);
+			foreach (var serverBrowser in serverBrowsers) {
+				serverBrowser.Start(ExceptionCallback);
+			}
 			return LoadData();
 		}
 
@@ -147,7 +163,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			IsLoading = true;
 			try {
 				var recentServers = await cacheService.LoadRecentServers();
-				var servers = await serverBrowser.GetNewList();
+				var servers = serverBrowsers.AsParallel().SelectMany(s => s.GetNewList().Result).Distinct(new ServerInfoComparer());
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem);
 					var newItems = new MvxObservableCollection<ServerListItemVM>(serverItems/*.Where(s => s.GameType.Contains("Siege"))*/);
@@ -203,9 +219,11 @@ namespace JKChat.Core.ViewModels.ServerList {
 			if (serverInfoMessageToken == null) {
 				serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			}
-			if (serverBrowser == null) {
-				serverBrowser = new ServerBrowser();
-				serverBrowser.Start(ExceptionCallback);
+			InitServerBrowsers();
+			foreach (var serverBrowser in serverBrowsers) {
+				if (!serverBrowser.Started) {
+					serverBrowser.Start(ExceptionCallback);
+				}
 			}
 		}
 
@@ -215,11 +233,13 @@ namespace JKChat.Core.ViewModels.ServerList {
 					Messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 					serverInfoMessageToken = null;
 				}
-				if (serverBrowser != null) {
-					serverBrowser.Stop();
-					serverBrowser.Dispose();
-					serverBrowser = null;
+				foreach (var serverBrowser in serverBrowsers) {
+					if (serverBrowser != null) {
+						serverBrowser.Stop();
+						serverBrowser.Dispose();
+					}
 				}
+				serverBrowsers = null;
 			}
 			base.ViewDestroy(viewFinishing);
 		}
