@@ -82,7 +82,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 			IsRefreshing = true;
 			try {
 				var recentServers = await cacheService.LoadRecentServers();
-				var servers = serverBrowsers.AsParallel().SelectMany(s => s.RefreshList().Result).Distinct(new ServerInfoComparer());
+				var refreshListTasks = serverBrowsers.Select(s => s.RefreshList());
+				var servers = (await Task.WhenAll(refreshListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
 					var newItems = new MvxObservableCollection<ServerListItemVM>(serverItems);
@@ -163,7 +164,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 			IsLoading = true;
 			try {
 				var recentServers = await cacheService.LoadRecentServers();
-				var servers = serverBrowsers.AsParallel().SelectMany(s => s.GetNewList().Result).Distinct(new ServerInfoComparer());
+				var getNewListTasks = serverBrowsers.Select(s => s.GetNewList());
+				var servers = (await Task.WhenAll(getNewListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem);
 					var newItems = new MvxObservableCollection<ServerListItemVM>(serverItems/*.Where(s => s.GameType.Contains("Siege"))*/);
