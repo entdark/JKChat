@@ -20,10 +20,10 @@ namespace JKChat.iOS.Views.Chat.Cells {
 				topVMType = value;
 				TopConstraint.Constant = topVMType == typeof(ChatMessageItemVM) ? 0.0f : 15.0f;
 				LayoutIfNeeded();
-            }
+			}
 		}
 
-        static ChatMessageViewCell() {
+		static ChatMessageViewCell() {
 			Nib = UINib.FromName("ChatMessageViewCell", NSBundle.MainBundle);
 		}
 
