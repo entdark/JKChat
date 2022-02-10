@@ -217,9 +217,11 @@ namespace JKChat.Core.Models {
 				AddToLocationChat(command, commandEventArgs.UTF8Command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
-				if (string.Compare(command.Argv(1), 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0) {
+				if (string.Compare(command.Argv(1), 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command.Argv(1), 0, "Invalid password", 0, 16, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Invalid Password";
-				} else if (string.Compare(command.Argv(1), 0, "@@@SERVER_IS_FULL", 0, 17, StringComparison.OrdinalIgnoreCase) == 0) {
+				} else if (string.Compare(command.Argv(1), 0, "@@@SERVER_IS_FULL", 0, 17, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command.Argv(1), 0, "Server is full.", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Server is Full";
 				} else {
 					AddToPrint(command);
@@ -240,9 +242,11 @@ namespace JKChat.Core.Models {
 				}
 			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
 				string reason;
-				if (string.Compare(command.Argv(1), 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0) {
+				if (string.Compare(command.Argv(1), 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command.Argv(1), 0, "was kicked", 0, 10, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You were kicked";
-				} else if (string.Compare(command.Argv(1), 0, "@@@DISCONNECTED", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
+				} else if (string.Compare(command.Argv(1), 0, "@@@DISCONNECTED", 0, 15, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command.Argv(1), 0, "disconnected", 0, 12, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You disconnected";
 				} else {
 					reason = command.Argv(1);
