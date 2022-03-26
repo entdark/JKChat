@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ using Xamarin.Essentials;
 namespace JKChat.Core.Models {
 	public class GameClient {
 		private const int MaxChatMessages = 512;
-		private readonly JKClient.JKClient Client;
+		private JKClient.JKClient Client;
 		private bool showingDialog;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
@@ -30,6 +31,7 @@ namespace JKChat.Core.Models {
 		private readonly IMvxLifetime lifetime;
 		private bool minimized = false;
 		private readonly LimitedObservableCollection<ChatItemVM> pendingItems;
+		private readonly HashSet<string> blockedPlayers;
 		private IMvxViewModel viewModel;
 		internal IMvxViewModel ViewModel {
 			get => viewModel;
@@ -75,7 +77,7 @@ namespace JKChat.Core.Models {
 		}
 		internal LimitedObservableCollection<ChatItemVM> Items { get; private set; }
 		internal ServerInfo ServerInfo { get; private set; }
-		internal ClientInfo []ClientInfo => Client.ClientInfo;
+		internal ClientInfo []ClientInfo => Client?.ClientInfo;
 
 		internal GameClient(ServerInfo serverInfo) {
 			navigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
@@ -84,15 +86,28 @@ namespace JKChat.Core.Models {
 			lifetime = Mvx.IoCProvider.Resolve<IMvxLifetime>();
 			lifetime.LifetimeChanged += LifetimeChanged;
 			pendingItems = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
+			blockedPlayers = new HashSet<string>();
 			ServerInfo = serverInfo;
-			Client = new JKClient.JKClient(JKClient.JKClient.GetKnownClientHandler(serverInfo)) {
-				Name = Settings.PlayerName,
-				Guid = Settings.PlayerId
-			};
-			Client.ServerCommandExecuted += ServerCommandExecuted;
-			Client.ServerInfoChanged += ServerInfoChanged;
 			Items = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
 			Status = ConnectionStatus.Disconnected;
+		}
+
+		internal async Task Start() {
+			await Helpers.Common.ExceptionalTaskRun(() => {
+				if (Client != null) {
+					Client.Start(ExceptionCallback);
+					return;
+				}
+				Client = new JKClient.JKClient(JKClient.JKClient.GetKnownClientHandler(ServerInfo)) {
+					Name = Settings.PlayerName
+				};
+				try {
+					Client.Guid = Settings.PlayerId;
+				} catch {}
+				Client.ServerCommandExecuted += ServerCommandExecuted;
+				Client.ServerInfoChanged += ServerInfoChanged;
+				Client.Start(ExceptionCallback);
+			});
 		}
 
 		private void ServerInfoChanged(ServerInfo serverInfo) {
@@ -101,14 +116,12 @@ namespace JKChat.Core.Models {
 		}
 
 		internal async Task Connect(bool ignoreDialog = true) {
-			if (!Client.Started) {
-				Client.Start(ExceptionCallback);
-			}
 			if (Status != ConnectionStatus.Disconnected || (!ignoreDialog && showingDialog)) {
 				return;
 			}
 			Status = ConnectionStatus.Connecting;
 			try {
+				await Start();
 				if (ServerInfo.NeedPassword/* && string.IsNullOrEmpty(Client.Password)*/) {
 					string password = string.Empty;
 					bool close = false;
@@ -148,7 +161,7 @@ namespace JKChat.Core.Models {
 		}
 
 		internal void Disconnect(bool showDisconnected = false) {
-			if (Client.Started) {
+			if (Client != null && Client.Started) {
 				Client.Disconnect();
 				Client.Stop();
 			}
@@ -182,14 +195,16 @@ namespace JKChat.Core.Models {
 
 		internal void Shutdown() {
 			Disconnect();
-			Client.ServerCommandExecuted -= ServerCommandExecuted;
-			Client.ServerInfoChanged -= ServerInfoChanged;
-			Client.Dispose();
+			if (Client != null) {
+				Client.ServerCommandExecuted -= ServerCommandExecuted;
+				Client.ServerInfoChanged -= ServerInfoChanged;
+				Client.Dispose();
+			}
 			lifetime.LifetimeChanged -= LifetimeChanged;
 		}
 
 		internal void ExecuteCommand(string cmd, Encoding encoding = null) {
-			Client.ExecuteCommand(cmd, encoding);
+			Client?.ExecuteCommand(cmd, encoding);
 		}
 
 		private void LifetimeChanged(object sender, MvxLifetimeEventArgs ev) {
@@ -282,14 +297,16 @@ namespace JKChat.Core.Models {
 		private void AddToChat(Command command, Command utf8Command) {
 			string fullMessage = command.Argv(1);
 			string utf8FullMessage = utf8Command?.Argv(1) ?? fullMessage;
-			int separator = fullMessage.IndexOf("\u0019: ");
+			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ");
 			if (separator < 0) {
 				return;
 			}
 			separator += 3;
-			string playerName = fullMessage.Substring(0, separator).Replace("\u0019", string.Empty);
-			string message = utf8FullMessage.Substring(separator, utf8FullMessage.Length-separator).Replace("\u0019", string.Empty);
-			var chatItem = new ChatMessageItemVM(playerName, message);
+			string name = fullMessage.Substring(0, separator);
+			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
+			string escapedPlayerName = GetEscapedPlayerName(name);
+			string message = utf8FullMessage.Substring(separator, utf8FullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty);
+			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			AddItem(chatItem);
 		}
 
@@ -302,7 +319,8 @@ namespace JKChat.Core.Models {
 			string colour = command.Argv(3);
 			string message = utf8Command.Argv(4);
 
-			string playerName = name.Replace("\u0019", string.Empty);
+			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
+			string escapedPlayerName = GetEscapedPlayerName(name);
 
 			var stringBuilder = new StringBuilder();
 			stringBuilder
@@ -311,20 +329,43 @@ namespace JKChat.Core.Models {
 				.Append("> ^")
 				.Append(colour)
 				.Append(message)
-				.Replace("\u0019", string.Empty);
+				.Replace(Common.EscapeCharacter, string.Empty);
 			string fullMessage = stringBuilder.ToString();
 
-			var chatItem = new ChatMessageItemVM(playerName, fullMessage);
+			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
 			AddItem(chatItem);
+		}
+
+		private static string GetEscapedPlayerName(string playerName) {
+			const string escapeColon = Common.EscapeCharacter + ": ";
+			const string escapeStartTeam = Common.EscapeCharacter + "(";
+			const string escapeEndTeam = Common.EscapeCharacter + ")";
+			const string escapeStartPrivate = Common.EscapeCharacter + "[";
+			const string escapeEndPrivate = Common.EscapeCharacter + "]";
+
+			int startIndex = playerName.IndexOf(escapeStartTeam);
+			if (startIndex < 0) startIndex = playerName.IndexOf(escapeStartPrivate);
+			if (startIndex < 0) startIndex = -2;
+			startIndex += 2;
+
+			int endIndex = playerName.IndexOf(escapeEndTeam);
+			if (endIndex < 0) endIndex = playerName.IndexOf(escapeEndPrivate);
+			if (endIndex < 0) endIndex = playerName.IndexOf(escapeColon);
+			if (endIndex < 0) return playerName;
+
+			return playerName.Substring(startIndex, endIndex-startIndex);
 		}
 
 		private void AddToPrint(Command command) {
 			string text = command.Argv(1).TrimEnd('\n');
-			var chatItem = new ChatInfoItemVM(text);
+			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02);
 			AddItem(chatItem);
 		}
 
 		private void AddItem(ChatItemVM item) {
+			if (item is ChatMessageItemVM messageItem && blockedPlayers.Contains(messageItem.EscapedPlayerName)) {
+				return;
+			}
 			lock (pendingItems) {
 				lock (Items) {
 					bool pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
@@ -353,6 +394,54 @@ namespace JKChat.Core.Models {
 				}
 			}
 			UnreadMessages++;
+		}
+
+		internal void RemoveItem(ChatItemVM item) {
+			lock (Items) {
+				int removeIndex = Items.IndexOf(item);
+				Items.Remove(item);
+				if (Items.Count > 0 && removeIndex >= 0) {
+					ChatItemVM prevItem = null, nextItem = null;
+					if (DeviceInfo.Platform == DevicePlatform.Android) {
+						int prevIndex = removeIndex - 1;
+						int nextIndex = removeIndex;
+						if (prevIndex >= 0) {
+							prevItem = Items[prevIndex];
+						}
+						if (nextIndex < Items.Count) {
+							nextItem = Items[nextIndex];
+						}
+					} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+						int prevIndex = removeIndex;
+						int nextIndex = removeIndex - 1;
+						if (prevIndex < Items.Count) {
+							prevItem = Items[prevIndex];
+						}
+						if (nextIndex >= 0) {
+							nextItem = Items[nextIndex];
+						}
+					}
+					if (prevItem != null) {
+						prevItem.BottomVMType = nextItem?.ThisVMType;
+					}
+					if (nextItem != null) {
+						nextItem.TopVMType = prevItem?.ThisVMType;
+					}
+				}
+			}
+		}
+
+		internal void HideAllMessages(ChatItemVM item) {
+			string playerName = (item as ChatMessageItemVM)?.EscapedPlayerName;
+			if (playerName == null) {
+				return;
+			}
+			blockedPlayers.Add(playerName);
+			var removeItems = Items.Where(it => it is ChatMessageItemVM messageItem && messageItem.EscapedPlayerName == playerName).ToArray();
+			foreach (var removeItem in removeItems) {
+				RemoveItem(removeItem);
+			}
+			//Items.RemoveItems(removeItems);
 		}
 
 		private async Task ShowDialog(JKDialogConfig config) {

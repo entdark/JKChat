@@ -149,12 +149,12 @@ namespace JKChat.iOS.Controls.JKDialog {
 
 		private void ButtonTouchUpInside(Action<object> action) {
 			object obj;
-			if ((config.Type & JKDialogType.Message) != 0) {
-				obj = message;
-			} else if ((config.Type & JKDialogType.Input) != 0) {
+			if ((config.Type & JKDialogType.Input) != 0) {
 				obj = input;
 			} else if ((config.Type & JKDialogType.List) != 0) {
 				obj = selectedItem;
+			} else if ((config.Type & JKDialogType.Message) != 0) {
+				obj = message;
 			} else {
 				obj = null;
 			}

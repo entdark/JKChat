@@ -5,9 +5,31 @@ using System.Text.RegularExpressions;
 
 namespace JKChat.Core.Helpers {
 	public static class ColourTextHelper {
-		public static string CleanString(string value, List<AttributeData<int>> colorAttributes = null, List<AttributeData<Uri>> uriAttributes = null) {
+		public static string CleanString(this string value, List<AttributeData<int>> colorAttributes = null, List<AttributeData<Uri>> uriAttributes = null, bool shadow = false) {
 			if (string.IsNullOrEmpty(value)) {
 				return string.Empty;
+			}
+			if (shadow) {
+				var shadowStringBuilder = new StringBuilder();
+				for (int i = 0; i < value.Length-1; i++) {
+					if (value[i] == '\0') {
+						break;
+					} else if (value[i] == '^') {
+						if ((i <  1 || value[i-1] != '^')
+							&& (value[i+1] != '\0' || value[i+1] != '^')) {
+							i += 2;
+						}
+					}
+					if (i >= value.Length) {
+						break;
+					}
+					shadowStringBuilder.Append(value[i]);
+				}
+				if (shadowStringBuilder.Length <= 0) {
+					return string.Empty;
+				} else {
+					value = shadowStringBuilder.ToString();
+				}
 			}
 			int colorLength = 0;
 			var stringBuilder = new StringBuilder();
@@ -57,7 +79,7 @@ namespace JKChat.Core.Helpers {
 								uriStr = "https://" + uriStr;
 							}
 							if (Uri.TryCreate(uriStr, UriKind.Absolute, out Uri result)) {
-								if (result.Scheme != "print" || value.IndexOf("^֎", StringComparison.Ordinal) < 0) {
+								if (result.Scheme != "print") {
 									int startOffset = value[i] == ' ' ? 1 : 0;
 									uriAttributes.Add(new AttributeData<Uri>() {
 										Start = stringBuilder.Length - uriStringBuilder.Length - startOffset,

@@ -10,9 +10,8 @@
     <LinearLayout
         android:id="@+id/dialog"
         android:orientation="vertical"
-        android:layout_width="wrap_content"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
-        android:minWidth="260dp"
         android:background="@color/dialog_background">
         <TextView
             tools:visibility="visible"

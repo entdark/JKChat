@@ -8,7 +8,9 @@ using Android.Text;
 using Android.Text.Style;
 using Android.Views;
 
+using JKChat.Android.Helpers;
 using JKChat.Core.Helpers;
+using JKChat.Core.ValueCombiners;
 
 using MvvmCross.Converters;
 
@@ -16,22 +18,38 @@ using Xamarin.Essentials;
 
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
+		private static Color Shadow = new Color(38, 38, 38);
 		protected override ISpannable Convert(string value, Type targetType, object parameter, CultureInfo culture) {
 			if (string.IsNullOrEmpty(value)) {
 				return new SpannableString(string.Empty);
 			}
-			bool parseUri = parameter is bool b && b;
+			bool parseUri = false, parseShadow = false;
+			if (parameter is bool b) {
+				parseUri = b;
+			} else if (parameter is ColourTextParameter ct) {
+				parseUri = ct.ParseUri;
+				parseShadow = ct.ParseShadow;
+			}
 			var colorAttributes = new List<AttributeData<int>>();
 			List<AttributeData<Uri>> uriAttributes = null;
 			if (parseUri) {
 				uriAttributes = new List<AttributeData<Uri>>();
 			}
 
-			string cleanStr = ColourTextHelper.CleanString(value, colorAttributes, uriAttributes);
+			string cleanStr = value.CleanString(colorAttributes, uriAttributes);
 			var spannable = new SpannableString(cleanStr);
 
+			//spannable.SetSpan(new ShadowSpan(Color.White), 0, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+			if (parseShadow) {
+				var shadowColorAttributes = new List<AttributeData<int>>();
+				value.CleanString(shadowColorAttributes, shadow: parseShadow);
+				spannable.SetSpan(new ShadowSpan(Shadow), 0, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				foreach (var shadowColorAttribute in shadowColorAttributes) {
+					spannable.SetSpan(new ShadowSpan(GetColor(shadowColorAttribute.Value)), shadowColorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				}
+			}
 			foreach (var colorAttribute in colorAttributes) {
-				spannable.SetSpan(new ForegroundColorSpan(GetColor(colorAttribute.Value)), colorAttribute.Start, colorAttribute.Start+colorAttribute.Length, SpanTypes.ExclusiveExclusive);
+				spannable.SetSpan(new ForegroundColorSpan(GetColor(colorAttribute.Value)), colorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
 			}
 			if (parseUri) {
 				foreach (var uriAttribute in uriAttributes) {
@@ -85,6 +103,22 @@ namespace JKChat.Android.ValueConverters {
 					System.Diagnostics.Debug.WriteLine(exception);
 					Launcher.TryOpenAsync(uri);
 				}
+			}
+		}
+
+		public class ShadowSpan : MetricAffectingSpan {
+			public Color ShadowColor { get; private set; }
+
+			public ShadowSpan(Color color) {
+				ShadowColor = color;
+			}
+
+			public override void UpdateDrawState(TextPaint tp) {
+				UpdateMeasureState(tp);
+				tp.SetShadowLayer(float.Epsilon, 1.337f.DpToPxF(), 1.337f.DpToPxF(), ShadowColor);
+			}
+
+			public override void UpdateMeasureState(TextPaint textPaint) {
 			}
 		}
 	}

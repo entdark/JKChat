@@ -1,20 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.Graphics.Drawables;
-using Android.OS;
-using Android.Runtime;
-using Android.Text;
-using Android.Views;
-using Android.Widget;
+﻿using Android.Widget;
 
 using AndroidX.RecyclerView.Widget;
 
-using MvvmCross.Commands;
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Plugin.Visibility;
 

@@ -18,8 +18,16 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			get => topVMType;
 			set {
 				topVMType = value;
-				TopConstraint.Constant = topVMType == typeof(ChatMessageItemVM) ? 0.0f : 15.0f;
-				LayoutIfNeeded();
+				SetConstraint(TopConstraint, value);
+			}
+		}
+
+		private Type bottomVMType;
+		public Type BottomVMType {
+			get => bottomVMType;
+			set {
+				bottomVMType = value;
+				SetConstraint(BottomConstraint, value);
 			}
 		}
 
@@ -45,8 +53,14 @@ namespace JKChat.iOS.Views.Chat.Cells {
 				set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
 				set.Bind(MessageTextView).For(v => v.AttributedText).To(vm => vm.Message).WithConversion("ColourText", true);
 				set.Bind(this).For(v => v.TopVMType).To(vm => vm.TopVMType);
+				set.Bind(this).For(v => v.BottomVMType).To(vm => vm.BottomVMType);
 				set.Apply();
 			});
+		}
+
+		private void SetConstraint(NSLayoutConstraint constraint, Type value) {
+			constraint.Constant = value == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+			LayoutIfNeeded();
 		}
 	}
 }

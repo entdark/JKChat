@@ -17,7 +17,7 @@ namespace JKChat.Core.ViewModels.Base {
 		protected IMvxMessenger Messenger { get; private set; }
 
 		private string title;
-		public string Title {
+		public virtual string Title {
 			get => title;
 			set => SetProperty(ref title, value);
 		}
@@ -34,7 +34,7 @@ namespace JKChat.Core.ViewModels.Base {
 			Messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 		}
 
-		protected virtual async Task ExceptionCallback(JKClientException exception) {
+		protected virtual async Task ExceptionCallback(Exception exception) {
 			Exception realException;
 			if (exception.InnerException is AggregateException aggregateException) {
 				realException = aggregateException.InnerExceptions != null ? aggregateException.InnerExceptions[0] : aggregateException;
@@ -56,9 +56,16 @@ namespace JKChat.Core.ViewModels.Base {
 				Type = JKDialogType.Title | JKDialogType.Message
 			});
 		}
+
+		protected virtual async Task ExceptionalTaskRun(Action action) {
+			await Task.Run(action)
+				.ContinueWith(async t => {
+					await ExceptionCallback(t.Exception);
+				}, TaskContinuationOptions.OnlyOnFaulted);
+		}
 	}
 
-	public abstract class BaseViewModel<TParamter> : BaseViewModel, IMvxViewModel<TParamter> {
-		public abstract void Prepare(TParamter parameter);
+	public abstract class BaseViewModel<TParameter> : BaseViewModel, IMvxViewModel<TParameter> {
+		public abstract void Prepare(TParameter parameter);
 	}
 }

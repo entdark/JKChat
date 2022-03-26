@@ -7,7 +7,9 @@ using Android.Views;
 using JKChat.Android.Views.Base;
 using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList;
+using JKChat.Core.ViewModels.ServerList.Items;
 
+using MvvmCross.Commands;
 using MvvmCross.DroidX;
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
@@ -15,7 +17,8 @@ using MvvmCross.Platforms.Android.Presenters.Attributes;
 
 namespace JKChat.Android.Views.ServerList {
 	[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
-	public class ServerListFragment : BaseFragment<ServerListViewModel> {
+	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
+		//private IMenuItem copyItem;
 		private MvxRecyclerView recyclerView;
 
 		public ServerListFragment() : base(Resource.Layout.server_list_page) {}
@@ -23,21 +26,63 @@ namespace JKChat.Android.Views.ServerList {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
+			BackArrow.AlwaysClose = true;
+
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			recyclerView.Adapter = new RestoreStateRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView);
+			recyclerView.ItemLongClick = new MvxCommand<ServerListItemVM>((item) => {
+				ToggleSelection(item);
+			});
 
 			var refreshLayout = view.FindViewById<MvxSwipeRefreshLayout>(Resource.Id.mvxswiperefreshlayout);
 			refreshLayout.SetColorSchemeResources(Resource.Color.accent);
 			refreshLayout.SetProgressBackgroundColorSchemeResource(Resource.Color.primary);
 		}
 
+		public override void OnDestroyView() {
+			base.OnDestroyView();
+		}
+
 		public override void OnResume() {
 			base.OnResume();
-			ActionBar.SetDisplayHomeAsUpEnabled(false);
 		}
 
 		public override void OnPause() {
 			base.OnPause();
+		}
+
+		public override bool OnBackPressed() {
+			if (SelectedItem != null) {
+				CloseSelection();
+				return true;
+			}
+			return base.OnBackPressed();
+		}
+
+		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
+			inflater.Inflate(Resource.Menu.server_list_toolbar_item, menu);
+			//copyItem = menu.FindItem(Resource.Id.copy_item);
+			base.OnCreateOptionsMenu(menu, inflater);
+		}
+
+		public override bool OnOptionsItemSelected(IMenuItem item) {
+			if (SelectedItem != null) {
+				/*if (item == copyItem) {
+					ViewModel.CopyCommand?.Execute(SelectedItem);
+				}*/
+			}
+			return base.OnOptionsItemSelected(item);
+		}
+
+		protected override void ShowSelection(ServerListItemVM item) {
+			ActionBar.SetDisplayHomeAsUpEnabled(true);
+			base.ShowSelection(item);
+		}
+
+		protected override void CloseSelection() {
+			BackArrow?.SetRotation(0.0f, false);
+			ActionBar.SetDisplayHomeAsUpEnabled(false);
+			base.CloseSelection();
 		}
 
 		private class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {

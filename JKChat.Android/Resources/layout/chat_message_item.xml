@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="15dp"
-        app:MvxBind="MarginTop ChatMessageMargin(TopVMType)">
+        app:MvxBind="FMarginTop ChatMessageMargin(TopVMType); FMarginBottom ChatMessageMargin(BottomVMType)">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -24,7 +24,7 @@
                 android:theme="@style/ChatText"
                 android:lines="1"
                 android:ellipsize="end"
-                app:MvxBind="TextFormatted ColourText(PlayerName)"/>
+                app:MvxBind="TextFormatted ColourText(PlayerName, ColourTextParameter(false, Shadow))"/>
             <TextView
                 tools:text="13:37"
                 android:layout_width="wrap_content"
@@ -35,13 +35,14 @@
                 android:lines="1"
                 app:MvxBind="Text Time"/>
         </LinearLayout>
-        <TextView
+        <LinkTextView
             android:id="@+id/message"
             tools:text="Structuralism, as is commonly believed, unbiased decomposes the elements of the subject of activity. Positivism categorically emphasizes the transcendental principle of perception. Apperception has an open mind about the ontological gravitational paradox."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:theme="@style/ChatText"
-            app:MvxBind="TextFormatted ColourText(Message, true)"/>
+            style="@style/ChatText"
+            app:MvxBind="TextFormatted ColourText(Message, ColourTextParameter(true, Shadow))"/>
     </LinearLayout>
+    <include layout="@layout/item_selection"/>
 </FrameLayout>

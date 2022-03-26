@@ -20,6 +20,7 @@ namespace JKChat.Core.Services {
 			var path = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "jkchat.db3");
 			connection = new SQLiteAsyncConnection(path);
 			connection.CreateTableAsync<RecentServer>().Wait();
+			connection.CreateTableAsync<ReportedServer>().Wait();
 		}
 
 		public async Task SaveRecentServer(ServerListItemVM server) {
@@ -41,11 +42,10 @@ namespace JKChat.Core.Services {
 			await connection.UpdateAsync(recentServer);
 		}
 
-		public async Task<ICollection<ServerListItemVM>> LoadRecentServers() {
+		public async Task<IEnumerable<ServerListItemVM>> LoadRecentServers() {
 			return (await connection.Table<RecentServer>().ToArrayAsync())
 				.OrderBy(recentServer => recentServer.LastConnected)
-				.Select(recentServer => recentServer.ToServerVM())
-				.ToArray();
+				.Select(recentServer => recentServer.ToServerVM());
 		}
 
 		private class RecentServer {
@@ -91,6 +91,38 @@ namespace JKChat.Core.Services {
 					Ping = int.TryParse(this.Ping, out int ping) ? ping : 0,
 					Protocol = this.Protocol,
 					GameType = ServerListItemVM.GetGameType(this.GameType)
+				});
+			}
+		}
+
+		public async Task AddReportedServer(ServerListItemVM server) {
+			var reportedServer = new ReportedServer(server);
+			await connection.InsertOrReplaceAsync(reportedServer);
+		}
+
+		public async Task<IEnumerable<ServerListItemVM>> LoadReportedServers() {
+			return (await connection.Table<ReportedServer>().ToArrayAsync())
+				.OrderBy(recentServer => recentServer.AddedTime)
+				.Select(recentServer => recentServer.ToServerVM());
+		}
+
+		private class ReportedServer {
+			[PrimaryKey]
+			public string Address { get; set; }
+			public string ServerName { get; set; }
+			public DateTime AddedTime { get; set; }
+
+			public ReportedServer() {}
+			public ReportedServer(ServerListItemVM server) {
+				Address = server.ServerInfo.Address.ToString();
+				ServerName = server.ServerName;
+				AddedTime = DateTime.UtcNow;
+			}
+
+			public ServerListItemVM ToServerVM() {
+				return new ServerListItemVM(new ServerInfo() {
+					Address = NetAddress.FromString(this.Address),
+					HostName = this.ServerName
 				});
 			}
 		}

@@ -1,13 +1,45 @@
-﻿using Android.App;
+﻿using System;
+
+using Android.App;
 using Android.Util;
+using Android.Views;
+
+using JKChat.Android.Controls.Toolbar;
 
 namespace JKChat.Android.Helpers {
 	public static class AndroidExtensions {
 		public static int DpToPx(this int dp) {
-			return (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics);
+			return (int)Math.Ceiling(TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics));
 		}
 		public static int DpToPx(this float dp) {
-			return (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics);
+			return (int)Math.Ceiling(TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics));
+		}
+		public static float DpToPxF(this float dp) {
+			return TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics);
+		}
+		public static float PxToDp(this int px) {
+			return TypedValue.ApplyDimension(ComplexUnitType.Px, px, Application.Context.Resources.DisplayMetrics);
+		}
+		public static float PxToDp(this float px) {
+			return TypedValue.ApplyDimension(ComplexUnitType.Px, px, Application.Context.Resources.DisplayMetrics);
+		}
+
+		public static void SetClickAction(this IMenuItem item, Action action) {
+			if (item?.ActionView is FadingImageView imageView) {
+				imageView.Action = action;
+			}
+		}
+		public static void SetVisible(this IMenuItem item, bool visible, bool instant) {
+			if (visible || instant) {
+				item?.SetVisible(visible);
+			}
+			if (item?.ActionView is FadingImageView imageView) {
+				imageView.HideShow(visible, instant, () => {
+					if (!visible && !instant) {
+						item?.SetVisible(visible);
+					}
+				});
+			}
 		}
 	}
 }

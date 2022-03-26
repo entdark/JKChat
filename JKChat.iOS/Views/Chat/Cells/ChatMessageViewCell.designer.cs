@@ -16,6 +16,9 @@ namespace JKChat.iOS.Views.Chat.Cells
 		UIKit.NSLayoutConstraint TopConstraint { get; set; }
 
 		[Outlet]
+		UIKit.NSLayoutConstraint BottomConstraint { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UIKit.UILabel MessageTextView { get; set; }
 

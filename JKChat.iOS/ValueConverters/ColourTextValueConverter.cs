@@ -23,11 +23,11 @@ namespace JKChat.iOS.ValueConverters {
 				uriAttributes = new List<AttributeData<Uri>>();
 			}
 
-			string cleanStr = ColourTextHelper.CleanString(value, colorAttributes, uriAttributes);
+			string cleanStr = value.CleanString(colorAttributes, uriAttributes);
 			var attributedString = new NSMutableAttributedString(cleanStr);
 
 			foreach (var colorAttribute in colorAttributes) {
-				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, colorAttribute.Length));
+				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, cleanStr.Length-colorAttribute.Start));
 			}
 			if (parseUri) {
 				foreach (var uriAttribute in uriAttributes) {

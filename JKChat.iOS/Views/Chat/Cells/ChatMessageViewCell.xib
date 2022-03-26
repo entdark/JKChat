@@ -54,6 +54,7 @@
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
             <connections>
                 <outlet property="TopConstraint" destination="268" id="P5E-Ap-bfc"/>
+                <outlet property="BottomConstraint" destination="H7y-Zg-bAo" id="name-outlet-H7y-Zg-bAo"/>
                 <outlet property="MessageTextView" destination="533" id="name-outlet-533"/>
                 <outlet property="PlayerNameLabel" destination="199" id="name-outlet-199"/>
                 <outlet property="TimeLabel" destination="r3n-YC-UWh" id="phG-FD-qFT"/>

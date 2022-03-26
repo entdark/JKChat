@@ -126,7 +126,7 @@ const float deltaTappedPos = 5.0f;
 						if (dt >= 500L) {
 //							ViewModel.LongPressCommand?.Execute(lastTappedItem);
 						} else {
-							ViewModel.SelectionChangedCommand?.Execute(lastTappedItem);
+							ViewModel.ItemClickCommand?.Execute(lastTappedItem);
 						}
 					}
 					goto case UIGestureRecognizerState.Cancelled;
@@ -150,7 +150,7 @@ const float deltaTappedPos = 5.0f;
 					var currentPoint = this.NavigationController?.View != null ? longPressGestureRecognizer.LocationInView(this.NavigationController.View) : CGPoint.Empty;
 					nfloat dx = NMath.Abs(lastTappedPoint.X - currentPoint.X), dy = NMath.Abs(lastTappedPoint.Y - currentPoint.Y);
 					if (!ChatTableView.Dragging && lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty && dx < deltaTappedPos && dy < deltaTappedPos) {
-						ViewModel.LongPressCommand?.Execute(lastTappedItem);
+						ViewModel.SelectCommand?.Execute(lastTappedItem);
 					}
 					lastTappedItem = null;
 					lastTappedTime = 0L;

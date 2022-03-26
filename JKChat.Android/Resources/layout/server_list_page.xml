@@ -16,10 +16,10 @@
             android:id="@+id/mvxrecyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="15dp"
+            android:paddingVertical="15dp"
             android:clipToPadding="false"
             app:MvxItemTemplate="@layout/server_list_item"
-            app:MvxBind="ItemsSource Items; ItemClick SelectionChangedCommand"/>
+            app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
     </MvvmCross.DroidX.MvxSwipeRefreshLayout>
     <include layout="@layout/loading"/>
 </FrameLayout>

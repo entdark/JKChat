@@ -18,7 +18,7 @@
             android:clipToPadding="false"
             android:layout_weight="1"
             app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
-            app:MvxBind="ItemsSource Items; ItemLongClick LongPressCommand"/>
+            app:MvxBind="ItemsSource Items"/>
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -107,6 +107,7 @@
                     android:layout_height="48dp"
                     android:layout_weight="0"
                     android:layout_gravity="bottom"
+                    android:background="?android:attr/actionBarItemBackground"
                     app:MvxBind="Click ChatTypeCommand">
                     <ImageView
                         android:layout_width="15dp"
@@ -131,16 +132,21 @@
                     style="@style/MessageText.15.Regular"
                     android:maxLength="149"
                     app:MvxBind="Text Message"/>
-                <ImageButton
-                    android:id="@+id/send_button"
+                <FrameLayout
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_weight="0"
                     android:layout_gravity="bottom"
-                    android:src="@drawable/ic_send"
-                    android:scaleType="centerInside"
-                    android:background="@null"
-                    app:MvxBind="Click SendMessageCommand"/>
+                    android:background="?android:attr/actionBarItemBackground"
+                    app:MvxBind="Click SendMessageCommand">
+                    <ImageView
+                        android:id="@+id/send_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_send"
+                        android:scaleType="centerInside"
+                        android:background="@null"/>
+                </FrameLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

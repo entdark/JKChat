@@ -22,6 +22,8 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 
+using Xamarin.Essentials;
+
 namespace JKChat.Android.Controls {
 	public class JKDialog : Dialog {
 		private TextView titleTextView, messageTextView;
@@ -35,6 +37,22 @@ namespace JKChat.Android.Controls {
 		private string message => messageTextView?.Text;
 		private string input => inputEditText?.Text;
 		private DialogItemVM selectedItem => config.ListViewModel.Items.Find(item => item.IsSelected);
+
+		public static int MaxScrollHeight {
+			get {
+				const int margin = 48;
+				const int maxHeight = 312;
+				int activityHeight;
+				var activity = Platform.CurrentActivity;
+				var decorView = activity.Window.DecorView;
+				if (activity.Resources.Configuration.Orientation == global::Android.Content.Res.Orientation.Landscape) {
+					activityHeight = Math.Min(decorView.Height, decorView.Width);
+				} else {
+					activityHeight = Math.Max(decorView.Height, decorView.Width);
+				}
+				return Math.Min(maxHeight.DpToPx(), activityHeight - 4*margin.DpToPx());
+			}
+		}
 
 		public JKDialog(Context context, JKDialogConfig config, TaskCompletionSource<object> tcs) : base(context) {
 			this.config = config;
@@ -141,12 +159,12 @@ namespace JKChat.Android.Controls {
 
 		private void ButtonClick(Action<object> action) {
 			object obj;
-			if ((config.Type & JKDialogType.Message) != 0) {
-				obj = message;
-			} else if ((config.Type & JKDialogType.Input) != 0) {
+			if ((config.Type & JKDialogType.Input) != 0) {
 				obj = input;
 			} else if ((config.Type & JKDialogType.List) != 0) {
 				obj = selectedItem;
+			} else if ((config.Type & JKDialogType.Message) != 0) {
+				obj = message;
 			} else {
 				obj = null;
 			}
@@ -173,14 +191,13 @@ namespace JKChat.Android.Controls {
 		}
 
 		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-			heightMeasureSpec = MeasureSpec.MakeMeasureSpec(312.DpToPx(), MeasureSpecMode.AtMost);
+			heightMeasureSpec = MeasureSpec.MakeMeasureSpec(JKDialog.MaxScrollHeight, MeasureSpecMode.AtMost);
 			base.OnMeasure(widthMeasureSpec, heightMeasureSpec);
 		}
 	}
 
 	[Register("JKChat.Android.Controls.JKDialogScrollView")]
 	public class JKDialogScrollView : ScrollView {
-		private static int MaxHeight => 312.DpToPx();
 		public JKDialogScrollView(Context context) : base(context) {
 		}
 
@@ -197,13 +214,7 @@ namespace JKChat.Android.Controls {
 		}
 
 		protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-			base.OnMeasure(widthMeasureSpec, heightMeasureSpec);
-//			heightMeasureSpec = MeasureSpec.MakeMeasureSpec(312.DpToPx(), MeasureSpecMode.AtMost);
-			int size = MeasuredHeight;
-			if (size > MaxHeight) {
-				size = MaxHeight;
-			}
-			heightMeasureSpec = MeasureSpec.MakeMeasureSpec(size, MeasureSpecMode.Exactly);
+			heightMeasureSpec = MeasureSpec.MakeMeasureSpec(JKDialog.MaxScrollHeight, MeasureSpecMode.AtMost);
 			base.OnMeasure(widthMeasureSpec, heightMeasureSpec);
 		}
 	}

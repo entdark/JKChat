@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#323544</color>
-    <color name="primary_dark">#323544</color>
-    <color name="accent">#94ECE9</color>
+	<color name="primary">#323544</color>
+	<color name="primary_dark">#323544</color>
+	<color name="accent">#94ECE9</color>
 	<color name="accent_translucent">#7F94ECE9</color>
 	<color name="toolbar">#323444</color>
-	<color name="toolbar_title">#8BD9FF</color>
+	<color name="toolbar_title">#94ECE9</color>
 	<color name="toolbar_subtitle">#828282</color>
+	<color name="toolbar_menu">#C8C8C8</color>
 	<color name="background">#222D66</color>
 	<color name="item_background">#26C4C4C4</color>
+	<color name="item_selection">#64547BC8</color>
 	<color name="regular_text">#AAD8DD</color>
 	<color name="connected">#95DC21</color>
 	<color name="connecting">#ECA314</color>

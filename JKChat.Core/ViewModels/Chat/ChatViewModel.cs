@@ -1,37 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using JKChat.Core.Helpers;
+using JKChat.Core.Messages;
 using JKChat.Core.Models;
+using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat.Items;
-using JKChat.Core.ViewModels.ServerList.Items;
-using MvvmCross.ViewModels;
-using MvvmCross.Commands;
-using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
-using System.Linq;
-using Xamarin.Essentials;
+using JKChat.Core.ViewModels.ServerList.Items;
+
 using MvvmCross;
+using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
-using JKChat.Core.Messages;
-using JKChat.Core.Helpers;
-using MvvmCross.Navigation;
+using MvvmCross.ViewModels;
+
+using Xamarin.Essentials;
 
 namespace JKChat.Core.ViewModels.Chat {
-	public class ChatViewModel : BaseViewModel<ServerListItemVM> {
+	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerListItemVM> {
 		private GameClient gameClient;
 		private MvxSubscriptionToken serverInfoMessageToken;
 
-		public IMvxCommand SelectionChangedCommand { get; private set; }
-		public IMvxCommand LongPressCommand { get; private set; }
+		public IMvxCommand ItemClickCommand { get; private set; }
+		public IMvxCommand CopyCommand { get; private set; }
 		public IMvxCommand SendMessageCommand { get; private set; }
 		public IMvxCommand ChatTypeCommand { get; private set; }
 		public IMvxCommand CommonChatTypeCommand { get; private set; }
 		public IMvxCommand TeamChatTypeCommand { get; private set; }
 		public IMvxCommand PrivateChatTypeCommand { get; private set; }
+
+		protected override string ReportTitle => "Report message";
+		protected override string ReportMessage => "Do you want to report this message?";
+		protected override string ReportedTitle => "Message reported";
+		protected override string ReportedMessage => "Thank you for reporting this message";
 
 		private ConnectionStatus status;
 		public ConnectionStatus Status {
@@ -45,7 +52,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private MvxObservableCollection<ChatItemVM> items;
-		public MvxObservableCollection<ChatItemVM> Items {
+		public override MvxObservableCollection<ChatItemVM> Items {
 			get => items;
 			set => SetProperty(ref items, value);
 		}
@@ -73,8 +80,8 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public ChatViewModel() {
-			SelectionChangedCommand = new MvxAsyncCommand<ChatItemVM>(SelectionChangedExecute);
-			LongPressCommand = new MvxAsyncCommand<ChatItemVM>(LongPressExecute);
+			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
+			CopyCommand = new MvxAsyncCommand<ChatItemVM>(CopyExecute);
 			SendMessageCommand = new MvxAsyncCommand(SendMessageExecute, SendMessageCanExecute);
 			ChatTypeCommand = new MvxCommand(ChatTypeExecute);
 			CommonChatTypeCommand = new MvxCommand(CommonChatTypeExecute);
@@ -97,7 +104,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 		}
 
-		private async Task SelectionChangedExecute(ChatItemVM item) {
+		private async Task ItemClickExecute(ChatItemVM item) {
 			string text;
 			if (item is ChatMessageItemVM messageItem) {
 				text = messageItem.Message;
@@ -107,7 +114,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				return;
 			}
 			var uriAttributes = new List<AttributeData<Uri>>();
-			ColourTextHelper.CleanString(text, uriAttributes: uriAttributes);
+			text.CleanString(uriAttributes: uriAttributes);
 			Uri uri;
 			if (uriAttributes.Count > 1) {
 				var dialogList = new DialogListViewModel();
@@ -155,7 +162,38 @@ namespace JKChat.Core.ViewModels.Chat {
 //			}
 		}
 
-		private async Task LongPressExecute(ChatItemVM item) {
+		protected override async Task<bool> ReportExecute(ChatItemVM item) {
+			bool report = await base.ReportExecute(item);
+//			if (report) {
+//				gameClient.RemoveItem(item);
+//			}
+			if (report && item is ChatMessageItemVM) {
+				bool block = false;
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Block user",
+					Message = "Would you like to block the user and hide all their messages?",
+					LeftButton = "No",
+					RightButton = "Yes",
+					RightClick = (_) => {
+						block = true;
+					},
+					Type = JKDialogType.Title | JKDialogType.Message
+				});
+				if (block) {
+					gameClient.HideAllMessages(item);
+				}
+			}
+			return report;
+		}
+
+		protected override void SelectExecute(ChatItemVM item) {
+			base.SelectExecute(item);
+			if (GetSelectedItem() == null) {
+				Title = gameClient?.ServerInfo?.HostName;
+			}
+		}
+
+		private async Task CopyExecute(ChatItemVM item) {
 			string text;
 			if (item is ChatMessageItemVM messageItem) {
 				text = messageItem.Message;
@@ -167,7 +205,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			if (string.IsNullOrEmpty(text)) {
 				return;
 			}
-			await Clipboard.SetTextAsync(ColourTextHelper.CleanString(text));
+			await Clipboard.SetTextAsync(text.CleanString());
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Message is Copied",
 //				Message = "To copy message with color codes click \"With Colors\"",
@@ -226,7 +264,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private bool SendMessageCanExecute() {
-			return !string.IsNullOrEmpty(Message) && Status == Models.ConnectionStatus.Connected;
+			return !string.IsNullOrEmpty(Message) && Status == ConnectionStatus.Connected;
 		}
 
 		private DialogItemVM SetupItem(JKClient.ClientInfo clientInfo) {
@@ -281,7 +319,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public override Task Initialize() {
-			return LoadData();
+			return Connect();
 		}
 
 		public override void ViewCreated() {
@@ -311,8 +349,8 @@ namespace JKChat.Core.ViewModels.Chat {
 			base.ViewDisappearing();
 		}
 
-		private async Task LoadData() {
-			gameClient.Connect(false);
+		private async Task Connect() {
+			await gameClient.Connect(false);
 		}
 	}
 }

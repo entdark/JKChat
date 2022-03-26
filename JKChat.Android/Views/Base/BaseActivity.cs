@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 
-using Android.App;
-using Android.Content;
+using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
+
 using AndroidX.AppCompat.Widget;
+using AndroidX.Core.Content;
+
+using JKChat.Android.Controls.Toolbar;
+
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class BaseActivity<TViewModel> : MvxActivity<TViewModel> where TViewModel : class, IMvxViewModel {
+	public abstract class BaseActivity<TViewModel> : MvxActivity<TViewModel>, IBaseActivity where TViewModel : class, IMvxViewModel {
+		public Toolbar Toolbar { get; private set; }
 		public int LayoutId { get; private set; }
 		public BaseActivity(int layoutId) {
 			LayoutId = layoutId;
@@ -25,8 +25,14 @@ namespace JKChat.Android.Views.Base {
 
 			var view = this.BindingInflate(LayoutId, null);
 			SetContentView(view);
-			var toolbar = view.FindViewById<Toolbar>(Resource.Id.toolbar);
-			SetSupportActionBar(toolbar);
+
+			Toolbar = view.FindViewById<Toolbar>(Resource.Id.toolbar);
+			Toolbar.NavigationIcon = new BackDrawable() {
+				Color = new Color(ContextCompat.GetColor(this, Resource.Color.toolbar_menu)),
+				RotatedColor = new Color(ContextCompat.GetColor(this, Resource.Color.toolbar_menu)),
+				StrokeWidth = 2.0f
+			};
+			SetSupportActionBar(Toolbar);
 			SupportActionBar.SetDisplayShowHomeEnabled(true);
 			SupportActionBar.SetDisplayHomeAsUpEnabled(true);
 		}
@@ -34,6 +40,17 @@ namespace JKChat.Android.Views.Base {
 		public override bool OnSupportNavigateUp() {
 			OnBackPressed();
 			return base.OnSupportNavigateUp();
+		}
+
+		public override void OnBackPressed() {
+			var fragment = Fragments.LastOrDefault();
+			bool handled = false;
+			if (fragment is IBaseFragment baseFragment) {
+				handled = baseFragment.OnBackPressed();
+			}
+			if (!handled) {
+				base.OnBackPressed();
+			}
 		}
 	}
 }

@@ -1,10 +1,19 @@
-﻿using JKChat.Core.Models;
+﻿using System;
+
+using JKChat.Core.Models;
+using JKChat.Core.ViewModels.Base.Items;
 
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList.Items {
-	public class ServerListItemVM : MvxNotifyPropertyChanged {
+	public class ServerListItemVM : MvxNotifyPropertyChanged, ISelectableItemVM, IEquatable<ServerListItemVM> {
 		internal JKClient.ServerInfo ServerInfo { get; private set; }
+
+		private bool isSelected;
+		public bool IsSelected {
+			get => isSelected;
+			set => SetProperty(ref isSelected, value);
+		}
 
 		private bool needPassword;
 		public bool NeedPassword {
@@ -129,6 +138,14 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			case "Harvester":
 				return JKClient.GameType.Harvester;
 			}
+		}
+
+		public bool Equals(ServerListItemVM other) {
+			return this.ServerInfo.Address == other.ServerInfo.Address;
+		}
+
+		public override int GetHashCode() {
+			return this.ServerInfo.Address.GetHashCode();
 		}
 	}
 }

@@ -1,33 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Android.Animation;
 using Android.App;
-using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Text;
 using Android.Text.Method;
-using Android.Util;
 using Android.Views;
 using Android.Views.Animations;
 using Android.Widget;
+
 using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
+
+using JKChat.Android.Controls;
+using JKChat.Android.Helpers;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Main;
 
 using MvvmCross;
 using MvvmCross.Binding.Extensions;
+using MvvmCross.Commands;
 using MvvmCross.DroidX.RecyclerView;
-using MvvmCross.Navigation;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using MvvmCross.Plugin.Messenger;
@@ -40,8 +40,9 @@ namespace JKChat.Android.Views.Chat {
 		Resource.Animation.fragment_open_exit,
 		Resource.Animation.fragment_close_enter,
 		Resource.Animation.fragment_close_exit)]
-	public class ChatFragment : BaseFragment<ChatViewModel> {
-		private ImageButton sendButton;
+	public class ChatFragment : ReportFragment<ChatViewModel, ChatItemVM> {
+		private IMenuItem copyItem;
+		private ImageView sendButton;
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
 
 		private string message;
@@ -55,9 +56,7 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		public ChatFragment() : base(Resource.Layout.chat_page) {
-			HasOptionsMenu = true;
-		}
+		public ChatFragment() : base(Resource.Layout.chat_page) {}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
@@ -76,31 +75,34 @@ namespace JKChat.Android.Views.Chat {
 			};
 			recyclerView.SetLayoutManager(layoutManager);
 			recyclerView.Adapter = scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView) {
-				TuneItem = (vh, pos) => {
-					var textView = vh.ItemView.FindViewById<TextView>(Resource.Id.message);
+				AdjustItem = (vh, pos) => {
+					var textView = vh.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 					textView.MovementMethod = LongClickLinkMovementMethod.Instance;
 				}
 			};
+			recyclerView.ItemLongClick = new MvxCommand<ChatItemVM>((item) => {
+				ToggleSelection(item);
+			});
 
-			sendButton = view.FindViewById<ImageButton>(Resource.Id.send_button);
-			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message));
+			sendButton = view.FindViewById<ImageView>(Resource.Id.send_button);
+			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), true);
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
 			if (ActionBar != null)
 				ActionBar.CustomView = titleView;
-			ActionBar?.SetDisplayShowCustomEnabled(true);
-			ActionBar?.SetDisplayShowTitleEnabled(false);
 		}
 
 		public override void OnDestroyView() {
-			base.OnDestroyView();
-		}
-
-		public override void OnDestroy() {
 			if (scrollToBottomRecyclerAdapter != null) {
 				scrollToBottomRecyclerAdapter.Finish();
 				scrollToBottomRecyclerAdapter = null;
 			}
+			CloseSelection();
+			base.DisplayCustomTitle();
+			base.OnDestroyView();
+		}
+
+		public override void OnDestroy() {
 			base.OnDestroy();
 		}
 
@@ -114,11 +116,27 @@ namespace JKChat.Android.Views.Chat {
 		}
 
 		protected override void DisplayCustomTitle() {
-			ActionBar?.SetDisplayShowCustomEnabled(true);
-			ActionBar?.SetDisplayShowTitleEnabled(false);
+			bool selectionEnabled = SelectedItem != null;
+			ActionBar?.SetDisplayShowCustomEnabled(!selectionEnabled);
+			ActionBar?.SetDisplayShowTitleEnabled(selectionEnabled);
+		}
+
+		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
+			inflater.Inflate(Resource.Menu.chat_toolbar_items, menu);
+			copyItem = menu.FindItem(Resource.Id.copy_item);
+			copyItem.SetClickAction(() => {
+				this.OnOptionsItemSelected(copyItem);
+			});
+			base.OnCreateOptionsMenu(menu, inflater);
 		}
 
 		public override bool OnOptionsItemSelected(IMenuItem item) {
+			if (SelectedItem != null) {
+				if (item == copyItem) {
+					ViewModel.CopyCommand?.Execute(SelectedItem);
+				}
+				return base.OnOptionsItemSelected(item);
+			}
 			if (ViewModel == null) {
 				return base.OnOptionsItemSelected(item);
 			}
@@ -126,8 +144,25 @@ namespace JKChat.Android.Views.Chat {
 			return true;
 		}
 
-		private void ScaleSendButton(bool show) {
+		protected override void ShowSelection(ChatItemVM item) {
+			base.ShowSelection(item);
+			copyItem?.SetVisible(true, false);
+			this.DisplayCustomTitle();
+		}
+
+		protected override void CloseSelection() {
+			base.CloseSelection();
+			copyItem?.SetVisible(false, false);
+			this.DisplayCustomTitle();
+		}
+
+		private void ScaleSendButton(bool show, bool instant = false) {
 			float scale = show ? 1.0f : 0.0f;
+			if (instant) {
+				sendButton.ScaleX = scale;
+				sendButton.ScaleY = scale;
+				return;
+			}
 			var scaleX = ObjectAnimator.OfFloat(sendButton, "scaleX", scale);
 			var scaleY = ObjectAnimator.OfFloat(sendButton, "scaleY", scale);
 			var set = new AnimatorSet();
@@ -144,7 +179,7 @@ namespace JKChat.Android.Views.Chat {
 			private bool scrolledToBottom = true;
 			private ScrollToBottomOnScrollListener onScrollListener;
 
-			public Action<RecyclerView.ViewHolder, int> TuneItem { get; set; }
+			public Action<RecyclerView.ViewHolder, int> AdjustItem { get; set; }
 
 			public ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext, MvxRecyclerView recyclerView) : base(bindingContext) {
 				this.recyclerView = recyclerView;
@@ -229,7 +264,7 @@ namespace JKChat.Android.Views.Chat {
 
 			public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 				base.OnBindViewHolder(holder, position);
-				TuneItem?.Invoke(holder, position);
+				AdjustItem?.Invoke(holder, position);
 			}
 
 			private class ScrollToBottomOnScrollListener : RecyclerView.OnScrollListener {
@@ -246,8 +281,8 @@ namespace JKChat.Android.Views.Chat {
 		}
 
 		public class LongClickLinkMovementMethod : LinkMovementMethod {
+			private static readonly int LongClickTime = ViewConfiguration.LongPressTimeout;
 			private Handler longClickHandler;
-			private static int LongClickTime = ViewConfiguration.LongPressTimeout;
 			private bool isLongPressed = false;
 
 			public override bool OnTouchEvent(TextView widget, ISpannable buffer, MotionEvent ev) {
@@ -279,17 +314,21 @@ namespace JKChat.Android.Views.Chat {
 							(link[0] as LinkClickableSpan).OnClick(widget);
 						}
 						isLongPressed = false;
-						return true;
+						//(widget.Parent.Parent as View).OnTouchEvent(ev);
 					} else if (action == MotionEventActions.Down) {
 						if (link.Length != 0) {
 							Selection.SetSelection(buffer, buffer.GetSpanStart(link[0]), buffer.GetSpanEnd(link[0]));
+						} else {
+							//(widget.Parent.Parent as View);
 						}
+
 						longClickHandler.PostDelayed(() => {
 							isLongPressed = true;
 							(widget.Parent.Parent as View).PerformLongClick();
 						}, LongClickTime);
-						return true;
 					}
+					//base.OnTouchEvent(widget, buffer, ev);
+					return true;
 				}
 
 				return base.OnTouchEvent(widget, buffer, ev);
