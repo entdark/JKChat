@@ -4,7 +4,7 @@ using JKChat.Core.Services;
 using JKChat.iOS.Presenter;
 using JKChat.iOS.Services;
 
-//using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 using MvvmCross;
 using MvvmCross.IoC;
@@ -14,15 +14,14 @@ using MvvmCross.Platforms.Ios.Presenters;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
 
-//using Serilog;
-//using Serilog.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace JKChat.iOS {
 	public class Setup : MvxIosSetup<App> {
-		protected override IMvxNavigationService CreateNavigationService(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override IMvxNavigationService CreateNavigationService(IMvxIoCProvider iocProvider) {
 			iocProvider.LazyConstructAndRegisterSingleton<IMvxNavigationService, IMvxViewModelLoader, IMvxViewDispatcher, IMvxIoCProvider>(
-				(loader, dispatcher, iocProvider) => new NavigationService(loader/*, dispatcher, iocProvider*/));
+				(loader, dispatcher, iocProvider) => new NavigationService(loader, dispatcher, iocProvider));
 			var navigationService = iocProvider.Resolve<IMvxNavigationService>();
 			iocProvider.RegisterSingleton(navigationService as INavigationService);
 			return navigationService;
@@ -32,19 +31,17 @@ namespace JKChat.iOS {
 			return new iOSViewPresenter(ApplicationDelegate, Window);
 		}
 
-		protected override void RegisterPresenter(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
-			base.RegisterPresenter(/*iocProvider*/);
+		protected override void RegisterPresenter(IMvxIoCProvider iocProvider) {
+			base.RegisterPresenter(iocProvider);
 			iocProvider.RegisterSingleton(iocProvider.Resolve<IMvxIosViewPresenter>() as IViewPresenter);
 		}
 
-		protected override void InitializeFirstChance(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
-			base.InitializeFirstChance(/*iocProvider*/);
+			base.InitializeFirstChance(iocProvider);
 		}
 
-		/*protected override ILoggerProvider CreateLogProvider() {
+		protected override ILoggerProvider CreateLogProvider() {
 			return new SerilogLoggerProvider();
 		}
 
@@ -56,6 +53,6 @@ namespace JKChat.iOS {
 				.CreateLogger();
 
 			return new SerilogLoggerFactory();
-		}*/
+		}
 	}
 }

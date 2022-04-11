@@ -10,11 +10,8 @@ using MvvmCross.Views;
 
 namespace JKChat.Core.Navigation {
 	public class NavigationService : MvxNavigationService, INavigationService {
-		public NavigationService(IMvxViewModelLoader viewModelLoader) : base(null, viewModelLoader) {
+		public NavigationService(IMvxViewModelLoader viewModelLoader, IMvxViewDispatcher viewDispatcher, IMvxIoCProvider iocProvider) : base(viewModelLoader, viewDispatcher, iocProvider) {
 		}
-
-		//public NavigationService(IMvxViewModelLoader viewModelLoader, IMvxViewDispatcher viewDispatcher, IMvxIoCProvider iocProvider) : base(viewModelLoader, viewDispatcher/*, iocProvider*/) {
-		//}
 
 		public async Task<bool> NavigateFromRoot<TViewModel>(Func<IMvxViewModel, bool> condition = null)
 			where TViewModel : IMvxViewModel {

@@ -8,7 +8,7 @@ using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 using JKChat.Core.ValueCombiners;
 
-//using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 using MvvmCross;
 using MvvmCross.Binding.Bindings.Target.Construction;
@@ -21,15 +21,14 @@ using MvvmCross.Platforms.Android.Presenters;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
 
-//using Serilog;
-//using Serilog.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace JKChat.Android {
 	public class Setup : MvxAndroidSetup<App> {
-		protected override IMvxNavigationService CreateNavigationService(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override IMvxNavigationService CreateNavigationService(IMvxIoCProvider iocProvider) {
 			iocProvider.LazyConstructAndRegisterSingleton<IMvxNavigationService, IMvxViewModelLoader, IMvxViewDispatcher, IMvxIoCProvider>(
-				(loader, dispatcher, iocProvider) => new NavigationService(loader/*, dispatcher, iocProvider*/));
+				(loader, dispatcher, iocProvider) => new NavigationService(loader, dispatcher, iocProvider));
 			var navigationService = iocProvider.Resolve<IMvxNavigationService>();
 			iocProvider.RegisterSingleton(navigationService as INavigationService);
 			return navigationService;
@@ -39,10 +38,9 @@ namespace JKChat.Android {
 			return new AndroidViewPresenter(AndroidViewAssemblies);
 		}
 
-		protected override void InitializeFirstChance(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
-			base.InitializeFirstChance(/*iocProvider*/);
+			base.InitializeFirstChance(iocProvider);
 		}
 
 		protected override void FillTargetFactories(IMvxTargetBindingFactoryRegistry registry) {
@@ -69,7 +67,7 @@ namespace JKChat.Android {
 			});
 		}
 
-		/*protected override ILoggerProvider CreateLogProvider() {
+		protected override ILoggerProvider CreateLogProvider() {
 			return new SerilogLoggerProvider();
 		}
 
@@ -81,6 +79,6 @@ namespace JKChat.Android {
 				.CreateLogger();
 
 			return new SerilogLoggerFactory();
-		}*/
+		}
 	}
 }

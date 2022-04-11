@@ -47,17 +47,17 @@ namespace JKChat.Android.Controls {
 		}
 
 		private void Initialize() {
-			NavigationItemSelected += ItemSelected;
-			NavigationItemReselected += ItemReselected;
+			ItemSelected += NavigationItemSelected;
+			ItemReselected += NavigationItemReselected;
 		}
 
-		private void ItemSelected(object sender, NavigationItemSelectedEventArgs ev) {
-			ViewPager?.SetCurrentItem(ev.Item.ItemId, true);
+		private void NavigationItemSelected(object sender, ItemSelectedEventArgs ev) {
+			ViewPager?.SetCurrentItem(ev.P0.ItemId, true);
 			ev.Handled = true;
 		}
 
-		private void ItemReselected(object sender, NavigationItemReselectedEventArgs ev) {
-			ev.Item.SetChecked(false);
+		private void NavigationItemReselected(object sender, ItemReselectedEventArgs ev) {
+			ev.P0.SetChecked(false);
 		}
 
 		public virtual bool DidRegisterViewModelType(Type viewModelType) {
@@ -70,8 +70,8 @@ namespace JKChat.Android.Controls {
 
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
-				NavigationItemSelected -= ItemSelected;
-				NavigationItemReselected -= ItemReselected;
+				ItemSelected -= NavigationItemSelected;
+				ItemReselected -= NavigationItemReselected;
 				ViewPager = null;
 			}
 
