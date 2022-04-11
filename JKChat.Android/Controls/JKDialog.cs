@@ -1,26 +1,22 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Android.Animation;
+
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
-using Android.Views.Animations;
+using Android.Views.InputMethods;
 using Android.Widget;
+
 using JKChat.Android.Helpers;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Dialog.Items;
-using MvvmCross.Commands;
+
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
-using MvvmCross.ViewModels;
 
 using Xamarin.Essentials;
 
@@ -170,6 +166,12 @@ namespace JKChat.Android.Controls {
 			}
 			action?.Invoke(obj);
 			config?.AnyClick?.Invoke(obj);
+
+			var view = CurrentFocus;
+			if (view != null) {
+				var imm = (InputMethodManager)Context.GetSystemService(Context.InputMethodService);
+				imm.HideSoftInputFromWindow(view.WindowToken, 0);
+			}
 
 			base.Dismiss();
 			tcs?.TrySetResult(null);

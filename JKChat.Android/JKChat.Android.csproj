@@ -73,12 +73,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
+    <Compile Include="Controls\BottomNavigationView.cs" />
+    <Compile Include="Controls\ConfigurationChangedView.cs" />
+    <Compile Include="Controls\Listeners\MenuItemClickListener.cs" />
     <Compile Include="Controls\Toolbar\BackDrawable.cs" />
     <Compile Include="Controls\Toolbar\FadingImageView.cs" />
     <Compile Include="Controls\JKDialog.cs" />
     <Compile Include="Controls\LinkTextView.cs" />
+    <Compile Include="Controls\ViewPager.cs" />
     <Compile Include="Helpers\AndroidExtensions.cs" />
     <Compile Include="LinkerPleaseInclude.cs" />
+    <Compile Include="Presenter\Attributes\BottomNavigationViewPresentationAttribute.cs" />
+    <Compile Include="Presenter\AndroidViewPresenter.cs" />
+    <Compile Include="Presenter\Attributes\PushFragmentPresentationAttribute.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DialogService.cs" />
@@ -99,6 +106,8 @@
     <Compile Include="Views\Chat\ChatFragment.cs" />
     <Compile Include="Views\Main\MainActivity.cs" />
     <Compile Include="Views\ServerList\ServerListFragment.cs" />
+    <Compile Include="Views\Settings\SettingsFragment.cs" />
+    <Compile Include="Views\Settings\SettingsNameFragment.cs" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="..\JKChat.Core\Resources\Fonts\anewhope_regular.ttf">
@@ -151,6 +160,9 @@
     <AndroidResource Include="Resources\font\ocrastd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AppCenter.Crashes">
+      <Version>4.5.0</Version>
+    </PackageReference>
     <PackageReference Include="MvvmCross">
       <Version>7.1.2</Version>
     </PackageReference>
@@ -167,9 +179,15 @@
       <Version>7.1.2</Version>
     </PackageReference>
     <PackageReference Include="sqlite-net-pcl">
-      <Version>1.7.335</Version>
+      <Version>1.8.116</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
+    <PackageReference Include="Xamarin.AndroidX.Preference">
+      <Version>1.1.1.11</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.Window">
+      <Version>1.0.0.3-beta02</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.2" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\splash_screen.xml">
@@ -448,6 +466,115 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\copy_menu_item.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\settings_page.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_server_list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_server_list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_server_list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_server_list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_server_list.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\menu\navbar_items.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\navbar_menu_states.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\toolbar.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\appbar.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\fragment_slide_rtl.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\fragment_slide_ltr.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\fragment_hslide_rtl.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\fragment_hslide_ltr.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\smooth_decelerate_interpolator.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\settings_name_page.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_apply.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\menu\apply_item.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_search.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\search_menu_item.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

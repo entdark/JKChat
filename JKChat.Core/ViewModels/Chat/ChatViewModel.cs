@@ -14,6 +14,7 @@ using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 using JKChat.Core.ViewModels.ServerList.Items;
+using JKChat.Core.ViewModels.Settings;
 
 using MvvmCross;
 using MvvmCross.Commands;
@@ -78,6 +79,8 @@ namespace JKChat.Core.ViewModels.Chat {
 			get => selectingChatType;
 			set => SetProperty(ref selectingChatType, value);
 		}
+
+		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
 
 		public ChatViewModel() {
 			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
@@ -312,7 +315,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		public override void Prepare(ServerListItemVM parameter) {
 			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(parameter.ServerInfo);
-			gameClient.ViewModel = this;
+			//gameClient.ViewModel = this;
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
@@ -335,13 +338,21 @@ namespace JKChat.Core.ViewModels.Chat {
 					Messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 					serverInfoMessageToken = null;
 				}
+				gameClient.MakeAllPending();
 			}
 			base.ViewDestroy(viewFinishing);
 		}
 
 		public override void ViewAppeared() {
 			base.ViewAppeared();
-			gameClient.ViewModel = this;
+			if (Items.Count <= 0) {
+				Task.Run(async () => {
+					await Task.Delay(200);
+					gameClient.ViewModel = this;
+				});
+			} else {
+				gameClient.ViewModel = this;
+			}
 		}
 
 		public override void ViewDisappearing() {
@@ -350,7 +361,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private async Task Connect() {
-			await gameClient.Connect(false);
+			gameClient.Connect(false);
 		}
 	}
 }

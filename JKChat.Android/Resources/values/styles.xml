@@ -5,6 +5,7 @@
 		<item name="colorPrimary">@color/primary</item>
 		<item name="colorPrimaryDark">@color/primary_dark</item>
 		<item name="colorAccent">@color/accent</item>
+		<item name="bottomNavigationStyle">@style/BottomNavigationView</item>
 	</style>
 
 	<style name="Dialog" parent="@android:style/Theme.Dialog">
@@ -34,6 +35,23 @@
 		<item name="android:layout_height">48dp</item>
 		<item name="android:scaleType">center</item>
 		<item name="android:background">?android:attr/actionBarItemBackground</item>
+	</style>
+
+	<style name="BottomNavigationView" parent="Widget.Design.BottomNavigationView">
+		<item name="android:background">@color/navbar</item>
+		<item name="itemIconTint">@drawable/navbar_menu_states</item>
+		<item name="itemTextAppearanceInactive">@style/BottomNavigationViewText.Inactive</item>
+		<item name="itemTextAppearanceActive">@style/BottomNavigationViewText.Active</item>
+	</style>
+	<style name="BottomNavigationViewText">
+		<item name="android:textSize">12sp</item>
+		<item name="android:fontFamily">@font/ergoe_bold</item>
+	</style>
+	<style name="BottomNavigationViewText.Inactive">
+		<item name="android:textColor">@color/navbar_menu</item>
+	</style>
+	<style name="BottomNavigationViewText.Active">
+		<item name="android:textColor">@color/navbar_menu_selected</item>
 	</style>
 
 	<style name="RegularText">
@@ -134,6 +152,17 @@
 	</style>
 
 	<style name="RecyclerView" parent="ScrollView">
+	</style>
+
+	<style name="SettingsText">
+		<item name="android:textColor">@color/settings_text</item>
+		<item name="android:textSize">15sp</item>
+		<item name="android:fontFamily">@font/ergoe_medium</item>
+	</style>
+	<style name="SettingsHeaderText">
+		<item name="android:textColor">@color/settings_header_text</item>
+		<item name="android:textSize">12sp</item>
+		<item name="android:fontFamily">@font/ergoe_bold</item>
 	</style>
 	
 </resources>

@@ -1,62 +1,47 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using CoreGraphics;
 
 using Foundation;
 
-using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
-using JKChat.iOS.Helpers;
 
-using MvvmCross;
 using MvvmCross.Binding.BindingContext;
+using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
+using MvvmCross.Presenters;
+using MvvmCross.Presenters.Attributes;
 using MvvmCross.ViewModels;
 
 using UIKit;
 
 namespace JKChat.iOS.Views.Base {
-	public abstract class BaseViewController<TViewModel> : MvxViewController<TViewModel>, IKeyboardViewController where TViewModel : class, IMvxViewModel, IBaseViewModel {
+	public abstract class BaseViewController<TViewModel> : MvxViewController<TViewModel>, IMvxOverridePresentationAttribute, IKeyboardViewController where TViewModel : class, IMvxViewModel, IBaseViewModel {
 		private NSObject keyboardWillShowObserver, keyboardWillHideObserver;
-		private nfloat keyboardAfterHiddenOffset = 0.0f;
-		private bool keyboardHidden = true;
-		private Stopwatch keyboardHiddenStopwatch;
 		public virtual CGRect EndKeyboardFrame { get; protected set; }
 		public virtual CGRect BeginKeyboardFrame { get; protected set; }
 
 		public bool HandleKeyboard { get; set; } = false;
+		public bool SetUpBackButton { get; set; } = true;
 
 		public override string Title {
 			get => base.Title;
 			set => base.Title = value;
 		}
 
+		protected CGRect NavigationBarFrame => NavigationController?.NavigationBar?.Frame ?? new CGRect(0.0f, 0.0f, View.Frame.Width, 44.0f);
+
 		protected virtual Task<bool> BackButtonClick => Task.FromResult(false);
 
-		protected BaseViewController() {}
-		protected BaseViewController(IntPtr handle) : base(handle) {}
-		protected BaseViewController(string nibName, NSBundle bundle) : base(nibName, bundle) {}
+		protected BaseViewController() { }
+		protected BaseViewController(IntPtr handle) : base(handle) { }
+		protected BaseViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
 
 		public override void LoadView() {
 			base.LoadView();
-
-			if (NavigationController != null) {
-				if (NavigationController.ViewControllers.Length > 1) {
-					var backImage = UIImage.FromFile("Images/Back.png").ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
-					var barButtonItem = new UIBarButtonItem(backImage, UIBarButtonItemStyle.Plain, async (sender, ev) => {
-						bool handled =  await BackButtonClick;
-						if (!handled && !NavigationController.IsMovingToParentViewController) {
-							NavigationController.PopViewController(true);
-						}
-					}) {
-						ImageInsets = new UIEdgeInsets(0.0f, 3.0f, 0.0f, 0.0f)
-					};
-					NavigationItem.LeftBarButtonItem = barButtonItem;
-					NavigationController.InteractivePopGestureRecognizer.Delegate = new UIGestureRecognizerDelegate();
-				}
-			}
 
 			Debug.WriteLine("UIFont Family names:");
 			foreach (var familyName in UIFont.FamilyNames) {
@@ -92,6 +77,30 @@ namespace JKChat.iOS.Views.Base {
 
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
+			NavigationController.NavigationBarHidden = false;
+
+			if (SetUpBackButton || NavigationController.ViewControllers.Length > 1) {
+				var backImage = UIImage.FromFile("Images/Back.png").ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
+				var barButtonItem = new UIBarButtonItem(backImage, UIBarButtonItemStyle.Plain, async (sender, ev) => {
+					bool handled = await BackButtonClick;
+					if (!handled && !NavigationController.IsMovingToParentViewController) {
+						NavigationController.PopViewController(true);
+					}
+				}) {
+					ImageInsets = new UIEdgeInsets(0.0f, 3.0f, 0.0f, 0.0f)
+				};
+
+
+				NavigationItem.LeftBarButtonItem = barButtonItem;
+				if (NavigationController != null) {
+					NavigationController.InteractivePopGestureRecognizer.Delegate = new UIGestureRecognizerDelegate();
+					Debug.WriteLine(NavigationController.ParentViewController);
+					//foreach (var navigationController in (NavigationController.ParentViewController as UISplitViewController).ViewControllers.OfType<UINavigationController>())
+					if (NavigationController.ParentViewController is UINavigationController navigationController) {
+						navigationController.InteractivePopGestureRecognizer.Delegate = new UIGestureRecognizerDelegate();
+					}
+				}
+			}
 			SubscribeForKeyboardNotifications();
 		}
 
@@ -124,66 +133,12 @@ namespace JKChat.iOS.Views.Base {
 			BeginKeyboardFrame = CGRect.Empty;
 		}
 
-		protected virtual void KeyboardWillShowNotification(NSNotification notification) {
-			notification.GetKeyboardUserInfo(out double duration, out UIViewAnimationOptions animationOptions, out CGRect endKeyboardFrame, out CGRect beginKeyboardFrame);
-			EndKeyboardFrame = endKeyboardFrame;
-			BeginKeyboardFrame = beginKeyboardFrame;
-			Debug.WriteLine($"KeyboardWillShowNotification.BeginKeyboardFrame: {BeginKeyboardFrame}");
-			Debug.WriteLine($"KeyboardWillShowNotification.EndKeyboardFrame: {EndKeyboardFrame}");
-			Action<UIScrollView> action = (scrollView) => {
-				scrollView.ContentInset = new UIEdgeInsets(scrollView.ContentInset.Top, scrollView.ContentInset.Left, EndKeyboardFrame.Height - DeviceInfo.SafeAreaInsets.Bottom, scrollView.ContentInset.Right);
-				scrollView.ScrollIndicatorInsets = new UIEdgeInsets(scrollView.ScrollIndicatorInsets.Top, scrollView.ScrollIndicatorInsets.Left, EndKeyboardFrame.Height - DeviceInfo.SafeAreaInsets.Bottom, scrollView.ScrollIndicatorInsets.Right);
-			};
-			var scrollView = this.View.FindView<UIScrollView>();
-			nfloat dKeyboardOffset = (BeginKeyboardFrame.Y - EndKeyboardFrame.Y);
-			if (/*DeviceInfo.SafeAreaInsets.Bottom <= 0.0f && */keyboardHidden && keyboardHiddenStopwatch?.ElapsedMilliseconds > (duration)*1000L) {
-				keyboardHidden = false;
-			}
-			nfloat offset = !keyboardHidden ? dKeyboardOffset : 0.0f;
-			offset += keyboardAfterHiddenOffset;
-			if (keyboardHidden) {
-				keyboardAfterHiddenOffset = dKeyboardOffset;
-			} else {
-				keyboardAfterHiddenOffset = 0.0f;
-			}
-			if (BeginKeyboardFrame.Height < EndKeyboardFrame.Height)
-				scrollView?.SetContentOffset(new CGPoint(scrollView.ContentOffset.X, offset - scrollView.ContentOffset.Y), BeginKeyboardFrame.Height == EndKeyboardFrame.Height);
-			if (!Mvx.IoCProvider.Resolve<IDialogService>().Showing || (!keyboardHidden/* && (BeginKeyboardFrame.Y != EndKeyboardFrame.Y)*/)) {
-				ApplyKeyboardAnimation(duration, animationOptions, scrollView, action);
-			}
-			keyboardHidden = false;
-			keyboardHiddenStopwatch?.Stop();
-			keyboardHiddenStopwatch = null;
-		}
+		protected virtual void KeyboardWillShowNotification(NSNotification notification) { }
 
-		protected virtual void KeyboardWillHideNotification(NSNotification notification) {
-			keyboardHidden = true;
-			notification.GetKeyboardUserInfo(out double duration, out UIViewAnimationOptions animationOptions, out CGRect endKeyboardFrame, out CGRect beginKeyboardFrame);
-			EndKeyboardFrame = endKeyboardFrame;
-			BeginKeyboardFrame = beginKeyboardFrame;
-			Debug.WriteLine($"KeyboardWillHideNotification.BeginKeyboardFrame: {BeginKeyboardFrame}");
-			Debug.WriteLine($"KeyboardWillHideNotification.EndKeyboardFrame: {EndKeyboardFrame}");
-			Action<UIScrollView> action = (scrollView) => {
-				scrollView.ContentInset = new UIEdgeInsets(scrollView.ContentInset.Top, scrollView.ContentInset.Left, EndKeyboardFrame.Height - DeviceInfo.SafeAreaInsets.Bottom, scrollView.ContentInset.Right);
-				scrollView.ScrollIndicatorInsets = new UIEdgeInsets(scrollView.ScrollIndicatorInsets.Top, scrollView.ScrollIndicatorInsets.Left, EndKeyboardFrame.Height - DeviceInfo.SafeAreaInsets.Bottom, scrollView.ScrollIndicatorInsets.Right);
-			};
-			var scrollView = this.View.FindView<UIScrollView>();
-//			scrollView?.SetContentOffset(new CGPoint(scrollView.ContentOffset.X, (BeginKeyboardFrame.Y - EndKeyboardFrame.Y) - scrollView.ContentOffset.Y), BeginKeyboardFrame.Height == EndKeyboardFrame.Height);
-			ApplyKeyboardAnimation(duration, animationOptions, scrollView, action, () => {
-				keyboardHiddenStopwatch = new Stopwatch();
-				keyboardHiddenStopwatch.Start();
-			});
-		}
+		protected virtual void KeyboardWillHideNotification(NSNotification notification) { }
 
-		private static void ApplyKeyboardAnimation(double duration, UIViewAnimationOptions animationOptions, UIScrollView scrollView, Action<UIScrollView> action, Action completion = null) {
-			if (scrollView == null) {
-				return;
-			}
-			UIView.Animate(duration, 0.0, animationOptions, () => {
-				action?.Invoke(scrollView);
-			}, () => {
-				completion?.Invoke();
-			});
+		public virtual MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {
+			return new MvxSplitViewPresentationAttribute(MasterDetailPosition.Detail);
 		}
 	}
 }

@@ -4,6 +4,7 @@ using Android.App;
 using Android.OS;
 using Android.Views;
 
+using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList;
@@ -16,12 +17,19 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 
 namespace JKChat.Android.Views.ServerList {
-	[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
+	[BottomNavigationViewPresentation(
+		"Server List",
+		Resource.Id.content_viewpager,
+		Resource.Id.navigationview,
+		Resource.Drawable.ic_server_list,
+		typeof(MainViewModel)
+	)]
+	//[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
 		private MvxRecyclerView recyclerView;
 
-		public ServerListFragment() : base(Resource.Layout.server_list_page) {}
+		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
@@ -60,7 +68,7 @@ namespace JKChat.Android.Views.ServerList {
 		}
 
 		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
-			inflater.Inflate(Resource.Menu.server_list_toolbar_item, menu);
+			inflater.Inflate(MenuId, menu);
 			//copyItem = menu.FindItem(Resource.Id.copy_item);
 			base.OnCreateOptionsMenu(menu, inflater);
 		}
@@ -74,18 +82,22 @@ namespace JKChat.Android.Views.ServerList {
 			return base.OnOptionsItemSelected(item);
 		}
 
-		protected override void ShowSelection(ServerListItemVM item) {
-			ActionBar.SetDisplayHomeAsUpEnabled(true);
-			base.ShowSelection(item);
+		protected override void ActivityExit() {}
+
+		protected override void ActivityPopEnter() {}
+
+		protected override void ShowSelection(ServerListItemVM item, bool animated = true) {
+			SetUpNavigation(true);
+			base.ShowSelection(item, animated);
 		}
 
-		protected override void CloseSelection() {
+		protected override void CloseSelection(bool animated = true) {
 			BackArrow?.SetRotation(0.0f, false);
-			ActionBar.SetDisplayHomeAsUpEnabled(false);
-			base.CloseSelection();
+			SetUpNavigation(false);
+			base.CloseSelection(animated);
 		}
 
-		private class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {
+		public class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {
 			private readonly MvxRecyclerView recyclerView;
 			private IParcelable recyclerViewSavedState;
 

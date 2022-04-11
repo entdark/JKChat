@@ -1,29 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <!--<include layout="@layout/appbar"/>-->
+    <FrameLayout
+        android:id="@id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.google.android.material.appbar.AppBarLayout
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <LinearLayout
+            android:id="@+id/content_primary"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <androidx.appcompat.widget.Toolbar
-                tools:title="12345"
-                android:id="@+id/toolbar"
+            android:layout_height="match_parent">
+            <JKChat.Android.Controls.ViewPager
+                android:id="@+id/content_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"/>
+            <JKChat.Android.Controls.BottomNavigationView
+                android:id="@+id/navigationview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/toolbar"
-                app:titleTextAppearance="@style/ToolbarTitle"
-                app:navigationIcon="@drawable/ic_back"/>
-        </com.google.android.material.appbar.AppBarLayout>
+                android:layout_weight="0"/>
+        </LinearLayout>
         <FrameLayout
-            android:id="@+id/content_frame"
+            android:id="@+id/content_secondary"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-</FrameLayout>
+            android:layout_height="match_parent"/>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

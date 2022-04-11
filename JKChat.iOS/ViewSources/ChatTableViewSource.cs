@@ -16,7 +16,7 @@ using MvvmCross.Platforms.Ios.Binding.Views;
 using UIKit;
 
 namespace JKChat.iOS.ViewSources {
-	public class ChatTableViewSource : MvxSimpleTableViewSource {
+	public class ChatTableViewSource : MvxStandardTableViewSource {
 		private CGRect initialKeyboardFrame;
 		private CGPoint initialContentOffset;
 		private nfloat dinsetY = nfloat.MinValue;
@@ -24,7 +24,7 @@ namespace JKChat.iOS.ViewSources {
 		public NSLayoutConstraint ViewBottomConstraint { get; set; }
 		protected bool NewDragging { get; set; }
 
-		public ChatTableViewSource(UITableView tableView, string nibName, string cellIdentifier = null, NSBundle bundle = null, bool registerNibForCellReuse = true) : base(tableView, nibName, cellIdentifier, bundle, registerNibForCellReuse) {
+		public ChatTableViewSource(UITableView tableView) : base(tableView) {
 			Initialize(tableView);
 		}
 
@@ -40,16 +40,16 @@ namespace JKChat.iOS.ViewSources {
 //			Debug.WriteLine("Scrolled");
 			bool dragging = NewDragging;
 			var chatTableView = scrollView as ChatTableView;
-			if (dragging && ViewControllerWithKeyboard.EndKeyboardFrame.Height > (ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Frame.Height) {
-				if ((ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame.Y > initialKeyboardFrame.Y) {
+			if (dragging && ViewControllerWithKeyboard.EndKeyboardFrame.Height > (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Frame.Height) {
+				if ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame.Y > initialKeyboardFrame.Y) {
 					if (dinsetY == nfloat.MinValue) {
 						dinsetY = chatTableView.ContentOffset.Y + chatTableView.ContentInset.Bottom + chatTableView.ExtraContentInset.Bottom;
 						if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-							dinsetY += (ViewControllerWithKeyboard as UIViewController).NavigationController.NavigationBar.Frame.Height + DeviceInfo.SafeAreaInsets.Top;
+							dinsetY += ((ViewControllerWithKeyboard as UIViewController)?.NavigationController?.NavigationBar?.Frame.Height ?? 44.0f) + DeviceInfo.SafeAreaInsets.Top;
 						}
 						initialContentOffset = scrollView.ContentOffset;
 					}
-					nfloat dy = dyLast =((ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame.Y - initialKeyboardFrame.Y)/* + DeviceInfo.SafeAreaInsets.Bottom*/;
+					nfloat dy = dyLast = ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame).Y - initialKeyboardFrame.Y/* + DeviceInfo.SafeAreaInsets.Bottom*/;
 //					scrollView.SetContentOffset(new CGPoint(initialContentOffset.X, -initialContentOffset.Y-dinsetY), true);
 //					scrollView.ContentInset = new UIEdgeInsets(scrollView.ContentInset.Top, scrollView.ContentInset.Left, initialKeyboardFrame.Height - dy - dinsetY, scrollView.ContentInset.Right);
 //					scrollView.ScrollIndicatorInsets = new UIEdgeInsets(scrollView.ScrollIndicatorInsets.Top, scrollView.ScrollIndicatorInsets.Left, initialKeyboardFrame.Height - dy, scrollView.ScrollIndicatorInsets.Right);
@@ -61,7 +61,7 @@ namespace JKChat.iOS.ViewSources {
 
 		public override void DraggingStarted(UIScrollView scrollView) {
 			Debug.WriteLine("DraggingStarted");
-			initialKeyboardFrame = (ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame;
+			initialKeyboardFrame = (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame;
 			NewDragging = true;
 			if (scrollView is ChatTableView chatTableView) {
 				chatTableView.StartedDragging = true;
@@ -88,7 +88,7 @@ namespace JKChat.iOS.ViewSources {
 			} else if (dinsetY >= 0.0f && velocity.Y >= 0.0f) {
 				y = targetContentOffset.Y;
 				Debug.WriteLine($"y1: {y}");
-				CGRect currentKeyboardFrame = (ViewControllerWithKeyboard as UIViewController).InputAccessoryView.Superview.Frame;
+				CGRect currentKeyboardFrame = (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame;
 				Debug.WriteLine($"current: {currentKeyboardFrame}");
 				Debug.WriteLine($"initial: {initialKeyboardFrame}");
 				y -= (dyLast/* + DeviceInfo.SafeAreaInsets.Bottom*/);

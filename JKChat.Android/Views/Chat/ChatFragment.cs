@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Android.Animation;
-using Android.App;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
@@ -17,29 +16,24 @@ using AndroidX.RecyclerView.Widget;
 
 using JKChat.Android.Controls;
 using JKChat.Android.Helpers;
+using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
 using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
-using JKChat.Core.ViewModels.Main;
 
 using MvvmCross;
 using MvvmCross.Binding.Extensions;
 using MvvmCross.Commands;
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
-using MvvmCross.Platforms.Android.Presenters.Attributes;
 using MvvmCross.Plugin.Messenger;
 
 using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 
 namespace JKChat.Android.Views.Chat {
-	[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, true,
-		Resource.Animation.fragment_open_enter,
-		Resource.Animation.fragment_open_exit,
-		Resource.Animation.fragment_close_enter,
-		Resource.Animation.fragment_close_exit)]
+	[PushFragmentPresentation]
 	public class ChatFragment : ReportFragment<ChatViewModel, ChatItemVM> {
 		private IMenuItem copyItem;
 		private ImageView sendButton;
@@ -56,7 +50,7 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		public ChatFragment() : base(Resource.Layout.chat_page) {}
+		public ChatFragment() : base(Resource.Layout.chat_page, Resource.Menu.chat_toolbar_items) {}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
@@ -74,12 +68,16 @@ namespace JKChat.Android.Views.Chat {
 				StackFromEnd = true
 			};
 			recyclerView.SetLayoutManager(layoutManager);
-			recyclerView.Adapter = scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView) {
-				AdjustItem = (vh, pos) => {
-					var textView = vh.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
-					textView.MovementMethod = LongClickLinkMovementMethod.Instance;
-				}
-			};
+			if (scrollToBottomRecyclerAdapter == null) {
+				scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView) {
+					AdjustItem = (vh, pos) => {
+						var textView = vh.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
+						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
+					}
+				};
+			}
+			scrollToBottomRecyclerAdapter.Start();
+			recyclerView.Adapter = scrollToBottomRecyclerAdapter;
 			recyclerView.ItemLongClick = new MvxCommand<ChatItemVM>((item) => {
 				ToggleSelection(item);
 			});
@@ -88,17 +86,16 @@ namespace JKChat.Android.Views.Chat {
 			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), true);
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
-			if (ActionBar != null)
-				ActionBar.CustomView = titleView;
+			SetCustomView(titleView);
 		}
 
 		public override void OnDestroyView() {
 			if (scrollToBottomRecyclerAdapter != null) {
 				scrollToBottomRecyclerAdapter.Finish();
-				scrollToBottomRecyclerAdapter = null;
+				//scrollToBottomRecyclerAdapter = null;
 			}
-			CloseSelection();
-			base.DisplayCustomTitle();
+			//CloseSelection();
+			//base.DisplayCustomTitle(false);
 			base.OnDestroyView();
 		}
 
@@ -115,19 +112,17 @@ namespace JKChat.Android.Views.Chat {
 			scrollToBottomRecyclerAdapter?.ScrollToBottom();
 		}
 
-		protected override void DisplayCustomTitle() {
-			bool selectionEnabled = SelectedItem != null;
-			ActionBar?.SetDisplayShowCustomEnabled(!selectionEnabled);
-			ActionBar?.SetDisplayShowTitleEnabled(selectionEnabled);
+		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
+			base.OnCreateOptionsMenu(menu, inflater);
 		}
 
-		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
-			inflater.Inflate(Resource.Menu.chat_toolbar_items, menu);
-			copyItem = menu.FindItem(Resource.Id.copy_item);
+		protected override void CreateOptionsMenu() {
+			base.CreateOptionsMenu();
+
+			copyItem = Menu.FindItem(Resource.Id.copy_item);
 			copyItem.SetClickAction(() => {
 				this.OnOptionsItemSelected(copyItem);
 			});
-			base.OnCreateOptionsMenu(menu, inflater);
 		}
 
 		public override bool OnOptionsItemSelected(IMenuItem item) {
@@ -144,16 +139,26 @@ namespace JKChat.Android.Views.Chat {
 			return true;
 		}
 
-		protected override void ShowSelection(ChatItemVM item) {
-			base.ShowSelection(item);
-			copyItem?.SetVisible(true, false);
-			this.DisplayCustomTitle();
+		protected override void ShowSelection(ChatItemVM item, bool animated = true) {
+			base.ShowSelection(item, animated);
+			copyItem?.SetVisible(true, animated);
+			DisplayCustomTitle(false);
 		}
 
-		protected override void CloseSelection() {
-			base.CloseSelection();
-			copyItem?.SetVisible(false, false);
-			this.DisplayCustomTitle();
+		protected override void CloseSelection(bool animated = true) {
+			base.CloseSelection(animated);
+			copyItem?.SetVisible(false, animated);
+			DisplayCustomTitle(true);
+		}
+
+		protected override void DisplayCustomTitle(bool show) {
+			base.DisplayCustomTitle(SelectedItem == null);
+		}
+
+		protected override void BackNavigationClick(object sender, AndroidX.AppCompat.Widget.Toolbar.NavigationClickEventArgs ev) {
+			if (!OnBackPressed()) {
+				Task.Run(ViewModel.OfferDisconnect);
+			}
 		}
 
 		private void ScaleSendButton(bool show, bool instant = false) {
@@ -176,22 +181,13 @@ namespace JKChat.Android.Views.Chat {
 			private readonly MvxRecyclerView recyclerView;
 			private bool dragging = false, touched = false;
 			private MvxSubscriptionToken sentMessageMessageToken;
-			private bool scrolledToBottom = true;
 			private ScrollToBottomOnScrollListener onScrollListener;
 
+			public bool ScrolledToBottom { get; set; } = true;
 			public Action<RecyclerView.ViewHolder, int> AdjustItem { get; set; }
 
 			public ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext, MvxRecyclerView recyclerView) : base(bindingContext) {
 				this.recyclerView = recyclerView;
-				onScrollListener = new ScrollToBottomOnScrollListener((idle) => {
-					if (idle && touched) {
-						this.scrolledToBottom = idle && !recyclerView.CanScrollVertically(2);
-						touched = false;
-					}
-				});
-				this.recyclerView.AddOnScrollListener(onScrollListener);
-				this.recyclerView.Touch += RecyclerViewTouch;
-				sentMessageMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<SentMessageMessage>(OnSentMessageMessage);
 			}
 
 			private void RecyclerViewTouch(object sender, View.TouchEventArgs ev) {
@@ -217,14 +213,14 @@ namespace JKChat.Android.Views.Chat {
 				bool activityResumed = Xamarin.Essentials.Platform.CurrentActivity is MainActivity mainActivity
 					&& mainActivity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
 
-				if (activityResumed && scrolledToBottom && ev.Action == NotifyCollectionChangedAction.Add && ev.NewStartingIndex >= 0 && !dragging) {
-					recyclerView.ScrollToPosition(ev.NewStartingIndex);
+				if (activityResumed && ScrolledToBottom && ev.Action == NotifyCollectionChangedAction.Add && ev.NewStartingIndex >= 0 && !dragging) {
+					ScrollToBottom();
 				}
 			}
 
 			public void ScrollToBottom() {
 				int position = recyclerView.ItemsSource.Count()-1;
-				if (scrolledToBottom && position >= 0) {
+				if (ScrolledToBottom && position >= 0) {
 					recyclerView.ScrollToPosition(position);
 					return;
 					int visiblePosition;
@@ -239,6 +235,18 @@ namespace JKChat.Android.Views.Chat {
 						recyclerView.SmoothScrollToPosition(position);
 					}
 				}
+			}
+
+			public void Start() {
+				onScrollListener = new ScrollToBottomOnScrollListener((idle) => {
+					if (idle && touched) {
+						this.ScrolledToBottom = idle && !recyclerView.CanScrollVertically(2);
+						touched = false;
+					}
+				});
+				this.recyclerView.AddOnScrollListener(onScrollListener);
+				this.recyclerView.Touch += RecyclerViewTouch;
+				sentMessageMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<SentMessageMessage>(OnSentMessageMessage);
 			}
 
 			public void Finish() {

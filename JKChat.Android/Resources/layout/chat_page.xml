@@ -1,154 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
-    <LinearLayout
-        android:orientation="vertical"
+    <include layout="@layout/appbar"/>
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <mvvmcross.droidx.recyclerview.MvxRecyclerView
-            style="@style/RecyclerView"
-            android:id="@+id/mvxrecyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:layout_weight="1"
-            app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
-            app:MvxBind="ItemsSource Items"/>
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:background="@color/message_block">
-            <LinearLayout
-                tools:visibility="visible"
-                android:orientation="horizontal"
+            android:layout_height="match_parent">
+            <mvvmcross.droidx.recyclerview.MvxRecyclerView
+                style="@style/RecyclerView"
+                android:id="@+id/mvxrecyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                app:MvxBind="Visibility Visibility(SelectingChatType)">
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_gravity="bottom"
-                    android:gravity="left|center_vertical"
-                    android:paddingHorizontal="16.5dp"
-                    app:MvxBind="Click CommonChatTypeCommand">
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:src="@drawable/chat_type_common"
-                        android:scaleType="centerInside"
-                        android:background="@drawable/chat_type_background"/>
-                    <TextView
-                        android:text="COMMON"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="6dp"
-                        style="@style/ChatTypeText.12.Regular"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_gravity="bottom"
-                    android:gravity="center"
-                    android:paddingHorizontal="16.5dp"
-                    app:MvxBind="Click TeamChatTypeCommand">
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:src="@drawable/chat_type_team"
-                        android:scaleType="centerInside"
-                        android:background="@drawable/chat_type_background"/>
-                    <TextView
-                        android:text="TEAM"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="6dp"
-                        style="@style/ChatTypeText.12.Regular"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_gravity="bottom"
-                    android:gravity="right|center_vertical"
-                    android:paddingHorizontal="16.5dp"
-                    app:MvxBind="Click PrivateChatTypeCommand">
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:src="@drawable/chat_type_private"
-                        android:scaleType="centerInside"
-                        android:background="@drawable/chat_type_background"/>
-                    <TextView
-                        android:text="PRIVATE"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="6dp"
-                        style="@style/ChatTypeText.12.Regular"/>
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:layout_weight="1"
+                app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
+                app:MvxBind="ItemsSource Items"/>
             <LinearLayout
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <FrameLayout
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="0"
-                    android:layout_gravity="bottom"
-                    android:background="?android:attr/actionBarItemBackground"
-                    app:MvxBind="Click ChatTypeCommand">
-                    <ImageView
-                        android:layout_width="15dp"
-                        android:layout_height="15dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/chat_type_common"
-                        android:scaleType="centerInside"
-                        android:background="@drawable/chat_type_background"
-                        app:MvxBind="DrawableName ChatTypeIcon(ChatType)"/>
-                </FrameLayout>
-                <EditText
-                    android:hint="Write a message..."
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:background="@color/message_block">
+                <LinearLayout
+                    tools:visibility="visible"
+                    android:orientation="horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:paddingLeft="7dp"
-                    android:paddingRight="7dp"
-                    android:minHeight="48dp"
-                    style="@style/MessageText.15.Regular"
-                    android:maxLength="149"
-                    app:MvxBind="Text Message"/>
-                <FrameLayout
-                    android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:layout_weight="0"
-                    android:layout_gravity="bottom"
-                    android:background="?android:attr/actionBarItemBackground"
-                    app:MvxBind="Click SendMessageCommand">
-                    <ImageView
-                        android:id="@+id/send_button"
+                    app:MvxBind="Visibility Visibility(SelectingChatType)">
+                    <LinearLayout
+                        android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/ic_send"
-                        android:scaleType="centerInside"
-                        android:background="@null"/>
-                </FrameLayout>
+                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:gravity="left|center_vertical"
+                        android:paddingHorizontal="16.5dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        app:MvxBind="Click CommonChatTypeCommand">
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:src="@drawable/chat_type_common"
+                            android:scaleType="centerInside"
+                            android:background="@drawable/chat_type_background"/>
+                        <TextView
+                            android:text="COMMON"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="6dp"
+                            style="@style/ChatTypeText.12.Regular"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:gravity="center"
+                        android:paddingHorizontal="16.5dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        app:MvxBind="Click TeamChatTypeCommand">
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:src="@drawable/chat_type_team"
+                            android:scaleType="centerInside"
+                            android:background="@drawable/chat_type_background"/>
+                        <TextView
+                            android:text="TEAM"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="6dp"
+                            style="@style/ChatTypeText.12.Regular"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:gravity="right|center_vertical"
+                        android:paddingHorizontal="16.5dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        app:MvxBind="Click PrivateChatTypeCommand">
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:src="@drawable/chat_type_private"
+                            android:scaleType="centerInside"
+                            android:background="@drawable/chat_type_background"/>
+                        <TextView
+                            android:text="PRIVATE"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="6dp"
+                            style="@style/ChatTypeText.12.Regular"/>
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:layout_gravity="bottom"
+                        android:background="?android:attr/actionBarItemBackground"
+                        app:MvxBind="Click ChatTypeCommand">
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/chat_type_common"
+                            android:scaleType="centerInside"
+                            android:background="@drawable/chat_type_background"
+                            app:MvxBind="DrawableName ChatTypeIcon(ChatType)"/>
+                    </FrameLayout>
+                    <EditText
+                        android:hint="Write a message..."
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:paddingLeft="7dp"
+                        android:paddingRight="7dp"
+                        android:minHeight="48dp"
+                        style="@style/MessageText.15.Regular"
+                        android:maxLength="149"
+                        app:MvxBind="Text Message"/>
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="0"
+                        android:layout_gravity="bottom"
+                        android:background="?android:attr/actionBarItemBackground"
+                        app:MvxBind="Click SendMessageCommand">
+                        <ImageView
+                            android:id="@+id/send_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_send"
+                            android:scaleType="centerInside"
+                            android:background="@null"/>
+                    </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-    <include layout="@layout/loading"/>
-</FrameLayout>
+        <include layout="@layout/loading"/>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

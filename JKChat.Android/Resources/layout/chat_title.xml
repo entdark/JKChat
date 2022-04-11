@@ -5,7 +5,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingRight="20dp">
+    android:paddingRight="20dp"
+    android:gravity="center_vertical">
     <TextView
         tools:text="Server name"
         android:layout_width="wrap_content"

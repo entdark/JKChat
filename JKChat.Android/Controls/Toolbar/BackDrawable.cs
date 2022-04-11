@@ -115,13 +115,6 @@ namespace JKChat.Android.Controls.Toolbar {
 			float endYDiff = 7.0f.DpToPx() + 2.0f.DpToPx() * rotation;
 			float startXDiff = -7.0f.DpToPx() + 7.0f.DpToPx() * rotation;
 			float endXDiff = 0.5f.DpToPx() - 0.5f.DpToPx() * rotation;
-			/*var path = new Path();
-			path.MoveTo(endXDiff, -endYDiff);
-			path.LineTo(startXDiff, 0.0f);
-			path.LineTo(endXDiff, endYDiff);
-			path.Close();
-			canvas.DrawPath(path, paint);*/
-			//canvas.DrawLines(new float []{ endXDiff, -endYDiff, startXDiff, 0.0f, endXDiff, endYDiff }, paint);
 			canvas.DrawLine(startXDiff, -startYDiff, endXDiff, -endYDiff, paint);
 			canvas.DrawLine(startXDiff, startYDiff, endXDiff, endYDiff, paint);
 			canvas.Restore();

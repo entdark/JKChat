@@ -9,17 +9,19 @@ using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList.Items;
 
 using JKClient;
 
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
+using MvvmCross.Presenters.Hints;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
 	public class ServerListViewModel : ReportViewModel<ServerListItemVM> {
-		private ServerBrowser []serverBrowsers;
+		private ServerBrowser[] serverBrowsers;
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
@@ -132,7 +134,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 				return;
 			}
 			Items.Move(Items.IndexOf(item), 0);
-			await NavigationService.Navigate<ChatViewModel, ServerListItemVM>(item);
+			await NavigationService.NavigateFromRoot<ChatViewModel, ServerListItemVM>(item, viewModel => {
+				return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
+			});
 			await cacheService.SaveRecentServer(item);
 		}
 
@@ -157,19 +161,14 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task LoadData() {
-			if (Settings.FirstLaunch) {
+			if (AppSettings.FirstLaunch) {
 				await RequestPlayerName();
-				await LoadServerList();
-			} else {
-				await Task.WhenAll(RequestPlayerName(), LoadServerList());
 			}
+			await LoadServerList();
 		}
 
 		private async Task RequestPlayerName() {
-/*			if (!Settings.FirstLaunch) {
-				return;
-			}*/
-			string name = Settings.PlayerName;
+			string name = AppSettings.PlayerName;
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Choose your name",
 				Input = name,
@@ -179,12 +178,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				},
 				Type = JKDialogType.Title | JKDialogType.Input
 			});
-			if (string.IsNullOrEmpty(name)) {
-				name = Settings.DefaultName;
-			} else if (name.Length > 31) {
-				name = name.Substring(0, 31);
-			}
-			Settings.PlayerName = name;
+			AppSettings.PlayerName = name;
 		}
 
 		private async Task LoadServerList() {

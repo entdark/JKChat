@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Timers;
-
-using CoreFoundation;
 
 using CoreGraphics;
 
@@ -16,7 +13,6 @@ using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.iOS.Controls;
 using JKChat.iOS.Helpers;
 using JKChat.iOS.Views.Base;
-using JKChat.iOS.Views.Chat.Cells;
 using JKChat.iOS.ViewSources;
 
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
@@ -24,11 +20,12 @@ using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using UIKit;
 
 namespace JKChat.iOS.Views.Chat {
+	[MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
 	public partial class ChatViewController : BaseViewController<ChatViewModel>, IUIGestureRecognizerDelegate {
 		private UIView statusView;
 		private UILabel statusLabel, titleLabel;
 		private UIStackView titleStackView;
-		private readonly InputAccessoryView inputAccessoryView = new InputAccessoryView();
+		private readonly InputAccessoryView inputAccessoryView;
 		private bool appeared = false;
 		private readonly Stopwatch itemTappedStopwatch = new Stopwatch();
 		private readonly Timer itemTappedTimer = new Timer(500.0) {
@@ -75,6 +72,8 @@ namespace JKChat.iOS.Views.Chat {
 
 		public ChatViewController() : base("ChatViewController", null) {
 			HandleKeyboard = true;
+			HidesBottomBarWhenPushed = true;
+			inputAccessoryView = new InputAccessoryView(this);
 		}
 
 		public override void DidReceiveMemoryWarning() {
@@ -88,9 +87,7 @@ namespace JKChat.iOS.Views.Chat {
 			base.LoadView();
 			itemTappedStopwatch.Start();
 
-			inputAccessoryView.BackgroundColor = Theme.Color.NavigationBar;
 			inputAccessoryView.AutoresizingMask = UIViewAutoresizing.All;
-			inputAccessoryView.SetSize(new CGSize(DeviceInfo.ScreenBounds.Width, 44.0f));
 //			MessageTextView.Frame = new CGRect(0.0f, 0.0f, DeviceInfo.ScreenBounds.Width, 44.0f);
 			MessageView.RemoveFromSuperview();
 			inputAccessoryView.AddAccessoryView(MessageView);
@@ -103,7 +100,7 @@ namespace JKChat.iOS.Views.Chat {
 //			ChatTableView.ContentInset = new UIEdgeInsets(ChatTableView.ContentInset.Top - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ContentInset.Left, ChatTableView.ContentInset.Bottom + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ContentInset.Right);
 //			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(ChatTableView.ScrollIndicatorInsets.Top - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ScrollIndicatorInsets.Left, ChatTableView.ScrollIndicatorInsets.Bottom + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ScrollIndicatorInsets.Right);
 			RecountTableInsets();
-const float deltaTappedPos = 5.0f;
+			const float deltaTappedPos = 5.0f;
 			UILongPressGestureRecognizer longPressGestureRecognizer;
 			ChatTableView.AddGestureRecognizer(longPressGestureRecognizer = new UILongPressGestureRecognizer((gr) => {
 				switch (gr.State) {
@@ -124,7 +121,7 @@ const float deltaTappedPos = 5.0f;
 					if (lastTappedItem != null && lastTappedTime != 0L && !ChatTableView.StartedDragging
 						&& lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty && dx < deltaTappedPos && dy < deltaTappedPos) {
 						if (dt >= 500L) {
-//							ViewModel.LongPressCommand?.Execute(lastTappedItem);
+							//							ViewModel.LongPressCommand?.Execute(lastTappedItem);
 						} else {
 							ViewModel.ItemClickCommand?.Execute(lastTappedItem);
 						}
@@ -150,7 +147,7 @@ const float deltaTappedPos = 5.0f;
 					var currentPoint = this.NavigationController?.View != null ? longPressGestureRecognizer.LocationInView(this.NavigationController.View) : CGPoint.Empty;
 					nfloat dx = NMath.Abs(lastTappedPoint.X - currentPoint.X), dy = NMath.Abs(lastTappedPoint.Y - currentPoint.Y);
 					if (!ChatTableView.Dragging && lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty && dx < deltaTappedPos && dy < deltaTappedPos) {
-						ViewModel.SelectCommand?.Execute(lastTappedItem);
+						ViewModel.CopyCommand?.Execute(lastTappedItem);
 					}
 					lastTappedItem = null;
 					lastTappedTime = 0L;
@@ -224,7 +221,7 @@ const float deltaTappedPos = 5.0f;
 
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
-			var source = new ChatTableViewSource(ChatTableView, ChatMessageViewCell.Key) {
+			var source = new ChatTableViewSource(ChatTableView) {
 				ViewControllerWithKeyboard = this,
 				ViewBottomConstraint = ViewBottomConstraint
 			};
@@ -259,8 +256,13 @@ const float deltaTappedPos = 5.0f;
 					appeared = true;
 					InvokeOnMainThread(() => {
 						BecomeFirstResponder();
+						ResizeInputAccessoryView();
 					});
 				});
+			} else {
+				ResizeInputAccessoryView();
+				RespaceTitleView();
+				RecountTableInsets();
 			}
 		}
 
@@ -317,6 +319,8 @@ const float deltaTappedPos = 5.0f;
 		}
 
 		private void RespaceTitleView() {
+			NavigationItem.TitleView = null;
+			NavigationItem.TitleView = titleStackView;
 			titleStackView.Spacing = DeviceInfo.IsPortrait || DeviceInfo.iPhoneX ? 2.0f : 0.0f;
 		}
 
@@ -324,8 +328,8 @@ const float deltaTappedPos = 5.0f;
 			nfloat top = -DeviceInfo.SafeAreaInsets.Bottom,
 				bottom = -DeviceInfo.SafeAreaInsets.Bottom;
 			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-				top += DeviceInfo.SafeAreaInsets.Top + NavigationController.NavigationBar.Frame.Height;
-				bottom += -DeviceInfo.SafeAreaInsets.Top - NavigationController.NavigationBar.Frame.Height;
+				top += DeviceInfo.SafeAreaInsets.Top + NavigationBarFrame.Height;
+				bottom += -DeviceInfo.SafeAreaInsets.Top - NavigationBarFrame.Height;
 			}
 			ChatTableView.ContentInset = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
 			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
@@ -334,18 +338,22 @@ const float deltaTappedPos = 5.0f;
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
 			//holy shit, Apple, really?
+			if (UIApplication.SharedApplication.ApplicationState == UIApplicationState.Background) {
+				base.ViewWillTransitionToSize(toSize, coordinator);
+				return;
+			}
 			nfloat? offsetY = null;
 			CGPoint? contentOffset = null;
 			var safeAreaInsets = DeviceInfo.SafeAreaInsets;
 			if (DeviceInfo.iPhoneX && toSize.Width > toSize.Height) {
-				offsetY = -safeAreaInsets.Top;//NavigationController.NavigationBar.Frame.Height;
+				offsetY = -safeAreaInsets.Top;//NavigationBarFrame.Height;
 			} else if (!DeviceInfo.iPhoneX && toSize.Width < toSize.Height) {
-				offsetY = NavigationController.NavigationBar.Frame.Height;
+				offsetY = NavigationBarFrame.Height;
 			}
 			base.ViewWillTransitionToSize(toSize, coordinator);
 			void setContentOffset() {
-				offsetY ??= DeviceInfo.iPhoneX ? DeviceInfo.SafeAreaInsets.Top : -NavigationController.NavigationBar.Frame.Height;
-				contentOffset ??= ChatTableView.ContentOffset;//-NavigationController.NavigationBar.Frame.Height;
+				offsetY ??= DeviceInfo.iPhoneX ? DeviceInfo.SafeAreaInsets.Top : -NavigationBarFrame.Height;
+				contentOffset ??= ChatTableView.ContentOffset;//-NavigationBarFrame.Frame.Height;
 				ChatTableView.ContentOffset = new CGPoint(contentOffset.Value.X, contentOffset.Value.Y + DeviceInfo.SafeAreaInsets.Bottom - safeAreaInsets.Bottom + offsetY.Value);
 			}
 			void resize() {
@@ -400,26 +408,61 @@ const float deltaTappedPos = 5.0f;
 	}
 
 	public class InputAccessoryView : UIView {
-		private NSLayoutConstraint leftConstraint, rightConstraint;
+		private readonly UIViewController parentViewController;
+		private NSLayoutConstraint leftConstraint, rightConstraint, bgBottomConstraint, bgRightConstraint;
 		private CGSize intrinsicContentSize = CGSize.Empty;
 		public override CGSize IntrinsicContentSize => intrinsicContentSize;
+		public InputAccessoryView(UIViewController parentViewController) {
+			this.parentViewController = parentViewController;
+		}
 		public void SetSize(CGSize size) {
+			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
 			if (leftConstraint != null) {
-				leftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left;
+				if (DeviceInfo.IsCollapsed) {
+					leftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left;
+				} else {
+					leftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left + DeviceInfo.ScreenBounds.Width - parentViewController.View.Frame.Width - DeviceInfo.SafeAreaInsets.Right;
+				}
 			}
 			if (rightConstraint != null) {
 				rightConstraint.Constant = -DeviceInfo.SafeAreaInsets.Right;
+			}
+			if (bgBottomConstraint != null) {
+				bgBottomConstraint.Constant = DeviceInfo.SafeAreaInsets.Bottom;
+			}
+			if (bgRightConstraint != null) {
+				bgRightConstraint.Constant = DeviceInfo.SafeAreaInsets.Right;
 			}
 			intrinsicContentSize = new CGSize(size.Width, size.Height/* + DeviceInfo.SafeAreaBottom*/);
 			InvalidateIntrinsicContentSize();
 		}
 		public void AddAccessoryView(UIView view) {
+			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
+
+			var backgroundView = new UIView() {
+				BackgroundColor = view.BackgroundColor,
+				TranslatesAutoresizingMaskIntoConstraints = false
+			};
+			view.ClipsToBounds = false;
+			view.InsertSubview(backgroundView, 0);
+			backgroundView.LeadingAnchor.ConstraintEqualTo(view.LeadingAnchor, 0.0f).Active = true;
+			(bgRightConstraint = backgroundView.TrailingAnchor.ConstraintEqualTo(view.TrailingAnchor, DeviceInfo.SafeAreaInsets.Right)).Active = true;
+			backgroundView.TopAnchor.ConstraintEqualTo(view.TopAnchor, 0.0f).Active = true;
+			(bgBottomConstraint = backgroundView.BottomAnchor.ConstraintEqualTo(view.BottomAnchor, DeviceInfo.SafeAreaInsets.Bottom)).Active = true;
+
 			this.AddSubview(view);
 			(leftConstraint = view.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor, 0.0f)).Active = true;
 			(rightConstraint = view.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor, 0.0f)).Active = true;
 			view.TopAnchor.ConstraintEqualTo(this.TopAnchor, 0.0f).Active = true;
 			view.BottomAnchor.ConstraintEqualTo(this.LayoutMarginsGuide.BottomAnchor, 0.0f).Active = true;
 			view.TranslatesAutoresizingMaskIntoConstraints = false;
+		}
+
+		public override UIView HitTest(CGPoint point, UIEvent uievent) {
+			if (point.X < leftConstraint.Constant) {
+				return null;
+			}
+			return base.HitTest(point, uievent);
 		}
 	}
 }

@@ -29,6 +29,7 @@ namespace JKChat.Core.Models {
 		private readonly IDialogService dialogService;
 		private readonly IMvxMessenger messenger;
 		private readonly IMvxLifetime lifetime;
+		private MvxSubscriptionToken playerNameMessageToken;
 		private bool minimized = false;
 		private readonly LimitedObservableCollection<ChatItemVM> pendingItems;
 		private readonly HashSet<string> blockedPlayers;
@@ -77,7 +78,7 @@ namespace JKChat.Core.Models {
 		}
 		internal LimitedObservableCollection<ChatItemVM> Items { get; private set; }
 		internal ServerInfo ServerInfo { get; private set; }
-		internal ClientInfo []ClientInfo => Client?.ClientInfo;
+		internal ClientInfo[] ClientInfo => Client?.ClientInfo;
 
 		internal GameClient(ServerInfo serverInfo) {
 			navigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
@@ -85,11 +86,23 @@ namespace JKChat.Core.Models {
 			messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 			lifetime = Mvx.IoCProvider.Resolve<IMvxLifetime>();
 			lifetime.LifetimeChanged += LifetimeChanged;
+			playerNameMessageToken = messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 			pendingItems = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
 			blockedPlayers = new HashSet<string>();
 			ServerInfo = serverInfo;
 			Items = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
 			Status = ConnectionStatus.Disconnected;
+		}
+
+		private void OnPlayerNameMessage(PlayerNameMessage message) {
+			if (Client != null) {
+				Client.Name = AppSettings.PlayerName;
+			}
+		}
+
+		private void ServerInfoChanged(ServerInfo serverInfo) {
+			ServerInfo = serverInfo;
+			messenger.Publish(new ServerInfoMessage(this, serverInfo, Status));
 		}
 
 		internal async Task Start() {
@@ -99,20 +112,15 @@ namespace JKChat.Core.Models {
 					return;
 				}
 				Client = new JKClient.JKClient(JKClient.JKClient.GetKnownClientHandler(ServerInfo)) {
-					Name = Settings.PlayerName
+					Name = AppSettings.PlayerName
 				};
 				try {
-					Client.Guid = Settings.PlayerId;
-				} catch {}
+					Client.Guid = AppSettings.PlayerId;
+				} catch { }
 				Client.ServerCommandExecuted += ServerCommandExecuted;
 				Client.ServerInfoChanged += ServerInfoChanged;
 				Client.Start(ExceptionCallback);
 			});
-		}
-
-		private void ServerInfoChanged(ServerInfo serverInfo) {
-			ServerInfo = serverInfo;
-			messenger.Publish(new ServerInfoMessage(this, serverInfo, Status));
 		}
 
 		internal async Task Connect(bool ignoreDialog = true) {
@@ -123,7 +131,7 @@ namespace JKChat.Core.Models {
 			try {
 				await Start();
 				if (ServerInfo.NeedPassword/* && string.IsNullOrEmpty(Client.Password)*/) {
-					string password = string.Empty;
+					string password = Client.Password;
 					bool close = false;
 					await ShowDialog(new JKDialogConfig() {
 						Title = "Enter Password",
@@ -201,6 +209,10 @@ namespace JKChat.Core.Models {
 				Client.Dispose();
 			}
 			lifetime.LifetimeChanged -= LifetimeChanged;
+			if (playerNameMessageToken != null) {
+				messenger.Unsubscribe<ServerInfoMessage>(playerNameMessageToken);
+				playerNameMessageToken = null;
+			}
 		}
 
 		internal void ExecuteCommand(string cmd, Encoding encoding = null) {
@@ -442,6 +454,18 @@ namespace JKChat.Core.Models {
 				RemoveItem(removeItem);
 			}
 			//Items.RemoveItems(removeItems);
+		}
+
+		public void MakeAllPending() {
+			lock (pendingItems) {
+				lock (Items) {
+					if (DeviceInfo.Platform == DevicePlatform.Android) {
+						Items.AddRange(pendingItems);
+						pendingItems.ReplaceWith(Items);
+						Items.Clear();
+					}
+				}
+			}
 		}
 
 		private async Task ShowDialog(JKDialogConfig config) {

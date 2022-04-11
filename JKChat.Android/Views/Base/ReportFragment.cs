@@ -1,14 +1,6 @@
-﻿using System;
-
-using Android.Animation;
-using Android.OS;
+﻿using Android.OS;
 using Android.Views;
-using Android.Views.Animations;
-using Android.Widget;
 
-using AndroidX.Core.Content;
-
-using JKChat.Android.Controls.Toolbar;
 using JKChat.Android.Helpers;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
@@ -20,8 +12,11 @@ namespace JKChat.Android.Views.Base {
 		protected virtual TItem SelectedItem { get; set; }
 		protected virtual IMenuItem ReportItem { get; set; }
 
-		public ReportFragment(int layoutId) : base(layoutId) {
-			HasOptionsMenu = true;
+		public ReportFragment(int layoutId, int menuId) : base(layoutId, menuId) {}
+
+		public override void OnViewCreated(View view, Bundle savedInstanceState) {
+			base.OnViewCreated(view, savedInstanceState);
+			CheckSelection(false);
 		}
 
 		public override void OnResume() {
@@ -29,17 +24,7 @@ namespace JKChat.Android.Views.Base {
 			CheckSelection();
 		}
 
-		public override void OnViewCreated(View view, Bundle savedInstanceState) {
-			base.OnViewCreated(view, savedInstanceState);
-		}
-
 		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
-			ReportItem = menu.FindItem(Resource.Id.report_item);
-			ReportItem.SetClickAction(() => {
-				this.OnOptionsItemSelected(ReportItem);
-			});
-			CheckSelection();
-
 			base.OnCreateOptionsMenu(menu, inflater);
 		}
 
@@ -62,6 +47,16 @@ namespace JKChat.Android.Views.Base {
 			return base.OnBackPressed();
 		}
 
+		protected override void CreateOptionsMenu() {
+			base.CreateOptionsMenu();
+
+			ReportItem = Menu.FindItem(Resource.Id.report_item);
+			ReportItem.SetClickAction(() => {
+				this.OnOptionsItemSelected(ReportItem);
+			});
+			CheckSelection();
+		}
+
 		protected virtual void ToggleSelection(TItem item) {
 			if (item == null || item == SelectedItem) {
 				CloseSelection();
@@ -70,26 +65,32 @@ namespace JKChat.Android.Views.Base {
 			}
 		}
 
-		protected virtual void CheckSelection() {
+		protected virtual void CheckSelection(bool animated = true) {
 			if (SelectedItem == null) {
-				CloseSelection();
+				CloseSelection(animated);
 			} else {
-				ShowSelection(SelectedItem);
+				ShowSelection(SelectedItem, animated);
 			}
 		}
 
-		protected virtual void ShowSelection(TItem item) {
+		protected virtual void ShowSelection(TItem item, bool animated = true) {
 			ViewModel.SelectCommand?.Execute(item);
 			SelectedItem = item;
-			ReportItem?.SetVisible(true, false);
-			BackArrow?.SetRotation(1.0f, true);
+			ReportItem?.SetVisible(true, animated);
+			BackArrow?.SetRotation(1.0f, animated);
 		}
 
-		protected virtual void CloseSelection() {
+		protected virtual void CloseSelection(bool animated = true) {
 			ViewModel.SelectCommand?.Execute(null);
 			SelectedItem = null;
-			ReportItem?.SetVisible(false, false);
-			BackArrow?.SetRotation(0.0f, true);
+			ReportItem?.SetVisible(false, animated);
+			BackArrow?.SetRotation(0.0f, animated);
+		}
+
+		protected override void BackNavigationClick(object sender, AndroidX.AppCompat.Widget.Toolbar.NavigationClickEventArgs ev) {
+			if (!OnBackPressed()) {
+				base.BackNavigationClick(sender, ev);
+			}
 		}
 	}
 }

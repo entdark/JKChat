@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+    <include layout="@layout/appbar"/>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <ScrollView
+            android:id="@+id/scrollview"
+            style="@style/ScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:background="@color/item_background">
+                    <TextView
+                        style="@style/SettingsHeaderText"
+                        android:text="Player Name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_gravity="bottom"
+                        android:lines="1"
+                        android:ellipsize="end"/>
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@color/item_background"
+                    android:foreground="@drawable/item_selection_foreground"
+                    app:MvxBind="Click PlayerNameCommand">
+                    <TextView
+                        style="@style/SettingsText"
+                        android:text="Jedi Knight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginHorizontal="20dp"
+                        android:lines="1"
+                        android:ellipsize="end"
+                        app:MvxBind="TextFormatted ColourText(PlayerName)"/>
+                </FrameLayout>
+                <!--<RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/item_background">
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        style="@style/SettingsText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerVertical="true"
+                        android:paddingHorizontal="20dp"
+                        android:checked="true"
+                        android:text="Notifications"
+                        android:foreground="@drawable/item_selection_foreground"/>
+                </RelativeLayout>-->
+            </LinearLayout>
+        </ScrollView>
+        <include layout="@layout/loading"/>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

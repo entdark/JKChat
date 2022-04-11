@@ -6,4 +6,9 @@
 		android:icon="@drawable/ic_report"
 		app:showAsAction="ifRoom"
 		app:actionLayout="@layout/report_menu_item"/>
+	<!--<item
+		android:id="@+id/search_item"
+		android:icon="@drawable/ic_search"
+		app:showAsAction="ifRoom"
+		app:actionLayout="@layout/search_menu_item"/>-->
 </menu>

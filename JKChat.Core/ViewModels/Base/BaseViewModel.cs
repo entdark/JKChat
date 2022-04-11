@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 
-using JKClient;
-
 using MvvmCross;
-using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
 	public abstract class BaseViewModel : MvxViewModel, IBaseViewModel {
-		protected IMvxNavigationService NavigationService { get; private set; }
+		protected INavigationService NavigationService { get; private set; }
 		protected IDialogService DialogService { get; private set; }
 		protected IMvxMessenger Messenger { get; private set; }
 
@@ -29,7 +27,7 @@ namespace JKChat.Core.ViewModels.Base {
 		}
 
 		public BaseViewModel() {
-			NavigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
+			NavigationService = Mvx.IoCProvider.Resolve<INavigationService>();
 			DialogService = Mvx.IoCProvider.Resolve<IDialogService>();
 			Messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 		}
@@ -55,13 +53,6 @@ namespace JKChat.Core.ViewModels.Base {
 				RightButton = "OK",
 				Type = JKDialogType.Title | JKDialogType.Message
 			});
-		}
-
-		protected virtual async Task ExceptionalTaskRun(Action action) {
-			await Task.Run(action)
-				.ContinueWith(async t => {
-					await ExceptionCallback(t.Exception);
-				}, TaskContinuationOptions.OnlyOnFaulted);
 		}
 	}
 

@@ -9,13 +9,16 @@
     <Compile Remove="Resources\Fonts\**" />
     <EmbeddedResource Remove="Resources\Fonts\**" />
     <None Remove="Resources\Fonts\**" />
+    <None Remove="ViewModels\Settings\" />
+    <None Remove="MvvmCross.Plugin.Visibility" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MvvmCross" Version="7.1.2" />
     <PackageReference Include="MvvmCross.Plugin.Messenger" Version="7.1.2" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.2" />
+    <PackageReference Include="MvvmCross.Plugin.Visibility" Version="7.1.2" />
   </ItemGroup>
 
   <ItemGroup>

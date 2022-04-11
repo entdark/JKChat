@@ -5,13 +5,17 @@ using JKChat.iOS.Views.ServerList.Cells;
 using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
+using MvvmCross.Presenters.Attributes;
+using MvvmCross.ViewModels;
 
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList {
-	[MvxRootPresentation(WrapInNavigationController = true)]
+	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "Images/ServerList.png", TabSelectedIconName = "Images/ServerListSelected.png")]
 	public partial class ServerListViewController : BaseViewController<ServerListViewModel> {
-		public ServerListViewController() : base("ServerListViewController", null) {}
+		public ServerListViewController() : base("ServerListViewController", null) {
+			SetUpBackButton = false;
+		}
 
 		public override void DidReceiveMemoryWarning() {
 			// Releases the view if it doesn't have a superview.
@@ -65,5 +69,9 @@ namespace JKChat.iOS.Views.ServerList {
 		}
 
 		#endregion
+
+		public override MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {
+			return null;
+		}
 	}
 }

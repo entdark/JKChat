@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 
 using Android.Graphics;
 using Android.Text;
@@ -49,17 +50,36 @@ namespace JKChat.Android.ValueConverters {
 				}
 			}
 			foreach (var colorAttribute in colorAttributes) {
-				spannable.SetSpan(new ForegroundColorSpan(GetColor(colorAttribute.Value)), colorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				spannable.SetSpan(new ForegroundColorCodeSpan(colorAttribute.Value), colorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
 			}
 			if (parseUri) {
 				foreach (var uriAttribute in uriAttributes) {
 					spannable.SetSpan(new LinkClickableSpan(uriAttribute.Value), uriAttribute.Start, uriAttribute.Start+uriAttribute.Length, SpanTypes.ExclusiveExclusive);
-					var color = colorAttributes.LastOrDefault((colorAttribute) => uriAttribute.Start >= colorAttribute.Start)?.Value ?? 7;
-					spannable.SetSpan(new ForegroundColorSpan(GetColor(color)), uriAttribute.Start, uriAttribute.Start+uriAttribute.Length, SpanTypes.ExclusiveExclusive);
+					int color = colorAttributes.LastOrDefault((colorAttribute) => uriAttribute.Start >= colorAttribute.Start)?.Value ?? 7;
+					spannable.SetSpan(new ForegroundColorCodeSpan(color), uriAttribute.Start, uriAttribute.Start+uriAttribute.Length, SpanTypes.ExclusiveExclusive);
 					spannable.SetSpan(new UnderlineSpan(), uriAttribute.Start, uriAttribute.Start+uriAttribute.Length, SpanTypes.ExclusiveExclusive);
 				}
 			}
 			return spannable;
+		}
+
+		protected override string ConvertBack(ISpannable value, Type targetType, object parameter, CultureInfo culture) {
+			if (value == null) {
+				return null;
+			}
+			var stringBuilder = new StringBuilder(value.ToString());
+			var spans = value.GetSpans(0, value.Length(), Java.Lang.Class.FromType(typeof(ForegroundColorCodeSpan)));
+			if (spans == null || spans.Length <= 0) {
+				return stringBuilder.ToString();
+			}
+			for (int i = spans.Length-1; i >= 0; i--) {
+				if (spans[i] is ForegroundColorCodeSpan colorSpan) {
+					int start = value.GetSpanStart(colorSpan);
+					stringBuilder.Insert(start, colorSpan.ColorCode);
+					stringBuilder.Insert(start, '^');
+				}
+			}
+			return stringBuilder.ToString();
 		}
 
 		private static Color GetColor(int code) {
@@ -83,6 +103,13 @@ namespace JKChat.Android.ValueConverters {
 			default:
 			case 7:
 				return new Color(255, 255, 255);
+			}
+		}
+
+		public class ForegroundColorCodeSpan : ForegroundColorSpan {
+			public int ColorCode { get; private set; }
+			public ForegroundColorCodeSpan(int code) : base(GetColor(code)) {
+				ColorCode = code;
 			}
 		}
 

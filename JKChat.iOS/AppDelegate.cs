@@ -5,9 +5,13 @@ using System.Threading.Tasks;
 using CoreLocation;
 
 using Foundation;
+
 using JKChat.Core;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
+
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Crashes;
 
 using MvvmCross;
 using MvvmCross.Platforms.Ios.Core;
@@ -17,35 +21,33 @@ using UIKit;
 
 using UserNotifications;
 
-namespace JKChat.iOS
-{
+namespace JKChat.iOS {
 	// The UIApplicationDelegate for the application. This class is responsible for launching the
 	// User Interface of the application, as well as listening (and optionally responding) to application events from iOS.
 	[Register("AppDelegate")]
-	public class AppDelegate : MvxApplicationDelegate<Setup, App>, IUNUserNotificationCenterDelegate
-	{
+	public class AppDelegate : MvxApplicationDelegate<Setup, App>, IUNUserNotificationCenterDelegate {
 		private CLLocationManager locationManager;
 		private bool isActive;
 		private int lastActiveCount, lastMessages;
-		private MvxSubscriptionToken serverInfoMessageToken;
+		private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken;
 
 		private CLAuthorizationStatus AuthorizationStatus {
 			get {
-				return UIDevice.CurrentDevice.CheckSystemVersion(14, 0) ?
+				return UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && locationManager != null ?
 					locationManager.AuthorizationStatus : CLLocationManager.Status;
 			}
 		}
 
 		// class-level declarations
 
-		public override UIWindow Window
-		{
+		public override UIWindow Window {
 			get;
 			set;
 		}
 
-		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
-		{
+		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions) {
+			AppCenter.Start(Core.ApiKeys.AppCenter.iOS, typeof(Crashes));
+
 			var titleTextAttributes = new UIStringAttributes() {
 				ForegroundColor = Theme.Color.Title,
 				Font = Theme.Font.ANewHope(13.0f)
@@ -63,33 +65,60 @@ namespace JKChat.iOS
 				UINavigationBar.Appearance.Translucent = false;
 			}
 
+			UITabBar.Appearance.BarTintColor = Theme.Color.TabBar;
+			UITabBar.Appearance.UnselectedItemTintColor = Theme.Color.TabBarItemUnselected;
+			UITabBar.Appearance.SelectedImageTintColor = Theme.Color.TabBarItemSelected;
+			var tabBarTitleNormalTextAttributes = new UITextAttributes() {
+				TextColor = Theme.Color.TabBarItemUnselected,
+				Font = Theme.Font.ErgoeBold(10.0f)
+			};
+			var tabBarTitleSelectedTextAttributes = new UITextAttributes() {
+				TextColor = Theme.Color.TabBarItemSelected,
+				Font = Theme.Font.ErgoeBold(10.0f)
+			};
+			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleNormalTextAttributes, UIControlState.Normal);
+			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleSelectedTextAttributes, UIControlState.Selected);
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
+				var appearance = new UITabBarAppearance();
+				appearance.ConfigureWithDefaultBackground();
+				appearance.BackgroundColor = Theme.Color.TabBar;
+				UITabBar.Appearance.StandardAppearance = appearance;
+				if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
+					UITabBar.Appearance.ScrollEdgeAppearance = appearance;
+				}
+				var tabBarTitleNormalStringAttributes = new UIStringAttributes() {
+					ForegroundColor = Theme.Color.TabBarItemUnselected,
+					Font = Theme.Font.ErgoeBold(10.0f)
+				};
+				var tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
+					ForegroundColor = Theme.Color.TabBarItemSelected,
+					Font = Theme.Font.ErgoeBold(10.0f)
+				};
+				var tabAppearance = new UITabBarItemAppearance();
+				tabAppearance.Normal.TitleTextAttributes = tabBarTitleNormalStringAttributes;
+				tabAppearance.Normal.IconColor = Theme.Color.TabBarItemUnselected;
+				tabAppearance.Selected.TitleTextAttributes = tabBarTitleSelectedStringAttributes;
+				tabAppearance.Selected.IconColor = Theme.Color.TabBarItemSelected;
+				appearance.StackedLayoutAppearance = tabAppearance;
+				appearance.InlineLayoutAppearance = tabAppearance;
+				appearance.CompactInlineLayoutAppearance = tabAppearance;
+			}
+
 			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
 
 			UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert, (approved, error) => {
 				Debug.WriteLine("UserNotifications approved: " + approved);
 			});
 			UNUserNotificationCenter.Current.Delegate = this;
-			if (locationManager == null) {
-				locationManager = new CLLocationManager() {
-					DesiredAccuracy = CLLocation.AccurracyBestForNavigation,
-					DistanceFilter = CLLocationDistance.FilterNone,
-					PausesLocationUpdatesAutomatically = false,
-					AllowsBackgroundLocationUpdates = true
-				};
-				if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
-					locationManager.DidChangeAuthorization += LocationManagerDidChangeAuthorization;
-				} else {
-					locationManager.AuthorizationChanged += LocationManagerAuthorizationChanged;
-				}
-			}
+			InitLocationManager();
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
 			isActive = true;
 			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			locationUpdateMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
 			return finishedLaunching;
 		}
 
-		public override void OnResignActivation(UIApplication application)
-		{
+		public override void OnResignActivation(UIApplication application) {
 			isActive = false;
 			// Invoked when the application is about to move from active to inactive state.
 			// This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) 
@@ -97,8 +126,7 @@ namespace JKChat.iOS
 			// Games should use this method to pause the game.
 		}
 
-		public override void DidEnterBackground(UIApplication application)
-		{
+		public override void DidEnterBackground(UIApplication application) {
 			ExecuteOnBackground();
 			StartLocationUpdate();
 			CreateNotification(false);
@@ -107,8 +135,7 @@ namespace JKChat.iOS
 			// If your application supports background execution this method is called instead of WillTerminate when the user quits.
 		}
 
-		public override void WillEnterForeground(UIApplication application)
-		{
+		public override void WillEnterForeground(UIApplication application) {
 			base.WillEnterForeground(application);
 			isActive = true;
 			StopLocationUpdate();
@@ -117,8 +144,7 @@ namespace JKChat.iOS
 			// Here you can undo many of the changes made on entering the background.
 		}
 
-		public override void OnActivated(UIApplication application)
-		{
+		public override void OnActivated(UIApplication application) {
 			isActive = true;
 			// Restart any tasks that were paused (or not yet started) while the application was inactive. 
 			// If the application was previously in the background, optionally refresh the user interface.
@@ -133,8 +159,7 @@ namespace JKChat.iOS
 			}
 		}
 
-		public override void WillTerminate(UIApplication application)
-		{
+		public override void WillTerminate(UIApplication application) {
 			if (locationManager != null) {
 				if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
 					locationManager.DidChangeAuthorization -= LocationManagerDidChangeAuthorization;
@@ -146,6 +171,10 @@ namespace JKChat.iOS
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 				serverInfoMessageToken = null;
+			}
+			if (locationUpdateMessageToken != null) {
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<LocationUpdateMessage>(locationUpdateMessageToken);
+				locationUpdateMessageToken = null;
 			}
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();
@@ -185,7 +214,7 @@ namespace JKChat.iOS
 			InvokeOnMainThread(() => {
 				var content = new UNMutableNotificationContent {
 					Title = "JKChat is minimized",
-//					Subtitle = "Notification Subtitle",
+					//					Subtitle = "Notification Subtitle",
 					Body = $"You have {time} seconds until it pauses the connection"
 				};
 				var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
@@ -252,10 +281,40 @@ namespace JKChat.iOS
 			});
 		}
 
+		private void OnLocationUpdateMessage(LocationUpdateMessage message) {
+			InitLocationManager();
+			if (AppSettings.LocationUpdate) {
+				RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
+			} else {
+				StopLocationUpdate();
+			}
+		}
+
+		private void InitLocationManager() {
+			if (AppSettings.LocationUpdate) {
+				if (locationManager == null) {
+					locationManager = new CLLocationManager() {
+						DesiredAccuracy = CLLocation.AccurracyBestForNavigation,
+						DistanceFilter = CLLocationDistance.FilterNone,
+						PausesLocationUpdatesAutomatically = false,
+						AllowsBackgroundLocationUpdates = true
+					};
+					if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
+						locationManager.DidChangeAuthorization += LocationManagerDidChangeAuthorization;
+					} else {
+						locationManager.AuthorizationChanged += LocationManagerAuthorizationChanged;
+					}
+				}
+			}
+		}
+
 		private void StartLocationUpdate() {
+			if (!AppSettings.LocationUpdate) {
+				return;
+			}
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
 			if (Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveClients > 0) {
-				locationManager.StartUpdatingLocation();
+				locationManager?.StartUpdatingLocation();
 			}
 		}
 
@@ -273,15 +332,15 @@ namespace JKChat.iOS
 		private static void RequestLocationAuthorization(CLLocationManager locationManager, CLAuthorizationStatus status) {
 			if (status == CLAuthorizationStatus.Authorized
 				|| status == CLAuthorizationStatus.AuthorizedWhenInUse) {
-				locationManager.RequestAlwaysAuthorization();
+				locationManager?.RequestAlwaysAuthorization();
 			} else if (status == CLAuthorizationStatus.NotDetermined
 				|| status != CLAuthorizationStatus.AuthorizedAlways) {
-				locationManager.RequestWhenInUseAuthorization();
+				locationManager?.RequestWhenInUseAuthorization();
 			}
 		}
 
 		private void StopLocationUpdate() {
-			locationManager.StopUpdatingLocation();
+			locationManager?.StopUpdatingLocation();
 		}
 
 		private void FreeMemory() {

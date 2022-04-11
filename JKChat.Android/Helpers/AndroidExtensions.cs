@@ -4,6 +4,7 @@ using Android.App;
 using Android.Util;
 using Android.Views;
 
+using JKChat.Android.Controls.Listeners;
 using JKChat.Android.Controls.Toolbar;
 
 namespace JKChat.Android.Helpers {
@@ -27,15 +28,22 @@ namespace JKChat.Android.Helpers {
 		public static void SetClickAction(this IMenuItem item, Action action) {
 			if (item?.ActionView is FadingImageView imageView) {
 				imageView.Action = action;
+			} else {
+				item?.SetOnMenuItemClickListener(new MenuItemClickListener() {
+					Click = () => {
+						action?.Invoke();
+						return true;
+					}
+				});
 			}
 		}
-		public static void SetVisible(this IMenuItem item, bool visible, bool instant) {
-			if (visible || instant) {
+		public static void SetVisible(this IMenuItem item, bool visible, bool animated) {
+			if (visible || !animated) {
 				item?.SetVisible(visible);
 			}
 			if (item?.ActionView is FadingImageView imageView) {
-				imageView.HideShow(visible, instant, () => {
-					if (!visible && !instant) {
+				imageView.HideShow(visible, animated, () => {
+					if (!visible && animated) {
 						item?.SetVisible(visible);
 					}
 				});

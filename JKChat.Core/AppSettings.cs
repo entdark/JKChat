@@ -1,9 +1,14 @@
 ﻿using System;
 
+using JKChat.Core.Messages;
+
+using MvvmCross;
+using MvvmCross.Plugin.Messenger;
+
 using Xamarin.Essentials;
 
 namespace JKChat.Core {
-	public static class Settings {
+	public static class AppSettings {
 		public const string DefaultName = "^5Jedi Knight";
 		public static bool FirstLaunch {
 			get {
@@ -17,7 +22,18 @@ namespace JKChat.Core {
 		}
 		public static string PlayerName {
 			get => Preferences.Get(nameof(PlayerName), DefaultName);
-			set => Preferences.Set(nameof(PlayerName), value);
+			set {
+				if (value == Preferences.Get(nameof(PlayerName), DefaultName)) {
+					return;
+				}
+				if (string.IsNullOrEmpty(value)) {
+					value = AppSettings.DefaultName;
+				} else if (value.Length > 31) {
+					value = value.Substring(0, 31);
+				}
+				Preferences.Set(nameof(PlayerName), value);
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new PlayerNameMessage(value));
+			}
 		}
 		private static readonly Guid DefaultPlayerId = Guid.NewGuid();
 		public static Guid PlayerId {
@@ -29,6 +45,13 @@ namespace JKChat.Core {
 				return Guid.TryParse(Preferences.Get(nameof(PlayerId), DefaultPlayerId.ToString()), out Guid playerId) ? playerId : DefaultPlayerId;
 			}
 			set => Preferences.Set(nameof(PlayerId), value.ToString());
+		}
+		public static bool LocationUpdate {
+			get => Preferences.Get(nameof(LocationUpdate), false);
+			set {
+				Preferences.Set(nameof(LocationUpdate), value);
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new LocationUpdateMessage(value));
+			}
 		}
 	}
 }

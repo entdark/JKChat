@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 
 using AndroidX.Core.App;
 using AndroidX.Lifecycle;
 
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
-using JKChat.Core.Models;
 using JKChat.Core.Services;
 
 using MvvmCross;

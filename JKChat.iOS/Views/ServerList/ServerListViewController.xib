@@ -1,32 +1,36 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6204"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ServerListViewController">
             <connections>
-                <outlet property="view" destination="1" id="RRd-Eg-VrN"/>
                 <outlet property="ServerListTableView" destination="CDb-UZ-oH3" id="name-outlet-CDb-UZ-oH3"/>
+                <outlet property="view" destination="1" id="RRd-Eg-VrN"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="1">
-            <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+            <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <color key="backgroundColor" colorSpace="calibratedRGB" red="0.13333333333333333" green="0.17647058823529413" blue="0.4" alpha="1"/>
             <subviews>
                 <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="134" estimatedRowHeight="-1" sectionHeaderHeight="44" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="CDb-UZ-oH3">
-                    <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                    <color key="backgroundColor" colorSpace="calibratedRGB" red="0.13333333333333333" green="0.17647058823529413" blue="0.4" alpha="1"/>
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                    <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                 </tableView>
             </subviews>
+            <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint id="144" firstItem="CDb-UZ-oH3" firstAttribute="top" secondItem="1" secondAttribute="top"/>
-                <constraint id="145" firstAttribute="trailing" secondItem="CDb-UZ-oH3" secondAttribute="trailing"/>
-                <constraint id="148" firstItem="CDb-UZ-oH3" firstAttribute="leading" secondItem="1" secondAttribute="leading"/>
-                <constraint id="149" firstAttribute="bottom" secondItem="CDb-UZ-oH3" secondAttribute="bottom"/>
+                <constraint firstItem="CDb-UZ-oH3" firstAttribute="top" secondItem="1" secondAttribute="top" id="144"/>
+                <constraint firstAttribute="trailing" secondItem="CDb-UZ-oH3" secondAttribute="trailing" id="145"/>
+                <constraint firstItem="CDb-UZ-oH3" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="148"/>
+                <constraint firstAttribute="bottom" secondItem="CDb-UZ-oH3" secondAttribute="bottom" id="149"/>
             </constraints>
+            <point key="canvasLocation" x="82" y="-21"/>
         </view>
     </objects>
 </document>

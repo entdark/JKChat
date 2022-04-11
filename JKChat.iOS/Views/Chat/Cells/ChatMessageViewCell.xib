@@ -9,27 +9,27 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="81" id="cxk-wN-pdQ" customClass="ChatMessageViewCell">
-            <rect key="frame" x="0.0" y="0.0" width="320" height="81"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" rowHeight="248" id="cxk-wN-pdQ" customClass="ChatMessageViewCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="248"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cxk-wN-pdQ" id="YTl-1W-gDM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="81"/>
+                <rect key="frame" x="0.0" y="0.0" width="320" height="248"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Player namePlayer namePlayer namePlayer namePlayer name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="199">
-                        <rect key="frame" x="20" y="15" width="252" height="16.5"/>
+                        <rect key="frame" x="20" y="0.0" width="245" height="16.5"/>
                         <fontDescription key="fontDescription" name="OCRAStd" family="OCR A Std" pointSize="14"/>
                         <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="13:37" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r3n-YC-UWh" userLabel="Time Label">
-                        <rect key="frame" x="272" y="18.5" width="28" height="13"/>
+                        <rect key="frame" x="272" y="3.5" width="28" height="13"/>
                         <fontDescription key="fontDescription" name="OCRAStd" family="OCR A Std" pointSize="11"/>
                         <color key="textColor" red="0.0" green="1" blue="1" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="533">
-                        <rect key="frame" x="20" y="36.5" width="280" height="44.5"/>
+                        <rect key="frame" x="20" y="21.5" width="280" height="211.5"/>
                         <constraints>
                             <constraint firstAttribute="height" relation="greaterThanOrEqual" id="901"/>
                         </constraints>
@@ -53,13 +53,13 @@
             </tableViewCellContentView>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
             <connections>
-                <outlet property="TopConstraint" destination="268" id="P5E-Ap-bfc"/>
-                <outlet property="BottomConstraint" destination="H7y-Zg-bAo" id="name-outlet-H7y-Zg-bAo"/>
+                <outlet property="BottomConstraint" destination="H7y-Zg-bAb" id="name-outlet-H7y-Zg-bAo"/>
                 <outlet property="MessageTextView" destination="533" id="name-outlet-533"/>
                 <outlet property="PlayerNameLabel" destination="199" id="name-outlet-199"/>
                 <outlet property="TimeLabel" destination="r3n-YC-UWh" id="phG-FD-qFT"/>
+                <outlet property="TopConstraint" destination="268" id="P5E-Ap-bfc"/>
             </connections>
-            <point key="canvasLocation" x="0.0" y="13.204225352112676"/>
+            <point key="canvasLocation" x="0.0" y="101.40845070422536"/>
         </tableViewCell>
     </objects>
 </document>

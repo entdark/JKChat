@@ -43,9 +43,9 @@ namespace JKChat.Android.Controls.Toolbar {
 			Action?.Invoke();
 		}
 
-		public void HideShow(bool show, bool instant = false, Action completion = null) {
+		public void HideShow(bool show, bool animated = true, Action completion = null) {
 			float value = show ? 1.0f : 0.0f;
-			if (instant) {
+			if (!animated) {
 				Alpha = value;
 				//ScaleX = value;
 				ScaleY = value;
