@@ -1,12 +1,15 @@
 ﻿using JKChat.Core;
 using JKChat.Core.Navigation;
 using JKChat.Core.Services;
+using JKChat.Core.ValueCombiners;
 using JKChat.iOS.Presenter;
 using JKChat.iOS.Services;
 
 //using Microsoft.Extensions.Logging;
 
 using MvvmCross;
+using MvvmCross.Binding.Combiners;
+using MvvmCross.Converters;
 using MvvmCross.IoC;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Ios.Core;
@@ -42,6 +45,13 @@ namespace JKChat.iOS {
 			var iocProvider = Mvx.IoCProvider;
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
 			base.InitializeFirstChance(/*iocProvider*/);
+		}
+
+		protected override void FillValueConverters(IMvxValueConverterRegistry registry) {
+			base.FillValueConverters(registry);
+			Mvx.IoCProvider.CallbackWhenRegistered<IMvxValueCombinerRegistry>(registry2 => {
+				registry2.AddOrOverwrite("ColourTextParameter", new ColourTextParameterValueCombiner());
+			});
 		}
 
 		/*protected override ILoggerProvider CreateLogProvider() {

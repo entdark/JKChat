@@ -1,11 +1,14 @@
 ﻿using System;
+
 using CoreGraphics;
+
 using Foundation;
+
 using JKChat.Core.ViewModels.Chat.Items;
-using JKChat.iOS.ValueConverters;
 
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.Chat.Cells {
@@ -50,11 +53,12 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 				var set = this.CreateBindingSet<ChatMessageViewCell, ChatMessageItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
-				set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
-				set.Bind(MessageTextView).For(v => v.AttributedText).To(vm => vm.Message).WithConversion("ColourText", true);
 				set.Bind(this).For(v => v.TopVMType).To(vm => vm.TopVMType);
 				set.Bind(this).For(v => v.BottomVMType).To(vm => vm.BottomVMType);
 				set.Apply();
+
+				this.AddBindings(PlayerNameLabel, "AttributedText ColourText(PlayerName, ColourTextParameter(true, Shadow))");
+				this.AddBindings(MessageTextView, "AttributedText ColourText(Message, ColourTextParameter(true, Shadow))");
 			});
 		}
 

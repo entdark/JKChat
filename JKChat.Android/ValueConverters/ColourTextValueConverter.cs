@@ -19,7 +19,7 @@ using Xamarin.Essentials;
 
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
-		private static Color Shadow = new Color(38, 38, 38);
+		private static readonly Color ShadowColor = new Color(38, 38, 38);
 		protected override ISpannable Convert(string value, Type targetType, object parameter, CultureInfo culture) {
 			if (string.IsNullOrEmpty(value)) {
 				return new SpannableString(string.Empty);
@@ -44,7 +44,7 @@ namespace JKChat.Android.ValueConverters {
 			if (parseShadow) {
 				var shadowColorAttributes = new List<AttributeData<int>>();
 				value.CleanString(shadowColorAttributes, shadow: parseShadow);
-				spannable.SetSpan(new ShadowSpan(Shadow), 0, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				spannable.SetSpan(new ShadowSpan(ShadowColor), 0, cleanStr.Length, SpanTypes.ExclusiveInclusive);
 				foreach (var shadowColorAttribute in shadowColorAttributes) {
 					spannable.SetSpan(new ShadowSpan(GetColor(shadowColorAttribute.Value)), shadowColorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
 				}
@@ -135,16 +135,13 @@ namespace JKChat.Android.ValueConverters {
 
 		public class ShadowSpan : MetricAffectingSpan {
 			public Color ShadowColor { get; private set; }
-
 			public ShadowSpan(Color color) {
 				ShadowColor = color;
 			}
-
 			public override void UpdateDrawState(TextPaint tp) {
 				UpdateMeasureState(tp);
 				tp.SetShadowLayer(float.Epsilon, 1.337f.DpToPxF(), 1.337f.DpToPxF(), ShadowColor);
 			}
-
 			public override void UpdateMeasureState(TextPaint textPaint) {
 			}
 		}

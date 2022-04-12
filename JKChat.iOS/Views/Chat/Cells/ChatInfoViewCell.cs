@@ -39,8 +39,9 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 				var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
-				set.Bind(TextLabel).For(v => v.AttributedText).To(vm => vm.Text).WithConversion("ColourText", true);
 				set.Apply();
+
+				this.AddBindings(TextLabel, "AttributedText ColourText(Text, ColourTextParameter(true, Shadow))");
 			});
 		}
 
