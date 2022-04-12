@@ -91,7 +91,15 @@ namespace JKChat.Core.ViewModels.Base {
 			}
 		}
 
-		protected virtual TItem GetSelectedItem() => Items?.FirstOrDefault(item => item.IsSelected);
+		protected virtual TItem GetSelectedItem() {
+			if (Items != null) {
+				lock (Items) {
+					return Items.FirstOrDefault(item => item.IsSelected);
+				}
+			} else {
+				return null;
+			}
+		}
 	}
 
 	public abstract class ReportViewModel<TItem, TParameter> : ReportViewModel<TItem>, IMvxViewModel<TParameter> where TItem : class, ISelectableItemVM {
