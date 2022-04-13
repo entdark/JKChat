@@ -314,11 +314,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public override void Prepare(ServerListItemVM parameter) {
-			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(parameter.ServerInfo);
-			//gameClient.ViewModel = this;
-			Items = gameClient.Items;
-			Status = gameClient.Status;
-			Title = gameClient.ServerInfo.HostName;
+			Prepare(parameter.ServerInfo);
 		}
 
 		public override Task Initialize() {
@@ -358,6 +354,37 @@ namespace JKChat.Core.ViewModels.Chat {
 		public override void ViewDisappearing() {
 			gameClient.ViewModel = null;
 			base.ViewDisappearing();
+		}
+
+		protected override void SaveStateToBundle(IMvxBundle bundle) {
+			base.SaveStateToBundle(bundle);
+			//TODO or NOTTODO: serialize into JSON
+			bundle.Data["Address"] = gameClient.ServerInfo.Address.ToString();
+			bundle.Data["Protocol"] = gameClient.ServerInfo.Protocol.ToString();
+			bundle.Data["NeedPassword"] = gameClient.ServerInfo.NeedPassword.ToString();
+			bundle.Data["HostName"] = gameClient.ServerInfo.HostName;
+		}
+
+		protected override void ReloadFromBundle(IMvxBundle state) {
+			base.ReloadFromBundle(state);
+			var serverInfo = new JKClient.ServerInfo();
+			if (state.Data.TryGetValue("Address", out string address) && !string.IsNullOrEmpty(address))
+				serverInfo.Address = JKClient.NetAddress.FromString(address);
+			if (state.Data.TryGetValue("Protocol", out string protocolStr) && Enum.TryParse(protocolStr, out JKClient.ProtocolVersion protocol))
+				serverInfo.Protocol = protocol;
+			if (state.Data.TryGetValue("NeedPassword", out string needPasswordStr) && bool.TryParse(needPasswordStr, out bool needPassword))
+				serverInfo.NeedPassword = needPassword;
+			if (state.Data.TryGetValue("HostName", out string hostName) && !string.IsNullOrEmpty(hostName))
+				serverInfo.HostName = hostName;
+			Prepare(serverInfo);
+		}
+
+		private void Prepare(JKClient.ServerInfo serverInfo) {
+			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(serverInfo);
+			//gameClient.ViewModel = this;
+			Items = gameClient.Items;
+			Status = gameClient.Status;
+			Title = gameClient.ServerInfo.HostName;
 		}
 
 		private async Task Connect() {
