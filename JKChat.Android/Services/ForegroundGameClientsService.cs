@@ -12,6 +12,7 @@ using JKChat.Core.Messages;
 using JKChat.Core.Services;
 
 using MvvmCross;
+using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Plugin.Messenger;
 
 namespace JKChat.Android.Services {
@@ -24,6 +25,8 @@ namespace JKChat.Android.Services {
 
 		public override void OnCreate() {
 			base.OnCreate();
+			var setupSingleton = MvxAndroidSetupSingleton.EnsureSingletonAvailable(ApplicationContext);
+			setupSingleton.EnsureInitialized();
 			CreateNotificationChannel();
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
