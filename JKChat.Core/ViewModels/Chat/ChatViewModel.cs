@@ -341,6 +341,9 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		public override void ViewAppeared() {
 			base.ViewAppeared();
+			if (gameClient.ViewModel != null) {
+				return;
+			}
 			if (Items.Count <= 0) {
 				Task.Run(async () => {
 					await Task.Delay(200);
@@ -376,12 +379,14 @@ namespace JKChat.Core.ViewModels.Chat {
 				serverInfo.NeedPassword = needPassword;
 			if (state.Data.TryGetValue("HostName", out string hostName) && !string.IsNullOrEmpty(hostName))
 				serverInfo.HostName = hostName;
-			Prepare(serverInfo);
+			Prepare(serverInfo, true);
 		}
 
-		private void Prepare(JKClient.ServerInfo serverInfo) {
+		private void Prepare(JKClient.ServerInfo serverInfo, bool setViewModel = false) {
 			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(serverInfo);
-			//gameClient.ViewModel = this;
+			if (setViewModel) {
+				gameClient.ViewModel = this;
+			}
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
