@@ -3,6 +3,7 @@
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Runtime;
 
 using AndroidX.Core.App;
 using AndroidX.Lifecycle;
@@ -13,6 +14,7 @@ using JKChat.Core.Services;
 
 using MvvmCross;
 using MvvmCross.Platforms.Android.Core;
+using MvvmCross.Platforms.Android.Services;
 using MvvmCross.Plugin.Messenger;
 
 namespace JKChat.Android.Services {
@@ -108,8 +110,13 @@ namespace JKChat.Android.Services {
 	}
 
 	[BroadcastReceiver]
-	public class ForegroundReceiver : BroadcastReceiver {
+	public class ForegroundReceiver : MvxBroadcastReceiver {
+		public ForegroundReceiver() {
+		}
+		public ForegroundReceiver(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer) {
+		}
 		public override void OnReceive(Context context, Intent intent) {
+			base.OnReceive(context, intent);
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.DisconnectFromAll();
 		}
