@@ -355,17 +355,17 @@ namespace JKChat.Core.Models {
 			const string escapeStartPrivate = Common.EscapeCharacter + "[";
 			const string escapeEndPrivate = Common.EscapeCharacter + "]";
 
-			int startIndex = playerName.IndexOf(escapeStartTeam);
-			if (startIndex < 0) startIndex = playerName.IndexOf(escapeStartPrivate);
-			if (startIndex < 0) startIndex = -2;
-			startIndex += 2;
-
 			int endIndex = playerName.IndexOf(escapeEndTeam);
 			if (endIndex < 0) endIndex = playerName.IndexOf(escapeEndPrivate);
 			if (endIndex < 0) endIndex = playerName.IndexOf(escapeColon);
 			if (endIndex < 0) return playerName;
 
-			return playerName.Substring(startIndex, endIndex-startIndex);
+			int startIndex = playerName.IndexOf(escapeStartTeam);
+			if (startIndex < 0) startIndex = playerName.IndexOf(escapeStartPrivate);
+			if (startIndex < 0) startIndex = -2;
+			startIndex += 2;
+
+			return playerName[startIndex..endIndex];
 		}
 
 		private void AddToPrint(Command command) {
