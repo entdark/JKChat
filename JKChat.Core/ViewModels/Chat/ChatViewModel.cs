@@ -14,7 +14,6 @@ using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 using JKChat.Core.ViewModels.ServerList.Items;
-using JKChat.Core.ViewModels.Settings;
 
 using MvvmCross;
 using MvvmCross.Commands;
@@ -27,6 +26,7 @@ namespace JKChat.Core.ViewModels.Chat {
 	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerListItemVM> {
 		private GameClient gameClient;
 		private MvxSubscriptionToken serverInfoMessageToken;
+		private bool restored = false;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand CopyCommand { get; init; }
@@ -373,6 +373,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				serverInfo.NeedPassword = needPassword;
 			if (state.Data.TryGetValue("HostName", out string hostName) && !string.IsNullOrEmpty(hostName))
 				serverInfo.HostName = hostName;
+			restored = true;
 			Prepare(serverInfo, true);
 		}
 
@@ -387,7 +388,9 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private async Task Connect() {
-			gameClient.Connect(false);
+			bool ignoreDialog = restored;
+			restored = false;
+			await gameClient.Connect(ignoreDialog);
 		}
 	}
 }
