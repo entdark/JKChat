@@ -255,7 +255,7 @@ namespace JKChat.Android.Views.Chat {
 					sentMessageMessageToken = null;
 				}
 				if (onScrollListener != null) {
-					recyclerView.RemoveOnScrollListener(onScrollListener);
+					recyclerView?.RemoveOnScrollListener(onScrollListener);
 					onScrollListener = null;
 				}
 			}
