@@ -10,15 +10,7 @@ using Xamarin.Essentials;
 namespace JKChat.Core.Helpers {
 	public static class Common {
 		public static async Task ExceptionCallback(Exception exception) {
-			Exception realException;
-			if (exception.InnerException is AggregateException aggregateException) {
-				realException = aggregateException.InnerExceptions != null ? aggregateException.InnerExceptions[0] : aggregateException;
-			} else if (exception.InnerException != null) {
-				realException = exception.InnerException;
-			} else {
-				realException = exception;
-			}
-			string message = realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
+			string message = GetExceptionMessage(exception);
 
 			await Mvx.IoCProvider.Resolve<IDialogService>().ShowAsync(new JKDialogConfig() {
 				Title = "Error",
@@ -30,6 +22,21 @@ namespace JKChat.Core.Helpers {
 				RightButton = "OK",
 				Type = JKDialogType.Title | JKDialogType.Message
 			});
+		}
+
+		public static string GetExceptionMessage(Exception exception) {
+			if (exception == null) {
+				return string.Empty;
+			}
+			Exception realException;
+			if (exception.InnerException is AggregateException aggregateException) {
+				realException = aggregateException.InnerExceptions != null ? aggregateException.InnerExceptions[0] : aggregateException;
+			} else if (exception.InnerException != null) {
+				realException = exception.InnerException;
+			} else {
+				realException = exception;
+			}
+			return realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
 		}
 
 		public static async Task ExceptionalTaskRun(Action action) {

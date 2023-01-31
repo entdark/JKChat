@@ -32,27 +32,8 @@ namespace JKChat.Core.ViewModels.Base {
 			Messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 		}
 
-		protected virtual async Task ExceptionCallback(Exception exception) {
-			Exception realException;
-			if (exception.InnerException is AggregateException aggregateException) {
-				realException = aggregateException.InnerExceptions != null ? aggregateException.InnerExceptions[0] : aggregateException;
-			} else if (exception.InnerException != null) {
-				realException = exception.InnerException;
-			} else {
-				realException = exception;
-			}
-			string message = realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
-
-			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Error",
-				Message = message,
-				LeftButton = "Copy",
-				LeftClick = (_) => {
-					Xamarin.Essentials.Clipboard.SetTextAsync(message);
-				},
-				RightButton = "OK",
-				Type = JKDialogType.Title | JKDialogType.Message
-			});
+		protected virtual Task ExceptionCallback(Exception exception) {
+			return Helpers.Common.ExceptionCallback(exception);
 		}
 	}
 

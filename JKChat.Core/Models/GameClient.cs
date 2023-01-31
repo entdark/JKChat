@@ -483,15 +483,7 @@ namespace JKChat.Core.Models {
 		}
 
 		private async Task ExceptionCallback(JKClientException exception) {
-			Exception realException;
-			if (exception.InnerException is AggregateException aggregateException) {
-				realException = aggregateException.InnerExceptions != null ? aggregateException.InnerExceptions[0] : aggregateException;
-			} else if (exception.InnerException != null) {
-				realException = exception.InnerException;
-			} else {
-				realException = exception;
-			}
-			string message = realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
+			string message = Helpers.Common.GetExceptionMessage(exception);
 
 			Disconnect();
 			bool close = false;

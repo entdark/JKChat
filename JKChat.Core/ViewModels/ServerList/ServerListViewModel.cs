@@ -117,7 +117,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					Items.ReplaceWith(newItems.Except(reportedServer));
 				}
 			} catch (Exception exception) {
-				Debug.WriteLine(exception);
+				await ExceptionCallback(exception);
 			}
 			IsRefreshing = false;
 		}
@@ -198,7 +198,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					Items.ReplaceWith(newItems.Except(reportedServer));
 				}
 			} catch (Exception exception) {
-				Debug.WriteLine(exception);
+				await ExceptionCallback(exception);
 			}
 			IsLoading = false;
 		}
