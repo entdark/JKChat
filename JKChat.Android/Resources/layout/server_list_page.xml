@@ -23,7 +23,7 @@
                 android:paddingVertical="15dp"
                 android:clipToPadding="false"
                 app:MvxItemTemplate="@layout/server_list_item"
-                app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
+                app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand; ItemLongClick SelectCommand"/>
         </MvvmCross.DroidX.MvxSwipeRefreshLayout>
         <include layout="@layout/loading"/>
     </FrameLayout>

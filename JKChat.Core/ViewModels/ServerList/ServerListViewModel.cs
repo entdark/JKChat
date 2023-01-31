@@ -35,12 +35,6 @@ namespace JKChat.Core.ViewModels.ServerList {
 		protected override string ReportedTitle => "Server reported";
 		protected override string ReportedMessage => "Thank you for reporting this server";
 
-		private MvxObservableCollection<ServerListItemVM> items;
-		public override MvxObservableCollection<ServerListItemVM> Items {
-			get => items;
-			set => SetProperty(ref items, value);
-		}
-
 		private bool isRefreshing;
 		public bool IsRefreshing {
 			get => isRefreshing;
@@ -151,7 +145,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		protected override void SelectExecute(ServerListItemVM item) {
 			base.SelectExecute(item);
-			if (GetSelectedItem() == null) {
+			if (SelectedItem == null) {
 				Title = "Server list";
 			}
 		}

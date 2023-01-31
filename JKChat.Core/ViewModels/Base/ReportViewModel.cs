@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,10 +25,20 @@ namespace JKChat.Core.ViewModels.Base {
 
 		public override string Title {
 			get => base.Title;
-			set { base.Title = GetSelectedItem() != null ? "Selected" : value; }
+			set { base.Title = SelectedItem != null ? "Selected" : value; }
 		}
 
-		public abstract MvxObservableCollection<TItem> Items { get; set; }
+		private MvxObservableCollection<TItem> items;
+		public virtual MvxObservableCollection<TItem> Items {
+			get => items;
+			set => SetProperty(ref items, value);
+		}
+
+		private TItem selectedItem;
+		public virtual TItem SelectedItem {
+			get => selectedItem;
+			set => SetProperty(ref selectedItem, value);
+		}
 
 		public ReportViewModel() {
 			ReportCommand = new MvxAsyncCommand<TItem>(ReportExecute);
@@ -83,21 +92,18 @@ namespace JKChat.Core.ViewModels.Base {
 		}
 
 		protected virtual void SelectExecute(TItem item) {
-			foreach (var it in Items) {
-				it.IsSelected = it == item;
-			}
-			if (GetSelectedItem() != null) {
-				Title = "Selected";
-			}
-		}
-
-		protected virtual TItem GetSelectedItem() {
-			if (Items != null) {
-				lock (Items) {
-					return Items.FirstOrDefault(item => item.IsSelected);
-				}
+			if (SelectedItem == item) {
+				SelectedItem = null;
 			} else {
-				return null;
+				SelectedItem = item;
+			}
+			lock (Items) {
+				foreach (var it in Items) {
+					it.IsSelected = it == item;
+				}
+			}
+			if (SelectedItem != null) {
+				Title = "Selected";
 			}
 		}
 	}

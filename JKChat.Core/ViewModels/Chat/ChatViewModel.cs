@@ -52,12 +52,6 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 		}
 
-		private MvxObservableCollection<ChatItemVM> items;
-		public override MvxObservableCollection<ChatItemVM> Items {
-			get => items;
-			set => SetProperty(ref items, value);
-		}
-
 		private string message;
 		public string Message {
 			get => message;
@@ -191,7 +185,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		protected override void SelectExecute(ChatItemVM item) {
 			base.SelectExecute(item);
-			if (GetSelectedItem() == null) {
+			if (SelectedItem == null) {
 				Title = gameClient?.ServerInfo?.HostName;
 			}
 		}
