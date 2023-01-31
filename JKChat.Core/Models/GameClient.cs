@@ -236,7 +236,7 @@ namespace JKChat.Core.Models {
 
 		private async void ServerCommandExecuted(CommandEventArgs commandEventArgs) {
 			var command = commandEventArgs.Command;
-			string cmd = command.Argv(0);
+			string cmd = command[0];
 			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
 				AddToChat(command, commandEventArgs.UTF8Command);
@@ -244,11 +244,11 @@ namespace JKChat.Core.Models {
 				AddToLocationChat(command, commandEventArgs.UTF8Command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
-				if (string.Compare(command.Argv(1), 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
-					|| string.Compare(command.Argv(1), 0, "Invalid password", 0, 16, StringComparison.OrdinalIgnoreCase) == 0) {
+				if (string.Compare(command[1], 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command[1], 0, "Invalid password", 0, 16, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Invalid Password";
-				} else if (string.Compare(command.Argv(1), 0, "@@@SERVER_IS_FULL", 0, 17, StringComparison.OrdinalIgnoreCase) == 0
-					|| string.Compare(command.Argv(1), 0, "Server is full.", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
+				} else if (string.Compare(command[1], 0, "@@@SERVER_IS_FULL", 0, 17, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command[1], 0, "Server is full.", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Server is Full";
 				} else {
 					AddToPrint(command);
@@ -269,14 +269,14 @@ namespace JKChat.Core.Models {
 				}
 			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
 				string reason;
-				if (string.Compare(command.Argv(1), 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0
-					|| string.Compare(command.Argv(1), 0, "was kicked", 0, 10, StringComparison.OrdinalIgnoreCase) == 0) {
+				if (string.Compare(command[1], 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command[1], 0, "was kicked", 0, 10, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You were kicked";
-				} else if (string.Compare(command.Argv(1), 0, "@@@DISCONNECTED", 0, 15, StringComparison.OrdinalIgnoreCase) == 0
-					|| string.Compare(command.Argv(1), 0, "disconnected", 0, 12, StringComparison.OrdinalIgnoreCase) == 0) {
+				} else if (string.Compare(command[1], 0, "@@@DISCONNECTED", 0, 15, StringComparison.OrdinalIgnoreCase) == 0
+					|| string.Compare(command[1], 0, "disconnected", 0, 12, StringComparison.OrdinalIgnoreCase) == 0) {
 					reason = "You disconnected";
 				} else {
-					reason = command.Argv(1);
+					reason = command[1];
 				}
 				JKDialogType type = JKDialogType.Title;
 				if (!string.IsNullOrEmpty(reason)) {
@@ -307,8 +307,8 @@ namespace JKChat.Core.Models {
 		}
 
 		private void AddToChat(Command command, Command utf8Command) {
-			string fullMessage = command.Argv(1);
-			string utf8FullMessage = utf8Command?.Argv(1) ?? fullMessage;
+			string fullMessage = command[1];
+			string utf8FullMessage = utf8Command?[1] ?? fullMessage;
 			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ");
 			if (separator < 0) {
 				return;
@@ -323,13 +323,13 @@ namespace JKChat.Core.Models {
 		}
 
 		private void AddToLocationChat(Command command, Command utf8Command) {
-			if (command.Argc < 4) {
+			if (command.Length < 4) {
 				return;
 			}
-			string name = command.Argv(1);
-			string location = command.Argv(2);
-			string colour = command.Argv(3);
-			string message = utf8Command.Argv(4);
+			string name = command[1];
+			string location = command[2];
+			string colour = command[3];
+			string message = utf8Command[4];
 
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
 			string escapedPlayerName = GetEscapedPlayerName(name);
@@ -369,7 +369,7 @@ namespace JKChat.Core.Models {
 		}
 
 		private void AddToPrint(Command command) {
-			string text = command.Argv(1).TrimEnd('\n');
+			string text = command[1].TrimEnd('\n');
 			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02);
 			AddItem(chatItem);
 		}
