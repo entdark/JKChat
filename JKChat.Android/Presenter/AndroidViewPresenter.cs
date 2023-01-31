@@ -106,7 +106,7 @@ namespace JKChat.Android.Presenter {
 		protected override IMvxFragmentView CreateFragment(AndroidX.Fragment.App.FragmentManager fragmentManager, MvxBasePresentationAttribute attribute, Type fragmentType) {
 			var fragmentView = base.CreateFragment(fragmentManager, attribute, fragmentType);
 			if (fragmentView is IBaseFragment baseFragment) {
-				baseFragment.Order = fragmentManager?.BackStackEntryCount ?? 0;
+				baseFragment.Order = (fragmentManager?.BackStackEntryCount ?? 0) + 1;
 			}
 			return fragmentView;
 		}
