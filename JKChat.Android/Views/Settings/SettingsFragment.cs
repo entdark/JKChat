@@ -41,7 +41,7 @@ namespace JKChat.Android.Views.Settings {
 	}
 	[MvxFragmentPresentation(
 		typeof(MainViewModel),
-		Resource.Id.content_secondary,
+		Resource.Id.content_detail,
 		true,
 		Resource.Animation.fragment_slide_rtl,
 		Resource.Animation.fragment_hslide_rtl,
