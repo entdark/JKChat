@@ -13,6 +13,7 @@ using JKChat.Core.ViewModels.Chat.Items;
 using JKClient;
 
 using MvvmCross;
+using MvvmCross.Base;
 using MvvmCross.Core;
 using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
@@ -25,6 +26,7 @@ namespace JKChat.Core.Models {
 		private const int MaxChatMessages = 512;
 		private JKClient.JKClient Client;
 		private bool showingDialog;
+		private readonly IMvxMainThreadAsyncDispatcher mainThread;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
 		private readonly IMvxMessenger messenger;
@@ -32,6 +34,7 @@ namespace JKChat.Core.Models {
 		private MvxSubscriptionToken playerNameMessageToken;
 		private bool minimized = false;
 		private readonly LimitedObservableCollection<ChatItemVM> pendingItems;
+		private bool addingPending = false;
 		private readonly HashSet<string> blockedPlayers;
 		private IMvxViewModel viewModel;
 		internal IMvxViewModel ViewModel {
@@ -39,21 +42,62 @@ namespace JKChat.Core.Models {
 			set {
 				viewModel = value;
 				if (value != null) {
+					addingPending = true;
 					unreadMessages = 0;
 					messenger.Publish(new ServerInfoMessage(this, ServerInfo, Status));
+					ChatItemVM []pendingItemsCopy;
 					lock (pendingItems) {
-						lock (Items) {
-							if (pendingItems.Count > 0) {
-								Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() => {
-									if (DeviceInfo.Platform == DevicePlatform.Android) {
-										Items.AddRange(pendingItems);
-									} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
-										Items.InsertRange(0, pendingItems);
-									}
-									pendingItems.Clear();
-								});
-							}
+						pendingItemsCopy = pendingItems.ToArray();
+						pendingItems.Clear();
+					}
+					if (pendingItemsCopy.Length > 0) {
+						if (DeviceInfo.Platform == DevicePlatform.Android) {
+							Task.Run(async () => {
+								int count = 0;
+								lock (Items) {
+									count = Items.Count;
+								}
+								if (true||count > 0) {
+									await mainThread.ExecuteOnMainThreadAsync(() => {
+										lock (Items) {
+											Items.AddRange(pendingItemsCopy);
+										}
+									});
+								} else {
+									//await Task.Delay(200);
+									await mainThread.ExecuteOnMainThreadAsync(() => {
+										lock (Items) {
+											Items.ReplaceWith(pendingItemsCopy);
+										}
+									});
+									//const int maxSingleInsertion = 20;
+									//foreach (var item in pendingItemsCopy.Reverse().Take(maxSingleInsertion)) {
+									//	await mainThread.ExecuteOnMainThreadAsync(() => {
+									//		lock (Items) {
+									//			Items.Insert(0, item);
+									//		}
+									//	});
+									//}
+									//if (pendingItemsCopy.Length > maxSingleInsertion) {
+									//	await mainThread.ExecuteOnMainThreadAsync(() => {
+									//		lock (Items) {
+									//			Items.InsertRange(0, pendingItemsCopy.Reverse().Skip(maxSingleInsertion), true);
+									//		}
+									//	});
+									//}
+								}
+								addingPending = false;
+							});
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+							mainThread.ExecuteOnMainThreadAsync(() => {
+								lock (Items) {
+									Items.InsertRange(0, pendingItemsCopy);
+								}
+								addingPending = false;
+							});
 						}
+					} else {
+						addingPending = false;
 					}
 				}
 			}
@@ -81,6 +125,7 @@ namespace JKChat.Core.Models {
 		internal ClientInfo[] ClientInfo => Client?.ClientInfo;
 
 		internal GameClient(ServerInfo serverInfo) {
+			mainThread = Mvx.IoCProvider.Resolve<IMvxMainThreadAsyncDispatcher>();
 			navigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
 			dialogService = Mvx.IoCProvider.Resolve<IDialogService>();
 			messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
@@ -116,7 +161,7 @@ namespace JKChat.Core.Models {
 				};
 				try {
 					Client.Guid = AppSettings.PlayerId;
-				} catch { }
+				} catch {}
 				Client.ServerCommandExecuted += ServerCommandExecuted;
 				Client.ServerInfoChanged += ServerInfoChanged;
 				Client.Start(ExceptionCallback);
@@ -172,6 +217,9 @@ namespace JKChat.Core.Models {
 			if (Client != null && Client.Started) {
 				Client.Disconnect();
 				Client.Stop();
+			}
+			if (showDisconnected) {
+				showDisconnected = Status != ConnectionStatus.Disconnected;
 			}
 			Status = ConnectionStatus.Disconnected;
 			if (showDisconnected) {
@@ -239,9 +287,9 @@ namespace JKChat.Core.Models {
 			string cmd = command[0];
 			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				AddToChat(command, commandEventArgs.UTF8Command);
+				await AddToChat(command, commandEventArgs.UTF8Command);
 			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				AddToLocationChat(command, commandEventArgs.UTF8Command);
+				await AddToLocationChat(command, commandEventArgs.UTF8Command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
 				if (string.Compare(command[1], 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
@@ -251,7 +299,7 @@ namespace JKChat.Core.Models {
 					|| string.Compare(command[1], 0, "Server is full.", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Server is Full";
 				} else {
-					AddToPrint(command);
+					await AddToPrint(command);
 					return;
 				}
 				Disconnect();
@@ -306,7 +354,7 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private void AddToChat(Command command, Command utf8Command) {
+		private async Task AddToChat(Command command, Command utf8Command) {
 			string fullMessage = command[1];
 			string utf8FullMessage = utf8Command?[1] ?? fullMessage;
 			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ");
@@ -319,10 +367,10 @@ namespace JKChat.Core.Models {
 			string escapedPlayerName = GetEscapedPlayerName(name);
 			string message = utf8FullMessage.Substring(separator, utf8FullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
-			AddItem(chatItem);
+			await AddItem(chatItem);
 		}
 
-		private void AddToLocationChat(Command command, Command utf8Command) {
+		private async Task AddToLocationChat(Command command, Command utf8Command) {
 			if (command.Length < 4) {
 				return;
 			}
@@ -345,7 +393,7 @@ namespace JKChat.Core.Models {
 			string fullMessage = stringBuilder.ToString();
 
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
-			AddItem(chatItem);
+			await AddItem(chatItem);
 		}
 
 		private static string GetEscapedPlayerName(string playerName) {
@@ -368,19 +416,21 @@ namespace JKChat.Core.Models {
 			return playerName[startIndex..endIndex];
 		}
 
-		private void AddToPrint(Command command) {
+		private async Task AddToPrint(Command command) {
 			string text = command[1].TrimEnd('\n');
 			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02);
-			AddItem(chatItem);
+			await AddItem(chatItem);
 		}
 
-		private void AddItem(ChatItemVM item) {
+		private async Task AddItem(ChatItemVM item) {
 			if (item is ChatMessageItemVM messageItem && blockedPlayers.Contains(messageItem.EscapedPlayerName)) {
 				return;
 			}
+			while (addingPending);
+			bool pending = false;
 			lock (pendingItems) {
 				lock (Items) {
-					bool pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
+					pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
 					var items = pending ? pendingItems : Items;
 					if (items.Count > 0) {
 						ChatItemVM prevItem = null;
@@ -394,16 +444,19 @@ namespace JKChat.Core.Models {
 					}
 					if (pending) {
 						pendingItems.Add(item);
-					} else {
-						Xamarin.Essentials.MainThread.BeginInvokeOnMainThread(() => {
-							if (DeviceInfo.Platform == DevicePlatform.Android) {
-								Items.Add(item);
-							} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
-								Items.Insert(0, item);
-							}
-						});
 					}
 				}
+			}
+			if (!pending)  {
+				await mainThread.ExecuteOnMainThreadAsync(() => {
+					lock (Items) {
+						if (DeviceInfo.Platform == DevicePlatform.Android) {
+							Items.Add(item);
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+							Items.Insert(0, item);
+						}
+					}
+				});
 			}
 			UnreadMessages++;
 		}
