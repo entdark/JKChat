@@ -502,7 +502,9 @@ namespace JKChat.Core.Models {
 			});
 			if (close) {
 				Disconnect();
-				await navigationService.Close(ViewModel);
+				if (ViewModel != null) {
+					await navigationService.Close(ViewModel);
+				}
 			}
 		}
 	}
