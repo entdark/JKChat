@@ -16,8 +16,8 @@ namespace JKChat.Core.ViewModels.Base {
 		private static readonly string []reportReasons = { "Spam", "Violence", "Child abuse", "Pornography", "Other" };
 		private static readonly Random reportDelayerRandom = new Random();
 		
-		public virtual IMvxCommand ReportCommand { get; protected set; }
-		public virtual IMvxCommand SelectCommand { get; protected set; }
+		public virtual IMvxCommand ReportCommand { get; init; }
+		public virtual IMvxCommand SelectCommand { get; init; }
 
 		protected virtual string ReportTitle => "Report";
 		protected virtual string ReportMessage => "Do you want to report this?";

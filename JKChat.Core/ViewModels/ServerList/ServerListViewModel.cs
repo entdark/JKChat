@@ -26,8 +26,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
 
-		public IMvxCommand ItemClickCommand { get; private set; }
-		public IMvxCommand RefreshCommand { get; private set; }
+		public IMvxCommand ItemClickCommand { get; init; }
+		public IMvxCommand RefreshCommand { get; init; }
 //		public IMvxCommand FilterCommand;
 
 		protected override string ReportTitle => "Report server";

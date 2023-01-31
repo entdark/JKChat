@@ -28,13 +28,13 @@ namespace JKChat.Core.ViewModels.Chat {
 		private GameClient gameClient;
 		private MvxSubscriptionToken serverInfoMessageToken;
 
-		public IMvxCommand ItemClickCommand { get; private set; }
-		public IMvxCommand CopyCommand { get; private set; }
-		public IMvxCommand SendMessageCommand { get; private set; }
-		public IMvxCommand ChatTypeCommand { get; private set; }
-		public IMvxCommand CommonChatTypeCommand { get; private set; }
-		public IMvxCommand TeamChatTypeCommand { get; private set; }
-		public IMvxCommand PrivateChatTypeCommand { get; private set; }
+		public IMvxCommand ItemClickCommand { get; init; }
+		public IMvxCommand CopyCommand { get; init; }
+		public IMvxCommand SendMessageCommand { get; init; }
+		public IMvxCommand ChatTypeCommand { get; init; }
+		public IMvxCommand CommonChatTypeCommand { get; init; }
+		public IMvxCommand TeamChatTypeCommand { get; init; }
+		public IMvxCommand PrivateChatTypeCommand { get; init; }
 
 		protected override string ReportTitle => "Report message";
 		protected override string ReportMessage => "Do you want to report this message?";
