@@ -311,7 +311,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			Prepare(parameter.ServerInfo);
 		}
 
-		public override Task Initialize() {
+		protected override Task BackgroundInitialize() {
 			return Connect();
 		}
 

@@ -150,7 +150,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			}
 		}
 
-		public override Task Initialize() {
+		protected override Task BackgroundInitialize() {
 			return LoadData();
 		}
 

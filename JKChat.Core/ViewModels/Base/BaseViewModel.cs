@@ -32,6 +32,15 @@ namespace JKChat.Core.ViewModels.Base {
 			Messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 		}
 
+		public override Task Initialize() {
+			Task.Run(BackgroundInitialize);
+			return Task.CompletedTask;
+		}
+
+		protected virtual Task BackgroundInitialize() {
+			return Task.CompletedTask;
+		}
+
 		protected virtual Task ExceptionCallback(Exception exception) {
 			return Helpers.Common.ExceptionCallback(exception);
 		}
