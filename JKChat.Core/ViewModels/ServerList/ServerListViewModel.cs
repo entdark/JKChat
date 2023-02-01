@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
@@ -28,6 +28,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		public IMvxCommand ItemClickCommand { get; private set; }
 		public IMvxCommand RefreshCommand { get; private set; }
+		public IMvxCommand AddServerCommand { get; private set; }
 //		public IMvxCommand FilterCommand;
 
 		protected override string ReportTitle => "Report server";
@@ -51,6 +52,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			Title = "Server list";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
+            AddServerCommand = new MvxAsyncCommand(AddServerExecute);
 			Items = new MvxObservableCollection<ServerListItemVM>();
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			this.cacheService = cacheService;
@@ -85,6 +87,113 @@ namespace JKChat.Core.ViewModels.ServerList {
 				item.Set(message.ServerInfo, message.Status);
 				cacheService.UpdateRecentServer(item);
 			}
+		}
+
+		private async Task AddServerExecute() {
+			string address = null;
+/*			int id = -1;
+			bool cancel = true;
+            await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Select the game",
+				RightButton = "OK",
+                LeftButton = "Cancel",
+				ListViewModel = new Dialog.DialogListViewModel() {
+					Items = new List<Dialog.Items.DialogItemVM>() {
+						new Dialog.Items.DialogItemVM() { Name = "Quake III Arena", Id = 0, IsSelected = true },
+						new Dialog.Items.DialogItemVM() { Name = "Jedi Academy", Id = 1 },
+						new Dialog.Items.DialogItemVM() { Name = "Jedi Outcast", Id = 2 }
+					}
+				},
+                RightClick = (input) => {
+					id = input is int i ? i : -1;
+					cancel = false;
+				},
+				Type = JKDialogType.Title | JKDialogType.List
+			});
+			if (cancel)
+				return;
+			var protocol = id switch {
+				0 => ProtocolVersion.Protocol68,
+                1 => ProtocolVersion.Protocol26,
+                2 => ProtocolVersion.Protocol15,
+                _ => ProtocolVersion.Protocol26,
+            };
+			var version = id switch {
+				0 => ClientVersion.Q3_v1_32,
+                1 => ClientVersion.JA_v1_01,
+                2 => ClientVersion.JO_v1_02,
+                _ => ClientVersion.JA_v1_01,
+            };*/
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Add server",
+				RightButton = "Add",
+                LeftButton = "Cancel",
+                RightClick = (input) => {
+                    address = input as string;
+				},
+				Type = JKDialogType.Title | JKDialogType.Input
+			});
+			if (string.IsNullOrEmpty(address)) {
+				return;
+			}
+			bool resolved = false;
+            IsLoading = true;
+            await Helpers.Common.ExceptionalTaskRun(async () => {
+                var netAddress = NetAddress.FromString(address);
+				if (netAddress == null) {
+					return;
+                }
+                IsLoading = false;
+                resolved = true;
+                bool connect = false;
+                if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
+					await DialogService.ShowAsync(new JKDialogConfig() {
+						Title = "Server exists",
+						Message = $"The server \"{address}\" (\"{ColourTextHelper.CleanString(item.ServerName)}\") already exists.\nWould you like to connect to that server?",
+						RightButton = "Connect",
+						LeftButton = "Cancel",
+						RightClick = (input) => {
+							connect = true;
+						},
+						Type = JKDialogType.Title | JKDialogType.Message
+					});
+					if (connect) {
+                        await ItemClickExecute(item);
+					}
+                    return;
+				}
+                var serverInfoTasks = serverBrowsers.Select(s => s.GetServerInfo(netAddress));
+                var infoString = await (await Task.WhenAny<InfoString>(serverInfoTasks));
+                var serverInfo = new ServerInfo(infoString) {
+					Address = netAddress,
+					HostName = address
+				};
+				var server = new ServerListItemVM(serverInfo);
+				Items.Insert(0, server);
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Server added",
+					Message = $"Would you like to connect to \"{address}\"?",
+					RightButton = "Connect",
+					LeftButton = "Cancel",
+					RightClick = (input) => {
+						connect = true;
+					},
+					Type = JKDialogType.Title | JKDialogType.Message
+				});
+				if (connect) {
+                    await ItemClickExecute(server);
+				}
+			});
+            IsLoading = false;
+            if (resolved) {
+				return;
+			}
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Failed adding server",
+				Message = $"Could not resolve \"{address}\"",
+				RightButton = "OK",
+				Type = JKDialogType.Title | JKDialogType.Message
+			});
 		}
 
 		private async Task RefreshExecute() {

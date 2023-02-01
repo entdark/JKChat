@@ -103,6 +103,10 @@ namespace JKChat.iOS {
 				appearance.InlineLayoutAppearance = tabAppearance;
 				appearance.CompactInlineLayoutAppearance = tabAppearance;
 			}
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
+				UIBarButtonItem.Appearance.TintColor = Theme.Color.NavigationBarButton;
+			}
+
 
 			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
 

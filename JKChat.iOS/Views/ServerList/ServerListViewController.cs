@@ -1,13 +1,13 @@
-﻿using JKChat.Core.ViewModels.ServerList;
+﻿using System.Collections.Specialized;
+using Foundation;
+using JKChat.Core.ViewModels.ServerList;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.Views.ServerList.Cells;
-
 using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
 using MvvmCross.Presenters.Attributes;
 using MvvmCross.ViewModels;
-
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList {
@@ -39,7 +39,7 @@ namespace JKChat.iOS.Views.ServerList {
 			};
 			ServerListTableView.RefreshControl = refreshControl;
 
-			var source = new MvxSimpleTableViewSource(ServerListTableView, ServerListViewCell.Key);
+			var source = new ServerListTableViewSource(ServerListTableView);
 
 			var set = this.CreateBindingSet();
 			set.Bind(source).For(s => s.ItemsSource).To(vm => vm.Items);
@@ -54,6 +54,12 @@ namespace JKChat.iOS.Views.ServerList {
 
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
+
+			var addButtomItem = new UIBarButtonItem(UIBarButtonSystemItem.Add, (sender, ev) => {
+				ViewModel.AddServerCommand?.Execute();
+			});
+
+			NavigationItem.RightBarButtonItem = addButtomItem;
 		}
 
 		public override void ViewDidAppear(bool animated) {
@@ -74,4 +80,19 @@ namespace JKChat.iOS.Views.ServerList {
 			return null;
 		}
 	}
+
+	public class ServerListTableViewSource : MvxStandardTableViewSource {
+		public ServerListTableViewSource(UITableView tableView) : base(tableView, ServerListViewCell.Key) {
+			this.UseAnimations = true;
+			this.AddAnimation = UITableViewRowAnimation.Top;
+			this.RemoveAnimation = UITableViewRowAnimation.Bottom;
+		}
+
+		protected override void CollectionChangedOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args){
+			base.CollectionChangedOnCollectionChanged(sender, args);
+			if (args.Action == NotifyCollectionChangedAction.Add) {
+				TableView.ScrollToRow(NSIndexPath.FromRowSection(0, 0), UITableViewScrollPosition.Top, true);
+			}
+		}
+    }
 }

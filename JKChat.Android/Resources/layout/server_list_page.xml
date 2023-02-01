@@ -25,6 +25,14 @@
                 app:MvxItemTemplate="@layout/server_list_item"
                 app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
         </MvvmCross.DroidX.MvxSwipeRefreshLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_gravity="bottom|end"
+            android:src="@drawable/ic_add"
+            app:MvxBind="Click AddServerCommand"/>
         <include layout="@layout/loading"/>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

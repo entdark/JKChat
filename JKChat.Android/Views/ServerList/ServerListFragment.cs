@@ -1,9 +1,12 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 
 using Android.App;
 using Android.OS;
 using Android.Views;
-
+using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.FloatingActionButton;
+using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Core.ViewModels.Main;
@@ -27,9 +30,10 @@ namespace JKChat.Android.Views.ServerList {
 	//[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
+		private IMenuItem addItem;
 		private MvxRecyclerView recyclerView;
 
-		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
+        public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
@@ -45,7 +49,14 @@ namespace JKChat.Android.Views.ServerList {
 			var refreshLayout = view.FindViewById<MvxSwipeRefreshLayout>(Resource.Id.mvxswiperefreshlayout);
 			refreshLayout.SetColorSchemeResources(Resource.Color.accent);
 			refreshLayout.SetProgressBackgroundColorSchemeResource(Resource.Color.primary);
-		}
+            var addButton = view.FindViewById<FloatingActionButton>(Resource.Id.add_button);
+			recyclerView.AddOnScrollListener(new OnScrollListener((dx, dy) => {
+				if (dy > 0)
+					addButton.Hide();
+				else if (dy < 0)
+					addButton.Show();
+			}));
+        }
 
 		public override void OnDestroyView() {
 			base.OnDestroyView();
@@ -59,14 +70,6 @@ namespace JKChat.Android.Views.ServerList {
 			base.OnPause();
 		}
 
-		public override bool OnBackPressed() {
-			if (SelectedItem != null) {
-				CloseSelection();
-				return true;
-			}
-			return base.OnBackPressed();
-		}
-
 		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
 			inflater.Inflate(MenuId, menu);
 			//copyItem = menu.FindItem(Resource.Id.copy_item);
@@ -74,27 +77,43 @@ namespace JKChat.Android.Views.ServerList {
 		}
 
 		public override bool OnOptionsItemSelected(IMenuItem item) {
-			if (SelectedItem != null) {
-				/*if (item == copyItem) {
-					ViewModel.CopyCommand?.Execute(SelectedItem);
-				}*/
+			if (item == addItem) {
+				ViewModel.AddServerCommand?.Execute(SelectedItem);
+				return true;
 			}
 			return base.OnOptionsItemSelected(item);
 		}
+
+		protected override void CreateOptionsMenu() {
+			base.CreateOptionsMenu();
+
+            addItem = Menu.FindItem(Resource.Id.add_item);
+            addItem.SetClickAction(() => {
+				this.OnOptionsItemSelected(addItem);
+			});
+			addItem?.SetVisible(false, false);
+//            CheckSelection();
+        }
 
 		protected override void ActivityExit() {}
 
 		protected override void ActivityPopEnter() {}
 
+		protected override void CheckSelection(bool animated = true) {
+			base.CheckSelection(animated);
+		}
+
 		protected override void ShowSelection(ServerListItemVM item, bool animated = true) {
 			SetUpNavigation(true);
+//			addItem?.SetVisible(false, false);
 			base.ShowSelection(item, animated);
 		}
 
 		protected override void CloseSelection(bool animated = true) {
 			BackArrow?.SetRotation(0.0f, false);
 			SetUpNavigation(false);
-			base.CloseSelection(animated);
+//            addItem?.SetVisible(true, animated);
+            base.CloseSelection(animated);
 		}
 
 		public class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {
@@ -114,7 +133,21 @@ namespace JKChat.Android.Views.ServerList {
 				if (moved) {
 					recyclerView?.GetLayoutManager()?.OnRestoreInstanceState(recyclerViewSavedState);
 				}
+				if (ev.Action == NotifyCollectionChangedAction.Add) {
+					recyclerView?.ScrollToPosition(0);
+				}
 			}
 		}
+
+		private class OnScrollListener : RecyclerView.OnScrollListener {
+			private readonly Action<int, int> onScrolled;
+			public OnScrollListener(Action<int, int> onScrolled) {
+				this.onScrolled = onScrolled;
+			}
+            public override void OnScrolled(RecyclerView recyclerView, int dx, int dy) {
+                base.OnScrolled(recyclerView, dx, dy);
+				onScrolled?.Invoke(dx, dy);
+            }
+        }
 	}
 }
