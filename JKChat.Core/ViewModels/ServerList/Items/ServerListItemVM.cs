@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base.Items;
@@ -68,9 +69,9 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			NeedPassword = serverInfo.NeedPassword;
 			ServerName = serverInfo.HostName;
 			MapName = serverInfo.MapName;
-			Players = $"{serverInfo.Clients}/{serverInfo.MaxClients}";
+			Players = $"{serverInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{serverInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
 			if (serverInfo.Ping != 0) {
-				Ping = serverInfo.Ping.ToString();
+				Ping = serverInfo.Ping.ToString(CultureInfo.InvariantCulture);
 			}
 			GameType = GetGameType(serverInfo.GameType);
 			Status = status;

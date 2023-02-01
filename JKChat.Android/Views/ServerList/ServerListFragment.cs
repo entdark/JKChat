@@ -42,9 +42,6 @@ namespace JKChat.Android.Views.ServerList {
 
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			recyclerView.Adapter = new RestoreStateRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView);
-			recyclerView.ItemLongClick = new MvxCommand<ServerListItemVM>((item) => {
-				ToggleSelection(item);
-			});
 
 			var refreshLayout = view.FindViewById<MvxSwipeRefreshLayout>(Resource.Id.mvxswiperefreshlayout);
 			refreshLayout.SetColorSchemeResources(Resource.Color.accent);
@@ -103,10 +100,10 @@ namespace JKChat.Android.Views.ServerList {
 			base.CheckSelection(animated);
 		}
 
-		protected override void ShowSelection(ServerListItemVM item, bool animated = true) {
+		protected override void ShowSelection(bool animated = true) {
 			SetUpNavigation(true);
 //			addItem?.SetVisible(false, false);
-			base.ShowSelection(item, animated);
+			base.ShowSelection(animated);
 		}
 
 		protected override void CloseSelection(bool animated = true) {

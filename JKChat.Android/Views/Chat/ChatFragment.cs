@@ -78,9 +78,6 @@ namespace JKChat.Android.Views.Chat {
 			}
 			scrollToBottomRecyclerAdapter.Start();
 			recyclerView.Adapter = scrollToBottomRecyclerAdapter;
-			recyclerView.ItemLongClick = new MvxCommand<ChatItemVM>((item) => {
-				ToggleSelection(item);
-			});
 
 			sendButton = view.FindViewById<ImageView>(Resource.Id.send_button);
 			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), true);
@@ -139,8 +136,8 @@ namespace JKChat.Android.Views.Chat {
 			return true;
 		}
 
-		protected override void ShowSelection(ChatItemVM item, bool animated = true) {
-			base.ShowSelection(item, animated);
+		protected override void ShowSelection(bool animated = true) {
+			base.ShowSelection(animated);
 			copyItem?.SetVisible(true, animated);
 			DisplayCustomTitle(false);
 		}
@@ -258,7 +255,7 @@ namespace JKChat.Android.Views.Chat {
 					sentMessageMessageToken = null;
 				}
 				if (onScrollListener != null) {
-					recyclerView.RemoveOnScrollListener(onScrollListener);
+					recyclerView?.RemoveOnScrollListener(onScrollListener);
 					onScrollListener = null;
 				}
 			}

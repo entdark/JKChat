@@ -100,6 +100,7 @@
     <Compile Include="ValueConverters\ChatTypeIconValueConverter.cs" />
     <Compile Include="ValueConverters\ColourTextValueConverter.cs" />
     <Compile Include="ValueConverters\ConnectionIconValueConverter.cs" />
+    <Compile Include="Views\AdminPanel\AdminPanelFragment.cs" />
     <Compile Include="Views\Base\BaseActivity.cs" />
     <Compile Include="Views\Base\BaseFragment.cs" />
     <Compile Include="Views\Base\IBaseActivity.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="Views\Chat\ChatFragment.cs" />
     <Compile Include="Views\Main\MainActivity.cs" />
     <Compile Include="Views\ServerList\ServerListFragment.cs" />
+    <Compile Include="Views\ServerList\ServerListPickerFragment.cs" />
     <Compile Include="Views\Settings\SettingsFragment.cs" />
     <Compile Include="Views\Settings\SettingsNameFragment.cs" />
   </ItemGroup>
@@ -214,6 +216,9 @@
       <Version>1.0.0.3-beta02</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials" Version="1.7.2" />
+    <PackageReference Include="Xamarin.Google.Android.Material">
+      <Version>1.4.0.4</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\splash_screen.xml">
@@ -603,6 +608,37 @@
     <AndroidResource Include="Resources\layout\search_menu_item.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\admin_panel_page.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\server_list_picker_page.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\modal_slide_btt.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\anim\modal_slide_ttb.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_admin_panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_admin_panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_admin_panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_admin_panel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_admin_panel.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

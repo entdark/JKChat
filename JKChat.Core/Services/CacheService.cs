@@ -86,9 +86,9 @@ namespace JKChat.Core.Services {
 					NeedPassword = this.NeedPassword,
 					HostName = this.ServerName,
 					MapName = this.MapName,
-					Clients = int.TryParse(players[0], out int clients) ? clients : 0,
-					MaxClients = int.TryParse(players[1], out int maxClients) ? maxClients : 0,
-					Ping = int.TryParse(this.Ping, out int ping) ? ping : 0,
+					Clients = int.TryParse(players[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int clients) ? clients : 0,
+					MaxClients = int.TryParse(players[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int maxClients) ? maxClients : 0,
+					Ping = int.TryParse(this.Ping, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ping) ? ping : 0,
 					Protocol = this.Protocol,
 					GameType = ServerListItemVM.GetGameType(this.GameType)
 				});

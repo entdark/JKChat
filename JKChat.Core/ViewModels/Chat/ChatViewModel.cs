@@ -14,7 +14,6 @@ using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 using JKChat.Core.ViewModels.ServerList.Items;
-using JKChat.Core.ViewModels.Settings;
 
 using MvvmCross;
 using MvvmCross.Commands;
@@ -27,14 +26,15 @@ namespace JKChat.Core.ViewModels.Chat {
 	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerListItemVM> {
 		private GameClient gameClient;
 		private MvxSubscriptionToken serverInfoMessageToken;
+		private bool restored = false;
 
-		public IMvxCommand ItemClickCommand { get; private set; }
-		public IMvxCommand CopyCommand { get; private set; }
-		public IMvxCommand SendMessageCommand { get; private set; }
-		public IMvxCommand ChatTypeCommand { get; private set; }
-		public IMvxCommand CommonChatTypeCommand { get; private set; }
-		public IMvxCommand TeamChatTypeCommand { get; private set; }
-		public IMvxCommand PrivateChatTypeCommand { get; private set; }
+		public IMvxCommand ItemClickCommand { get; init; }
+		public IMvxCommand CopyCommand { get; init; }
+		public IMvxCommand SendMessageCommand { get; init; }
+		public IMvxCommand ChatTypeCommand { get; init; }
+		public IMvxCommand CommonChatTypeCommand { get; init; }
+		public IMvxCommand TeamChatTypeCommand { get; init; }
+		public IMvxCommand PrivateChatTypeCommand { get; init; }
 
 		protected override string ReportTitle => "Report message";
 		protected override string ReportMessage => "Do you want to report this message?";
@@ -50,12 +50,6 @@ namespace JKChat.Core.ViewModels.Chat {
 					IsLoading = value == ConnectionStatus.Connecting;
 				}
 			}
-		}
-
-		private MvxObservableCollection<ChatItemVM> items;
-		public override MvxObservableCollection<ChatItemVM> Items {
-			get => items;
-			set => SetProperty(ref items, value);
 		}
 
 		private string message;
@@ -191,7 +185,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		protected override void SelectExecute(ChatItemVM item) {
 			base.SelectExecute(item);
-			if (GetSelectedItem() == null) {
+			if (SelectedItem == null) {
 				Title = gameClient?.ServerInfo?.HostName;
 			}
 		}
@@ -317,7 +311,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			Prepare(parameter.ServerInfo);
 		}
 
-		public override Task Initialize() {
+		protected override Task BackgroundInitialize() {
 			return Connect();
 		}
 
@@ -379,6 +373,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				serverInfo.NeedPassword = needPassword;
 			if (state.Data.TryGetValue("HostName", out string hostName) && !string.IsNullOrEmpty(hostName))
 				serverInfo.HostName = hostName;
+			restored = true;
 			Prepare(serverInfo, true);
 		}
 
@@ -393,7 +388,9 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private async Task Connect() {
-			gameClient.Connect(false);
+			bool ignoreDialog = restored;
+			restored = false;
+			await gameClient.Connect(ignoreDialog);
 		}
 	}
 }

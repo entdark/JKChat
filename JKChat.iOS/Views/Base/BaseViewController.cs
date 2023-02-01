@@ -36,7 +36,7 @@ namespace JKChat.iOS.Views.Base {
 
 		protected virtual Task<bool> BackButtonClick => Task.FromResult(false);
 
-		protected BaseViewController() { }
+		protected BaseViewController() {}
 		protected BaseViewController(IntPtr handle) : base(handle) { }
 		protected BaseViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
 
@@ -133,9 +133,9 @@ namespace JKChat.iOS.Views.Base {
 			BeginKeyboardFrame = CGRect.Empty;
 		}
 
-		protected virtual void KeyboardWillShowNotification(NSNotification notification) { }
+		protected virtual void KeyboardWillShowNotification(NSNotification notification) {}
 
-		protected virtual void KeyboardWillHideNotification(NSNotification notification) { }
+		protected virtual void KeyboardWillHideNotification(NSNotification notification) {}
 
 		public virtual MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {
 			return new MvxSplitViewPresentationAttribute(MasterDetailPosition.Detail);

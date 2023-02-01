@@ -10,11 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <MvvmCross.DroidX.MvxSwipeRefreshLayout
+<!--        <MvvmCross.DroidX.MvxSwipeRefreshLayout
             android:id="@+id/mvxswiperefreshlayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:MvxBind="Refreshing IsRefreshing; RefreshCommand RefreshCommand">
+            app:MvxBind="Refreshing IsRefreshing; RefreshCommand RefreshCommand">-->
             <mvvmcross.droidx.recyclerview.MvxRecyclerView
                 style="@style/RecyclerView"
                 android:id="@+id/mvxrecyclerview"
@@ -23,16 +23,15 @@
                 android:paddingVertical="15dp"
                 android:clipToPadding="false"
                 app:MvxItemTemplate="@layout/server_list_item"
-                app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand; ItemLongClick SelectCommand"/>
-        </MvvmCross.DroidX.MvxSwipeRefreshLayout>
+                app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
+<!--        </MvvmCross.DroidX.MvxSwipeRefreshLayout>-->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_gravity="bottom|end"
-            android:src="@drawable/ic_add"
-            app:MvxBind="Click AddServerCommand"/>
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="bottom|right"
+            android:layout_margin="20dp"/>
+            <!--app:MvxBind="Click SelectServerCommand"/>-->
         <include layout="@layout/loading"/>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

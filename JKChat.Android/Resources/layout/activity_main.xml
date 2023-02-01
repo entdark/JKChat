@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <LinearLayout
-            android:id="@+id/content_primary"
+            android:id="@+id/content_master"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -28,7 +28,11 @@
                 android:layout_weight="0"/>
         </LinearLayout>
         <FrameLayout
-            android:id="@+id/content_secondary"
+            android:id="@+id/content_detail"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <FrameLayout
+            android:id="@+id/content_modal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </FrameLayout>

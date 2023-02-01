@@ -22,7 +22,7 @@
                 android:clipToPadding="false"
                 android:layout_weight="1"
                 app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
-                app:MvxBind="ItemsSource Items"/>
+                app:MvxBind="ItemsSource Items; ItemLongClick SelectCommand"/>
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"

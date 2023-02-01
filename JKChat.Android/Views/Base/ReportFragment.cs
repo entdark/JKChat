@@ -9,7 +9,11 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
 	public abstract class ReportFragment<TViewModel, TItem> : BaseFragment<TViewModel> where TItem : class, ISelectableItemVM where TViewModel : ReportViewModel<TItem>, IMvxViewModel, IBaseViewModel {
-		protected virtual TItem SelectedItem { get; set; }
+		private TItem selectedItem;
+		protected virtual TItem SelectedItem {
+			get => selectedItem;
+			set { selectedItem = value; CheckSelection(); }
+		}
 		protected virtual IMenuItem ReportItem { get; set; }
 
 		public ReportFragment(int layoutId, int menuId) : base(layoutId, menuId) {}
@@ -17,6 +21,10 @@ namespace JKChat.Android.Views.Base {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 			CheckSelection(false);
+
+			var set = this.CreateBindingSet();
+			set.Bind(this).For(v => v.SelectedItem).To(vm => vm.SelectedItem);
+			set.Apply();
 		}
 
 		public override void OnResume() {
@@ -57,32 +65,21 @@ namespace JKChat.Android.Views.Base {
 			CheckSelection();
 		}
 
-		protected virtual void ToggleSelection(TItem item) {
-			if (item == null || item == SelectedItem) {
-				CloseSelection();
-			} else {
-				ShowSelection(item);
-			}
-		}
-
 		protected virtual void CheckSelection(bool animated = true) {
 			if (SelectedItem == null) {
 				CloseSelection(animated);
 			} else {
-				ShowSelection(SelectedItem, animated);
+				ShowSelection(animated);
 			}
 		}
 
-		protected virtual void ShowSelection(TItem item, bool animated = true) {
-			ViewModel.SelectCommand?.Execute(item);
-			SelectedItem = item;
+		protected virtual void ShowSelection(bool animated = true) {
 			ReportItem?.SetVisible(true, animated);
 			BackArrow?.SetRotation(1.0f, animated);
 		}
 
 		protected virtual void CloseSelection(bool animated = true) {
 			ViewModel.SelectCommand?.Execute(null);
-			SelectedItem = null;
 			ReportItem?.SetVisible(false, animated);
 			BackArrow?.SetRotation(0.0f, animated);
 		}

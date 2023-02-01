@@ -39,7 +39,7 @@ namespace JKChat.Android.Views.Main {
 	[MvxActivityPresentation]
 	public class MainActivity : BaseActivity<MainViewModel> {
 		private MvxSubscriptionToken serverInfoMessageToken;
-		private View contentPrimaryView, contentSecondaryView;
+		private View contentMasterView, contentDetailView;
 
 		public MainActivity() : base(Resource.Layout.activity_main) {}
 
@@ -63,8 +63,8 @@ namespace JKChat.Android.Views.Main {
 				ViewPager.OffscreenPageLimit = 2;
 			}
 
-			contentPrimaryView = FindViewById(Resource.Id.content_primary);
-			contentSecondaryView = FindViewById(Resource.Id.content_secondary);
+			contentMasterView = FindViewById(Resource.Id.content_master);
+			contentDetailView = FindViewById(Resource.Id.content_detail);
 		}
 
 		protected override void OnDestroy() {
@@ -102,13 +102,13 @@ namespace JKChat.Android.Views.Main {
 		protected override void ConfigurationChanged(Configuration configuration) {
 			base.ConfigurationChanged(configuration);
 			const float primaryWidth = 480.0f;
-			if (contentPrimaryView != null && contentPrimaryView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters) {
+			if (contentMasterView != null && contentMasterView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters) {
 				marginLayoutParameters.Width = ExpandedWindow ? primaryWidth.DpToPx() : ViewGroup.LayoutParams.MatchParent;
-				contentPrimaryView.LayoutParameters = marginLayoutParameters;
+				contentMasterView.LayoutParameters = marginLayoutParameters;
 			}
-			if (contentSecondaryView != null && contentSecondaryView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters2) {
+			if (contentDetailView != null && contentDetailView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters2) {
 				marginLayoutParameters2.LeftMargin = ExpandedWindow ? primaryWidth.DpToPx() : 0.0f.DpToPx();
-				contentSecondaryView.LayoutParameters = marginLayoutParameters2;
+				contentDetailView.LayoutParameters = marginLayoutParameters2;
 			}
 		}
 
@@ -116,7 +116,7 @@ namespace JKChat.Android.Views.Main {
 			base.Exit();
 			if (!ExpandedWindow) {
 				var exitAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_hslide_rtl);
-				contentPrimaryView.StartAnimation(exitAnimation);
+				contentMasterView.StartAnimation(exitAnimation);
 			}
 		}
 
@@ -124,7 +124,7 @@ namespace JKChat.Android.Views.Main {
 			base.PopEnter();
 			if (!ExpandedWindow) {
 				var popEnterAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_hslide_ltr);
-				contentPrimaryView.StartAnimation(popEnterAnimation);
+				contentMasterView.StartAnimation(popEnterAnimation);
 			}
 		}
 

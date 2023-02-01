@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
+using JKChat.Core.ViewModels.AdminPanel;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.Core.ViewModels.Settings;
@@ -17,8 +15,11 @@ namespace JKChat.Core.ViewModels.Main {
 		}
 
 		private async Task ShowInitialViewModelsExecute() {
-			await Task.WhenAll(NavigationService.Navigate<ServerListViewModel>(),
-				NavigationService.Navigate<SettingsViewModel>());
+			await Task.WhenAll(
+				NavigationService.Navigate<ServerListViewModel>(),
+				NavigationService.Navigate<AdminPanelViewModel>(),
+				NavigationService.Navigate<SettingsViewModel>()
+			);
 		}
 	}
 }

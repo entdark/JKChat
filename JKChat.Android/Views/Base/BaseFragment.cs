@@ -146,13 +146,13 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		protected virtual void ActivityExit() {
-			if (Order == 0) {
+			if (Order == 1) {
 				(Activity as IBaseActivity)?.Exit();
 			}
 		}
 
 		protected virtual void ActivityPopEnter() {
-			if (Order == 0) {
+			if (Order == 1) {
 				(Activity as IBaseActivity)?.PopEnter();
 			}
 		}

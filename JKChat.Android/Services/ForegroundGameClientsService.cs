@@ -49,8 +49,7 @@ namespace JKChat.Android.Services {
 		}
 
 		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId) {
-			var notification = CreateNotification(1, 0);
-			StartForeground(NotificationID, notification);
+			HandleForeground(true);
 			return StartCommandResult.Sticky;
 		}
 
@@ -60,14 +59,22 @@ namespace JKChat.Android.Services {
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
+			HandleForeground();
+		}
+
+		private void HandleForeground(bool start = false) {
 			FreeMemory();
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			int clientsCount = gameClientsService.ActiveClients;
 			int unreadMessages = gameClientsService.UnreadMessages;
 			if (clientsCount > 0/* || unreadMessages > 0*/) {
 				var notification = CreateNotification(clientsCount, unreadMessages);
-				var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
-				notificationManager.Notify(NotificationID, notification);
+				if (start) {
+					StartForeground(NotificationID, notification);
+				} else {
+					var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
+					notificationManager.Notify(NotificationID, notification);
+				}
 			} else {
 				StopForeground(true);
 				StopSelf();

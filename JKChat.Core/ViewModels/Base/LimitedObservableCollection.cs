@@ -44,13 +44,17 @@ namespace JKChat.Core.ViewModels.Base {
 			base.AddRange(items);
 		}
 
-		public void InsertRange(int index, IEnumerable<T> items) {
+		public void InsertRange(int index, IEnumerable<T> items, bool silently = false) {
 			using (SuppressEvents()) {
 				foreach (var item in items) {
 					Insert(index, item);
 				}
 			}
-			OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items, 0));
+			if (!silently) {
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items, 0));
+			} else {
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, Items));
+			}
 		}
 	}
 }
