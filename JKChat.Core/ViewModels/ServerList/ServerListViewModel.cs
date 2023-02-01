@@ -9,22 +9,20 @@ using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat;
-using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList.Items;
 
 using JKClient;
 
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
-using MvvmCross.Presenters.Hints;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
 	public class ServerListViewModel : ReportViewModel<ServerListItemVM> {
-		private ServerBrowser[] serverBrowsers;
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
+		private readonly IServerListService serverListService;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
@@ -41,7 +39,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			set => SetProperty(ref isRefreshing, value);
 		}
 
-		public ServerListViewModel(ICacheService cacheService, IGameClientsService gameClientsService) {
+		public ServerListViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
 			Title = "Server list";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
@@ -49,25 +47,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
-		}
-
-		private async Task InitServerBrowsers() {
-			if (serverBrowsers != null) {
-				return;
-			}
-			await Helpers.Common.ExceptionalTaskRun(() => {
-				serverBrowsers = new ServerBrowser[] {
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol25)),
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol26)),
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol15)),
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol16)),
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol68)),
-					new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol71))
-				};
-				foreach (var serverBrowser in serverBrowsers) {
-					serverBrowser.Start(Helpers.Common.ExceptionCallback);
-				}
-			});
+			this.serverListService = serverListService;
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
@@ -83,15 +63,14 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private async Task RefreshExecute() {
 			if (IsLoading) {
-				return;
+//				IsRefreshing = false;
+//				return;
 			}
 			IsRefreshing = true;
 			try {
-				await InitServerBrowsers();
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
-				var refreshListTasks = serverBrowsers.Select(s => s.RefreshList());
-				var servers = (await Task.WhenAll(refreshListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
+				var servers = await serverListService.RefreshList();
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
 					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
@@ -123,10 +102,19 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task ItemClickExecute(ServerListItemVM item) {
-			var selectedItem = GetSelectedItem();
-			if (selectedItem != null) {
+			if (SelectedItem != null) {
 				return;
 			}
+/*			try {
+				var info = await serverListService.GetServerInfo(item.ServerInfo);
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Server info",
+					Message = string.Join('\n', info.Select(i => i.Key + ": " + i.Value)),
+					RightButton = "OK",
+					Type = JKDialogType.Title | JKDialogType.Message
+				});
+			} catch {}
+			return;*/
 			Items.Move(Items.IndexOf(item), 0);
 			await NavigationService.NavigateFromRoot<ChatViewModel, ServerListItemVM>(item, viewModel => {
 				return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
@@ -178,11 +166,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private async Task LoadServerList() {
 			IsLoading = true;
 			try {
-				await InitServerBrowsers();
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
-				var getNewListTasks = serverBrowsers.Select(s => s.GetNewList());
-				var servers = (await Task.WhenAll(getNewListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
+				var servers = await serverListService.GetCurrentList();
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem);
 					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems/*.Where(s => s.GameType.Contains("Siege"))*/);
@@ -246,13 +232,6 @@ namespace JKChat.Core.ViewModels.ServerList {
 					Messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 					serverInfoMessageToken = null;
 				}
-				foreach (var serverBrowser in serverBrowsers) {
-					if (serverBrowser != null) {
-						serverBrowser.Stop();
-						serverBrowser.Dispose();
-					}
-				}
-				serverBrowsers = null;
 			}
 			base.ViewDestroy(viewFinishing);
 		}
