@@ -100,7 +100,7 @@ namespace JKChat.iOS.Presenter {
 		}
 	}
 
-	public class WrapperTabBarViewModel : MvxViewModel { }
+	public class WrapperTabBarViewModel : MvxViewModel {}
 	public class WrapperTabBarViewController : MvxTabBarViewController<WrapperTabBarViewModel> {
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
@@ -108,7 +108,7 @@ namespace JKChat.iOS.Presenter {
 		}
 	}
 
-	public class WrapperDetailViewModel : MvxViewModel { }
+	public class WrapperDetailViewModel : MvxViewModel {}
 	public class WrapperDetailViewController : MvxViewController<WrapperDetailViewModel> {
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
