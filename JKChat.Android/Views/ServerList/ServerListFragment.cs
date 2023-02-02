@@ -32,6 +32,7 @@ namespace JKChat.Android.Views.ServerList {
 		//private IMenuItem copyItem;
 		private IMenuItem addItem;
 		private MvxRecyclerView recyclerView;
+		private FloatingActionButton addButton;
 
         public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
 
@@ -46,12 +47,16 @@ namespace JKChat.Android.Views.ServerList {
 			var refreshLayout = view.FindViewById<MvxSwipeRefreshLayout>(Resource.Id.mvxswiperefreshlayout);
 			refreshLayout.SetColorSchemeResources(Resource.Color.accent);
 			refreshLayout.SetProgressBackgroundColorSchemeResource(Resource.Color.primary);
-            var addButton = view.FindViewById<FloatingActionButton>(Resource.Id.add_button);
+			addButton = view.FindViewById<FloatingActionButton>(Resource.Id.add_button);
 			recyclerView.AddOnScrollListener(new OnScrollListener((dx, dy) => {
-				if (dy > 0)
+				if (SelectedItem != null) {
+					return;
+				}
+				if (dy > 0) {
 					addButton.Hide();
-				else if (dy < 0)
+				} else if (dy < 0) {
 					addButton.Show();
+				}
 			}));
         }
 
@@ -97,6 +102,11 @@ namespace JKChat.Android.Views.ServerList {
 		protected override void ActivityPopEnter() {}
 
 		protected override void CheckSelection(bool animated = true) {
+			if (SelectedItem != null) {
+				addButton?.Hide();
+			} else {
+				addButton?.Show();
+			}
 			base.CheckSelection(animated);
 		}
 
