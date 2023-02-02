@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -145,7 +146,7 @@
                     </constraints>
                 </view>
                 <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
-                    <rect key="frame" x="0.0" y="0.0" width="375" height="778"/>
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                     <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <color key="tintColor" red="0.039215686274509803" green="0.37647058823529411" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                 </tableView>
@@ -164,7 +165,7 @@
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="top" secondItem="1" secondAttribute="top" id="Vpf-8U-gBg"/>
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="cYK-8w-CnP"/>
                 <constraint firstAttribute="bottom" secondItem="KtL-wy-5qa" secondAttribute="bottom" id="uGI-Wh-lgf"/>
-                <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="uab-qN-vGf"/>
+                <constraint firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="uab-qN-vGf"/>
                 <constraint firstItem="175" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="wRR-VV-sYN"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="x9j-9q-oWD"/>
                 <constraint firstAttribute="trailing" secondItem="0BW-om-Vsj" secondAttribute="trailing" id="yNL-jZ-lB9"/>

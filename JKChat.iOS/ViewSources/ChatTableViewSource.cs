@@ -20,15 +20,12 @@ namespace JKChat.iOS.ViewSources {
 		private CGRect initialKeyboardFrame;
 		private CGPoint initialContentOffset;
 		private nfloat dinsetY = nfloat.MinValue;
+		private bool dragging = false;
+
 		public IKeyboardViewController ViewControllerWithKeyboard { get; set; }
 		public NSLayoutConstraint ViewBottomConstraint { get; set; }
-		protected bool NewDragging { get; set; }
 
 		public ChatTableViewSource(UITableView tableView) : base(tableView) {
-			Initialize(tableView);
-		}
-
-		private void Initialize(UITableView tableView) {
 			tableView.RegisterNibForCellReuse(ChatMessageViewCell.Nib, ChatMessageViewCell.Key);
 			tableView.RegisterNibForCellReuse(ChatInfoViewCell.Nib, ChatInfoViewCell.Key);
 			this.UseAnimations = true;
@@ -38,7 +35,6 @@ namespace JKChat.iOS.ViewSources {
 		private nfloat dyLast;
 		public override void Scrolled(UIScrollView scrollView) {
 //			Debug.WriteLine("Scrolled");
-			bool dragging = NewDragging;
 			var chatTableView = scrollView as ChatTableView;
 			if (dragging && ViewControllerWithKeyboard.EndKeyboardFrame.Height > (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Frame.Height) {
 				if ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame.Y > initialKeyboardFrame.Y) {
@@ -49,12 +45,7 @@ namespace JKChat.iOS.ViewSources {
 						}
 						initialContentOffset = scrollView.ContentOffset;
 					}
-					nfloat dy = dyLast = ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame).Y - initialKeyboardFrame.Y/* + DeviceInfo.SafeAreaInsets.Bottom*/;
-//					scrollView.SetContentOffset(new CGPoint(initialContentOffset.X, -initialContentOffset.Y-dinsetY), true);
-//					scrollView.ContentInset = new UIEdgeInsets(scrollView.ContentInset.Top, scrollView.ContentInset.Left, initialKeyboardFrame.Height - dy - dinsetY, scrollView.ContentInset.Right);
-//					scrollView.ScrollIndicatorInsets = new UIEdgeInsets(scrollView.ScrollIndicatorInsets.Top, scrollView.ScrollIndicatorInsets.Left, initialKeyboardFrame.Height - dy, scrollView.ScrollIndicatorInsets.Right);
-//					ViewBottomConstraint.Constant = initialKeyboardFrame.Height - dy - dinsetY;
-//					(ViewControllerWithKeyboard as UIViewController).View.LayoutIfNeeded();
+					nfloat dy = dyLast = ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame).Y - initialKeyboardFrame.Y;
 				}
 			}
 		}
@@ -62,7 +53,7 @@ namespace JKChat.iOS.ViewSources {
 		public override void DraggingStarted(UIScrollView scrollView) {
 			Debug.WriteLine("DraggingStarted");
 			initialKeyboardFrame = (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame;
-			NewDragging = true;
+			dragging = true;
 			if (scrollView is ChatTableView chatTableView) {
 				chatTableView.StartedDragging = true;
 			}
@@ -70,7 +61,7 @@ namespace JKChat.iOS.ViewSources {
 
 		public override void DraggingEnded(UIScrollView scrollView, bool willDecelerate) {
 			Debug.WriteLine("DraggingEnded");
-			NewDragging = false;
+			dragging = false;
 			initialKeyboardFrame = CGRect.Empty;
 			dinsetY = nfloat.MinValue;
 			if (!willDecelerate && scrollView is ChatTableView chatTableView) {
@@ -82,9 +73,7 @@ namespace JKChat.iOS.ViewSources {
 			Debug.WriteLine("WillEndDragging");
 			nfloat y;
 			if (dinsetY >= 0.0f && dinsetY <= 176.0f && velocity.Y >= 0.0f) {
-				nfloat height = DeviceInfo.ScreenBounds.Height - ViewControllerWithKeyboard.EndKeyboardFrame.Y;
-				y = height + (scrollView as ChatTableView).ExtraContentInset.Bottom/* - DeviceInfo.SafeAreaInsets.Bottom*/;
-				targetContentOffset = new CGPoint(scrollView.ContentOffset.X, -y-ChatTableView.SpecialOffset);
+				targetContentOffset = new CGPoint(scrollView.ContentOffset.X, -ChatTableView.SpecialOffset);
 			} else if (dinsetY >= 0.0f && velocity.Y >= 0.0f) {
 				y = targetContentOffset.Y;
 				Debug.WriteLine($"y1: {y}");
@@ -110,32 +99,6 @@ namespace JKChat.iOS.ViewSources {
 //			this.UseAnimations = scrolledToBottom;
 			return scrolledToBottom;
 		}
-
-/*		public override nfloat EstimatedHeight(UITableView tableView, NSIndexPath indexPath) {
-			var item = ItemsSource.ElementAt(indexPath.Row) as ChatItemVM;
-			var label = new UILabel(new CGRect(20.0f, 0.0f, DeviceInfo.ScreenBounds.Width - 40.0f, 0.0f)) {
-				Font = Theme.Font.OCRAStd(14.0f),
-				AttributedText = (NSAttributedString)new ColourTextValueConverter().Convert(item.PlayerName, typeof(NSAttributedString), null, CultureInfo.InvariantCulture),
-				LineBreakMode = UILineBreakMode.TailTruncation,
-				Lines = 1
-			};
-			label.SizeToFit();
-			var height = label.Frame.Height;
-			label = new UILabel(new CGRect(20.0f, 0.0f, DeviceInfo.ScreenBounds.Width - 40.0f, 0.0f)) {
-				Font = Theme.Font.OCRAStd(14.0f),
-				AttributedText = (NSAttributedString)new ColourTextValueConverter().Convert(item.PlayerName, typeof(NSAttributedString), null, CultureInfo.InvariantCulture),
-				LineBreakMode = UILineBreakMode.TailTruncation,
-				Lines = 0
-			};
-			label.SizeToFit();
-			height += label.Frame.Height;
-			height += 15.0f;
-			return height;
-		}
-
-		public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) {
-			return EstimatedHeight(tableView, indexPath);
-		}*/
 
 		protected override UITableViewCell GetOrCreateCellFor(UITableView tableView, NSIndexPath indexPath, object item) {
 			if (item is ChatMessageItemVM) {

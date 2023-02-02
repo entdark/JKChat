@@ -65,7 +65,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		public override bool CanBecomeFirstResponder => appeared;
+		public override bool CanBecomeFirstResponder => true;//appeared;
 		public override UIView InputAccessoryView => inputAccessoryView;//MessageView;
 
 		protected override Task<bool> BackButtonClick => ViewModel?.OfferDisconnect();
@@ -88,18 +88,22 @@ namespace JKChat.iOS.Views.Chat {
 			itemTappedStopwatch.Start();
 
 			inputAccessoryView.AutoresizingMask = UIViewAutoresizing.All;
-//			MessageTextView.Frame = new CGRect(0.0f, 0.0f, DeviceInfo.ScreenBounds.Width, 44.0f);
 			MessageView.RemoveFromSuperview();
 			inputAccessoryView.AddAccessoryView(MessageView);
-//			ChatTypeStackView.Hidden = true;
-//			ChatTableView.ExtraContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
 			ChatTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive;
 			ChatTableView.KeyboardViewController = this;
 			ChatTableView.RowHeight = UITableView.AutomaticDimension;
 			ChatTableView.EstimatedRowHeight = UITableView.AutomaticDimension;
-//			ChatTableView.ContentInset = new UIEdgeInsets(ChatTableView.ContentInset.Top - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ContentInset.Left, ChatTableView.ContentInset.Bottom + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ContentInset.Right);
-//			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(ChatTableView.ScrollIndicatorInsets.Top - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ScrollIndicatorInsets.Left, ChatTableView.ScrollIndicatorInsets.Bottom + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom, ChatTableView.ScrollIndicatorInsets.Right);
-			RecountTableInsets();
+			if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+			{
+				ChatTableView.InsetsLayoutMarginsFromSafeArea = false;
+				ChatTableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
+			}
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
+			{
+				ChatTableView.AutomaticallyAdjustsScrollIndicatorInsets = false;
+			}
+			EdgesForExtendedLayout = UIRectEdge.None;
 			const float deltaTappedPos = 5.0f;
 			UILongPressGestureRecognizer longPressGestureRecognizer;
 			ChatTableView.AddGestureRecognizer(longPressGestureRecognizer = new UILongPressGestureRecognizer((gr) => {
@@ -121,7 +125,7 @@ namespace JKChat.iOS.Views.Chat {
 					if (lastTappedItem != null && lastTappedTime != 0L && !ChatTableView.StartedDragging
 						&& lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty && dx < deltaTappedPos && dy < deltaTappedPos) {
 						if (dt >= 500L) {
-							//							ViewModel.LongPressCommand?.Execute(lastTappedItem);
+//							ViewModel.LongPressCommand?.Execute(lastTappedItem);
 						} else {
 							ViewModel.ItemClickCommand?.Execute(lastTappedItem);
 						}
@@ -225,8 +229,9 @@ namespace JKChat.iOS.Views.Chat {
 				ViewControllerWithKeyboard = this,
 				ViewBottomConstraint = ViewBottomConstraint
 			};
+			ChatTableView.Source = source;
 
-			var set = this.CreateBindingSet();
+			using var set = this.CreateBindingSet();
 			set.Bind(source).For(s => s.ItemsSource).To(vm => vm.Items);
 //			set.Bind(source).For(s => s.SelectionChangedCommand).To(vm => vm.SelectionChangedCommand);
 			set.Bind(MessageTextView).For(v => v.Text).To(vm => vm.Message).TwoWay();
@@ -242,28 +247,12 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(titleLabel).For(v => v.AttributedText).To(vm => vm.Title).WithConversion("ColourText");
 			set.Bind(statusView).For(v => v.BackgroundColor).To(vm => vm.Status).WithConversion("ConnectionColor");
 			set.Bind(statusLabel).For(v => v.Text).To(vm => vm.Status);
-			set.Apply();
-
-			ChatTableView.Source = source;
-			ChatTableView.ReloadData();
 		}
 
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
-			if (!appeared) {
-				Task.Run(async () => {
-					await Task.Delay(64);
-					appeared = true;
-					InvokeOnMainThread(() => {
-						BecomeFirstResponder();
-						ResizeInputAccessoryView();
-					});
-				});
-			} else {
-				ResizeInputAccessoryView();
-				RespaceTitleView();
-				RecountTableInsets();
-			}
+			ResizeInputAccessoryView();
+			RespaceTitleView();
 		}
 
 		public override void ViewDidAppear(bool animated) {
@@ -311,34 +300,19 @@ namespace JKChat.iOS.Views.Chat {
 		}
 
 		private void ResizeInputAccessoryView() {
-			float height = 44.0f;//Math.Max((float)MessageTextView.IntrinsicContentSize.Height, 44.0f);
-/*			if (SelectingChatType) {
-				height += 44.0f;
-			}*/
+			float height = 44.0f;
 			inputAccessoryView.SetSize(new CGSize(DeviceInfo.ScreenBounds.Width, height));
 		}
 
 		private void RespaceTitleView() {
 			NavigationItem.TitleView = null;
 			NavigationItem.TitleView = titleStackView;
-			titleStackView.Spacing = DeviceInfo.IsPortrait || DeviceInfo.iPhoneX ? 2.0f : 0.0f;
-		}
-
-		private void RecountTableInsets() {
-			nfloat top = -DeviceInfo.SafeAreaInsets.Bottom,
-				bottom = -DeviceInfo.SafeAreaInsets.Bottom;
-			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-				top += DeviceInfo.SafeAreaInsets.Top + NavigationBarFrame.Height;
-				bottom += -DeviceInfo.SafeAreaInsets.Top - NavigationBarFrame.Height;
-			}
-			ChatTableView.ContentInset = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
-			ChatTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f + top, 0.0f, 0.0f + ChatTableView.SpecialOffset + bottom, 0.0f);
-//			this.View.LayoutIfNeeded();
+			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
 		}
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
 			//holy shit, Apple, really?
-			if (UIApplication.SharedApplication.ApplicationState == UIApplicationState.Background) {
+			if (false||UIApplication.SharedApplication.ApplicationState == UIApplicationState.Background) {
 				base.ViewWillTransitionToSize(toSize, coordinator);
 				return;
 			}
@@ -359,7 +333,6 @@ namespace JKChat.iOS.Views.Chat {
 			void resize() {
 				ResizeInputAccessoryView();
 				RespaceTitleView();
-				RecountTableInsets();
 			}
 			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
 				coordinator.AnimateAlongsideTransition((_) => {
@@ -377,7 +350,6 @@ namespace JKChat.iOS.Views.Chat {
 			base.ViewSafeAreaInsetsDidChange();
 			if (!UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
 				ResizeInputAccessoryView();
-				RecountTableInsets();
 			}
 		}
 
@@ -394,6 +366,9 @@ namespace JKChat.iOS.Views.Chat {
 		protected override void KeyboardWillHideNotification(NSNotification notification) {
 			notification.GetKeyboardUserInfo(out double duration, out UIViewAnimationOptions animationOptions, out CGRect endKeyboardFrame, out CGRect beginKeyboardFrame);
 			BeginKeyboardFrame = beginKeyboardFrame;
+			nfloat endKeyboardHeight = /*DeviceInfo.SafeAreaInsets.Bottom+*/InputAccessoryView.Frame.Height;
+			nfloat dy = endKeyboardFrame.Height-endKeyboardHeight;
+			endKeyboardFrame = new CGRect(endKeyboardFrame.X, endKeyboardFrame.Y+dy, endKeyboardFrame.Width, endKeyboardHeight);
 			EndKeyboardFrame = endKeyboardFrame;
 			UIView.Animate(duration, 0.0, animationOptions, () => {
 				ViewBottomConstraint.Constant = endKeyboardFrame.Height - ChatTableView.SpecialOffset;
