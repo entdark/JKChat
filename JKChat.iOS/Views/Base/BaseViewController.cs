@@ -71,10 +71,9 @@ namespace JKChat.iOS.Views.Base {
 			loadingIndicatorView.CenterYAnchor.ConstraintEqualTo(loadingView.CenterYAnchor, 0.0f).Active = true;
 			loadingIndicatorView.TranslatesAutoresizingMaskIntoConstraints = false;
 
-			var set = this.CreateBindingSet<BaseViewController<TViewModel>, TViewModel>();
+			using var set = this.CreateBindingSet<BaseViewController<TViewModel>, TViewModel>();
 			set.Bind(loadingView).For("Visibility").To(vm => vm.IsLoading).WithConversion("Visibility");
 			set.Bind(this).For(v => v.Title).To(vm => vm.Title);
-			set.Apply();
 		}
 
 		public override void ViewWillAppear(bool animated) {

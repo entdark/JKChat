@@ -20,7 +20,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 		}
 
 		private void BindingControls() {
-			var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
+            using var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
 			set.Bind(PasswordImageView).For("Visibility").To(vm => vm.NeedPassword).WithConversion("Visibility");
 			set.Bind(ServerNameLabel).For(v => v.AttributedText).To(vm => vm.ServerName).WithConversion("ColourText");
 			set.Bind(MapNameLabel).For(v => v.Text).To(vm => vm.MapName);
@@ -29,7 +29,6 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 			set.Bind(PingLabel).For(v => v.Text).To(vm => vm.Ping);
 			set.Bind(StatusLabel).For(v => v.Text).To(vm => vm.Status);
 			set.Bind(StatusView).For(v => v.BackgroundColor).To(vm => vm.Status).WithConversion("ConnectionColor");
-			set.Apply();
 		}
 	}
 }

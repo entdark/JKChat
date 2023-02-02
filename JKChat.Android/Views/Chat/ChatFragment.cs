@@ -54,9 +54,8 @@ namespace JKChat.Android.Views.Chat {
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
-			var set = this.CreateBindingSet();
+            using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
-			set.Apply();
 			return view;
 		}
 

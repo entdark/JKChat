@@ -97,9 +97,8 @@ namespace JKChat.Android.Views.Base {
 
 			CreateOptionsMenu();
 
-			var set = this.CreateBindingSet();
+			using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.Title).To(vm => vm.Title);
-			set.Apply();
 		}
 
 		public override void OnDestroyView() {

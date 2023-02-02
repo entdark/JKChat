@@ -45,12 +45,11 @@ namespace JKChat.iOS.Views.ServerList {
 
 			var source = new ServerListTableViewSource(ServerListTableView);
 
-			var set = this.CreateBindingSet();
+            using var set = this.CreateBindingSet();
 			set.Bind(source).For(s => s.ItemsSource).To(vm => vm.Items);
 			set.Bind(source).For(s => s.SelectionChangedCommand).To(vm => vm.ItemClickCommand);
 			set.Bind(refreshControl).For(r => r.IsRefreshing).To(vm => vm.IsRefreshing);
 			set.Bind(refreshControl).For(r => r.RefreshCommand).To(vm => vm.RefreshCommand);
-			set.Apply();
 
 			ServerListTableView.Source = source;
 			ServerListTableView.ReloadData();

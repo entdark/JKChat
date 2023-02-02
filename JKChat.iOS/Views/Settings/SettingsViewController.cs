@@ -31,12 +31,11 @@ namespace JKChat.iOS.Views.Settings {
 			LocationUpdateLabel.Font = Theme.Font.ErgoeMedium(15.0f);
 			UpdateViews(this.View.Frame.Size);
 
-			var set = this.CreateBindingSet();
+            using var set = this.CreateBindingSet();
 			set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
 			set.Bind(PlayerNameButton).To(vm => vm.PlayerNameCommand);
 			set.Bind(LocationUpdateSwitch).For(v => v.On).To(vm => vm.LocationUpdate);
 			set.Bind(LocationUpdateButton).To(vm => vm.LocationUpdateCommand);
-			set.Apply();
 		}
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {

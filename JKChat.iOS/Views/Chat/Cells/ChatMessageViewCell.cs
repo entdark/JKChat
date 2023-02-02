@@ -51,11 +51,10 @@ namespace JKChat.iOS.Views.Chat.Cells {
 //				MessageTextView.Selectable = false;
 				MessageTextView.ClipsToBounds = false;
 
-				var set = this.CreateBindingSet<ChatMessageViewCell, ChatMessageItemVM>();
+                using var set = this.CreateBindingSet<ChatMessageViewCell, ChatMessageItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
 				set.Bind(this).For(v => v.TopVMType).To(vm => vm.TopVMType);
 				set.Bind(this).For(v => v.BottomVMType).To(vm => vm.BottomVMType);
-				set.Apply();
 
 				this.AddBindings(PlayerNameLabel, "AttributedText ColourText(PlayerName, ColourTextParameter(true, Shadow))");
 				this.AddBindings(MessageTextView, "AttributedText ColourText(Message, ColourTextParameter(true, Shadow))");

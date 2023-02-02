@@ -22,9 +22,8 @@ namespace JKChat.Android.Views.Base {
 			base.OnViewCreated(view, savedInstanceState);
 			CheckSelection(false);
 
-			var set = this.CreateBindingSet();
+            using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.SelectedItem).To(vm => vm.SelectedItem);
-			set.Apply();
 		}
 
 		public override void OnResume() {
