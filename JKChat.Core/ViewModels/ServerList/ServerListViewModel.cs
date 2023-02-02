@@ -154,8 +154,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private async Task RefreshExecute() {
 			if (IsLoading) {
-//				IsRefreshing = false;
-//				return;
+				return;
 			}
 			IsRefreshing = true;
 			try {
@@ -165,16 +164,6 @@ namespace JKChat.Core.ViewModels.ServerList {
 				if (servers != null && servers.Any()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
 					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
-/*					var connectedItems = Items.Where(it => it.Status != Models.ConnectionStatus.Disconnected);
-					if (connectedItems != null) {
-						foreach (var connectedItem in connectedItems) {
-							var item = newItems.FirstOrDefault(it => it.ServerInfo.Address == connectedItem.ServerInfo.Address);
-							if (item != null) {
-								//newItems.Move(newItems.IndexOf(item), 0);
-								item.Status = connectedItem.Status;
-							}
-						}
-					}*/
 					AddRecentServers(newCollection, recentServers);
 					UpdateServersStatuses(newCollection);
 					newItems = newCollection;
@@ -196,16 +185,6 @@ namespace JKChat.Core.ViewModels.ServerList {
 			if (SelectedItem != null) {
 				return;
 			}
-/*			try {
-				var info = await serverListService.GetServerInfo(item.ServerInfo);
-				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Server info",
-					Message = string.Join('\n', info.Select(i => i.Key + ": " + i.Value)),
-					RightButton = "OK",
-					Type = JKDialogType.Title | JKDialogType.Message
-				});
-			} catch {}
-			return;*/
 			Items.Move(Items.IndexOf(item), 0);
 			await NavigationService.NavigateFromRoot<ChatViewModel, ServerListItemVM>(item, viewModel => {
 				return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
