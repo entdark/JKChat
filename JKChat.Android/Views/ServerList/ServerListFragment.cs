@@ -5,7 +5,9 @@ using Android.App;
 using Android.OS;
 using Android.Views;
 using AndroidX.RecyclerView.Widget;
+
 using Google.Android.Material.FloatingActionButton;
+
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
@@ -27,14 +29,13 @@ namespace JKChat.Android.Views.ServerList {
 		Resource.Drawable.ic_server_list,
 		typeof(MainViewModel)
 	)]
-	//[MvxFragmentPresentation(typeof(MainViewModel), Resource.Id.content_frame, false)]
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
 		private IMenuItem addItem;
 		private MvxRecyclerView recyclerView;
 		private FloatingActionButton addButton;
 
-        public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
+		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
@@ -58,7 +59,7 @@ namespace JKChat.Android.Views.ServerList {
 					addButton.Show();
 				}
 			}));
-        }
+		}
 
 		public override void OnDestroyView() {
 			base.OnDestroyView();
@@ -89,13 +90,13 @@ namespace JKChat.Android.Views.ServerList {
 		protected override void CreateOptionsMenu() {
 			base.CreateOptionsMenu();
 
-            addItem = Menu.FindItem(Resource.Id.add_item);
-            addItem.SetClickAction(() => {
+			addItem = Menu.FindItem(Resource.Id.add_item);
+			addItem.SetClickAction(() => {
 				this.OnOptionsItemSelected(addItem);
 			});
 			addItem?.SetVisible(false, false);
-//            CheckSelection();
-        }
+//			CheckSelection();
+		}
 
 		protected override void ActivityExit() {}
 
@@ -119,8 +120,8 @@ namespace JKChat.Android.Views.ServerList {
 		protected override void CloseSelection(bool animated = true) {
 			BackArrow?.SetRotation(0.0f, false);
 			SetUpNavigation(false);
-//            addItem?.SetVisible(true, animated);
-            base.CloseSelection(animated);
+//			addItem?.SetVisible(true, animated);
+			base.CloseSelection(animated);
 		}
 
 		public class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {
@@ -151,10 +152,10 @@ namespace JKChat.Android.Views.ServerList {
 			public OnScrollListener(Action<int, int> onScrolled) {
 				this.onScrolled = onScrolled;
 			}
-            public override void OnScrolled(RecyclerView recyclerView, int dx, int dy) {
-                base.OnScrolled(recyclerView, dx, dy);
+			public override void OnScrolled(RecyclerView recyclerView, int dx, int dy) {
+				base.OnScrolled(recyclerView, dx, dy);
 				onScrolled?.Invoke(dx, dy);
-            }
-        }
+			}
+		}
 	}
 }

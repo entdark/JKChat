@@ -1,13 +1,17 @@
 ﻿using System.Collections.Specialized;
+
 using Foundation;
+
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.Views.ServerList.Cells;
+
 using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
 using MvvmCross.Presenters.Attributes;
 using MvvmCross.ViewModels;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList {
@@ -94,5 +98,5 @@ namespace JKChat.iOS.Views.ServerList {
 				TableView.ScrollToRow(NSIndexPath.FromRowSection(0, 0), UITableViewScrollPosition.Top, true);
 			}
 		}
-    }
+	}
 }

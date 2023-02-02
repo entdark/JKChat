@@ -26,7 +26,7 @@ namespace JKChat.iOS.Services {
 				var dialog = new JKDialogViewController(config, tcs);
 				var viewController = Xamarin.Essentials.Platform.GetCurrentUIViewController();
 				if (viewController is JKDialogViewController && viewController.PresentingViewController != null) {
-                    viewController = viewController.PresentingViewController;
+					viewController = viewController.PresentingViewController;
 				}
 				viewController.PresentViewController(dialog, true, null);
 			});

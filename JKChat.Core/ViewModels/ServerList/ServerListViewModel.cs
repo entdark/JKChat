@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+
 using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
@@ -44,7 +45,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			Title = "Server list";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
-            AddServerCommand = new MvxAsyncCommand(AddServerExecute);
+			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
 			Items = new MvxObservableCollection<ServerListItemVM>();
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			this.cacheService = cacheService;
