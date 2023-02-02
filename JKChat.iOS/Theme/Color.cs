@@ -12,6 +12,7 @@ namespace JKChat.iOS {
 			public static readonly UIColor TabBar = UIColor.FromRGB(50, 53, 68);
 			public static readonly UIColor TabBarItemUnselected = UIColor.FromRGB(161, 161, 161);
 			public static readonly UIColor TabBarItemSelected = Accent;
+			public static readonly UIColor LoadingBackground = UIColor.FromRGBA(34, 45, 102, 64);
 			public static readonly UIColor Disconnected = UIColor.FromRGB(181, 37, 37);
 			public static readonly UIColor Connecting = UIColor.FromRGB(236, 163, 20);
 			public static readonly UIColor Connected = UIColor.FromRGB(149, 220, 33);

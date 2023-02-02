@@ -49,7 +49,9 @@ namespace JKChat.iOS.Views.Base {
 			}
 //			this.View.BackgroundColor = Theme.Color.Background;
 
-			var loadingView = new UIView();
+			var loadingView = new UIView() {
+				BackgroundColor = Theme.Color.LoadingBackground
+			};
 			View.AddSubview(loadingView);
 			loadingView.LeadingAnchor.ConstraintEqualTo(this.View.LeadingAnchor, 0.0f).Active = true;
 			loadingView.TrailingAnchor.ConstraintEqualTo(this.View.TrailingAnchor, 0.0f).Active = true;
