@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 using JKChat.Core.Services;
@@ -39,12 +40,17 @@ namespace JKChat.Core.Helpers {
 			return realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
 		}
 
-		public static async Task ExceptionalTaskRun(Action action) {
+		public static async Task<bool> ExceptionalTaskRun(Action action) {
+			bool result = true;
 			await Task.Run(action)
 				.ContinueWith(async t => {
-					if (t.IsFaulted)
+					Debug.WriteLine("t: " + t.Status);
+					if (t.IsFaulted) {
+						result = false;
 						await ExceptionCallback(t.Exception);
+					}
 				});
+			return result;
 		}
 	}
 }
