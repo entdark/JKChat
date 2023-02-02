@@ -17,7 +17,7 @@ namespace JKChat.Core.ViewModels.Main {
 		private async Task ShowInitialViewModelsExecute() {
 			await Task.WhenAll(
 				NavigationService.Navigate<ServerListViewModel>(),
-				NavigationService.Navigate<AdminPanelViewModel>(),
+//				NavigationService.Navigate<AdminPanelViewModel>(),
 				NavigationService.Navigate<SettingsViewModel>()
 			);
 		}
