@@ -10,7 +10,7 @@ using MvvmCross.ViewModels;
 namespace JKChat.Android.Views.Base {
 	public abstract class ReportFragment<TViewModel, TItem> : BaseFragment<TViewModel> where TItem : class, ISelectableItemVM where TViewModel : ReportViewModel<TItem>, IMvxViewModel, IBaseViewModel {
 		private TItem selectedItem;
-		protected virtual TItem SelectedItem {
+		public virtual TItem SelectedItem {
 			get => selectedItem;
 			set { selectedItem = value; CheckSelection(); }
 		}
