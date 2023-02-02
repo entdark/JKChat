@@ -43,7 +43,7 @@ namespace JKChat.Core.ViewModels.Settings {
 		}
 
 		private async Task PlayerNameExecute() {
-/*			string name = AppSettings.PlayerName;
+			string name = AppSettings.PlayerName;
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Choose your name",
 				Input = name,
@@ -53,8 +53,8 @@ namespace JKChat.Core.ViewModels.Settings {
 				},
 				Type = JKDialogType.Title | JKDialogType.Input
 			});
-			AppSettings.PlayerName = name;*/
-			await NavigationService.NavigateFromRoot<SettingsNameViewModel>();
+			AppSettings.PlayerName = name;
+//			await NavigationService.NavigateFromRoot<SettingsNameViewModel>();
 		}
 
 		private void OnPlayerNameMessage(PlayerNameMessage message) {
