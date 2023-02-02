@@ -8,9 +8,8 @@ using JKClient;
 
 namespace JKChat.Core.Services {
 	internal class ServerListService : IServerListService {
-		private ServerBrowser []serverBrowsers;
+		private readonly ServerBrowser []serverBrowsers;
 		private IEnumerable<ServerInfo> servers;
-		private bool loading = false;
 
 		public ServerListService() {
 			serverBrowsers = new ServerBrowser[] {
@@ -30,7 +29,6 @@ namespace JKChat.Core.Services {
 			if (this.servers == null || !this.servers.Any()) {
 				return await GetNewList();
 			}
-			var info = await serverBrowsers[1].GetServerInfo("pug.jactf.com", 29071);
 			return this.servers;
 		}
 
@@ -67,24 +65,5 @@ namespace JKChat.Core.Services {
 		public async Task<InfoString> GetServerInfo(ServerInfo serverInfo) {
 			return await GetServerInfo(serverInfo.Address, serverInfo.Protocol);
 		}
-
-		/*		private async Task InitServerBrowsers() {
-					if (serverBrowsers != null) {
-						return;
-					}
-					await Helpers.Common.ExceptionalTaskRun(() => {
-						serverBrowsers = new ServerBrowser[] {
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol25)),
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol26)),
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol15)),
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol16)),
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol68)),
-							new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol71))
-						};
-						foreach (var serverBrowser in serverBrowsers) {
-							serverBrowser.Start(Helpers.Common.ExceptionCallback);
-						}
-					});
-				}*/
 	}
 }
