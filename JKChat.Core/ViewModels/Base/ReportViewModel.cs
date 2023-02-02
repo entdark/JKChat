@@ -99,7 +99,7 @@ namespace JKChat.Core.ViewModels.Base {
 			}
 			lock (Items) {
 				foreach (var it in Items) {
-					it.IsSelected = it == item;
+					it.IsSelected = it == SelectedItem;
 				}
 			}
 			if (SelectedItem != null) {
