@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+using JKChat.Core.Helpers;
+
 using JKClient;
 
 namespace JKChat.Core.Services {
@@ -59,8 +61,8 @@ namespace JKChat.Core.Services {
 				return await serverBrowser?.GetServerInfo(address);
 			}
 			var serverInfoTasks = serverBrowsers.Select(s => s.GetServerInfo(address));
-			var serverInfoTask = await Task.WhenAny(serverInfoTasks);
-			return serverInfoTask.Result;
+			var serverInfoTask = await serverInfoTasks.WhenAny(t => t.Status == TaskStatus.RanToCompletion);
+			return serverInfoTask?.Result;
 		}
 		public async Task<InfoString> GetServerInfo(ServerInfo serverInfo) {
 			return await GetServerInfo(serverInfo.Address, serverInfo.Protocol);
