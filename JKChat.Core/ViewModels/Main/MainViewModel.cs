@@ -9,7 +9,7 @@ using MvvmCross.Commands;
 
 namespace JKChat.Core.ViewModels.Main {
 	public class MainViewModel : BaseViewModel {
-		public IMvxCommand ShowInitialViewModelsCommand { get; private set; }
+		public IMvxCommand ShowInitialViewModelsCommand { get; init; }
 		public MainViewModel() {
 			ShowInitialViewModelsCommand = new MvxAsyncCommand(ShowInitialViewModelsExecute);
 		}
