@@ -64,110 +64,92 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task AddServerExecute() {
-			string address = null;
-/*			int id = -1;
-			bool cancel = true;
-            await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Select the game",
-				RightButton = "OK",
-                LeftButton = "Cancel",
-				ListViewModel = new Dialog.DialogListViewModel() {
-					Items = new List<Dialog.Items.DialogItemVM>() {
-						new Dialog.Items.DialogItemVM() { Name = "Quake III Arena", Id = 0, IsSelected = true },
-						new Dialog.Items.DialogItemVM() { Name = "Jedi Academy", Id = 1 },
-						new Dialog.Items.DialogItemVM() { Name = "Jedi Outcast", Id = 2 }
-					}
-				},
-                RightClick = (input) => {
-					id = input is int i ? i : -1;
-					cancel = false;
-				},
-				Type = JKDialogType.Title | JKDialogType.List
-			});
-			if (cancel)
-				return;
-			var protocol = id switch {
-				0 => ProtocolVersion.Protocol68,
-                1 => ProtocolVersion.Protocol26,
-                2 => ProtocolVersion.Protocol15,
-                _ => ProtocolVersion.Protocol26,
-            };
-			var version = id switch {
-				0 => ClientVersion.Q3_v1_32,
-                1 => ClientVersion.JA_v1_01,
-                2 => ClientVersion.JO_v1_02,
-                _ => ClientVersion.JA_v1_01,
-            };*/
+			string inputAddress = null;
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Add server",
 				RightButton = "Add",
-                LeftButton = "Cancel",
-                RightClick = (input) => {
-                    address = input as string;
+				LeftButton = "Cancel",
+				RightClick = (input) => {
+					inputAddress = input as string;
 				},
 				Type = JKDialogType.Title | JKDialogType.Input
 			});
-			if (string.IsNullOrEmpty(address)) {
+			if (string.IsNullOrEmpty(inputAddress)) {
 				return;
 			}
-			bool resolved = false;
-            IsLoading = true;
-            await Helpers.Common.ExceptionalTaskRun(async () => {
-                var netAddress = NetAddress.FromString(address);
-				if (netAddress == null) {
-					return;
-                }
-                IsLoading = false;
-                resolved = true;
-                bool connect = false;
-                if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
-					await DialogService.ShowAsync(new JKDialogConfig() {
-						Title = "Server exists",
-						Message = $"The server \"{address}\" (\"{ColourTextHelper.CleanString(item.ServerName)}\") already exists.\nWould you like to connect to that server?",
-						RightButton = "Connect",
-						LeftButton = "Cancel",
-						RightClick = (input) => {
-							connect = true;
-						},
-						Type = JKDialogType.Title | JKDialogType.Message
-					});
-					if (connect) {
-                        await ItemClickExecute(item);
-					}
-                    return;
+			IsLoading = true;
+			NetAddress netAddress = null;
+			bool success = await JKChat.Core.Helpers.Common.ExceptionalTaskRun(() => {
+				try {
+					netAddress = NetAddress.FromString(inputAddress);
+				} catch {
+					IsLoading = false;
+					throw;
 				}
-                var serverInfoTasks = serverBrowsers.Select(s => s.GetServerInfo(netAddress));
-                var infoString = await (await Task.WhenAny<InfoString>(serverInfoTasks));
-                var serverInfo = new ServerInfo(infoString) {
-					Address = netAddress,
-					HostName = address
-				};
-				var server = new ServerListItemVM(serverInfo);
-				Items.Insert(0, server);
+			});
+			if (!success) {
+				IsLoading = false;
+				return;
+			}
+			if (netAddress == null) {
+				IsLoading = false;
 				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Server added",
-					Message = $"Would you like to connect to \"{address}\"?",
+					Title = "Failed adding server",
+					Message = $"Could not resolve \"{inputAddress}\"",
+					RightButton = "OK",
+					Type = JKDialogType.Title | JKDialogType.Message
+				});
+				return;
+			}
+			bool connect = false;
+			if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
+				IsLoading = false;
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Server exists",
+					Message = $"Would you like to connect to \"{ColourTextHelper.CleanString(item.ServerName)}\" (\"{inputAddress}\")?",
 					RightButton = "Connect",
 					LeftButton = "Cancel",
-					RightClick = (input) => {
+					RightClick = _ => {
 						connect = true;
 					},
 					Type = JKDialogType.Title | JKDialogType.Message
 				});
 				if (connect) {
-                    await ItemClickExecute(server);
+					await ItemClickExecute(item);
 				}
-			});
-            IsLoading = false;
-            if (resolved) {
 				return;
 			}
+			var infoString = await serverListService.GetServerInfo(netAddress);
+			IsLoading = false;
+			if (infoString == null) {
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Failed adding server",
+					Message = $"There is no server with address \"{inputAddress}\"",
+					RightButton = "OK",
+					Type = JKDialogType.Title | JKDialogType.Message
+				});
+				return;
+			}
+			var serverInfo = new ServerInfo(infoString) {
+				Address = netAddress,
+				HostName = inputAddress
+			};
+			var server = new ServerListItemVM(serverInfo);
+			Items.Insert(0, server);
+			IsLoading = false;
 			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Failed adding server",
-				Message = $"Could not resolve \"{address}\"",
-				RightButton = "OK",
+				Title = "Server added",
+				Message = $"Would you like to connect to \"{inputAddress}\"?",
+				RightButton = "Connect",
+				LeftButton = "Cancel",
+				RightClick = _ => {
+					connect = true;
+				},
 				Type = JKDialogType.Title | JKDialogType.Message
 			});
+			if (connect) {
+				await ItemClickExecute(server);
+			}
 		}
 
 		private async Task RefreshExecute() {
