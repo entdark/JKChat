@@ -83,10 +83,10 @@ namespace JKChat.Android.Services {
 
 		private Notification CreateNotification(int count, int messages) {
 			var activityIntent = new Intent(this, typeof(MainActivity));
-			var pendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, 0);
+			var pendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, PendingIntentFlags.Immutable);
 			var closeIntent = new Intent(this, typeof(ForegroundReceiver));
 			closeIntent.SetAction("Test");
-			var closePendingIntent = PendingIntent.GetBroadcast(this, 2, closeIntent, 0);
+			var closePendingIntent = PendingIntent.GetBroadcast(this, 2, closeIntent, PendingIntentFlags.Immutable);
 			var notification = new NotificationCompat.Builder(this, NotificationChannelID)
 				.SetAutoCancel(false)
 				.SetContentTitle($"You are connected to {count} server" + (count > 1 ? "s" : string.Empty))
