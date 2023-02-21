@@ -6,7 +6,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Chat.Items {
 	public abstract class ChatItemVM : MvxNotifyPropertyChanged, ISelectableItemVM {
-		public string Time { get; private set; } = DateTime.Now.ToString("t");
+		public string Time { get; init; } = DateTime.Now.ToString("t");
 
 		private bool isSelected;
 		public bool IsSelected {

@@ -8,7 +8,7 @@ using MvvmCross.Plugin.Messenger;
 
 namespace JKChat.Core.ViewModels.Settings {
 	public class SettingsNameViewModel : BaseViewModel {
-		public IMvxCommand ApplyCommand { get; private set; }
+		public IMvxCommand ApplyCommand { get; init; }
 
 		private string playerName;
 		public string PlayerName {

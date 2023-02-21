@@ -5,10 +5,9 @@ using JKChat.Core.ViewModels.Dialog.Items;
 using MvvmCross.Commands;
 
 namespace JKChat.Core.ViewModels.Dialog {
-
 	public class DialogListViewModel {
-		public List<DialogItemVM> Items { get; internal set; }
-		public IMvxCommand ItemClickCommand { get; private set; }
+		public List<DialogItemVM> Items { get; init; }
+		public IMvxCommand ItemClickCommand { get; init; }
 
 		public DialogListViewModel() {
 			Items = new List<DialogItemVM>();

@@ -120,7 +120,7 @@ namespace JKChat.Core.Models {
 				}
 			}
 		}
-		internal LimitedObservableCollection<ChatItemVM> Items { get; private set; }
+		internal LimitedObservableCollection<ChatItemVM> Items { get; init; }
 		internal ServerInfo ServerInfo { get; private set; }
 		internal ClientInfo[] ClientInfo => Client?.ClientInfo;
 

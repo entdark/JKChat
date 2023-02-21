@@ -8,7 +8,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList.Items {
 	public class ServerListItemVM : MvxNotifyPropertyChanged, ISelectableItemVM, IEquatable<ServerListItemVM> {
-		internal JKClient.ServerInfo ServerInfo { get; private set; }
+		internal JKClient.ServerInfo ServerInfo { get; init; }
 
 		private bool isSelected;
 		public bool IsSelected {

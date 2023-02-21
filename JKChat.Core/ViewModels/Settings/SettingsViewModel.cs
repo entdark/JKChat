@@ -11,8 +11,9 @@ namespace JKChat.Core.ViewModels.Settings {
 	public class SettingsViewModel : BaseViewModel {
 		private MvxSubscriptionToken playerNameMessageToken;
 
-		public IMvxCommand PlayerNameCommand { get; private set; }
-		public IMvxCommand LocationUpdateCommand { get; private set; }
+		public IMvxCommand PlayerNameCommand { get; init; }
+		public IMvxCommand EncodingCommand { get; init; }
+		public IMvxCommand LocationUpdateCommand { get; init; }
 
 		private string playerName;
 		public string PlayerName {

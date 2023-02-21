@@ -10,9 +10,9 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
 	public abstract class BaseViewModel : MvxViewModel, IBaseViewModel {
-		protected INavigationService NavigationService { get; private set; }
-		protected IDialogService DialogService { get; private set; }
-		protected IMvxMessenger Messenger { get; private set; }
+		protected INavigationService NavigationService { get; init; }
+		protected IDialogService DialogService { get; init; }
+		protected IMvxMessenger Messenger { get; init; }
 
 		private string title;
 		public virtual string Title {
