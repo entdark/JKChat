@@ -20,6 +20,11 @@ using Xamarin.Essentials;
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
 		private static readonly Color ShadowColor = new Color(38, 38, 38);
+
+		public ISpannable Convert(string value, ColourTextParameter parameter = null) {
+			return Convert(value, typeof(ISpannable), parameter, null) as ISpannable;
+		}
+
 		protected override ISpannable Convert(string value, Type targetType, object parameter, CultureInfo culture) {
 			if (string.IsNullOrEmpty(value)) {
 				return new SpannableString(string.Empty);

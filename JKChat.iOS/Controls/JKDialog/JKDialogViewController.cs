@@ -9,7 +9,7 @@ using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Dialog.Items;
 using JKChat.iOS.Controls.JKDialog.Cells;
 using JKChat.iOS.Helpers;
-
+using JKChat.iOS.ValueConverters;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
 using UIKit;
@@ -19,11 +19,14 @@ namespace JKChat.iOS.Controls.JKDialog {
 		private readonly JKDialogConfig config;
 		private readonly TaskCompletionSource<object> tcs;
 		private readonly bool handleKeyboard = false;
+		private readonly ColourTextValueConverter colourTextConverter = new ColourTextValueConverter();
 		private NSObject keyboardWillShowObserver, keyboardWillHideObserver;
 
 		private string message => MessageLabel.Text;
 		private string input => InputTextField.Text;
 		private DialogItemVM selectedItem => config.ListViewModel.Items.Find(item => item.IsSelected);
+
+		public override bool CanBecomeFirstResponder => true;
 
 		public JKDialogViewController(JKDialogConfig config, TaskCompletionSource<object> tcs) : base("JKDialogViewController", null) {
 			ModalPresentationStyle = UIModalPresentationStyle.Custom;
@@ -49,29 +52,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 			TitleLabel.Text = config?.Title;
 
 			if (!string.IsNullOrEmpty(config?.Message)) {
-				MessageLabel.Text = config?.Message;
-
-				var helperLabel = new UILabel(new CGRect(0.0f, 0.0f, 230.0f, 0.0f)) {
-					Text = config?.Message,
-					Lines = 0,
-					Font = Theme.Font.ErgoeMedium(15.0f),
-					TextAlignment = UITextAlignment.Left,
-					LineBreakMode = UILineBreakMode.WordWrap
-				};
-				helperLabel.SizeToFit();
-
-				if (helperLabel.Frame.Height <= 85.0f) {
-					MessageLabel.TextAlignment = UITextAlignment.Center;
-				}
-				nfloat height = helperLabel.Frame.Height + 20.0f;
-				if (height >= 242.0f) {
-					MessageHeightConstraint.Constant = 242.0f;
-				} else {
-					MessageHeightConstraint.Constant = height;
-					MessageScrollView.ScrollEnabled = false;
-				}
-			} else {
-				MessageView.Hidden = true;
+				SetMessageText(config?.Message);
 			}
 
 			if (!string.IsNullOrEmpty(config?.LeftButton)) {
@@ -85,6 +66,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 			RightButton.TouchUpInside += RightButtonTouchUpInside;
 
 			InputTextField.Text = config?.Input;
+			InputTextField.EditingChanged += InputTextFieldEditingChanged;
 
 			if (config?.ListViewModel != null) {
 				ListTableView.RegisterNibForCellReuse(JKDialogViewCell.Nib, JKDialogViewCell.Key);
@@ -126,14 +108,43 @@ namespace JKChat.iOS.Controls.JKDialog {
 			BackgroundButton.TouchUpInside += BackgroundButtonTouchUpInside;
 		}
 
-		#nullable enable
+		private void InputTextFieldEditingChanged(object sender, EventArgs ev) {
+			SetMessageText((sender as UITextField)?.Text);
+		}
+
+		private void SetMessageText(string text) {
+			var message = colourTextConverter.Convert(text);
+			MessageLabel.AttributedText = message;
+
+			var helperLabel = new UILabel(new CGRect(0.0f, 0.0f, 230.0f, 0.0f)) {
+				AttributedText = message,
+				Lines = 0,
+				Font = Theme.Font.ErgoeMedium(15.0f),
+				TextAlignment = UITextAlignment.Left,
+				LineBreakMode = UILineBreakMode.WordWrap
+			};
+			helperLabel.SizeToFit();
+
+			if (helperLabel.Frame.Height <= 85.0f) {
+				MessageLabel.TextAlignment = UITextAlignment.Center;
+			}
+			nfloat height = helperLabel.Frame.Height + 20.0f;
+			if (height >= 242.0f) {
+				MessageHeightConstraint.Constant = 242.0f;
+			} else {
+				MessageHeightConstraint.Constant = height;
+				MessageScrollView.ScrollEnabled = false;
+			}
+		}
+
+#nullable enable
 		public override void DismissViewController(bool animated, Action? action) {
 			base.DismissViewController(animated, action);
 			if (config?.ImmediateResult ?? true) {
 				DismissAction();
 			}
 		}
-		#nullable disable
+#nullable disable
 
 		private void BackgroundButtonTouchUpInside(object sender, EventArgs ev) {
 			ButtonTouchUpInside(config?.BackgroundClick);
@@ -200,6 +211,14 @@ namespace JKChat.iOS.Controls.JKDialog {
 
 		public override void ViewDidDisappear(bool animated) {
 			base.ViewDidDisappear(animated);
+		}
+
+		protected override void Dispose(bool disposing) {
+			if (disposing) {
+				BackgroundButton.TouchUpInside -= BackgroundButtonTouchUpInside;
+				InputTextField.EditingChanged -= InputTextFieldEditingChanged;
+			}
+				base.Dispose(disposing);
 		}
 
 		#endregion

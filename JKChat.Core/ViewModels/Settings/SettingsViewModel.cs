@@ -47,12 +47,14 @@ namespace JKChat.Core.ViewModels.Settings {
 			string name = AppSettings.PlayerName;
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Choose your name",
+				Message = name,
 				Input = name,
 				RightButton = "OK",
 				RightClick = (input) => {
 					name = input as string;
 				},
-				Type = JKDialogType.Title | JKDialogType.Input
+				LeftButton = "Cancel",
+				Type = JKDialogType.Title | JKDialogType.MessageFromInput
 			});
 			AppSettings.PlayerName = name;
 //			await NavigationService.NavigateFromRoot<SettingsNameViewModel>();

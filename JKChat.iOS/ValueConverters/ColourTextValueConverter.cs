@@ -14,6 +14,11 @@ using UIKit;
 namespace JKChat.iOS.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, NSAttributedString> {
 		private static readonly UIColor ShadowColor = UIColor.FromRGB(38, 38, 38);
+
+		public NSAttributedString Convert(string value, ColourTextParameter parameter = null) {
+			return Convert(value, typeof(NSAttributedString), parameter, null) as NSAttributedString;
+		}
+
 		protected override NSAttributedString Convert(string value, Type targetType, object parameter, CultureInfo culture) {
 			if (string.IsNullOrEmpty(value)) {
 				return new NSAttributedString(string.Empty);

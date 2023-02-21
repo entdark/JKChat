@@ -32,6 +32,7 @@ namespace JKChat.Core.Services {
 		Title = 1,
 		Message = 2,
 		Input = 4,
-		List = 8
+		List = 8,
+		MessageFromInput = 16 | Message | Input
 	}
 }

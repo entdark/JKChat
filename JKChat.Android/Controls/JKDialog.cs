@@ -11,6 +11,7 @@ using Android.Views.InputMethods;
 using Android.Widget;
 
 using JKChat.Android.Helpers;
+using JKChat.Android.ValueConverters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Dialog.Items;
 
@@ -29,6 +30,7 @@ namespace JKChat.Android.Controls {
 		private JKDialogRecyclerView listView;
 		private readonly JKDialogConfig config;
 		private readonly TaskCompletionSource<object> tcs;
+		private readonly ColourTextValueConverter colourTextConverter = new ColourTextValueConverter();
 
 		private string message => messageTextView?.Text;
 		private string input => inputEditText?.Text;
@@ -88,10 +90,9 @@ namespace JKChat.Android.Controls {
 			messageTextView = FindViewById<TextView>(Resource.Id.message);
 			messageView = FindViewById(Resource.Id.message_view);
 			if (!string.IsNullOrEmpty(config?.Message)) {
-				messageTextView.Text = config?.Message;
+				var message = colourTextConverter.Convert(config?.Message);
+				messageTextView.TextFormatted = message;
 				dialog.Background = Context.GetDrawable(Resource.Color.dialog_title_background);
-			} else {
-				messageView.Visibility = ViewStates.Gone;
 			}
 
 			leftButton = FindViewById<Button>(Resource.Id.left_button);
@@ -108,6 +109,12 @@ namespace JKChat.Android.Controls {
 
 			inputEditText = FindViewById<EditText>(Resource.Id.input);
 			inputEditText.Text = config?.Input;
+			inputEditText.TextChanged += TextChanged;
+
+			inputView = FindViewById(Resource.Id.input_view);
+			if ((config.Type & JKDialogType.MessageFromInput) != 0) {
+				inputView.Background = Context.GetDrawable(Resource.Color.dialog_background);
+			}
 
 			listView = FindViewById<JKDialogRecyclerView>(Resource.Id.list);
 			if (config?.ListViewModel != null) {
@@ -118,8 +125,6 @@ namespace JKChat.Android.Controls {
 			} else {
 				listView.Visibility = ViewStates.Gone;
 			}
-
-			inputView = FindViewById(Resource.Id.input_view);
 
 			if (config == null) {
 				messageView.Visibility = ViewStates.Gone;
@@ -139,6 +144,11 @@ namespace JKChat.Android.Controls {
 					listView.Visibility = ViewStates.Gone;
 				}
 			}
+		}
+
+		private void TextChanged(object sender, global::Android.Text.TextChangedEventArgs ev) {
+			var message = colourTextConverter.Convert((sender as EditText)?.Text);
+			messageTextView.TextFormatted = message;
 		}
 
 		public override void Dismiss() {
@@ -175,6 +185,13 @@ namespace JKChat.Android.Controls {
 
 			base.Dismiss();
 			tcs?.TrySetResult(null);
+		}
+
+		protected override void Dispose(bool disposing) {
+			if (disposing) {
+				inputEditText.TextChanged -= TextChanged;
+			}
+			base.Dispose(disposing);
 		}
 	}
 
