@@ -1,6 +1,7 @@
 ﻿using CoreGraphics;
 
 using JKChat.Core.ViewModels.Settings;
+using JKChat.iOS.Helpers;
 using JKChat.iOS.Views.Base;
 
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
@@ -27,8 +28,14 @@ namespace JKChat.iOS.Views.Settings {
 
 			PlayerNameLabel.Font = Theme.Font.ErgoeMedium(15.0f);
 
+			EncodingHeaderLabel.Text = "Encoding (Jedi Academy only)".ToUpper();
+			EncodingHeaderLabel.Font = Theme.Font.ErgoeBold(10.0f);
+
+			EncodingLabel.Font = Theme.Font.ErgoeMedium(15.0f);
+
 			LocationUpdateLabel.Text = "Location Updates";
 			LocationUpdateLabel.Font = Theme.Font.ErgoeMedium(15.0f);
+
 			UpdateViews(this.View.Frame.Size);
 
 			LocationUpdateBackgroundView.Hidden = DeviceInfo.IsRunningOnMacOS;
@@ -36,6 +43,8 @@ namespace JKChat.iOS.Views.Settings {
 			using var set = this.CreateBindingSet();
 			set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
 			set.Bind(PlayerNameButton).To(vm => vm.PlayerNameCommand);
+			set.Bind(EncodingLabel).For(v => v.Text).To(vm => vm.Encoding);
+			set.Bind(EncodingButton).To(vm => vm.EncodingCommand);
 			set.Bind(LocationUpdateSwitch).For(v => v.On).To(vm => vm.LocationUpdate);
 			set.Bind(LocationUpdateButton).To(vm => vm.LocationUpdateCommand);
 		}
@@ -57,11 +66,13 @@ namespace JKChat.iOS.Views.Settings {
 				ContentLeftConstraint.Constant = 0.0f;
 				ContentRightConstraint.Constant = 0.0f;
 				PlayerNameBackgroundView.Layer.CornerRadius = 0.0f;
+				EncodingBackgroundView.Layer.CornerRadius = 0.0f;
 				LocationUpdateBackgroundView.Layer.CornerRadius = 0.0f;
 			} else {
 				ContentLeftConstraint.Constant = 20.0f;
 				ContentRightConstraint.Constant = 20.0f;
 				PlayerNameBackgroundView.Layer.CornerRadius = 14.0f;
+				EncodingBackgroundView.Layer.CornerRadius = 14.0f;
 				LocationUpdateBackgroundView.Layer.CornerRadius = 14.0f;
 			}
 			this.View.LayoutIfNeeded();

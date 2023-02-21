@@ -263,8 +263,8 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		internal void ExecuteCommand(string cmd, Encoding encoding = null) {
-			Client?.ExecuteCommand(cmd, encoding);
+		internal void ExecuteCommand(string cmd) {
+			Client?.ExecuteCommand(cmd);
 		}
 
 		private void LifetimeChanged(object sender, MvxLifetimeEventArgs ev) {
@@ -287,9 +287,9 @@ namespace JKChat.Core.Models {
 			string cmd = command[0];
 			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				await AddToChat(command, commandEventArgs.UTF8Command);
+				await AddToChat(command);
 			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				await AddToLocationChat(command, commandEventArgs.UTF8Command);
+				await AddToLocationChat(command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
 				if (string.Compare(command[1], 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
@@ -354,9 +354,8 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private async Task AddToChat(Command command, Command utf8Command) {
+		private async Task AddToChat(Command command) {
 			string fullMessage = command[1];
-			string utf8FullMessage = utf8Command?[1] ?? fullMessage;
 			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ");
 			if (separator < 0) {
 				return;
@@ -365,19 +364,19 @@ namespace JKChat.Core.Models {
 			string name = fullMessage.Substring(0, separator);
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
 			string escapedPlayerName = GetEscapedPlayerName(name);
-			string message = utf8FullMessage.Substring(separator, utf8FullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty);
+			string message = fullMessage.Substring(separator, fullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			await AddItem(chatItem);
 		}
 
-		private async Task AddToLocationChat(Command command, Command utf8Command) {
+		private async Task AddToLocationChat(Command command) {
 			if (command.Length < 4) {
 				return;
 			}
 			string name = command[1];
 			string location = command[2];
 			string colour = command[3];
-			string message = utf8Command[4];
+			string message = command[4];
 
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
 			string escapedPlayerName = GetEscapedPlayerName(name);

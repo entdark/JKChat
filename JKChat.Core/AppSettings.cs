@@ -46,6 +46,10 @@ namespace JKChat.Core {
 			}
 			set => Preferences.Set(nameof(PlayerId), value.ToString());
 		}
+		public static int EncodingId {
+			get => Preferences.Get(nameof(EncodingId), 1);
+			set => Preferences.Set(nameof(EncodingId), value);
+		}
 		public static bool LocationUpdate {
 			get => Preferences.Get(nameof(LocationUpdate), false);
 			set {

@@ -216,7 +216,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		private async Task SendMessageExecute() {
 			if (Message.StartsWith("/")) {
-				gameClient.ExecuteCommand(Message.Substring(1), Encoding.UTF8);
+				gameClient.ExecuteCommand(Message.Substring(1));
 				Message = string.Empty;
 				Messenger.Publish(new SentMessageMessage(this));
 				return;
@@ -254,7 +254,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				command = $"tell {id} \"{Message}\"\n";
 				break;
 			}
-			gameClient.ExecuteCommand(command, Encoding.UTF8);
+			gameClient.ExecuteCommand(command);
 			Message = string.Empty;
 			Messenger.Publish(new SentMessageMessage(this));
 		}

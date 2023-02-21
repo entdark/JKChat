@@ -1,14 +1,18 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Dialog;
+using JKChat.Core.ViewModels.Dialog.Items;
 
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
 
 namespace JKChat.Core.ViewModels.Settings {
 	public class SettingsViewModel : BaseViewModel {
+		private readonly IJKClientService jkclientService;
 		private MvxSubscriptionToken playerNameMessageToken;
 
 		public IMvxCommand PlayerNameCommand { get; init; }
@@ -21,6 +25,12 @@ namespace JKChat.Core.ViewModels.Settings {
 			set => SetProperty(ref playerName, value);
 		}
 
+		private string encoding;
+		public string Encoding {
+			get => encoding;
+			set => SetProperty(ref encoding, value);
+		}
+
 		private bool locationUpdate;
 		public bool LocationUpdate {
 			get => locationUpdate;
@@ -31,16 +41,19 @@ namespace JKChat.Core.ViewModels.Settings {
 			}
 		}
 
-		public SettingsViewModel() {
+		public SettingsViewModel(IJKClientService jkclientService) {
+			this.jkclientService = jkclientService;
 			Title = "Settings";
 			PlayerNameCommand = new MvxAsyncCommand(PlayerNameExecute);
+			EncodingCommand = new MvxAsyncCommand(EncodingExecute);
 			LocationUpdateCommand = new MvxCommand(LocationUpdateExecute);
+			PlayerName = AppSettings.PlayerName;
+			Encoding = jkclientService.Encoding.EncodingName;
 			locationUpdate = AppSettings.LocationUpdate;
 		}
 
 		public override void ViewAppearing() {
 			base.ViewAppearing();
-			PlayerName = AppSettings.PlayerName;
 		}
 
 		private async Task PlayerNameExecute() {
@@ -58,6 +71,34 @@ namespace JKChat.Core.ViewModels.Settings {
 			});
 			AppSettings.PlayerName = name;
 //			await NavigationService.NavigateFromRoot<SettingsNameViewModel>();
+		}
+
+		private async Task EncodingExecute() {
+			var dialogList = new DialogListViewModel();
+			var availableEncodings = jkclientService.AvailableEncodings;
+			for (int i = 0; i < availableEncodings.Length; i++) {
+				dialogList.Items.Add(new DialogItemVM() {
+					Id = i,
+					Name = availableEncodings[i].EncodingName,
+					IsSelected = string.Compare(availableEncodings[i].EncodingName, Encoding, StringComparison.InvariantCultureIgnoreCase) == 0
+				});
+			}
+			int id = -1;
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Select encoding",
+				RightButton = "OK",
+				RightClick = (input) => {
+					if (input is DialogItemVM dialogItem) {
+						id = dialogItem.Id;
+					}
+				},
+				LeftButton = "Cancel",
+				ListViewModel = dialogList,
+				Type = JKDialogType.Title | JKDialogType.List
+			});
+			jkclientService.SetEncodingById(id);
+			Encoding = jkclientService.Encoding.EncodingName;
+			AppSettings.EncodingId = id;
 		}
 
 		private void OnPlayerNameMessage(PlayerNameMessage message) {
@@ -85,5 +126,7 @@ namespace JKChat.Core.ViewModels.Settings {
 			base.ViewDestroy(viewFinishing);
 		}
 	}
-	public class SettingsViewModel2 : SettingsViewModel { }
+	public class SettingsViewModel2 : SettingsViewModel {
+		public SettingsViewModel2(IJKClientService jkclientService) : base(jkclientService) {}
+	}
 }

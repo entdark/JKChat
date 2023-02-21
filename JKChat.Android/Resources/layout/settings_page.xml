@@ -51,6 +51,39 @@
                         android:ellipsize="end"
                         app:MvxBind="TextFormatted ColourText(PlayerName)"/>
                 </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/item_background">
+                    <TextView
+                        style="@style/SettingsHeaderText"
+                        android:text="Encoding (Jedi Academy only)"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="20dp"
+                        android:layout_marginBottom="4dp"
+                        android:layout_gravity="bottom"
+                        android:lines="1"
+                        android:ellipsize="end"/>
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@color/item_background"
+                    android:foreground="@drawable/item_selection_foreground"
+                    app:MvxBind="Click EncodingCommand">
+                    <TextView
+                        style="@style/SettingsText"
+                        android:text="windows-1252"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginHorizontal="20dp"
+                        android:lines="1"
+                        android:ellipsize="end"
+                        app:MvxBind="Text Encoding"/>
+                </FrameLayout>
                 <!--<RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
