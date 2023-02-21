@@ -20,7 +20,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 		}
 
 		private void BindingControls() {
-            using var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
+			using var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
 			set.Bind(PasswordImageView).For("Visibility").To(vm => vm.NeedPassword).WithConversion("Visibility");
 			set.Bind(ServerNameLabel).For(v => v.AttributedText).To(vm => vm.ServerName).WithConversion("ColourText");
 			set.Bind(MapNameLabel).For(v => v.Text).To(vm => vm.MapName);

@@ -23,7 +23,7 @@ namespace JKChat.iOS.Controls.JKDialog.Cells {
 		}
 
 		private void BindingControls() {
-            using var set = this.CreateBindingSet<JKDialogViewCell, DialogItemVM>();
+			using var set = this.CreateBindingSet<JKDialogViewCell, DialogItemVM>();
 			set.Bind(NameLabel).For(v => v.AttributedText).To(vm => vm.Name).WithConversion("ColourText");
 			set.Bind(ContentView).For(v => v.BackgroundColor).To(vm => vm.IsSelected).WithConversion("DialogSelection");
 		}

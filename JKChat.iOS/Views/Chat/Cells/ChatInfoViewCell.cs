@@ -37,7 +37,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			this.DelayBind(() => {
 				ResizeGradient();
 
-                using var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
+				using var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
 
 				this.AddBindings(TextLabel, "AttributedText ColourText(Text, ColourTextParameter(true, Shadow))");

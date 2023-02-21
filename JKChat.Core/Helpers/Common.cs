@@ -55,11 +55,9 @@ namespace JKChat.Core.Helpers {
 			return result;
 		}
 
-		public static async Task<Task<TResult>> WhenAny<TResult>(this IEnumerable<Task<TResult>> tasks, Predicate<Task<TResult>> condition)
-		{
+		public static async Task<Task<TResult>> WhenAny<TResult>(this IEnumerable<Task<TResult>> tasks, Predicate<Task<TResult>> condition) {
 			var tasklist = tasks.ToList();
-			while (tasklist.Count > 0)
-			{
+			while (tasklist.Count > 0) {
 				var task = await Task.WhenAny(tasklist);
 				if (condition(task))
 					return task;
