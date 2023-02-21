@@ -12,6 +12,7 @@ namespace JKChat.iOS {
 			try {
 				UIApplication.Main(args, null, typeof(AppDelegate));
 			} catch (Exception exception) {
+				Microsoft.AppCenter.Crashes.Crashes.TrackError(exception);
 				Debug.WriteLine(exception);
 			}
 		}
