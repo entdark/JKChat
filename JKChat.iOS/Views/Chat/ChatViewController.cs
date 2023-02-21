@@ -94,13 +94,11 @@ namespace JKChat.iOS.Views.Chat {
 			ChatTableView.KeyboardViewController = this;
 			ChatTableView.RowHeight = UITableView.AutomaticDimension;
 			ChatTableView.EstimatedRowHeight = UITableView.AutomaticDimension;
-			if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
-			{
+			if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0)) {
 				ChatTableView.InsetsLayoutMarginsFromSafeArea = false;
 				ChatTableView.ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never;
 			}
-			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
-			{
+			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
 				ChatTableView.AutomaticallyAdjustsScrollIndicatorInsets = false;
 			}
 			EdgesForExtendedLayout = UIRectEdge.None;
@@ -300,8 +298,12 @@ namespace JKChat.iOS.Views.Chat {
 		}
 
 		private void ResizeInputAccessoryView() {
+			ResizeInputAccessoryView(DeviceInfo.ScreenBounds.Size);
+		}
+
+		private void ResizeInputAccessoryView(CGSize newSize) {
 			float height = 44.0f;
-			inputAccessoryView.SetSize(new CGSize(DeviceInfo.ScreenBounds.Width, height));
+//			inputAccessoryView.SetSize(new CGSize(newSize.Width, height));
 		}
 
 		private void RespaceTitleView() {
@@ -311,46 +313,13 @@ namespace JKChat.iOS.Views.Chat {
 		}
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
-			//holy shit, Apple, really?
-			if (false||UIApplication.SharedApplication.ApplicationState == UIApplicationState.Background) {
-				base.ViewWillTransitionToSize(toSize, coordinator);
-				return;
-			}
-			nfloat? offsetY = null;
-			CGPoint? contentOffset = null;
-			var safeAreaInsets = DeviceInfo.SafeAreaInsets;
-			if (DeviceInfo.iPhoneX && toSize.Width > toSize.Height) {
-				offsetY = -safeAreaInsets.Top;//NavigationBarFrame.Height;
-			} else if (!DeviceInfo.iPhoneX && toSize.Width < toSize.Height) {
-				offsetY = NavigationBarFrame.Height;
-			}
 			base.ViewWillTransitionToSize(toSize, coordinator);
-			void setContentOffset() {
-				offsetY ??= DeviceInfo.iPhoneX ? DeviceInfo.SafeAreaInsets.Top : -NavigationBarFrame.Height;
-				contentOffset ??= ChatTableView.ContentOffset;//-NavigationBarFrame.Frame.Height;
-				ChatTableView.ContentOffset = new CGPoint(contentOffset.Value.X, contentOffset.Value.Y + DeviceInfo.SafeAreaInsets.Bottom - safeAreaInsets.Bottom + offsetY.Value);
-			}
-			void resize() {
-				ResizeInputAccessoryView();
-				RespaceTitleView();
-			}
-			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-				coordinator.AnimateAlongsideTransition((_) => {
-					setContentOffset();
-				}, (_) => {
-					setContentOffset();
-					resize();
-				});
-			} else {
-				resize();
-			}
+			ResizeInputAccessoryView(toSize);
+			RespaceTitleView();
 		}
 
 		public override void ViewSafeAreaInsetsDidChange() {
 			base.ViewSafeAreaInsetsDidChange();
-			if (!UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-				ResizeInputAccessoryView();
-			}
 		}
 
 		protected override void KeyboardWillShowNotification(NSNotification notification) {
@@ -391,6 +360,17 @@ namespace JKChat.iOS.Views.Chat {
 			this.parentViewController = parentViewController;
 		}
 		public void SetSize(CGSize size) {
+			intrinsicContentSize = new CGSize(size.Width, size.Height/* + DeviceInfo.SafeAreaBottom*/);
+			InvalidateIntrinsicContentSize();
+		}
+		public override CGRect Bounds {
+			get => base.Bounds;
+			set {
+				base.Bounds = value;
+				UpdateInsets();
+			}
+		}
+		private void UpdateInsets() {
 			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
 			if (leftConstraint != null) {
 				if (DeviceInfo.IsCollapsed) {
@@ -408,8 +388,6 @@ namespace JKChat.iOS.Views.Chat {
 			if (bgRightConstraint != null) {
 				bgRightConstraint.Constant = DeviceInfo.SafeAreaInsets.Right;
 			}
-			intrinsicContentSize = new CGSize(size.Width, size.Height/* + DeviceInfo.SafeAreaBottom*/);
-			InvalidateIntrinsicContentSize();
 		}
 		public void AddAccessoryView(UIView view) {
 			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
