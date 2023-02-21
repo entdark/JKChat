@@ -49,13 +49,13 @@ namespace JKChat.Android.ValueConverters {
 			if (parseShadow) {
 				var shadowColorAttributes = new List<AttributeData<int>>();
 				value.CleanString(shadowColorAttributes, shadow: parseShadow);
-				spannable.SetSpan(new ShadowSpan(ShadowColor), 0, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				spannable.SetSpan(new ShadowSpan(ShadowColor), 0, cleanStr.Length, SpanTypes.ExclusiveExclusive);
 				foreach (var shadowColorAttribute in shadowColorAttributes) {
-					spannable.SetSpan(new ShadowSpan(GetColor(shadowColorAttribute.Value)), shadowColorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+					spannable.SetSpan(new ShadowSpan(GetColor(shadowColorAttribute.Value)), shadowColorAttribute.Start, shadowColorAttribute.Start+shadowColorAttribute.Length, SpanTypes.ExclusiveExclusive);
 				}
 			}
 			foreach (var colorAttribute in colorAttributes) {
-				spannable.SetSpan(new ForegroundColorCodeSpan(colorAttribute.Value), colorAttribute.Start, cleanStr.Length, SpanTypes.ExclusiveInclusive);
+				spannable.SetSpan(new ForegroundColorCodeSpan(colorAttribute.Value), colorAttribute.Start, colorAttribute.Start+colorAttribute.Length, SpanTypes.ExclusiveExclusive);
 			}
 			if (parseUri) {
 				foreach (var uriAttribute in uriAttributes) {

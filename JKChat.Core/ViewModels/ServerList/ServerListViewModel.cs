@@ -107,7 +107,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				IsLoading = false;
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Server exists",
-					Message = $"Would you like to connect to \"{ColourTextHelper.CleanString(item.ServerName)}\" (\"{inputAddress}\")?",
+					Message = $"Would you like to connect to \"{item.ServerName}{JKClient.Common.EscapeCharacter}\" (\"{inputAddress}\")?",
 					RightButton = "Connect",
 					LeftButton = "Cancel",
 					RightClick = _ => {

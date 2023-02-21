@@ -45,11 +45,11 @@ namespace JKChat.iOS.ValueConverters {
 				value.CleanString(shadowColorAttributes, shadow: parseShadow);
 				attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(), new NSRange(0, cleanStr.Length));
 				foreach (var shadowColorAttribute in shadowColorAttributes) {
-					attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(shadowColorAttribute.Value), new NSRange(shadowColorAttribute.Start, cleanStr.Length-shadowColorAttribute.Start));
+					attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(shadowColorAttribute.Value), new NSRange(shadowColorAttribute.Start, shadowColorAttribute.Length));
 				}
 			}
 			foreach (var colorAttribute in colorAttributes) {
-				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, cleanStr.Length-colorAttribute.Start));
+				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, colorAttribute.Length));
 			}
 			if (parseUri) {
 				foreach (var uriAttribute in uriAttributes) {
