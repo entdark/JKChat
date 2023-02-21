@@ -1,5 +1,7 @@
 ﻿using CoreGraphics;
 
+using Foundation;
+
 using JKChat.iOS.Presenter;
 
 using MvvmCross;
@@ -17,5 +19,6 @@ namespace JKChat.iOS.Helpers {
 		public static bool iPhoneX => UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone
 			&& SafeAreaInsets.Top > 24.0f;
 		public static bool IsCollapsed => Mvx.IoCProvider.Resolve<IViewPresenter>().IsCollapsed;
+		public static bool IsRunningOnMacOS => UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && NSProcessInfo.ProcessInfo.IsiOSApplicationOnMac;
 	}
 }

@@ -9,6 +9,7 @@ using Foundation;
 using JKChat.Core;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
+using JKChat.iOS.Helpers;
 
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Crashes;
@@ -27,7 +28,6 @@ namespace JKChat.iOS {
 	[Register("AppDelegate")]
 	public class AppDelegate : MvxApplicationDelegate<Setup, App>, IUNUserNotificationCenterDelegate {
 		private CLLocationManager locationManager;
-		private bool isActive;
 		private int lastActiveCount, lastMessages;
 		private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken;
 
@@ -43,6 +43,12 @@ namespace JKChat.iOS {
 		public override UIWindow Window {
 			get;
 			set;
+		}
+
+		private bool isActive;
+		public bool IsActive {
+			get => !DeviceInfo.IsRunningOnMacOS ? isActive : true;
+			set => isActive = value;
 		}
 
 		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions) {
@@ -107,7 +113,6 @@ namespace JKChat.iOS {
 				UIBarButtonItem.Appearance.TintColor = Theme.Color.NavigationBarButton;
 			}
 
-
 			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
 
 			UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert, (approved, error) => {
@@ -116,14 +121,14 @@ namespace JKChat.iOS {
 			UNUserNotificationCenter.Current.Delegate = this;
 			InitLocationManager();
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
-			isActive = true;
+			IsActive = true;
 			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			locationUpdateMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
 			return finishedLaunching;
 		}
 
 		public override void OnResignActivation(UIApplication application) {
-			isActive = false;
+			IsActive = false;
 			// Invoked when the application is about to move from active to inactive state.
 			// This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) 
 			// or when the user quits the application and it begins the transition to the background state.
@@ -141,7 +146,7 @@ namespace JKChat.iOS {
 
 		public override void WillEnterForeground(UIApplication application) {
 			base.WillEnterForeground(application);
-			isActive = true;
+			IsActive = true;
 			StopLocationUpdate();
 			CreateNotification();
 			// Called as part of the transition from background to active state.
@@ -149,7 +154,7 @@ namespace JKChat.iOS {
 		}
 
 		public override void OnActivated(UIApplication application) {
-			isActive = true;
+			IsActive = true;
 			// Restart any tasks that were paused (or not yet started) while the application was inactive. 
 			// If the application was previously in the background, optionally refresh the user interface.
 		}
@@ -182,13 +187,16 @@ namespace JKChat.iOS {
 			}
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();
-			isActive = false;
+			IsActive = false;
 			// Called when the application is about to terminate. Save data, if needed. See also DidEnterBackground.
 		}
 
 		private void ExecuteOnBackground() {
 			if (this.AuthorizationStatus == CLAuthorizationStatus.AuthorizedAlways
 				|| this.AuthorizationStatus == CLAuthorizationStatus.AuthorizedWhenInUse) {
+				return;
+			}
+			if (DeviceInfo.IsRunningOnMacOS) {
 				return;
 			}
 			var taskID = UIApplication.SharedApplication.BeginBackgroundTask(() => {
@@ -218,7 +226,7 @@ namespace JKChat.iOS {
 			InvokeOnMainThread(() => {
 				var content = new UNMutableNotificationContent {
 					Title = "JKChat is minimized",
-					//					Subtitle = "Notification Subtitle",
+//					Subtitle = "Notification Subtitle",
 					Body = $"You have {time} seconds until it pauses the connection"
 				};
 				var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
@@ -238,10 +246,10 @@ namespace JKChat.iOS {
 		}
 
 		private void CreateNotification(bool respectCount = true) {
-			if (!UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && isActive) {
+			if (!UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && IsActive) {
 //				return;
 			}
-			respectCount = !isActive;
+			respectCount = !IsActive;
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			int count = gameClientsService.ActiveClients;
 			InvokeOnMainThread(() => {
@@ -316,6 +324,9 @@ namespace JKChat.iOS {
 			if (!AppSettings.LocationUpdate) {
 				return;
 			}
+			if (DeviceInfo.IsRunningOnMacOS) {
+				return;
+			}
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
 			if (Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveClients > 0) {
 				locationManager?.StartUpdatingLocation();
@@ -334,6 +345,9 @@ namespace JKChat.iOS {
 			}
 		}
 		private static void RequestLocationAuthorization(CLLocationManager locationManager, CLAuthorizationStatus status) {
+			if (DeviceInfo.IsRunningOnMacOS) {
+				return;
+			}
 			if (status == CLAuthorizationStatus.Authorized
 				|| status == CLAuthorizationStatus.AuthorizedWhenInUse) {
 				locationManager?.RequestAlwaysAuthorization();
@@ -348,7 +362,7 @@ namespace JKChat.iOS {
 		}
 
 		private void FreeMemory() {
-			if (isActive) {
+			if (IsActive) {
 				return;
 			}
 			GC.Collect();

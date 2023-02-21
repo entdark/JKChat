@@ -31,7 +31,9 @@ namespace JKChat.iOS.Views.Settings {
 			LocationUpdateLabel.Font = Theme.Font.ErgoeMedium(15.0f);
 			UpdateViews(this.View.Frame.Size);
 
-            using var set = this.CreateBindingSet();
+			LocationUpdateBackgroundView.Hidden = DeviceInfo.IsRunningOnMacOS;
+
+			using var set = this.CreateBindingSet();
 			set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
 			set.Bind(PlayerNameButton).To(vm => vm.PlayerNameCommand);
 			set.Bind(LocationUpdateSwitch).For(v => v.On).To(vm => vm.LocationUpdate);
