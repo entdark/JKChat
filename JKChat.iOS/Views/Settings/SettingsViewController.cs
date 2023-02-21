@@ -10,7 +10,7 @@ using MvvmCross.ViewModels;
 using UIKit;
 
 namespace JKChat.iOS.Views.Settings {
-	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Settings", TabIconName = "Images/Settings.png", TabSelectedIconName = "Images/SettingsSelected.png")]
+	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Settings", TabIconName = "Settings", TabSelectedIconName = "SettingsSelected")]
 	public partial class SettingsViewController : BaseViewController<SettingsViewModel> {
 		public SettingsViewController() : base("SettingsViewController", null) {
 			SetUpBackButton = false;

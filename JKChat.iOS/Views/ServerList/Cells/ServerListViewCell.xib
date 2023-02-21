@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -17,76 +17,76 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="134"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
-                    <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="377">
-                        <rect key="frame" x="20" y="8" width="280" height="118"/>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="377">
+                        <rect key="frame" x="20" y="5" width="280" height="124"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Images/Password.png" translatesAutoresizingMaskIntoConstraints="NO" id="526">
-                                <rect key="frame" x="8" y="8" width="29" height="29"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Password" translatesAutoresizingMaskIntoConstraints="NO" id="526">
+                                <rect key="frame" x="6" y="6" width="28" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="28" id="551"/>
                                     <constraint firstAttribute="height" constant="28" id="564"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Server Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MIH-dw-ael">
-                                <rect key="frame" x="34" y="8" width="278" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Server Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MIH-dw-ael">
+                                <rect key="frame" x="34" y="9.5" width="240" height="21"/>
                                 <fontDescription key="fontDescription" name="ErgoeBold" family="Ergoe" pointSize="18"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Images/Map.png" translatesAutoresizingMaskIntoConstraints="NO" id="892">
-                                <rect key="frame" x="8" y="28" width="29" height="29"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Map" translatesAutoresizingMaskIntoConstraints="NO" id="892">
+                                <rect key="frame" x="6" y="34" width="28" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="28" id="893"/>
                                     <constraint firstAttribute="height" constant="28" id="894"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Map Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="895">
-                                <rect key="frame" x="34" y="32" width="278" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Map Name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="895">
+                                <rect key="frame" x="34" y="39.5" width="240" height="17.5"/>
                                 <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Images/Players.png" translatesAutoresizingMaskIntoConstraints="NO" id="902">
-                                <rect key="frame" x="8" y="62" width="29" height="29"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Players" translatesAutoresizingMaskIntoConstraints="NO" id="902">
+                                <rect key="frame" x="6" y="62" width="28" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="28" id="903"/>
                                     <constraint firstAttribute="height" constant="28" id="904"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="16/32" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="905">
-                                <rect key="frame" x="34" y="65" width="125" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="16/32" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="905">
+                                <rect key="frame" x="34" y="67.5" width="106" height="17.5"/>
                                 <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Images/GameType.png" translatesAutoresizingMaskIntoConstraints="NO" id="912">
-                                <rect key="frame" x="8" y="84" width="29" height="29"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="GameType" translatesAutoresizingMaskIntoConstraints="NO" id="912">
+                                <rect key="frame" x="6" y="90" width="28" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="28" id="913"/>
                                     <constraint firstAttribute="height" constant="28" id="914"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="CTF" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="915">
-                                <rect key="frame" x="34" y="88" width="125" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CTF" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="915">
+                                <rect key="frame" x="34" y="95.5" width="28.5" height="17.5"/>
                                 <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Images/Ping.png" translatesAutoresizingMaskIntoConstraints="NO" id="1693">
-                                <rect key="frame" x="138" y="62" width="29" height="29"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Ping" translatesAutoresizingMaskIntoConstraints="NO" id="1693">
+                                <rect key="frame" x="140" y="62" width="28" height="28"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="28" id="1694"/>
                                     <constraint firstAttribute="height" constant="28" id="1695"/>
                                 </constraints>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="16" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1696">
-                                <rect key="frame" x="167" y="64" width="129" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="16" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1696">
+                                <rect key="frame" x="168" y="67.5" width="106" height="17.5"/>
                                 <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Connected" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1930">
-                                <rect key="frame" x="167" y="94" width="129" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Connected" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1930">
+                                <rect key="frame" x="168" y="95.5" width="106" height="17.5"/>
                                 <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
                                 <color key="textColor" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </label>
-                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2886">
-                                <rect key="frame" x="146" y="98" width="13" height="13"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2886">
+                                <rect key="frame" x="148" y="98" width="12" height="12"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="12" id="2887"/>
@@ -163,11 +163,11 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="Images/GameType.png" width="12" height="12"/>
-        <image name="Images/Map.png" width="12" height="12"/>
-        <image name="Images/Password.png" width="10" height="15"/>
-        <image name="Images/Ping.png" width="15" height="14"/>
-        <image name="Images/Players.png" width="14" height="16"/>
+        <image name="GameType" width="12" height="12"/>
+        <image name="Map" width="12" height="12"/>
+        <image name="Password" width="10" height="15"/>
+        <image name="Ping" width="15" height="14"/>
+        <image name="Players" width="14" height="16"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

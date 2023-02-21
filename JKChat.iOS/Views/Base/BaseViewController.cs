@@ -81,7 +81,7 @@ namespace JKChat.iOS.Views.Base {
 			NavigationController.NavigationBarHidden = false;
 
 			if (SetUpBackButton || NavigationController.ViewControllers.Length > 1) {
-				var backImage = UIImage.FromFile("Images/Back.png").ImageWithRenderingMode(UIImageRenderingMode.AlwaysOriginal);
+				var backImage = UIImage.FromBundle("Back");
 				var barButtonItem = new UIBarButtonItem(backImage, UIBarButtonItemStyle.Plain, async (sender, ev) => {
 					bool handled = await BackButtonClick;
 					if (!handled && !NavigationController.IsMovingToParentViewController) {
@@ -90,7 +90,6 @@ namespace JKChat.iOS.Views.Base {
 				}) {
 					ImageInsets = new UIEdgeInsets(0.0f, 3.0f, 0.0f, 0.0f)
 				};
-
 
 				NavigationItem.LeftBarButtonItem = barButtonItem;
 				if (NavigationController != null) {

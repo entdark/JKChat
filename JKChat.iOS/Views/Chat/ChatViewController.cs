@@ -287,13 +287,13 @@ namespace JKChat.iOS.Views.Chat {
 			switch (ChatType) {
 			default:
 			case ChatType.Common:
-				image = UIImage.FromFile("Images/ChatTypeCommon.png");
+				image = UIImage.FromBundle("ChatTypeCommon");
 				break;
 			case ChatType.Team:
-				image = UIImage.FromFile("Images/ChatTypeTeam.png");
+				image = UIImage.FromBundle("ChatTypeTeam");
 				break;
 			case ChatType.Private:
-				image = UIImage.FromFile("Images/ChatTypePrivate.png");
+				image = UIImage.FromBundle("ChatTypePrivate");
 				break;
 			}
 			ChatTypeButton.SetImage(image, UIControlState.Normal);

@@ -15,7 +15,7 @@ using MvvmCross.ViewModels;
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList {
-	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "Images/ServerList.png", TabSelectedIconName = "Images/ServerListSelected.png")]
+	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "ServerList", TabSelectedIconName = "ServerListSelected")]
 	public partial class ServerListViewController : BaseViewController<ServerListViewModel> {
 		public ServerListViewController() : base("ServerListViewController", null) {
 			SetUpBackButton = false;
