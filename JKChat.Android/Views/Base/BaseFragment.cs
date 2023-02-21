@@ -1,6 +1,8 @@
 ﻿using Android.Graphics;
+using Android.InputMethodServices;
 using Android.OS;
 using Android.Views;
+using Android.Views.InputMethods;
 
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
@@ -8,14 +10,13 @@ using AndroidX.Core.Content;
 using AndroidX.Core.View;
 
 using JKChat.Android.Controls.Toolbar;
+using JKChat.Android.Helpers;
 using JKChat.Core.ViewModels.Base;
 
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Platforms.Android.Views.Fragments;
 using MvvmCross.ViewModels;
-
-using static Android.Renderscripts.Sampler;
 
 namespace JKChat.Android.Views.Base {
 	public abstract class BaseFragment<TViewModel> : MvxFragment<TViewModel>, IBaseFragment where TViewModel : class, IMvxViewModel, IBaseViewModel {
@@ -111,6 +112,7 @@ namespace JKChat.Android.Views.Base {
 
 		public override void OnPause() {
 			base.OnPause();
+			HideKeyboard();
 			ActivityPopEnter();
 		}
 
@@ -146,12 +148,14 @@ namespace JKChat.Android.Views.Base {
 
 		protected virtual void ActivityExit() {
 			if (Order == 1) {
+				HideKeyboard();
 				(Activity as IBaseActivity)?.Exit();
 			}
 		}
 
 		protected virtual void ActivityPopEnter() {
 			if (Order == 1) {
+				HideKeyboard();
 				(Activity as IBaseActivity)?.PopEnter();
 			}
 		}
@@ -213,6 +217,13 @@ namespace JKChat.Android.Views.Base {
 
 		protected virtual void BackNavigationClick(object sender, Toolbar.NavigationClickEventArgs ev) {
 			Activity?.OnBackPressed();
+		}
+
+		protected void ShowKeyboard(View view = null) {
+			Context.ShowKeyboard(view);
+		}
+		protected void HideKeyboard(View view = null) {
+			Context.HideKeyboard(view);
 		}
 
 		private void SetTitle() {

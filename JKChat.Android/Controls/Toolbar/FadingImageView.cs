@@ -35,7 +35,7 @@ namespace JKChat.Android.Controls.Toolbar {
 		}
 
 		private void Initialize() {
-			HideShow(false, true);
+			HideShow(false, false);
 			Click += FadingImageViewClick;
 		}
 

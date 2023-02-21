@@ -22,5 +22,10 @@ namespace JKChat.iOS {
 		public void Include(UIView view) {
 			view.BackgroundColor = Theme.Color.Accent;
 		}
+		public void Include(UISearchBar searchBar) {
+			searchBar.Text = searchBar.Text + "";
+			searchBar.Placeholder = searchBar.Placeholder + "";
+			searchBar.TextChanged += (sender, ev) => {};
+		}
 	}
 }

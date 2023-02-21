@@ -85,7 +85,6 @@ namespace JKChat.Core.ViewModels.Chat {
 			TeamChatTypeCommand = new MvxCommand(TeamChatTypeExecute);
 			PrivateChatTypeCommand = new MvxCommand(PrivateChatTypeExecute);
 
-			Items = new MvxObservableCollection<ChatItemVM>();
 			ChatType = ChatType.Common;
 			SelectingChatType = false;
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
+using JKChat.Core.Helpers;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base.Items;
 
@@ -25,8 +26,14 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 		private string serverName;
 		public string ServerName {
 			get => serverName;
-			set => SetProperty(ref serverName, value);
+			set {
+				if (SetProperty(ref serverName, value)) {
+					CleanServerName = ColourTextHelper.CleanString(value);
+				}
+			}
 		}
+
+		public string CleanServerName { get; private set; }
 
 		private string mapName;
 		public string MapName {

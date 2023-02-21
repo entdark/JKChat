@@ -1,4 +1,5 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 
 using Foundation;
 
@@ -17,6 +18,8 @@ using UIKit;
 namespace JKChat.iOS.Views.ServerList {
 	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "ServerList", TabSelectedIconName = "ServerListSelected")]
 	public partial class ServerListViewController : BaseViewController<ServerListViewModel> {
+		private UISearchBar searchBar;
+
 		public ServerListViewController() : base("ServerListViewController", null) {
 			SetUpBackButton = false;
 		}
@@ -32,6 +35,22 @@ namespace JKChat.iOS.Views.ServerList {
 			base.LoadView();
 			ServerListTableView.RegisterNibForCellReuse(ServerListViewCell.Nib, ServerListViewCell.Key);
 			ServerListTableView.ContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
+			ServerListTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.OnDrag;
+			ServerListTableView.AutomaticallyAdjustsScrollIndicatorInsets = false;
+
+			var searchController = new UISearchController() {
+				DimsBackgroundDuringPresentation = false,
+				ObscuresBackgroundDuringPresentation = false
+			};
+			searchBar = searchController.SearchBar;
+			searchBar.AutocapitalizationType = UITextAutocapitalizationType.None;
+			searchBar.SearchButtonClicked += SearchButtonClicked;
+			searchBar.CancelButtonClicked += CancelButtonClicked;
+			if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0)) {
+				NavigationItem.SearchController = searchController;
+			} else {
+				ServerListTableView.TableHeaderView = searchBar;
+			}
 		}
 
 		#region View lifecycle
@@ -45,14 +64,20 @@ namespace JKChat.iOS.Views.ServerList {
 
 			var source = new ServerListTableViewSource(ServerListTableView);
 
-            using var set = this.CreateBindingSet();
+			using var set = this.CreateBindingSet();
 			set.Bind(source).For(s => s.ItemsSource).To(vm => vm.Items);
 			set.Bind(source).For(s => s.SelectionChangedCommand).To(vm => vm.ItemClickCommand);
 			set.Bind(refreshControl).For(r => r.IsRefreshing).To(vm => vm.IsRefreshing);
 			set.Bind(refreshControl).For(r => r.RefreshCommand).To(vm => vm.RefreshCommand);
+			set.Bind(searchBar).To(vm => vm.SearchText);
+		}
 
-			ServerListTableView.Source = source;
-			ServerListTableView.ReloadData();
+		private void CancelButtonClicked(object sender, EventArgs ev) {
+			ViewModel.SearchText = string.Empty;
+		}
+
+		private void SearchButtonClicked(object sender, EventArgs ev) {
+			ResignFirstResponder();
 		}
 
 		public override void ViewWillAppear(bool animated) {
@@ -82,10 +107,20 @@ namespace JKChat.iOS.Views.ServerList {
 		public override MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {
 			return null;
 		}
+
+		protected override void Dispose(bool disposing) {
+			base.Dispose(disposing);
+			if (searchBar != null) {
+				searchBar.SearchButtonClicked += SearchButtonClicked;
+				searchBar.CancelButtonClicked += CancelButtonClicked;
+				searchBar = null;
+			}
+		}
 	}
 
 	public class ServerListTableViewSource : MvxStandardTableViewSource {
 		public ServerListTableViewSource(UITableView tableView) : base(tableView, ServerListViewCell.Key) {
+			tableView.Source = this;
 			this.UseAnimations = true;
 			this.AddAnimation = UITableViewRowAnimation.Top;
 			this.RemoveAnimation = UITableViewRowAnimation.Bottom;

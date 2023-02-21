@@ -2,8 +2,12 @@
 using System.Collections.Specialized;
 
 using Android.App;
+using Android.InputMethodServices;
 using Android.OS;
 using Android.Views;
+using Android.Views.InputMethods;
+using Android.Widget;
+using AndroidX.AppCompat.Widget;
 using AndroidX.RecyclerView.Widget;
 
 using Google.Android.Material.FloatingActionButton;
@@ -31,9 +35,11 @@ namespace JKChat.Android.Views.ServerList {
 	)]
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
-		private IMenuItem addItem;
+		private IMenuItem searchItem;
 		private MvxRecyclerView recyclerView;
 		private FloatingActionButton addButton;
+		private EditText searchView;
+		private bool searching = false;
 
 		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_item) {}
 
@@ -59,6 +65,23 @@ namespace JKChat.Android.Views.ServerList {
 					addButton.Show();
 				}
 			}));
+
+			searchView = this.BindingInflate(Resource.Layout.search_title, null, false) as EditText;
+			searchView.SetTextAppearance(Resource.Style.MessageText_15_Regular);
+			searchView.EditorAction += Searched;
+			searchView.Background = null;
+			var lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
+			lp.RightMargin = 48.0f.DpToPx();
+			searchView.LayoutParameters = lp;
+			SetCustomView(searchView);
+		}
+
+		private void Searched(object sender, TextView.EditorActionEventArgs ev) {
+			if (ev.ActionId == global::Android.Views.InputMethods.ImeAction.Search) {
+				if (sender is View view) {
+					HideKeyboard();
+				}
+			}
 		}
 
 		public override void OnDestroyView() {
@@ -71,6 +94,7 @@ namespace JKChat.Android.Views.ServerList {
 
 		public override void OnPause() {
 			base.OnPause();
+			HideKeyboard();
 		}
 
 		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
@@ -80,8 +104,8 @@ namespace JKChat.Android.Views.ServerList {
 		}
 
 		public override bool OnOptionsItemSelected(IMenuItem item) {
-			if (item == addItem) {
-				ViewModel.AddServerCommand?.Execute(SelectedItem);
+			if (item == searchItem) {
+				ShowSearch();
 				return true;
 			}
 			return base.OnOptionsItemSelected(item);
@@ -90,17 +114,20 @@ namespace JKChat.Android.Views.ServerList {
 		protected override void CreateOptionsMenu() {
 			base.CreateOptionsMenu();
 
-			addItem = Menu.FindItem(Resource.Id.add_item);
-			addItem.SetClickAction(() => {
-				this.OnOptionsItemSelected(addItem);
+			searchItem = Menu.FindItem(Resource.Id.search_item);
+			searchItem.SetClickAction(() => {
+				this.OnOptionsItemSelected(searchItem);
 			});
-			addItem?.SetVisible(false, false);
-//			CheckSelection();
+			searchItem?.SetVisible(false, false);
 		}
 
-		protected override void ActivityExit() {}
+		protected override void ActivityExit() {
+			HideKeyboard();
+		}
 
-		protected override void ActivityPopEnter() {}
+		protected override void ActivityPopEnter() {
+			HideKeyboard();
+		}
 
 		protected override void CheckSelection(bool animated = true) {
 			if (SelectedItem != null) {
@@ -108,20 +135,51 @@ namespace JKChat.Android.Views.ServerList {
 			} else {
 				addButton?.Show();
 			}
-			base.CheckSelection(animated);
+			base.CheckSelection(false);
 		}
 
 		protected override void ShowSelection(bool animated = true) {
-			SetUpNavigation(true);
-//			addItem?.SetVisible(false, false);
-			base.ShowSelection(animated);
+			base.ShowSelection(false);
+			HideSearch(true);
 		}
 
 		protected override void CloseSelection(bool animated = true) {
-			BackArrow?.SetRotation(0.0f, false);
-			SetUpNavigation(false);
-//			addItem?.SetVisible(true, animated);
-			base.CloseSelection(animated);
+			if (!searching && !string.IsNullOrEmpty(ViewModel.SearchText)) {
+				ShowSearch();
+			} else {
+				base.CloseSelection(false);
+				SetUpNavigation(false);
+				searchItem?.SetVisible(true, false);
+			}
+		}
+
+		public override bool OnBackPressed() {
+			if (searching) {
+				HideSearch();
+				return true;
+			}
+			return base.OnBackPressed();
+		}
+
+		private void ShowSearch() {
+			searching = true;
+			base.CloseSelection();
+			SetUpNavigation(true);
+			searchItem?.SetVisible(false, false);
+			DisplayCustomTitle(true);
+			searchView?.RequestFocus();
+			ShowKeyboard(searchView);
+		}
+
+		private void HideSearch(bool showSelection = false) {
+			searching = false;
+			SetUpNavigation(showSelection);
+			searchItem?.SetVisible(!showSelection, false);
+			DisplayCustomTitle(false);
+			if (!showSelection) {
+				ViewModel.SearchText = string.Empty;
+			}
+			HideKeyboard();
 		}
 
 		public class RestoreStateRecyclerAdapter : MvxRecyclerAdapter {

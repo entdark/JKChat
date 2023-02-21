@@ -7,13 +7,8 @@
 		app:showAsAction="ifRoom"
 		app:actionLayout="@layout/report_menu_item"/>
 	<item
-		android:id="@+id/add_item"
-		android:icon="@drawable/ic_add"
-		app:showAsAction="ifRoom"
-		app:actionLayout="@layout/add_menu_item"/>
-	<!--<item
 		android:id="@+id/search_item"
 		android:icon="@drawable/ic_search"
 		app:showAsAction="ifRoom"
-		app:actionLayout="@layout/search_menu_item"/>-->
+		app:actionLayout="@layout/search_menu_item"/>
 </menu>

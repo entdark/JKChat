@@ -6,6 +6,8 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 
+using JKChat.Android.Helpers;
+
 namespace JKChat.Android.Controls {
 	[Register("JKChat.Android.Controls.BottomNavigationView")]
 	public class BottomNavigationView : Google.Android.Material.BottomNavigation.BottomNavigationView {
@@ -54,10 +56,12 @@ namespace JKChat.Android.Controls {
 		private void NavigationItemSelected(object sender, ItemSelectedEventArgs ev) {
 			ViewPager?.SetCurrentItem(ev.Item.ItemId, true);
 			ev.Handled = true;
+			Context.HideKeyboard();
 		}
 
 		private void NavigationItemReselected(object sender, ItemReselectedEventArgs ev) {
 			ev.Item.SetChecked(false);
+			Context.HideKeyboard();
 		}
 
 		public virtual bool DidRegisterViewModelType(Type viewModelType) {

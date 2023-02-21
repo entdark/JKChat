@@ -1,8 +1,11 @@
 ﻿using System;
 
 using Android.App;
+using Android.Content;
+using Android.InputMethodServices;
 using Android.Util;
 using Android.Views;
+using Android.Views.InputMethods;
 
 using JKChat.Android.Controls.Listeners;
 using JKChat.Android.Controls.Toolbar;
@@ -47,6 +50,17 @@ namespace JKChat.Android.Helpers {
 						item?.SetVisible(visible);
 					}
 				});
+			}
+		}
+		public static void ShowKeyboard(this Context context, View view = null) {
+			var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
+			imm.ShowSoftInput(view, 0);
+		}
+		public static void HideKeyboard(this Context context, View view = null) {
+			view ??= (context as Activity)?.CurrentFocus;
+			if (view != null) {
+				var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
+				imm.HideSoftInputFromWindow(view.WindowToken, 0);
 			}
 		}
 	}

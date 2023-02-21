@@ -43,6 +43,7 @@ namespace JKChat.Core.ViewModels.Base {
 		public ReportViewModel() {
 			ReportCommand = new MvxAsyncCommand<TItem>(ReportExecute);
 			SelectCommand = new MvxCommand<TItem>(SelectExecute);
+			Items = new MvxObservableCollection<TItem>();
 		}
 
 		protected virtual async Task<bool> ReportExecute(TItem item) {

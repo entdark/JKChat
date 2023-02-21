@@ -20,10 +20,11 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
 	public class ServerListViewModel : ReportViewModel<ServerListItemVM> {
-		private MvxSubscriptionToken serverInfoMessageToken;
+		private readonly MvxObservableCollection<ServerListItemVM> items;
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
+		private MvxSubscriptionToken serverInfoMessageToken;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
@@ -41,12 +42,28 @@ namespace JKChat.Core.ViewModels.ServerList {
 			set => SetProperty(ref isRefreshing, value);
 		}
 
+		private string searchText;
+		public string SearchText {
+			get => searchText;
+			set {
+				if (SetProperty(ref searchText, value)) {
+					if (string.IsNullOrEmpty(value)) {
+						Items.ReplaceWith(items);
+						return;
+					} else {
+						Items.ReplaceWith(items.Where(item => item.CleanServerName.Contains(value, StringComparison.InvariantCultureIgnoreCase)
+							|| item.MapName.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
+					}
+				}
+			}
+		}
+
 		public ServerListViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
 			Title = "Server list";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
 			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
-			Items = new MvxObservableCollection<ServerListItemVM>();
+			items = new MvxObservableCollection<ServerListItemVM>();
 			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
@@ -136,6 +153,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				HostName = inputAddress
 			};
 			var server = new ServerListItemVM(serverInfo);
+			items.Insert(0, server);
 			Items.Insert(0, server);
 			IsLoading = false;
 			await DialogService.ShowAsync(new JKDialogConfig() {
@@ -174,7 +192,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 				}
 				if (newItems != null) {
 					var reportedServer = await cacheService.LoadReportedServers();
-					Items.ReplaceWith(newItems.Except(reportedServer));
+					items.ReplaceWith(newItems.Except(reportedServer));
+					Items.ReplaceWith(items);
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
@@ -186,6 +205,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			if (SelectedItem != null) {
 				return;
 			}
+			items.Move(items.IndexOf(item), 0);
 			Items.Move(Items.IndexOf(item), 0);
 			await NavigationService.NavigateFromRoot<ChatViewModel, ServerListItemVM>(item, viewModel => {
 				return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
@@ -196,6 +216,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		protected override async Task<bool> ReportExecute(ServerListItemVM item) {
 			bool report = await base.ReportExecute(item);
 			if (report) {
+				items.Remove(item);
 				Items.Remove(item);
 				await cacheService.AddReportedServer(item);
 			}
@@ -252,7 +273,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 				}
 				if (newItems != null) {
 					var reportedServer = await cacheService.LoadReportedServers();
-					Items.ReplaceWith(newItems.Except(reportedServer));
+					items.ReplaceWith(newItems.Except(reportedServer));
+					Items.ReplaceWith(items);
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
