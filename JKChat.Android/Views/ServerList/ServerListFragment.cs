@@ -85,6 +85,10 @@ namespace JKChat.Android.Views.ServerList {
 		}
 
 		public override void OnDestroyView() {
+			if (searchView != null) {
+				searchView.EditorAction -= Searched;
+				searchView = null;
+			}
 			base.OnDestroyView();
 		}
 
