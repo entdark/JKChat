@@ -218,7 +218,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 				BackgroundButton.TouchUpInside -= BackgroundButtonTouchUpInside;
 				InputTextField.EditingChanged -= InputTextFieldEditingChanged;
 			}
-				base.Dispose(disposing);
+			base.Dispose(disposing);
 		}
 
 		#endregion
