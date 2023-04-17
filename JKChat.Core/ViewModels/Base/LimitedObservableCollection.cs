@@ -7,7 +7,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
 	public class LimitedObservableCollection<T> : MvxObservableCollection<T> {
-		private int limit;
+		private readonly int limit;
 		public LimitedObservableCollection(int limit) {
 			if (limit < 0) {
 				throw new ArgumentOutOfRangeException(nameof(limit));
