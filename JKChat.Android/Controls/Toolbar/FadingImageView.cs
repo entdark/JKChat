@@ -77,8 +77,8 @@ namespace JKChat.Android.Controls.Toolbar {
 			set.PlayTogether(animators);
 			set.SetDuration(200);
 			set.SetInterpolator(new DecelerateInterpolator());
-			set.Start();
 			set.AnimationEnd += VisibilityAnimationEnd;
+			set.Start();
 		}
 
 		private void VisibilityAnimationEnd(object sender, EventArgs ev) {
