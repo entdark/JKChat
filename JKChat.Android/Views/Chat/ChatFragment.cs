@@ -79,7 +79,7 @@ namespace JKChat.Android.Views.Chat {
 			recyclerView.Adapter = scrollToBottomRecyclerAdapter;
 
 			sendButton = view.FindViewById<ImageView>(Resource.Id.send_button);
-			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), true);
+			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), false);
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
 			SetCustomTitleView(titleView);
@@ -157,9 +157,9 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		private void ScaleSendButton(bool show, bool instant = false) {
+		private void ScaleSendButton(bool show, bool animated = true) {
 			float scale = show ? 1.0f : 0.0f;
-			if (instant) {
+			if (animated) {
 				sendButton.ScaleX = scale;
 				sendButton.ScaleY = scale;
 				return;
