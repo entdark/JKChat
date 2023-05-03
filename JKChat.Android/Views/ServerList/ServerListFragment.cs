@@ -73,7 +73,7 @@ namespace JKChat.Android.Views.ServerList {
 			var lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
 			lp.RightMargin = 48.0f.DpToPx();
 			searchView.LayoutParameters = lp;
-			SetCustomView(searchView);
+			SetCustomTitleView(searchView);
 		}
 
 		private void Searched(object sender, TextView.EditorActionEventArgs ev) {

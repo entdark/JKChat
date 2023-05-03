@@ -82,7 +82,7 @@ namespace JKChat.Android.Views.Chat {
 			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), true);
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
-			SetCustomView(titleView);
+			SetCustomTitleView(titleView);
 		}
 
 		public override void OnDestroyView() {

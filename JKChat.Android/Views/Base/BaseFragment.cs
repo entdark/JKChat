@@ -47,7 +47,7 @@ namespace JKChat.Android.Views.Base {
 		protected Toolbar ActivityToolbar => (Activity as IBaseActivity)?.Toolbar;
 
 		protected Toolbar Toolbar { get; private set; }
-		protected View ToolbarCustomView { get; private set; }
+		protected View ToolbarCustomTitleView { get; private set; }
 
 		protected IMenu Menu { get; private set; }
 
@@ -161,19 +161,19 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		private bool toolbarCustomTitleAdded = false;
-		protected virtual void SetCustomView(View view) {
+		protected virtual void SetCustomTitleView(View view) {
 			if (ActionBar != null) {
 				ActionBar.CustomView = view;
 			} else if (Toolbar != null) {
-				if (ToolbarCustomView != null) {
-					Toolbar.RemoveView(ToolbarCustomView);
+				if (ToolbarCustomTitleView != null) {
+					Toolbar.RemoveView(ToolbarCustomTitleView);
 				}
 				if (view != null) {
 					Toolbar.AddView(view);
 					toolbarCustomTitleAdded = true;
 				}
 			}
-			ToolbarCustomView = view;
+			ToolbarCustomTitleView = view;
 		}
 
 		protected virtual void DisplayCustomTitle(bool show) {
@@ -181,12 +181,12 @@ namespace JKChat.Android.Views.Base {
 				ActionBar.SetDisplayShowCustomEnabled(show);
 				ActionBar.SetDisplayShowTitleEnabled(!show);
 			} else if (Toolbar != null) {
-				if (ToolbarCustomView != null) {
+				if (ToolbarCustomTitleView != null) {
 					if (show && !toolbarCustomTitleAdded) {
-						Toolbar.AddView(ToolbarCustomView);
+						Toolbar.AddView(ToolbarCustomTitleView);
 						toolbarCustomTitleAdded = true;
 					} else if (!show && toolbarCustomTitleAdded) {
-						Toolbar.RemoveView(ToolbarCustomView);
+						Toolbar.RemoveView(ToolbarCustomTitleView);
 						toolbarCustomTitleAdded = false;
 					}
 				}
