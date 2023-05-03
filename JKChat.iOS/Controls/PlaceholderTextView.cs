@@ -7,6 +7,8 @@ using CoreGraphics;
 
 using Foundation;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Controls {
@@ -59,7 +61,7 @@ namespace JKChat.iOS.Controls {
 			Initialize();
 		}
 
-		protected internal PlaceholderTextView(IntPtr handle) : base(handle) {
+		protected internal PlaceholderTextView(NativeHandle handle) : base(handle) {
 			Initialize();
 		}
 

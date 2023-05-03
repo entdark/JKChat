@@ -27,6 +27,8 @@ using MvvmCross.Platforms.Android.Presenters.Attributes;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Plugin.Messenger;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.Android.Views.Main {
 	[Activity(
 		Label = "@string/app_name",
@@ -45,7 +47,7 @@ namespace JKChat.Android.Views.Main {
 
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
-			Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+			Platform.Init(this, savedInstanceState);
 			if (savedInstanceState != null) {
 				Mvx.IoCProvider.Resolve<IDialogService>().RestoreState();
 			} else {

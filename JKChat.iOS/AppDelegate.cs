@@ -47,13 +47,14 @@ namespace JKChat.iOS {
 
 		private bool isActive;
 		public bool IsActive {
-			get => !DeviceInfo.IsRunningOnMacOS ? isActive : true;
+			get => isActive;
 			set => isActive = value;
 		}
 
 		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions) {
+#if !__MACCATALYST__
 			AppCenter.Start(Core.ApiKeys.AppCenter.iOS, typeof(Crashes));
-
+#endif
 			var titleTextAttributes = new UIStringAttributes() {
 				ForegroundColor = Theme.Color.Title,
 				Font = Theme.Font.ANewHope(13.0f)
@@ -74,16 +75,16 @@ namespace JKChat.iOS {
 			UITabBar.Appearance.BarTintColor = Theme.Color.TabBar;
 			UITabBar.Appearance.UnselectedItemTintColor = Theme.Color.TabBarItemUnselected;
 			UITabBar.Appearance.SelectedImageTintColor = Theme.Color.TabBarItemSelected;
-			var tabBarTitleNormalTextAttributes = new UITextAttributes() {
-				TextColor = Theme.Color.TabBarItemUnselected,
+			var tabBarTitleNormalStringAttributes = new UIStringAttributes() {
+				ForegroundColor = Theme.Color.TabBarItemUnselected,
 				Font = Theme.Font.ErgoeBold(10.0f)
 			};
-			var tabBarTitleSelectedTextAttributes = new UITextAttributes() {
-				TextColor = Theme.Color.TabBarItemSelected,
+			var tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
+				ForegroundColor = Theme.Color.TabBarItemSelected,
 				Font = Theme.Font.ErgoeBold(10.0f)
 			};
-			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleNormalTextAttributes, UIControlState.Normal);
-			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleSelectedTextAttributes, UIControlState.Selected);
+			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleNormalStringAttributes, UIControlState.Normal);
+			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleSelectedStringAttributes, UIControlState.Selected);
 			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
 				var appearance = new UITabBarAppearance();
 				appearance.ConfigureWithDefaultBackground();
@@ -92,11 +93,11 @@ namespace JKChat.iOS {
 				if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
 					UITabBar.Appearance.ScrollEdgeAppearance = appearance;
 				}
-				var tabBarTitleNormalStringAttributes = new UIStringAttributes() {
+				tabBarTitleNormalStringAttributes = new UIStringAttributes() {
 					ForegroundColor = Theme.Color.TabBarItemUnselected,
 					Font = Theme.Font.ErgoeBold(10.0f)
 				};
-				var tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
+				tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
 					ForegroundColor = Theme.Color.TabBarItemSelected,
 					Font = Theme.Font.ErgoeBold(10.0f)
 				};
@@ -124,6 +125,14 @@ namespace JKChat.iOS {
 			IsActive = true;
 			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
 			locationUpdateMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
+			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidBecomeMainNotification"), (notification) => {
+				base.WillEnterForeground(application);
+				IsActive = true;
+			});
+			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidResignMainNotification"), (notification) => {
+				IsActive = false;
+				base.DidEnterBackground(application);
+			});
 			return finishedLaunching;
 		}
 
@@ -188,6 +197,7 @@ namespace JKChat.iOS {
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();
 			IsActive = false;
+			base.WillTerminate(application);
 			// Called when the application is about to terminate. Save data, if needed. See also DidEnterBackground.
 		}
 

@@ -9,6 +9,8 @@ using JKChat.Core.ViewModels.Chat.Items;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.Chat.Cells {
@@ -38,7 +40,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			Nib = UINib.FromName("ChatMessageViewCell", NSBundle.MainBundle);
 		}
 
-		protected ChatMessageViewCell(IntPtr handle) : base(handle) {
+		protected ChatMessageViewCell(NativeHandle handle) : base(handle) {
 			this.DelayBind(() => {
 //				this.ContentView.BackgroundColor = UIColor.Red;
 				this.ContentView.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);

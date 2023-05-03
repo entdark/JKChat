@@ -9,12 +9,14 @@ using Foundation;
 using JKChat.iOS.Helpers;
 using JKChat.iOS.Views.Base;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Controls {
 	[Register("ChatTableView")]
 	public class ChatTableView : UITableView {
-		public const float SpecialOffset = 1337.0f;
+		public static float SpecialOffset => !DeviceInfo.IsRunningOnMacOS ? 1337.0f : 0.0f;
 		public IKeyboardViewController KeyboardViewController { get; set; }
 		public override UIEdgeInsets ContentInset {
 			get => new UIEdgeInsets(base.ContentInset.Bottom - ExtraContentInset.Bottom, base.ContentInset.Left - ExtraContentInset.Left, base.ContentInset.Top - ExtraContentInset.Top, base.ContentInset.Right - ExtraContentInset.Right);
@@ -58,7 +60,7 @@ namespace JKChat.iOS.Controls {
 		protected ChatTableView(NSObjectFlag t) : base(t) {
 			Initialize();
 		}
-		protected internal ChatTableView(IntPtr handle) : base(handle) {
+		protected internal ChatTableView(NativeHandle handle) : base(handle) {
 			Initialize();
 		}
 

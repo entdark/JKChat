@@ -19,7 +19,7 @@ using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.Android.Controls {
 	public class JKDialog : Dialog {

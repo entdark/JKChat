@@ -16,6 +16,8 @@ using MvvmCross.Presenters;
 using MvvmCross.Presenters.Attributes;
 using MvvmCross.ViewModels;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.Base {
@@ -37,7 +39,7 @@ namespace JKChat.iOS.Views.Base {
 		protected virtual Task<bool> BackButtonClick => Task.FromResult(false);
 
 		protected BaseViewController() {}
-		protected BaseViewController(IntPtr handle) : base(handle) { }
+		protected BaseViewController(NativeHandle handle) : base(handle) { }
 		protected BaseViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
 
 		public override void LoadView() {

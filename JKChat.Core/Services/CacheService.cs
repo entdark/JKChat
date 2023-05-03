@@ -12,12 +12,14 @@ using JKClient;
 
 using SQLite;
 
+using Microsoft.Maui.Storage;
+
 namespace JKChat.Core.Services {
 	public class CacheService : ICacheService {
 		private readonly SQLiteAsyncConnection connection;
 
 		public CacheService() {
-			var path = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "jkchat.db3");
+			var path = Path.Combine(FileSystem.AppDataDirectory, "jkchat.db3");
 			connection = new SQLiteAsyncConnection(path);
 			connection.CreateTableAsync<RecentServer>().Wait();
 			connection.CreateTableAsync<ReportedServer>().Wait();

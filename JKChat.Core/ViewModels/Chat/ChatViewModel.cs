@@ -20,7 +20,8 @@ using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 namespace JKChat.Core.ViewModels.Chat {
 	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerListItemVM> {

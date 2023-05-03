@@ -17,6 +17,8 @@ using JKChat.iOS.ViewSources;
 
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.Chat {
@@ -65,7 +67,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		public override bool CanBecomeFirstResponder => true;//appeared;
+		public override bool CanBecomeFirstResponder => !DeviceInfo.IsRunningOnMacOS;//appeared;
 		public override UIView InputAccessoryView => inputAccessoryView;//MessageView;
 
 		protected override Task<bool> BackButtonClick => ViewModel?.OfferDisconnect();
@@ -88,8 +90,15 @@ namespace JKChat.iOS.Views.Chat {
 			itemTappedStopwatch.Start();
 
 			inputAccessoryView.AutoresizingMask = UIViewAutoresizing.All;
-			MessageView.RemoveFromSuperview();
-			inputAccessoryView.AddAccessoryView(MessageView);
+			if (!DeviceInfo.IsRunningOnMacOS) {
+				MessageView.RemoveFromSuperview();
+				inputAccessoryView.AddAccessoryView(MessageView);
+				ViewBottomConstraint.Active = true;
+				ChatBottomMessageTopConstraint.Active = false;
+			} else {
+				ViewBottomConstraint.Active = false;
+				ChatBottomMessageTopConstraint.Active = true;
+			}
 			ChatTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive;
 			ChatTableView.KeyboardViewController = this;
 			ChatTableView.RowHeight = UITableView.AutomaticDimension;
@@ -157,17 +166,6 @@ namespace JKChat.iOS.Views.Chat {
 				});
 			};
 			ViewBottomConstraint.Constant = 44.0f + DeviceInfo.SafeAreaInsets.Bottom - ChatTableView.SpecialOffset;
-
-			ChatTypeCommonButton.ImageEdgeInsets = new UIEdgeInsets(0.0f, 20.0f, 0.0f, 0.0f);
-			ChatTypeCommonButton.TitleEdgeInsets = new UIEdgeInsets(0.0f, 26.0f, 0.0f, 0.0f);
-
-			ChatTypeTeamButton.ImageEdgeInsets = new UIEdgeInsets(0.0f, -3.0f, 0.0f, 3.0f);
-			ChatTypeTeamButton.TitleEdgeInsets = new UIEdgeInsets(0.0f, 3.0f, 0.0f, -3.0f);
-
-			ChatTypePrivateButton.ImageEdgeInsets = new UIEdgeInsets(0.0f, 0.0f, 0.0f, 26.0f);
-			ChatTypePrivateButton.TitleEdgeInsets = new UIEdgeInsets(0.0f, 0.0f, 0.0f, 20.0f);
-
-			ChatTypeButton.ImageEdgeInsets = new UIEdgeInsets(16.0f, 20.0f, 13.0f, 16.0f);
 
 			MessageTextView.Placeholder = "Write a message...";
 			MessageTextView.PlaceholderColor = Theme.Color.Placeholder;

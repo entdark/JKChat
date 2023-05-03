@@ -17,6 +17,8 @@ using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Platforms.Android.Services;
 using MvvmCross.Plugin.Messenger;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.Android.Services {
 	[Service(Enabled = true)]
 	public class ForegroundGameClientsService : Service {
@@ -109,7 +111,7 @@ namespace JKChat.Android.Services {
 		}
 
 		private static void FreeMemory() {
-			if (Xamarin.Essentials.Platform.CurrentActivity is MainActivity mainActivity && mainActivity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed)) {
+			if (Platform.CurrentActivity is MainActivity mainActivity && mainActivity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed)) {
 				return;
 			}
 			GC.Collect();

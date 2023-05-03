@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="15dp"
-        app:MvxBind="FMarginTop ChatMessageMargin(TopVMType); FMarginBottom ChatMessageMargin(BottomVMType)">
+        app:MvxBind="MarginTop ChatMessageMargin(TopVMType); MarginBottom ChatMessageMargin(BottomVMType)">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"

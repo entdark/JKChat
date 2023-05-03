@@ -12,6 +12,8 @@ using JKChat.iOS.Helpers;
 using JKChat.iOS.ValueConverters;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Controls.JKDialog {
@@ -38,7 +40,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 			}
 		}
 
-		public JKDialogViewController(IntPtr handle) : base(handle) {
+		public JKDialogViewController(NativeHandle handle) : base(handle) {
 		}
 
 		#region View lifecycle

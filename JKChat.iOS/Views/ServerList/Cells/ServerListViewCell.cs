@@ -1,9 +1,14 @@
 ﻿using System;
 
 using Foundation;
+
 using JKChat.Core.ViewModels.ServerList.Items;
+
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
+
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList.Cells {
@@ -15,7 +20,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 			Nib = UINib.FromName("ServerListViewCell", NSBundle.MainBundle);
 		}
 
-		protected ServerListViewCell(IntPtr handle) : base(handle) {
+		protected ServerListViewCell(NativeHandle handle) : base(handle) {
 			this.DelayBind(BindingControls);
 		}
 

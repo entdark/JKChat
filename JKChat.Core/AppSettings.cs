@@ -5,7 +5,7 @@ using JKChat.Core.Messages;
 using MvvmCross;
 using MvvmCross.Plugin.Messenger;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.Storage;
 
 namespace JKChat.Core {
 	public static class AppSettings {

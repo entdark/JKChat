@@ -6,6 +6,8 @@ using Foundation;
 using JKChat.Core.Services;
 using JKChat.iOS.Controls.JKDialog;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.iOS.Services {
 	public class DialogService : IDialogService {
 		private TaskCompletionSource<object> tcs;
@@ -24,7 +26,7 @@ namespace JKChat.iOS.Services {
 
 			nsObject.InvokeOnMainThread(() => {
 				var dialog = new JKDialogViewController(config, tcs);
-				var viewController = Xamarin.Essentials.Platform.GetCurrentUIViewController();
+				var viewController = Platform.GetCurrentUIViewController();
 				if (viewController is JKDialogViewController && viewController.PresentingViewController != null) {
 					viewController = viewController.PresentingViewController;
 				}

@@ -8,7 +8,7 @@ using JKChat.Core.Services;
 
 using MvvmCross;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 namespace JKChat.Core.Helpers {
 	public static class Common {

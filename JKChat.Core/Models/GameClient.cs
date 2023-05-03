@@ -19,7 +19,8 @@ using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Devices;
 
 namespace JKChat.Core.Models {
 	public class GameClient {
@@ -88,7 +89,9 @@ namespace JKChat.Core.Models {
 								}
 								addingPending = false;
 							});
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS
+								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
+								|| DeviceInfo.Platform == DevicePlatform.macOS) {
 							mainThread.ExecuteOnMainThreadAsync(() => {
 								lock (Items) {
 									Items.InsertRange(0, pendingItemsCopy);
@@ -356,15 +359,15 @@ namespace JKChat.Core.Models {
 
 		private async Task AddToChat(Command command) {
 			string fullMessage = command[1];
-			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ");
+			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ", StringComparison.Ordinal);
 			if (separator < 0) {
 				return;
 			}
 			separator += 3;
 			string name = fullMessage.Substring(0, separator);
-			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
+			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
-			string message = fullMessage.Substring(separator, fullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty);
+			string message = fullMessage.Substring(separator, fullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			await AddItem(chatItem);
 		}
@@ -378,7 +381,7 @@ namespace JKChat.Core.Models {
 			string colour = command[3];
 			string message = command[4];
 
-			string playerName = name.Replace(Common.EscapeCharacter, string.Empty);
+			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
 
 			var stringBuilder = new StringBuilder();
@@ -387,9 +390,8 @@ namespace JKChat.Core.Models {
 				.Append(location)
 				.Append("> ^")
 				.Append(colour)
-				.Append(message)
-				.Replace(Common.EscapeCharacter, string.Empty);
-			string fullMessage = stringBuilder.ToString();
+				.Append(message);
+			string fullMessage = stringBuilder.ToString().Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
 			await AddItem(chatItem);
@@ -402,13 +404,13 @@ namespace JKChat.Core.Models {
 			const string escapeStartPrivate = Common.EscapeCharacter + "[";
 			const string escapeEndPrivate = Common.EscapeCharacter + "]";
 
-			int endIndex = playerName.IndexOf(escapeEndTeam);
-			if (endIndex < 0) endIndex = playerName.IndexOf(escapeEndPrivate);
-			if (endIndex < 0) endIndex = playerName.IndexOf(escapeColon);
+			int endIndex = playerName.IndexOf(escapeEndTeam, StringComparison.Ordinal);
+			if (endIndex < 0) endIndex = playerName.IndexOf(escapeEndPrivate, StringComparison.Ordinal);
+			if (endIndex < 0) endIndex = playerName.IndexOf(escapeColon, StringComparison.Ordinal);
 			if (endIndex < 0) return playerName;
 
-			int startIndex = playerName.IndexOf(escapeStartTeam);
-			if (startIndex < 0) startIndex = playerName.IndexOf(escapeStartPrivate);
+			int startIndex = playerName.IndexOf(escapeStartTeam, StringComparison.Ordinal);
+			if (startIndex < 0) startIndex = playerName.IndexOf(escapeStartPrivate, StringComparison.Ordinal);
 			if (startIndex < 0) startIndex = -2;
 			startIndex += 2;
 
@@ -435,7 +437,9 @@ namespace JKChat.Core.Models {
 						ChatItemVM prevItem = null;
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
 							prevItem = items[items.Count - 1];
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS
+								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
+								|| DeviceInfo.Platform == DevicePlatform.macOS) {
 							prevItem = items[0];
 						}
 						prevItem.BottomVMType = item.ThisVMType;
@@ -451,7 +455,9 @@ namespace JKChat.Core.Models {
 					lock (Items) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
 							Items.Add(item);
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+						} else if (DeviceInfo.Platform == DevicePlatform.iOS
+								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
+								|| DeviceInfo.Platform == DevicePlatform.macOS) {
 							Items.Insert(0, item);
 						}
 					}
@@ -475,7 +481,9 @@ namespace JKChat.Core.Models {
 						if (nextIndex < Items.Count) {
 							nextItem = Items[nextIndex];
 						}
-					} else if (DeviceInfo.Platform == DevicePlatform.iOS) {
+					} else if (DeviceInfo.Platform == DevicePlatform.iOS
+							|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
+							|| DeviceInfo.Platform == DevicePlatform.macOS) {
 						int prevIndex = removeIndex;
 						int nextIndex = removeIndex - 1;
 						if (prevIndex < Items.Count) {
@@ -544,7 +552,7 @@ namespace JKChat.Core.Models {
 				Message = message,
 				LeftButton = "Copy",
 				LeftClick = (_) => {
-					Xamarin.Essentials.Clipboard.SetTextAsync(message);
+					Clipboard.SetTextAsync(message);
 				},
 				RightButton = "OK",
 				AnyClick = (_) => {

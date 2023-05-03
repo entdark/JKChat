@@ -30,6 +30,8 @@ using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Plugin.Messenger;
 
+using Microsoft.Maui.ApplicationModel;
+
 using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 
 namespace JKChat.Android.Views.Chat {
@@ -206,7 +208,7 @@ namespace JKChat.Android.Views.Chat {
 			public override void NotifyDataSetChanged(NotifyCollectionChangedEventArgs ev) {
 				base.NotifyDataSetChanged(ev);
 
-				bool activityResumed = Xamarin.Essentials.Platform.CurrentActivity is MainActivity mainActivity
+				bool activityResumed = Platform.CurrentActivity is MainActivity mainActivity
 					&& mainActivity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Resumed);
 
 				if (activityResumed && ScrolledToBottom && ev.Action == NotifyCollectionChangedAction.Add && ev.NewStartingIndex >= 0 && !dragging) {

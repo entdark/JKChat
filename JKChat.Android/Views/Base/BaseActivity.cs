@@ -10,11 +10,9 @@ using AndroidX.Core.Content;
 
 using JKChat.Android.Controls;
 using JKChat.Android.Controls.Toolbar;
-using JKChat.Android.Helpers;
 
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
-using MvvmCross.Platforms.Android.Views.ViewPager;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
@@ -51,9 +49,7 @@ namespace JKChat.Android.Views.Base {
 
 			var contentView = FindViewById<ViewGroup>(Resource.Id.content);
 			contentView.AddView(new ConfigurationChangedView(this) {
-				ConfigurationChanged = configuration => {
-					ConfigurationChanged(configuration);
-				}
+				ConfigurationChanged = ConfigurationChanged
 			});
 		}
 

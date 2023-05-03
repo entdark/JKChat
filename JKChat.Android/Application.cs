@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Text;
 
 using Android.App;
 using Android.Runtime;
+
+using JKChat.Core;
 
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Crashes;
@@ -17,7 +20,7 @@ namespace JKChat.Android {
 		Theme = "@style/AppTheme",
 		ResizeableActivity = true
 	)]
-	public class Application : global::Android.App.Application/*MvxAndroidApplication<Setup, App>*/ {
+	public class Application : MvxAndroidApplication<Setup, App> {
 		public Application() {
 		}
 
@@ -25,6 +28,8 @@ namespace JKChat.Android {
 		}
 
 		public override void OnCreate() {
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
 			AppCenter.Start(Core.ApiKeys.AppCenter.Android, typeof(Crashes));
 
 			base.OnCreate();

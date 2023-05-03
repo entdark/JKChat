@@ -15,7 +15,7 @@ using JKChat.Core.ValueCombiners;
 
 using MvvmCross.Converters;
 
-using Xamarin.Essentials;
+using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {

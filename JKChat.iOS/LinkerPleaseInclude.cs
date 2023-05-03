@@ -5,6 +5,7 @@ using MvvmCross.Plugin.Visibility;
 using UIKit;
 
 namespace JKChat.iOS {
+	[Preserve(AllMembers = true)]
 	public class LinkerPleaseInclude {
 		public void Include(MvxVisibilityValueConverter vvc) {
 			vvc = new MvxVisibilityValueConverter();

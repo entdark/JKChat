@@ -2,13 +2,12 @@
 
 using JKChat.Android.Presenter;
 using JKChat.Android.Services;
-using JKChat.Android.TargetBindings;
 using JKChat.Core;
 using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 using JKChat.Core.ValueCombiners;
 
-//using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 
 using MvvmCross;
 using MvvmCross.Binding.Bindings.Target.Construction;
@@ -18,18 +17,18 @@ using MvvmCross.IoC;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Platforms.Android.Presenters;
+using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
 using MvvmCross.Views;
 
-//using Serilog;
-//using Serilog.Extensions.Logging;
+using Serilog;
+using Serilog.Extensions.Logging;
 
 namespace JKChat.Android {
 	public class Setup : MvxAndroidSetup<App> {
-		protected override IMvxNavigationService CreateNavigationService(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override IMvxNavigationService CreateNavigationService(IMvxIoCProvider iocProvider) {
 			iocProvider.LazyConstructAndRegisterSingleton<IMvxNavigationService, IMvxViewModelLoader, IMvxViewDispatcher, IMvxIoCProvider>(
-				(loader, dispatcher, iocProvider) => new NavigationService(loader/*, dispatcher, iocProvider*/));
+				(loader, dispatcher, iocProvider) => new NavigationService(loader, dispatcher, iocProvider));
 			var navigationService = iocProvider.Resolve<IMvxNavigationService>();
 			iocProvider.RegisterSingleton(navigationService as INavigationService);
 			return navigationService;
@@ -39,27 +38,9 @@ namespace JKChat.Android {
 			return new AndroidViewPresenter(AndroidViewAssemblies);
 		}
 
-		protected override void InitializeFirstChance(/*IMvxIoCProvider iocProvider*/) {
-			var iocProvider = Mvx.IoCProvider;
+		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
-			base.InitializeFirstChance(/*iocProvider*/);
-		}
-
-		protected override void FillTargetFactories(IMvxTargetBindingFactoryRegistry registry) {
-			base.FillTargetFactories(registry);
-			var allMargins = new[] {
-				FloatMarginTargetBinding.View_Margin,
-				FloatMarginTargetBinding.View_MarginLeft,
-				FloatMarginTargetBinding.View_MarginRight,
-				FloatMarginTargetBinding.View_MarginTop,
-				FloatMarginTargetBinding.View_MarginBottom,
-				FloatMarginTargetBinding.View_MarginStart,
-				FloatMarginTargetBinding.View_MarginEnd
-			};
-			foreach (var margin in allMargins) {
-				registry.RegisterCustomBindingFactory<View>(
-					margin, view => new FloatMarginTargetBinding(view, margin));
-			}
+			base.InitializeFirstChance(iocProvider);
 		}
 
 		protected override void FillValueConverters(IMvxValueConverterRegistry registry) {
@@ -69,7 +50,12 @@ namespace JKChat.Android {
 			});
 		}
 
-		/*protected override ILoggerProvider CreateLogProvider() {
+		public override void LoadPlugins(IMvxPluginManager pluginManager) {
+			base.LoadPlugins(pluginManager);
+			pluginManager.EnsurePluginLoaded<MvvmCross.Plugin.Visibility.Platforms.Android.Plugin>(true);
+		}
+
+		protected override ILoggerProvider CreateLogProvider() {
 			return new SerilogLoggerProvider();
 		}
 
@@ -81,6 +67,6 @@ namespace JKChat.Android {
 				.CreateLogger();
 
 			return new SerilogLoggerFactory();
-		}*/
+		}
 	}
 }

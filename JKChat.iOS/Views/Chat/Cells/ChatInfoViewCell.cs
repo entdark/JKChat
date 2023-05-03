@@ -12,6 +12,8 @@ using JKChat.iOS.Helpers;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Views.Chat.Cells {
@@ -33,7 +35,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			Nib = UINib.FromName("ChatInfoViewCell", NSBundle.MainBundle);
 		}
 
-		protected ChatInfoViewCell(IntPtr handle) : base(handle) {
+		protected ChatInfoViewCell(NativeHandle handle) : base(handle) {
 			this.DelayBind(() => {
 				ResizeGradient();
 

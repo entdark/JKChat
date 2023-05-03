@@ -7,6 +7,8 @@ using JKChat.Core.ViewModels.Dialog.Items;
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
+using ObjCRuntime;
+
 using UIKit;
 
 namespace JKChat.iOS.Controls.JKDialog.Cells {
@@ -18,7 +20,7 @@ namespace JKChat.iOS.Controls.JKDialog.Cells {
 			Nib = UINib.FromName("JKDialogViewCell", NSBundle.MainBundle);
 		}
 
-		protected JKDialogViewCell(IntPtr handle) : base(handle) {
+		protected JKDialogViewCell(NativeHandle handle) : base(handle) {
 			this.DelayBind(BindingControls);
 		}
 

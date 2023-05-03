@@ -7,6 +7,8 @@ using JKChat.Android.Controls;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Services;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.Android.Services {
 	public class DialogService : IDialogService {
 		private TaskCompletionSource<object> tcs;
@@ -51,7 +53,7 @@ namespace JKChat.Android.Services {
 				return;
 			}
 			do {
-				var mainActivity = Xamarin.Essentials.Platform.CurrentActivity as MainActivity;
+				var mainActivity = Platform.CurrentActivity as MainActivity;
 				//happens in the very first launch
 				if (mainActivity != null && mainActivity.Lifecycle.CurrentState == Lifecycle.State.Initialized) {
 					break;
@@ -62,8 +64,8 @@ namespace JKChat.Android.Services {
 				}
 			} while (true);
 
-			Xamarin.Essentials.Platform.CurrentActivity.RunOnUiThread(() => {
-				var dialog = new JKDialog(Xamarin.Essentials.Platform.CurrentActivity, Resource.Style.Dialog, this.config, tcs);
+			Platform.CurrentActivity.RunOnUiThread(() => {
+				var dialog = new JKDialog(Platform.CurrentActivity, Resource.Style.Dialog, this.config, tcs);
 				dialog.Show();
 			});
 

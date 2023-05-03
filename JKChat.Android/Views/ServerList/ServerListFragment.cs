@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-using Android.App;
-using Android.InputMethodServices;
 using Android.OS;
 using Android.Views;
-using Android.Views.InputMethods;
 using Android.Widget;
-using AndroidX.AppCompat.Widget;
+
 using AndroidX.RecyclerView.Widget;
 
 using Google.Android.Material.FloatingActionButton;
@@ -19,11 +16,9 @@ using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.Core.ViewModels.ServerList.Items;
 
-using MvvmCross.Commands;
 using MvvmCross.DroidX;
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
-using MvvmCross.Platforms.Android.Presenters.Attributes;
 
 namespace JKChat.Android.Views.ServerList {
 	[BottomNavigationViewPresentation(

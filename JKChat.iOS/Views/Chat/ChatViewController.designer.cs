@@ -13,6 +13,9 @@ namespace JKChat.iOS.Views.Chat
 	partial class ChatViewController
 	{
 		[Outlet]
+		UIKit.NSLayoutConstraint ChatBottomMessageTopConstraint { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		JKChat.iOS.Controls.ChatTableView ChatTableView { get; set; }
 
@@ -49,7 +52,7 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.UIButton SendButton { get; set; }
 
 		[Outlet]
-		[GeneratedCode("iOS Designer", "1.0")]
+		[GeneratedCode ("iOS Designer", "1.0")]
 		UIKit.NSLayoutConstraint ViewBottomConstraint { get; set; }
 		
 		void ReleaseDesignerOutlets ()
@@ -102,6 +105,11 @@ namespace JKChat.iOS.Views.Chat
 			if (ViewBottomConstraint != null) {
 				ViewBottomConstraint.Dispose ();
 				ViewBottomConstraint = null;
+			}
+
+			if (ChatBottomMessageTopConstraint != null) {
+				ChatBottomMessageTopConstraint.Dispose ();
+				ChatBottomMessageTopConstraint = null;
 			}
 		}
 	}
