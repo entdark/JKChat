@@ -78,7 +78,7 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		protected virtual void CloseSelection(bool animated = true) {
-			ViewModel.SelectCommand?.Execute(null);
+			ViewModel?.SelectCommand?.Execute(null);
 			ReportItem?.SetVisible(false, animated);
 			BackArrow?.SetRotation(0.0f, animated);
 		}

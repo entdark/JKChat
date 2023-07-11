@@ -7,9 +7,9 @@
     <UseMauiEssentials>true</UseMauiEssentials>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
   </PropertyGroup>
   <ItemGroup>

@@ -43,7 +43,7 @@ namespace JKChat.iOS.Views.Settings {
 			using var set = this.CreateBindingSet();
 			set.Bind(PlayerNameLabel).For(v => v.AttributedText).To(vm => vm.PlayerName).WithConversion("ColourText");
 			set.Bind(PlayerNameButton).To(vm => vm.PlayerNameCommand);
-			set.Bind(EncodingLabel).For(v => v.Text).To(vm => vm.Encoding);
+			set.Bind(EncodingLabel).For(v => v.Text).To(vm => vm.Encoding.EncodingName);
 			set.Bind(EncodingButton).To(vm => vm.EncodingCommand);
 			set.Bind(LocationUpdateSwitch).For(v => v.On).To(vm => vm.LocationUpdate);
 			set.Bind(LocationUpdateButton).To(vm => vm.LocationUpdateCommand);

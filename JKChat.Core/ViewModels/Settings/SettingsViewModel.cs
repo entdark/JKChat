@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text;
 using System.Threading.Tasks;
 
 using JKChat.Core.Messages;
@@ -25,8 +25,8 @@ namespace JKChat.Core.ViewModels.Settings {
 			set => SetProperty(ref playerName, value);
 		}
 
-		private string encoding;
-		public string Encoding {
+		private Encoding encoding;
+		public Encoding Encoding {
 			get => encoding;
 			set => SetProperty(ref encoding, value);
 		}
@@ -48,7 +48,7 @@ namespace JKChat.Core.ViewModels.Settings {
 			EncodingCommand = new MvxAsyncCommand(EncodingExecute);
 			LocationUpdateCommand = new MvxCommand(LocationUpdateExecute);
 			PlayerName = AppSettings.PlayerName;
-			Encoding = jkclientService.Encoding.EncodingName;
+			Encoding = jkclientService.Encoding;
 			locationUpdate = AppSettings.LocationUpdate;
 		}
 
@@ -80,7 +80,7 @@ namespace JKChat.Core.ViewModels.Settings {
 				dialogList.Items.Add(new DialogItemVM() {
 					Id = i,
 					Name = availableEncodings[i].EncodingName,
-					IsSelected = string.Compare(availableEncodings[i].EncodingName, Encoding, StringComparison.InvariantCultureIgnoreCase) == 0
+					IsSelected = availableEncodings[i].Equals(Encoding)
 				});
 			}
 			int id = -1;
@@ -97,7 +97,7 @@ namespace JKChat.Core.ViewModels.Settings {
 				Type = JKDialogType.Title | JKDialogType.List
 			});
 			jkclientService.SetEncodingById(id);
-			Encoding = jkclientService.Encoding.EncodingName;
+			Encoding = jkclientService.Encoding;
 			AppSettings.EncodingId = id;
 		}
 

@@ -14,7 +14,7 @@ namespace JKChat.Core.Services {
 			get => Common.Encoding;
 			set {
 				Common.Encoding = value;
-				Common.AllowAllEncodingCharacters = string.Compare(Common.Encoding.EncodingName, Encoding.UTF8.EncodingName, StringComparison.InvariantCultureIgnoreCase) == 0;
+				Common.AllowAllEncodingCharacters = Common.Encoding.Equals(Encoding.UTF8);
 			}
 		}
 		public Encoding []AvailableEncodings => availableEncodings;

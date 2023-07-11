@@ -13,6 +13,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <UseSystemResourceKeys>false</UseSystemResourceKeys>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\JKChat.Core\JKChat.Core.csproj" />

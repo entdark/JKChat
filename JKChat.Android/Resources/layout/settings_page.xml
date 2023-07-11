@@ -82,7 +82,7 @@
                         android:layout_marginHorizontal="20dp"
                         android:lines="1"
                         android:ellipsize="end"
-                        app:MvxBind="Text Encoding"/>
+                        app:MvxBind="Text Encoding.EncodingName"/>
                 </FrameLayout>
                 <!--<RelativeLayout
                     android:layout_width="match_parent"

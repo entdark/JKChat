@@ -143,7 +143,7 @@ namespace JKChat.Android.Views.ServerList {
 		}
 
 		protected override void CloseSelection(bool animated = true) {
-			if (!searching && !string.IsNullOrEmpty(ViewModel.SearchText)) {
+			if (!searching && !string.IsNullOrEmpty(ViewModel?.SearchText)) {
 				ShowSearch();
 			} else {
 				base.CloseSelection(false);
@@ -175,7 +175,7 @@ namespace JKChat.Android.Views.ServerList {
 			SetUpNavigation(showSelection);
 			searchItem?.SetVisible(!showSelection, false);
 			DisplayCustomTitle(false);
-			if (!showSelection) {
+			if (!showSelection && ViewModel != null) {
 				ViewModel.SearchText = string.Empty;
 			}
 			HideKeyboard();
