@@ -1,6 +1,4 @@
-﻿using System;
-
-using CoreAnimation;
+﻿using CoreAnimation;
 
 using CoreGraphics;
 
@@ -27,6 +25,14 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			get => base.Frame;
 			set {
 				base.Frame = value;
+				ResizeGradient();
+			}
+		}
+
+		public override CGRect Bounds {
+			get => base.Bounds;
+			set {
+				base.Bounds = value;
 				ResizeGradient();
 			}
 		}

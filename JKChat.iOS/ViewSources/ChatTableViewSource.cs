@@ -1,16 +1,19 @@
-﻿using System;
+﻿using System.Collections.Specialized;
 using System.Diagnostics;
 
 using CoreGraphics;
 
 using Foundation;
 
+using JKChat.Core.ValueCombiners;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.iOS.Controls;
 using JKChat.iOS.Helpers;
+using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.Views.Chat.Cells;
 
+using MvvmCross.Binding.Extensions;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
 using UIKit;
@@ -107,6 +110,129 @@ namespace JKChat.iOS.ViewSources {
 				return tableView.DequeueReusableCell(ChatInfoViewCell.Key);
 			}
 			return base.GetOrCreateCellFor(tableView, indexPath, item);
+		}
+
+		public override void ReloadTableData() {
+			base.ReloadTableData();
+			RecountAllCellHeights();
+		}
+
+		protected override void CollectionChangedOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) {
+			switch (args.Action) {
+				case NotifyCollectionChangedAction.Add:
+					for (int i = args.NewStartingIndex, count = args.NewItems.Count; i < count; i++) {
+						CountHeightForRow(i);
+					}
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					break;
+				case NotifyCollectionChangedAction.Reset:
+					break;
+			}
+
+			base.CollectionChangedOnCollectionChanged(sender, args);
+		}
+
+		public override nfloat EstimatedHeight(UITableView tableView, NSIndexPath indexPath) {
+			var item = ItemsSource.ElementAt(indexPath.Row) as ChatItemVM;
+			if (item.EstimatedHeight != 0.0)
+				return (nfloat)item.EstimatedHeight;
+			return UITableView.AutomaticDimension;
+		}
+
+		public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) {
+			var item = ItemsSource.ElementAt(indexPath.Row) as ChatItemVM;
+			if (item.EstimatedHeight != 0.0)
+				return (nfloat)item.EstimatedHeight;
+			return UITableView.AutomaticDimension;
+		}
+
+		public void RecountAllCellHeights(CGSize customSize) {
+			if (ItemsSource == null)
+				return;
+			int i = 0;
+			TableView.BeginUpdates();
+			foreach (var item in ItemsSource) {
+				CountHeightForRow(i++, customSize, true);
+			}
+			TableView.EndUpdates();
+		}
+
+		public void RecountAllCellHeights() {
+			RecountAllCellHeights(DeviceInfo.ScreenBounds.Size);
+		}
+
+		private ColourTextValueConverter converter = new ColourTextValueConverter();
+		private readonly UILabel
+			timeLabel = new UILabel() {
+				TextAlignment = UITextAlignment.Right,
+				Font = Theme.Font.OCRAStd(11.0f),
+				LineBreakMode = UILineBreakMode.TailTruncation,
+				Lines = 1
+			},
+			nameLabel = new UILabel() {
+				TextAlignment = UITextAlignment.Left,
+				Font = Theme.Font.OCRAStd(14.0f),
+				LineBreakMode = UILineBreakMode.TailTruncation,
+				Lines = 1
+			},
+			messageLabel = new UILabel() {
+				TextAlignment = UITextAlignment.Left,
+				Font = Theme.Font.OCRAStd(14.0f),
+				LineBreakMode = UILineBreakMode.TailTruncation,
+				Lines = 0
+			},
+			textLabel = new UILabel() {
+				TextAlignment = UITextAlignment.Left,
+				Font = Theme.Font.OCRAStd(13.0f),
+				LineBreakMode = UILineBreakMode.TailTruncation,
+				Lines = 0
+			};
+		private nfloat CountHeightForRow(int row, bool recount = false) {
+			return CountHeightForRow(row, DeviceInfo.ScreenBounds.Size, recount);
+		}
+		private nfloat CountHeightForRow(int row, CGSize size, bool recount = false) {
+			var item = ItemsSource.ElementAt(row) as ChatItemVM;
+			if (!recount && item.EstimatedHeight != 0.0)
+				return (nfloat)item.EstimatedHeight;
+
+			nfloat height = 0.0f;
+			nfloat leftMargin = 20.0f + (DeviceInfo.IsCollapsed ? DeviceInfo.SafeAreaInsets.Left : 0.0f),
+				rightMargin = 20.0f + DeviceInfo.SafeAreaInsets.Right;
+			timeLabel.Frame = new CGRect(0.0f, 0.0f, 0.0f, 0.0f);
+			timeLabel.Text = item.Time;
+			timeLabel.SizeToFit();
+			if (item is ChatMessageItemVM messageItem) {
+				nameLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin - timeLabel.Frame.Width - 7.0f, 0.0f);
+				nameLabel.AttributedText = converter.Convert(messageItem.PlayerName, new ColourTextParameter() {
+					ParseUri = true,
+					ParseShadow = messageItem.Shadow
+				});
+				nameLabel.SizeToFit();
+				messageLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin, 0.0f);
+				messageLabel.AttributedText = converter.Convert(messageItem.Message, new ColourTextParameter() {
+					ParseUri = true,
+					ParseShadow = messageItem.Shadow
+				});
+				messageLabel.SizeToFit();
+				height += messageItem.TopVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+				height += nameLabel.Frame.Height;
+				height += 5.0f;
+				height += messageLabel.Frame.Height;
+				height += messageItem.BottomVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+			} else if (item is ChatInfoItemVM infoItem) {
+				textLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin - timeLabel.Frame.Width - 7.0f, 0.0f);
+				textLabel.AttributedText = converter.Convert(infoItem.Text, new ColourTextParameter() {
+					ParseUri = true,
+					ParseShadow = infoItem.Shadow
+				});
+				textLabel.SizeToFit();
+				height += 10.0f;
+				height += textLabel.Frame.Height;
+				height += 10.0f;
+			}
+			item.EstimatedHeight = height;
+			return height;
 		}
 	}
 }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
-
-using CoreGraphics;
+﻿using CoreGraphics;
 
 using Foundation;
 
 using JKChat.iOS.Helpers;
 using JKChat.iOS.Views.Base;
+using JKChat.iOS.ViewSources;
 
 using ObjCRuntime;
 
@@ -91,6 +88,11 @@ namespace JKChat.iOS.Controls {
 			}
 			var indexPath = NSIndexPath.FromRowSection(0, 0);
 			this.ScrollToRow(indexPath, UITableViewScrollPosition.Top, true);
+		}
+
+		public void RecountAllCellHeights(CGSize newSize) {
+			var source = (this.Source as ChatTableViewSource) ?? (this.DataSource as ChatTableViewSource);
+			source?.RecountAllCellHeights(newSize);
 		}
 	}
 }

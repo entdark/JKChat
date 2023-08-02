@@ -310,8 +310,20 @@ namespace JKChat.iOS.Views.Chat {
 			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
 		}
 
+		private void RecountAllCellHeights(CGSize newSize) {
+			ChatTableView.RecountAllCellHeights(newSize);
+		}
+
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
 			base.ViewWillTransitionToSize(toSize, coordinator);
+			coordinator.AnimateAlongsideTransition(animateContext =>
+			{
+//                RecountAllCellHeights(toSize);
+			},
+			completionContext =>
+			{
+				RecountAllCellHeights(toSize);
+			});
 			ResizeInputAccessoryView(toSize);
 			RespaceTitleView();
 		}

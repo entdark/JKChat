@@ -27,5 +27,7 @@ namespace JKChat.Core.ViewModels.Chat.Items {
 			get => bottomVMType;
 			set => SetProperty(ref bottomVMType, value);
 		}
+
+		public double EstimatedHeight { get; set; }
 	}
 }
