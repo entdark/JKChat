@@ -35,6 +35,7 @@ namespace JKChat.iOS.Views.ServerList {
 			base.LoadView();
 			ServerListTableView.RegisterNibForCellReuse(ServerListViewCell.Nib, ServerListViewCell.Key);
 			ServerListTableView.ContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
+			ServerListTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f, 0.0f, 0.0f, 0.0f);
 			ServerListTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.OnDrag;
 			ServerListTableView.AutomaticallyAdjustsScrollIndicatorInsets = false;
 
