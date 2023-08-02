@@ -29,7 +29,7 @@ namespace JKChat.Core.ValueCombiners {
 	}
 
 	public class ColourTextParameter {
-		public bool ParseUri { get; set; }
-		public bool ParseShadow { get; set; }
+		public bool ParseUri { get; init; }
+		public bool ParseShadow { get; init; }
 	}
 }

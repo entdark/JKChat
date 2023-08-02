@@ -112,7 +112,7 @@ namespace JKChat.Android.ValueConverters {
 		}
 
 		public class ForegroundColorCodeSpan : ForegroundColorSpan {
-			public int ColorCode { get; private set; }
+			public int ColorCode { get; init; }
 			public ForegroundColorCodeSpan(int code) : base(GetColor(code)) {
 				ColorCode = code;
 			}
@@ -139,7 +139,7 @@ namespace JKChat.Android.ValueConverters {
 		}
 
 		public class ShadowSpan : MetricAffectingSpan {
-			public Color ShadowColor { get; private set; }
+			public Color ShadowColor { get; init; }
 			public ShadowSpan(Color color) {
 				ShadowColor = color;
 			}
