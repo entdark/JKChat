@@ -64,11 +64,9 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		public override void OnBackPressed() {
-			IBaseFragment fragment;
+			IBaseFragment fragment = null;
 			if (SupportFragmentManager?.BackStackEntryCount > 0) {
 				fragment = SupportFragmentManager.Fragments?.LastOrDefault() as IBaseFragment;
-			} else {
-				fragment = Fragments?[ViewPager?.CurrentItem ?? 0] as IBaseFragment;
 			}
 			bool handled = fragment?.OnBackPressed() ?? false;
 			if (!handled && SupportFragmentManager?.BackStackEntryCount <= 0 && ViewPager != null) {

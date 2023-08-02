@@ -13,8 +13,6 @@ using JKChat.Core.Messages;
 using JKChat.Core.Services;
 
 using MvvmCross;
-using MvvmCross.Platforms.Android.Core;
-using MvvmCross.Platforms.Android.Services;
 using MvvmCross.Plugin.Messenger;
 
 using Microsoft.Maui.ApplicationModel;
@@ -29,8 +27,6 @@ namespace JKChat.Android.Services {
 
 		public override void OnCreate() {
 			base.OnCreate();
-			var setupSingleton = MvxAndroidSetupSingleton.EnsureSingletonAvailable(ApplicationContext);
-			setupSingleton.EnsureInitialized();
 			CreateNotificationChannel();
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
@@ -119,13 +115,12 @@ namespace JKChat.Android.Services {
 	}
 
 	[BroadcastReceiver]
-	public class ForegroundReceiver : MvxBroadcastReceiver {
+	public class ForegroundReceiver : BroadcastReceiver {
 		public ForegroundReceiver() {
 		}
 		public ForegroundReceiver(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer) {
 		}
 		public override void OnReceive(Context context, Intent intent) {
-			base.OnReceive(context, intent);
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.DisconnectFromAll();
 		}
