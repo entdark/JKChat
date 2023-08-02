@@ -17,6 +17,7 @@
                 <outlet property="ChatTypeStackView" destination="1046" id="name-outlet-1046"/>
                 <outlet property="ChatTypeTeamButton" destination="1417" id="name-outlet-1417"/>
                 <outlet property="MessageTextView" destination="1903" id="name-outlet-1903"/>
+                <outlet property="MessageToolbar" destination="fup-dp-pgP" id="5Km-1m-lhf"/>
                 <outlet property="MessageView" destination="3687" id="name-outlet-3687"/>
                 <outlet property="SendButton" destination="2313" id="name-outlet-2313"/>
                 <outlet property="ViewBottomConstraint" destination="uab-qN-vGf" id="name-outlet-uab-qN-vGf"/>
@@ -39,6 +40,19 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3687">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
                             <subviews>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JrR-ah-AEs">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
+                                    <color key="backgroundColor" red="0.19437411430000001" green="0.20945405959999999" blue="0.26679441329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </view>
+                                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fup-dp-pgP">
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="44" id="xny-wn-Fdp"/>
+                                    </constraints>
+                                    <items/>
+                                    <color key="barTintColor" red="0.1960784314" green="0.20784313730000001" blue="0.2666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </toolbar>
                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="882">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
                                     <subviews>
@@ -73,7 +87,7 @@
                                                     </state>
                                                 </button>
                                             </subviews>
-                                            <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="44" id="1077"/>
                                             </constraints>
@@ -82,15 +96,16 @@
                                             <rect key="frame" x="0.0" y="44" width="375" height="57.666666666666657"/>
                                             <subviews>
                                                 <view autoresizesSubviews="NO" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3295">
-                                                    <rect key="frame" x="0.0" y="4" width="51" height="50"/>
+                                                    <rect key="frame" x="0.0" y="7" width="51" height="44"/>
                                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="51" id="3317"/>
+                                                        <constraint firstAttribute="height" constant="44" id="VyP-11-IcJ"/>
                                                     </constraints>
                                                 </view>
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" text="Lorem ipsum dolor sit er elit lamet," translatesAutoresizingMaskIntoConstraints="NO" id="1903" customClass="PlaceholderTextView">
                                                     <rect key="frame" x="51" y="0.0" width="280" height="57.666666666666664"/>
-                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" relation="greaterThanOrEqual" id="1914"/>
                                                     </constraints>
@@ -99,19 +114,18 @@
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textView>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3401">
-                                                    <rect key="frame" x="331" y="4" width="44" height="50"/>
+                                                    <rect key="frame" x="331" y="7" width="44" height="44"/>
                                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="44" id="3402"/>
+                                                        <constraint firstAttribute="height" constant="44" id="Skq-15-taw"/>
                                                     </constraints>
                                                 </view>
                                             </subviews>
-                                            <constraints>
-                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="1141"/>
-                                            </constraints>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         </stackView>
                                     </subviews>
-                                    <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </stackView>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
                                     <rect key="frame" x="0.0" y="57.666666666666629" width="51" height="44"/>
@@ -136,17 +150,23 @@
                                     </state>
                                 </button>
                             </subviews>
-                            <color key="backgroundColor" red="0.19607843137254902" green="0.20784313725490197" blue="0.26666666666666666" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
-                                <constraint firstItem="882" firstAttribute="height" secondItem="3687" secondAttribute="height" id="03b-pB-LVS"/>
+                                <constraint firstAttribute="trailing" secondItem="fup-dp-pgP" secondAttribute="trailing" id="3tN-YY-ffo"/>
+                                <constraint firstAttribute="trailing" secondItem="JrR-ah-AEs" secondAttribute="trailing" id="94A-Zi-Ox5"/>
                                 <constraint firstAttribute="bottom" secondItem="1670" secondAttribute="bottom" id="I4C-qC-8Br"/>
                                 <constraint firstItem="882" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="Leh-MI-ibv"/>
                                 <constraint firstItem="882" firstAttribute="top" secondItem="3687" secondAttribute="top" id="Oot-hr-0xe"/>
                                 <constraint firstAttribute="trailing" secondItem="882" secondAttribute="trailing" id="S1d-rN-fLp"/>
                                 <constraint firstItem="1670" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="TmO-VE-aJo"/>
+                                <constraint firstItem="JrR-ah-AEs" firstAttribute="top" secondItem="3687" secondAttribute="top" id="TyQ-E0-7CD"/>
+                                <constraint firstItem="JrR-ah-AEs" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="VKi-nC-LNN"/>
                                 <constraint firstAttribute="bottom" secondItem="882" secondAttribute="bottom" id="VME-Z0-GfI"/>
                                 <constraint firstAttribute="bottom" secondItem="2313" secondAttribute="bottom" id="Ycn-yd-nIY"/>
+                                <constraint firstAttribute="bottom" secondItem="JrR-ah-AEs" secondAttribute="bottom" id="flF-Ly-vIS"/>
                                 <constraint firstAttribute="trailing" secondItem="2313" secondAttribute="trailing" id="gl7-BT-wsp"/>
+                                <constraint firstItem="fup-dp-pgP" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="uJ0-3i-fQE"/>
+                                <constraint firstItem="fup-dp-pgP" firstAttribute="top" secondItem="3687" secondAttribute="top" id="wP7-nM-Ido"/>
                             </constraints>
                         </view>
                     </subviews>

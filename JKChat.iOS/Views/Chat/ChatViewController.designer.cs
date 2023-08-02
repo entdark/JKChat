@@ -44,6 +44,9 @@ namespace JKChat.iOS.Views.Chat
 		JKChat.iOS.Controls.PlaceholderTextView MessageTextView { get; set; }
 
 		[Outlet]
+		UIKit.UIToolbar MessageToolbar { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UIKit.UIView MessageView { get; set; }
 
@@ -57,6 +60,11 @@ namespace JKChat.iOS.Views.Chat
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (ChatBottomMessageTopConstraint != null) {
+				ChatBottomMessageTopConstraint.Dispose ();
+				ChatBottomMessageTopConstraint = null;
+			}
+
 			if (ChatTableView != null) {
 				ChatTableView.Dispose ();
 				ChatTableView = null;
@@ -107,9 +115,9 @@ namespace JKChat.iOS.Views.Chat
 				ViewBottomConstraint = null;
 			}
 
-			if (ChatBottomMessageTopConstraint != null) {
-				ChatBottomMessageTopConstraint.Dispose ();
-				ChatBottomMessageTopConstraint = null;
+			if (MessageToolbar != null) {
+				MessageToolbar.Dispose ();
+				MessageToolbar = null;
 			}
 		}
 	}

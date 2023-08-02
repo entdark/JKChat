@@ -95,6 +95,7 @@ namespace JKChat.iOS.Views.Chat {
 				inputAccessoryView.AddAccessoryView(MessageView);
 				ViewBottomConstraint.Active = true;
 				ChatBottomMessageTopConstraint.Active = false;
+				MessageToolbar.Hidden = true;
 			} else {
 				ViewBottomConstraint.Active = false;
 				ChatBottomMessageTopConstraint.Active = true;
@@ -363,7 +364,7 @@ namespace JKChat.iOS.Views.Chat {
 
 	public class InputAccessoryView : UIView {
 		private readonly UIViewController parentViewController;
-		private NSLayoutConstraint leftConstraint, rightConstraint, bgBottomConstraint, bgRightConstraint;
+		private NSLayoutConstraint leftConstraint, rightConstraint, bgBottomConstraint, bgRightConstraint, toolbarLeftConstraint, toolbarRightConstraint;
 		private CGSize intrinsicContentSize = CGSize.Empty;
 		public override CGSize IntrinsicContentSize => intrinsicContentSize;
 		public InputAccessoryView(UIViewController parentViewController) {
@@ -381,7 +382,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 		private void UpdateInsets() {
-			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
+			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
 			if (leftConstraint != null) {
 				if (DeviceInfo.IsCollapsed) {
 					leftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left;
@@ -398,12 +399,23 @@ namespace JKChat.iOS.Views.Chat {
 			if (bgRightConstraint != null) {
 				bgRightConstraint.Constant = DeviceInfo.SafeAreaInsets.Right;
 			}
+			if (toolbarLeftConstraint != null) {
+				if (DeviceInfo.IsCollapsed) {
+					toolbarLeftConstraint.Constant = -DeviceInfo.SafeAreaInsets.Left;
+				} else {
+					toolbarLeftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left + DeviceInfo.ScreenBounds.Width - parentViewController.View.Frame.Width - DeviceInfo.SafeAreaInsets.Right;
+				}
+			}
+			if (toolbarRightConstraint != null) {
+				toolbarRightConstraint.Constant = 0.0f;
+			}
 		}
 		public void AddAccessoryView(UIView view) {
-			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.NavigationBar : UIColor.Clear;
+			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
+			ClipsToBounds = false;
 
 			var backgroundView = new UIView() {
-				BackgroundColor = view.BackgroundColor,
+				BackgroundColor = Theme.Color.Bar,
 				TranslatesAutoresizingMaskIntoConstraints = false
 			};
 			view.ClipsToBounds = false;
@@ -413,7 +425,18 @@ namespace JKChat.iOS.Views.Chat {
 			backgroundView.TopAnchor.ConstraintEqualTo(view.TopAnchor, 0.0f).Active = true;
 			(bgBottomConstraint = backgroundView.BottomAnchor.ConstraintEqualTo(view.BottomAnchor, DeviceInfo.SafeAreaInsets.Bottom)).Active = true;
 
+			var backgroundToolbar = new UIToolbar() {
+				BarTintColor = Theme.Color.Toolbar,
+				BarStyle = UIBarStyle.Default,
+				Translucent = false,
+				TranslatesAutoresizingMaskIntoConstraints = false
+			};
+			this.AddSubview(backgroundToolbar);
 			this.AddSubview(view);
+			(toolbarLeftConstraint = backgroundToolbar.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor, -DeviceInfo.SafeAreaInsets.Left)).Active = true;
+			(toolbarRightConstraint = backgroundToolbar.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor, 0.0f)).Active = true;
+			backgroundToolbar.TopAnchor.ConstraintEqualTo(this.TopAnchor, 0.0f).Active = true;
+			backgroundToolbar.HeightAnchor.ConstraintEqualTo(44.0f).Active = true;
 			(leftConstraint = view.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor, 0.0f)).Active = true;
 			(rightConstraint = view.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor, 0.0f)).Active = true;
 			view.TopAnchor.ConstraintEqualTo(this.TopAnchor, 0.0f).Active = true;
