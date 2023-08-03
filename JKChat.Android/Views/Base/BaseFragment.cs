@@ -216,7 +216,7 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		protected virtual void BackNavigationClick(object sender, Toolbar.NavigationClickEventArgs ev) {
-			Activity?.OnBackPressed();
+			Activity?.OnBackPressedDispatcher.OnBackPressed();
 		}
 
 		protected void ShowKeyboard(View view = null) {
