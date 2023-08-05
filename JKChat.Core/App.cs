@@ -2,11 +2,14 @@
 using JKChat.Core.ViewModels.Main;
 
 using MvvmCross;
+using MvvmCross.Navigation;
 using MvvmCross.Plugin;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core {
 	public class App : MvxApplication {
+		public static bool AllowReset { get; set; } = true;
+
 		public override void LoadPlugins(IMvxPluginManager pluginManager) {
 			base.LoadPlugins(pluginManager);
 			pluginManager.EnsurePluginLoaded<MvvmCross.Plugin.Messenger.Plugin>(true);
@@ -18,7 +21,17 @@ namespace JKChat.Core {
 			Mvx.IoCProvider.RegisterSingleton<ICacheService>(() => new CacheService());
 			Mvx.IoCProvider.RegisterSingleton<IJKClientService>(() => new JKClientService());
 			Mvx.IoCProvider.Resolve<IJKClientService>().SetEncodingById(AppSettings.EncodingId);
-			RegisterAppStart<MainViewModel>();
+			RegisterCustomAppStart<AppStart>();
+		}
+
+		private class AppStart : MvxAppStart<MainViewModel> {
+			public AppStart(IMvxApplication application, IMvxNavigationService navigationService) : base(application, navigationService) {
+			}
+
+			public override void ResetStart() {
+				if (AllowReset)
+					base.ResetStart();
+			}
 		}
 	}
 }

@@ -12,7 +12,6 @@ using Google.Android.Material.FloatingActionButton;
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
-using JKChat.Core.ViewModels.Main;
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.Core.ViewModels.ServerList.Items;
 
@@ -21,13 +20,7 @@ using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 
 namespace JKChat.Android.Views.ServerList {
-	[BottomNavigationViewPresentation(
-		"Server List",
-		Resource.Id.content_viewpager,
-		Resource.Id.navigationview,
-		Resource.Drawable.ic_server_list,
-		typeof(MainViewModel)
-	)]
+	[TabFragmentPresentation("Server List", Resource.Drawable.ic_server_list)]
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
 		private IMenuItem searchItem;

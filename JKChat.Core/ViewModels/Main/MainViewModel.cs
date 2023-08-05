@@ -5,21 +5,26 @@ using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.Core.ViewModels.Settings;
 
-using MvvmCross.Commands;
-
 namespace JKChat.Core.ViewModels.Main {
 	public class MainViewModel : BaseViewModel {
-		public IMvxCommand ShowInitialViewModelsCommand { get; init; }
-		public MainViewModel() {
-			ShowInitialViewModelsCommand = new MvxAsyncCommand(ShowInitialViewModelsExecute);
-		}
+		private bool initialNavigationDone = false;
+
+		public MainViewModel() {}
 
 		private async Task ShowInitialViewModelsExecute() {
+			if (initialNavigationDone)
+				return;
+			initialNavigationDone = true;
 			await Task.WhenAll(
 				NavigationService.Navigate<ServerListViewModel>(),
 //				NavigationService.Navigate<AdminPanelViewModel>(),
 				NavigationService.Navigate<SettingsViewModel>()
 			);
+		}
+
+		public override void ViewAppearing() {
+			base.ViewAppearing();
+			_ = ShowInitialViewModelsExecute();
 		}
 	}
 }

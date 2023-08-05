@@ -1,25 +1,49 @@
-﻿using Android.Graphics;
-using Android.InputMethodServices;
+﻿using System;
+
+using Android.Graphics;
 using Android.OS;
 using Android.Views;
-using Android.Views.InputMethods;
+using Android.Views.Animations;
 
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Core.View;
 
+using JKChat.Android.Callbacks;
 using JKChat.Android.Controls.Toolbar;
 using JKChat.Android.Helpers;
+using JKChat.Core.Navigation;
 using JKChat.Core.ViewModels.Base;
 
+using MvvmCross;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Platforms.Android.Views.Fragments;
-using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class BaseFragment<TViewModel> : MvxFragment<TViewModel>, IBaseFragment where TViewModel : class, IMvxViewModel, IBaseViewModel {
+	public abstract class BaseFragment<TViewModel> : MvxFragment<TViewModel>, IBaseFragment where TViewModel : class, IBaseViewModel {
+		private const string bundleOrder = nameof(BaseFragment<TViewModel>) + nameof(bundleOrder);
+		private const string bundleRegisterBackPressedCallback = nameof(BaseFragment<TViewModel>) + nameof(bundleRegisterBackPressedCallback);
+
+		private OnBackPressedCallback onBackPressedCallback;
+
+		protected ActionBar ActionBar => (Activity as MvxActivity)?.SupportActionBar;
+
+		protected Toolbar ActivityToolbar => (Activity as IBaseActivity)?.Toolbar;
+
+		protected Toolbar Toolbar { get; private set; }
+		protected View ToolbarCustomTitleView { get; private set; }
+
+		protected IMenu Menu { get; private set; }
+
+		protected int LayoutId { get; private set; }
+
+		protected int MenuId { get; private set; }
+
+		public int Order { get; set; }
+		public bool RegisterBackPressedCallback { get; set; }
+
 		private BackDrawable backArrow;
 		protected BackDrawable BackArrow {
 			get => backArrow;
@@ -39,21 +63,6 @@ namespace JKChat.Android.Views.Base {
 				SetTitle();
 			}
 		}
-
-		public int Order { get; set; }
-
-		protected ActionBar ActionBar => (Activity as MvxActivity)?.SupportActionBar;
-
-		protected Toolbar ActivityToolbar => (Activity as IBaseActivity)?.Toolbar;
-
-		protected Toolbar Toolbar { get; private set; }
-		protected View ToolbarCustomTitleView { get; private set; }
-
-		protected IMenu Menu { get; private set; }
-
-		protected int LayoutId { get; private set; }
-
-		protected int MenuId { get; private set; }
 
 		public BaseFragment(int layoutId, int menuId = int.MinValue) {
 			LayoutId = layoutId;
@@ -98,6 +107,13 @@ namespace JKChat.Android.Views.Base {
 
 			CreateOptionsMenu();
 
+			if (RegisterBackPressedCallback)
+			{
+				onBackPressedCallback?.Remove();
+				onBackPressedCallback = new OnBackPressedCallback(OnBackPressedCallback);
+				Activity.OnBackPressedDispatcher.AddCallback(this, onBackPressedCallback);
+			}
+
 			using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.Title).To(vm => vm.Title);
 		}
@@ -107,6 +123,8 @@ namespace JKChat.Android.Views.Base {
 				Toolbar.NavigationClick -= BackNavigationClick;
 			}
 			DestroyOptionsMenu();
+			onBackPressedCallback?.Remove();
+
 			base.OnDestroyView();
 		}
 
@@ -122,6 +140,7 @@ namespace JKChat.Android.Views.Base {
 			DisplayCustomTitle(false);
 		}
 
+		[Obsolete]
 		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
 			inflater.Inflate(MenuId, menu);
 			Menu = menu;
@@ -129,6 +148,7 @@ namespace JKChat.Android.Views.Base {
 			base.OnCreateOptionsMenu(menu, inflater);
 		}
 
+		[Obsolete]
 		public override void OnDestroyOptionsMenu() {
 			Menu = null;
 			base.OnDestroyOptionsMenu();
@@ -136,14 +156,38 @@ namespace JKChat.Android.Views.Base {
 
 		public override void OnSaveInstanceState(Bundle outState) {
 			base.OnSaveInstanceState(outState);
+			outState.PutInt(bundleOrder, Order);
+			outState.PutBoolean(bundleRegisterBackPressedCallback, RegisterBackPressedCallback);
 		}
 
 		public override void OnViewStateRestored(Bundle savedInstanceState) {
 			base.OnViewStateRestored(savedInstanceState);
+			if (savedInstanceState != null)
+				OnRestoreInstanceState(savedInstanceState);
+		}
+
+		public virtual void OnRestoreInstanceState(Bundle savedInstanceState) {
+			Order = savedInstanceState.GetInt(bundleOrder, Order);
+			RegisterBackPressedCallback = savedInstanceState.GetBoolean(bundleRegisterBackPressedCallback, RegisterBackPressedCallback);
+		}
+
+		public override Animation OnCreateAnimation(int transit, bool enter, int nextAnim) {
+			if (IBaseFragment.DisableAnimations)
+				return new NullAnimation();
+			return base.OnCreateAnimation(transit, enter, nextAnim);
 		}
 
 		public virtual bool OnBackPressed() {
 			return false;
+		}
+
+		protected virtual void OnBackPressedCallback() {
+			Mvx.IoCProvider.Resolve<INavigationService>().Close(ViewModel);
+		}
+
+		protected void ToggleBackPressedCallback(bool enable) {
+			if (onBackPressedCallback != null)
+				onBackPressedCallback.Enabled = enable;
 		}
 
 		protected virtual void ActivityExit() {
@@ -232,6 +276,18 @@ namespace JKChat.Android.Views.Base {
 			} else if (Toolbar != null && !toolbarCustomTitleAdded) {
 				Toolbar.Title = Title;
 			}
+		}
+
+		private class NullAnimation : Animation {
+			public NullAnimation() {
+				Duration = 0L;
+			}
+		}
+	}
+
+	public class BasePushFragment<TViewModel> : BaseFragment<TViewModel> where TViewModel : class, IBaseViewModel {
+		public BasePushFragment(int layoutId, int menuId = int.MinValue) : base(layoutId, menuId) {
+			RegisterBackPressedCallback = true;
 		}
 	}
 }

@@ -319,7 +319,7 @@ namespace JKChat.iOS.Views.Chat {
 			base.ViewWillTransitionToSize(toSize, coordinator);
 			coordinator.AnimateAlongsideTransition(animateContext =>
 			{
-//                RecountAllCellHeights(toSize);
+//				RecountAllCellHeights(toSize);
 			},
 			completionContext =>
 			{

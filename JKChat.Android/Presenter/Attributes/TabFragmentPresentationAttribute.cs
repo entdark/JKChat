@@ -1,14 +1,21 @@
 ﻿using System;
-
+using JKChat.Android.Views.Main;
 using MvvmCross;
 using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 
 namespace JKChat.Android.Presenter.Attributes {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-	public class BottomNavigationViewPresentationAttribute : MvxViewPagerFragmentPresentationAttribute {
+	public class TabFragmentPresentationAttribute : MvxViewPagerFragmentPresentationAttribute {
+		public TabFragmentPresentationAttribute(string title, int iconDrawableResourceId) : this(
+			title,
+			Resource.Id.tabs_viewpager,
+			Resource.Id.tabs_navigationview,
+			iconDrawableResourceId,
+			fragmentHostViewType: typeof(MainFragment)
+		) {}
 
-		public BottomNavigationViewPresentationAttribute(
+		public TabFragmentPresentationAttribute(
 			string title,
 			int viewPagerResourceId,
 			int bottomNavigationViewResourceId,
@@ -17,12 +24,13 @@ namespace JKChat.Android.Presenter.Attributes {
 			bool addToBackStack = false,
 			Type fragmentHostViewType = null,
 			bool isCacheableFragment = false) : base(title, viewPagerResourceId, activityHostViewModelType,
-			addToBackStack, fragmentHostViewType, isCacheableFragment) {
+			addToBackStack, fragmentHostViewType, isCacheableFragment)
+		{
 			BottomNavigationViewResourceId = bottomNavigationViewResourceId;
 			IconDrawableResourceId = iconDrawableResourceId;
 		}
 
-		public BottomNavigationViewPresentationAttribute(
+		public TabFragmentPresentationAttribute(
 			string title,
 			string viewPagerResourceId,
 			string bottomNavigationViewResourceId,
@@ -31,7 +39,8 @@ namespace JKChat.Android.Presenter.Attributes {
 			bool addToBackStack = false,
 			Type fragmentHostViewType = null,
 			bool isCacheableFragment = false) : base(title, viewPagerResourceId,
-			activityHostViewModelType, addToBackStack, fragmentHostViewType, isCacheableFragment) {
+			activityHostViewModelType, addToBackStack, fragmentHostViewType, isCacheableFragment)
+		{
 			var context = Mvx.IoCProvider.Resolve<IMvxAndroidGlobals>().ApplicationContext;
 
 			BottomNavigationViewResourceId = !string.IsNullOrEmpty(bottomNavigationViewResourceId)

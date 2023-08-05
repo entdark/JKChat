@@ -50,17 +50,5 @@ namespace JKChat.iOS.Services {
 				completion?.Invoke();
 			}
 		}
-
-		void IDialogService.SaveState() {
-			
-		}
-
-		void IDialogService.RestoreState() {
-			
-		}
-
-		void IDialogService.Stop(bool force) {
-			
-		}
 	}
 }

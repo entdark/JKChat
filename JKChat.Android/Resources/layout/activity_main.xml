@@ -11,22 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/content_master"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <JKChat.Android.Controls.ViewPager
-                android:id="@+id/content_viewpager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-            <JKChat.Android.Controls.BottomNavigationView
-                android:id="@+id/navigationview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"/>
-        </LinearLayout>
+            android:layout_height="match_parent"/>
         <FrameLayout
             android:id="@+id/content_detail"
             android:layout_width="match_parent"

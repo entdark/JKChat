@@ -7,9 +7,6 @@ namespace JKChat.Core.Services {
 	public interface IDialogService {
 		bool Showing { get; }
 		Task ShowAsync(JKDialogConfig config, Action completion = null);
-		void SaveState();
-		void RestoreState();
-		void Stop(bool force = false);
 	}
 
 	public class JKDialogConfig {

@@ -53,15 +53,22 @@ namespace JKChat.Android.Helpers {
 			}
 		}
 		public static void ShowKeyboard(this Context context, View view = null) {
-			var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
-			imm.ShowSoftInput(view, 0);
+			if ((view != null && (view.IsFocused || view.RequestFocus())) || view == null) {
+				var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
+				imm.ShowSoftInput(view, ShowFlags.Implicit);
+			}
 		}
-		public static void HideKeyboard(this Context context, View view = null) {
+		public static void HideKeyboard(this Context context, View view = null, bool clearFocus = false) {
 			view ??= (context as Activity)?.CurrentFocus;
 			if (view != null) {
 				var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
-				imm.HideSoftInputFromWindow(view.WindowToken, 0);
+				imm.HideSoftInputFromWindow(view.WindowToken, HideSoftInputFlags.None);
+				if (clearFocus)
+					view.ClearFocus();
 			}
+		}
+		public static void HideKeyboard(this Context context, bool clearFocus) {
+			context.HideKeyboard(null, clearFocus);
 		}
 	}
 }

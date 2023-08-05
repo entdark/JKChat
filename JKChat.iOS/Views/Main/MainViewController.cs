@@ -14,8 +14,6 @@ using UIKit;
 namespace JKChat.iOS.Views.Main {
 	[MvxRootPresentation]
 	public class MainViewController : MvxSplitViewController<MainViewModel>, IUISplitViewControllerDelegate {
-		private bool firstAppearance = false;
-
 		public MainViewController() {
 			CollapseSecondViewController = (split, secondary, primary) => {
 				var vcs = split.ViewControllers;
@@ -61,14 +59,6 @@ namespace JKChat.iOS.Views.Main {
 				if (delayedShowWrapper) {
 					ShowWrapperActually();
 				}
-			}
-		}
-
-		public override void ViewWillAppear(bool animated) {
-			base.ViewWillAppear(animated);
-			if (!firstAppearance) {
-				firstAppearance = true;
-				ViewModel.ShowInitialViewModelsCommand.Execute();
 			}
 		}
 

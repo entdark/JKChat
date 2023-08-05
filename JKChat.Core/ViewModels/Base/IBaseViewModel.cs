@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
-	public interface IBaseViewModel {
+	public interface IBaseViewModel : IMvxViewModel {
 		string Title { get; set; }
 		bool IsLoading { get; set; }
 	}

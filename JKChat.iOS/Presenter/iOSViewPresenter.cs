@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 using JKChat.Core.Navigation.Hints;
 using JKChat.iOS.Views.Main;
+
 using MvvmCross.Platforms.Ios.Presenters;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;

@@ -1,33 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Content.Res;
 using Android.OS;
-using Android.Runtime;
 using Android.Views;
 using Android.Views.Animations;
-using Android.Widget;
 
-using JKChat.Android.Controls;
 using JKChat.Android.Helpers;
 using JKChat.Android.Services;
 using JKChat.Android.Views.Base;
 using JKChat.Core.Messages;
-using JKChat.Core.Models;
 using JKChat.Core.Services;
-using JKChat.Core.ViewModels.Main;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
-using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Plugin.Messenger;
-
-using Microsoft.Maui.ApplicationModel;
+using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Main {
 	[Activity(
@@ -39,7 +31,7 @@ namespace JKChat.Android.Views.Main {
 		WindowSoftInputMode = SoftInput.StateHidden
 	)]
 	[MvxActivityPresentation]
-	public class MainActivity : BaseActivity<MainViewModel> {
+	public class MainActivity : BaseActivity<MainActivityViewModel> {
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private View contentMasterView, contentDetailView;
 
@@ -48,22 +40,10 @@ namespace JKChat.Android.Views.Main {
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
 			Platform.Init(this, savedInstanceState);
-			if (savedInstanceState != null) {
-				Mvx.IoCProvider.Resolve<IDialogService>().RestoreState();
-			} else {
-				Mvx.IoCProvider.Resolve<IDialogService>().Stop(true);
-			}
-			//if (savedInstanceState == null) {
-				ViewModel.ShowInitialViewModelsCommand.Execute();
-			//}
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}
 			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
-
-			if (ViewPager != null) {
-				ViewPager.OffscreenPageLimit = 2;
-			}
 
 			contentMasterView = FindViewById(Resource.Id.content_master);
 			contentDetailView = FindViewById(Resource.Id.content_detail);
@@ -76,29 +56,7 @@ namespace JKChat.Android.Views.Main {
 			}
 /*			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();*/
-//			Mvx.IoCProvider.Resolve<IDialogService>().Stop();
 			base.OnDestroy();
-		}
-
-		protected override void OnStop() {
-			base.OnStop();
-		}
-
-		protected override void OnStart() {
-			base.OnStart();
-		}
-
-		protected override void OnResume() {
-			base.OnResume();
-		}
-
-		protected override void OnSaveInstanceState(Bundle outState) {
-			Mvx.IoCProvider.Resolve<IDialogService>().SaveState();
-			base.OnSaveInstanceState(outState);
-		}
-
-		protected override void OnRestoreInstanceState(Bundle savedInstanceState) {
-			base.OnRestoreInstanceState(savedInstanceState);
 		}
 
 		protected override void ConfigurationChanged(Configuration configuration) {
@@ -150,4 +108,6 @@ namespace JKChat.Android.Views.Main {
 			return false;
 		}
 	}
+
+	public class MainActivityViewModel : MvxViewModel {}
 }

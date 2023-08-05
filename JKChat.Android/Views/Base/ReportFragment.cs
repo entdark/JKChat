@@ -54,6 +54,12 @@ namespace JKChat.Android.Views.Base {
 			return base.OnBackPressed();
 		}
 
+		protected override void OnBackPressedCallback() {
+			if (!OnBackPressed()) {
+				base.OnBackPressedCallback();
+			}
+		}
+
 		protected override void CreateOptionsMenu() {
 			base.CreateOptionsMenu();
 

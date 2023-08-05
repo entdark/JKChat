@@ -25,7 +25,6 @@ using JKChat.Core.ViewModels.Chat.Items;
 
 using MvvmCross;
 using MvvmCross.Binding.Extensions;
-using MvvmCross.Commands;
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Plugin.Messenger;
@@ -345,7 +344,7 @@ namespace JKChat.Android.Views.Chat {
 				get {
 					if (instance == null) {
 						instance = new LongClickLinkMovementMethod();
-						instance.longClickHandler = new Handler();
+						instance.longClickHandler = new Handler(Looper.MainLooper);
 					}
 					return instance;
 				}
