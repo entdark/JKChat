@@ -1,0 +1,5 @@
+<resources>
+	<style name="AppThemeMaterial3" parent="AppThemeMaterial3.Base">
+		<item name="android:windowLightStatusBar">true</item>
+	</style>
+</resources>

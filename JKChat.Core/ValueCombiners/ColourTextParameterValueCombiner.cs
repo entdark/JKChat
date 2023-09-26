@@ -7,7 +7,6 @@ using MvvmCross.Binding.Bindings.SourceSteps;
 using MvvmCross.Binding.Combiners;
 
 namespace JKChat.Core.ValueCombiners {
-
 	public class ColourTextParameterValueCombiner : MvxValueCombiner {
 		public override Type SourceType(IEnumerable<IMvxSourceStep> steps) {
 			return typeof(ColourTextParameter);

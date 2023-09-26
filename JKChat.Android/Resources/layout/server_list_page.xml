@@ -4,11 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
-    <include layout="@layout/appbar"/>
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
+        app:paddingTopFitsWindowInsets="true">
+        <include layout="@layout/toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <MvvmCross.DroidX.MvxSwipeRefreshLayout
             android:id="@+id/mvxswiperefreshlayout"
@@ -16,11 +26,10 @@
             android:layout_height="match_parent"
             app:MvxBind="Refreshing IsRefreshing; RefreshCommand RefreshCommand">
             <mvvmcross.droidx.recyclerview.MvxRecyclerView
-                style="@style/RecyclerView"
                 android:id="@+id/mvxrecyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingVertical="15dp"
+                android:paddingVertical="8dp"
                 android:clipToPadding="false"
                 app:MvxItemTemplate="@layout/server_list_item"
                 app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand; ItemLongClick SelectCommand"/>

@@ -1,0 +1,6 @@
+<resources>
+	<style name="AppThemeMaterial3" parent="AppThemeMaterial3.Base">
+		<item name="android:windowLightNavigationBar">false</item>
+		<item name="android:windowLightStatusBar">false</item>
+	</style>
+</resources>

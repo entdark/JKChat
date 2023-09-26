@@ -34,6 +34,12 @@
     <AndroidResource Include="..\JKChat.Core\Resources\Fonts\ocrastd_regular.otf">
       <Link>Resources\font\ocrastd_regular.otf</Link>
     </AndroidResource>
+    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\roboto_mono_regular.ttf">
+      <Link>Resources\font\roboto_mono_regular.ttf</Link>
+    </AndroidResource>
+    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\roboto_mono_medium.ttf">
+      <Link>Resources\font\roboto_mono_medium.ttf</Link>
+    </AndroidResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MvvmCross" Version="9.1.1" />
@@ -50,5 +56,65 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
     <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Update="Resources\layout\reset_menu_item.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\layout\dialog_input.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\drawable\ic_settings_states.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\layout\connection_status.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\layout\server_info_primary_item.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\layout\server_info_item.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\values\attrs.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\drawable\bg_preview_tint.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\color\bg_preview_tint.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\layout\server_info_full.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\menu\server_info_toolbar_items.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+    <AndroidResource Update="Resources\drawable\ic_favourites_states.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Adapters\" />
+    <None Remove="Resources\color\" />
+    <None Remove="Views\Favourites\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Adapters\" />
+    <Folder Include="Resources\color\" />
+    <Folder Include="Views\Favourites\" />
   </ItemGroup>
 </Project>

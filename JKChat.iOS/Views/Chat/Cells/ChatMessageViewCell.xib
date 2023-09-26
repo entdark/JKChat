@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_0" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_0" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -17,41 +18,43 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="749" text="Player namePlayer namePlayer namePlayer namePlayer name" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="199">
-                        <rect key="frame" x="20" y="0.0" width="245" height="16.5"/>
-                        <fontDescription key="fontDescription" name="OCRAStd" family="OCR A Std" pointSize="14"/>
-                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <rect key="frame" x="16" y="8" width="241.5" height="20"/>
+                        <fontDescription key="fontDescription" name="SFMono-Regular" family="SF Mono" pointSize="17"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="13:37" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r3n-YC-UWh" userLabel="Time Label">
-                        <rect key="frame" x="272" y="3.5" width="28" height="13"/>
-                        <fontDescription key="fontDescription" name="OCRAStd" family="OCR A Std" pointSize="11"/>
-                        <color key="textColor" red="0.0" green="1" blue="1" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                        <rect key="frame" x="273.5" y="11" width="30.5" height="14"/>
+                        <fontDescription key="fontDescription" name="SFMono-Medium" family="SF Mono" pointSize="12"/>
+                        <color key="textColor" systemColor="secondaryLabelColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Message" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="533">
-                        <rect key="frame" x="20" y="21.5" width="280" height="211.5"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Message" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="533">
+                        <rect key="frame" x="16" y="28" width="288" height="212"/>
                         <constraints>
                             <constraint firstAttribute="height" relation="greaterThanOrEqual" id="901"/>
                         </constraints>
-                        <fontDescription key="fontDescription" name="OCRAStd" family="OCR A Std" pointSize="14"/>
-                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <fontDescription key="fontDescription" name="SFMono-Regular" family="SF Mono" pointSize="15"/>
                         <nil key="highlightedColor"/>
                     </label>
                 </subviews>
                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                 <constraints>
-                    <constraint firstItem="199" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="20" id="222"/>
-                    <constraint firstItem="r3n-YC-UWh" firstAttribute="leading" secondItem="199" secondAttribute="trailing" constant="7" id="245"/>
-                    <constraint firstItem="199" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" id="268"/>
-                    <constraint firstItem="533" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="20" id="545"/>
-                    <constraint firstAttribute="trailing" secondItem="533" secondAttribute="trailing" constant="20" id="579"/>
-                    <constraint firstItem="533" firstAttribute="top" secondItem="199" secondAttribute="bottom" constant="5" id="591"/>
-                    <constraint firstAttribute="bottom" secondItem="533" secondAttribute="bottom" constant="15" id="H7y-Zg-bAb"/>
-                    <constraint firstItem="r3n-YC-UWh" firstAttribute="bottom" secondItem="199" secondAttribute="bottom" id="H7y-Zg-bAo"/>
-                    <constraint firstAttribute="trailing" secondItem="r3n-YC-UWh" secondAttribute="trailing" constant="20" id="ZOj-mC-kjh"/>
+                    <constraint firstItem="r3n-YC-UWh" firstAttribute="leading" secondItem="199" secondAttribute="trailing" constant="16" id="245"/>
+                    <constraint firstItem="199" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" constant="8" id="268"/>
+                    <constraint firstAttribute="trailing" secondItem="533" secondAttribute="trailing" constant="16" id="579"/>
+                    <constraint firstItem="533" firstAttribute="top" secondItem="199" secondAttribute="bottom" id="591"/>
+                    <constraint firstAttribute="bottom" secondItem="533" secondAttribute="bottom" constant="8" id="H7y-Zg-bAb"/>
+                    <constraint firstItem="r3n-YC-UWh" firstAttribute="centerY" secondItem="199" secondAttribute="centerY" id="H7y-Zg-bAo"/>
                 </constraints>
             </tableViewCellContentView>
+            <viewLayoutGuide key="safeArea" id="Ydu-ia-gDR"/>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="tintColor" systemColor="systemMintColor"/>
+            <constraints>
+                <constraint firstItem="r3n-YC-UWh" firstAttribute="trailing" secondItem="Ydu-ia-gDR" secondAttribute="trailing" constant="-16" id="PU5-ZF-hHh"/>
+                <constraint firstItem="199" firstAttribute="leading" secondItem="Ydu-ia-gDR" secondAttribute="leading" constant="16" id="WG9-QX-0HF"/>
+                <constraint firstItem="533" firstAttribute="leading" secondItem="Ydu-ia-gDR" secondAttribute="leading" constant="16" id="lTG-Nr-Paf"/>
+            </constraints>
             <connections>
                 <outlet property="BottomConstraint" destination="H7y-Zg-bAb" id="name-outlet-H7y-Zg-bAo"/>
                 <outlet property="MessageTextView" destination="533" id="name-outlet-533"/>
@@ -62,4 +65,12 @@
             <point key="canvasLocation" x="0.0" y="101.40845070422536"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <systemColor name="secondaryLabelColor">
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
 </document>

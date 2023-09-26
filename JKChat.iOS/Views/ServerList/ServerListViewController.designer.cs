@@ -10,19 +10,19 @@ using System.CodeDom.Compiler;
 
 namespace JKChat.iOS.Views.ServerList
 {
-    [Register ("ServerListViewController")]
-    partial class ServerListViewController
-    {
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UITableView ServerListTableView { get; set; }
+	[Register ("ServerListViewController")]
+	partial class ServerListViewController
+	{
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		UIKit.UITableView ServerListTableView { get; set; }
 
-        void ReleaseDesignerOutlets ()
-        {
-            if (ServerListTableView != null) {
-                ServerListTableView.Dispose ();
-                ServerListTableView = null;
-            }
-        }
-    }
+		void ReleaseDesignerOutlets ()
+		{
+			if (ServerListTableView != null) {
+				ServerListTableView.Dispose ();
+				ServerListTableView = null;
+			}
+		}
+	}
 }

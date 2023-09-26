@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
-using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
+using JKChat.Core.Navigation.Parameters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.ServerList.Items;
 
 using JKClient;
 
 using MvvmCross.Commands;
-using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
@@ -24,16 +25,16 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
-		private MvxSubscriptionToken serverInfoMessageToken;
+		private readonly Filter filter;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
 		public IMvxCommand AddServerCommand { get; init; }
-//		public IMvxCommand FilterCommand;
+		public IMvxCommand FilterCommand { get; init; }
 
-		protected override string ReportTitle => "Report server";
+		protected override string ReportTitle => "Report Server";
 		protected override string ReportMessage => "Do you want to report this server?";
-		protected override string ReportedTitle => "Server reported";
+		protected override string ReportedTitle => "Server Reported";
 		protected override string ReportedMessage => "Thank you for reporting this server";
 
 		private bool isRefreshing;
@@ -45,17 +46,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private string searchText;
 		public string SearchText {
 			get => searchText;
-			set {
-				if (SetProperty(ref searchText, value)) {
-					if (string.IsNullOrEmpty(value)) {
-						Items.ReplaceWith(items);
-						return;
-					} else {
-						Items.ReplaceWith(items.Where(item => item.CleanServerName.Contains(value, StringComparison.InvariantCultureIgnoreCase)
-							|| item.MapName.Contains(value, StringComparison.InvariantCultureIgnoreCase)));
-					}
-				}
-			}
+			set => SetProperty(ref searchText, value, ApplyFilter);
 		}
 
 		public ServerListViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
@@ -63,111 +54,127 @@ namespace JKChat.Core.ViewModels.ServerList {
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
 			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
+			FilterCommand = new MvxAsyncCommand(FilterExecute);
 			items = new MvxObservableCollection<ServerListItemVM>();
-			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			filter = AppSettings.Filter ?? new();
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
 		}
 
-		private void OnServerInfoMessage(ServerInfoMessage message) {
-			var item = Items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+		private void FilterPropertyChanged(object sender, PropertyChangedEventArgs ev) {
+			ApplyFilter();
+		}
+
+		private void ApplyFilter() {
+			IEnumerable<ServerListItemVM> filteredItems = items;
+			bool replace = !filter.IsReset || Items.Count != items.Count;
+			filteredItems = filter.Apply(filteredItems);
+			if (!string.IsNullOrEmpty(SearchText)) {
+				filteredItems = filteredItems.Where(item => item.CleanServerName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
+					|| item.MapName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase));
+				replace = true;
+			}
+
+			if (replace)
+				Items.ReplaceWith(filteredItems);
+		}
+
+		protected override void OnServerInfoMessage(ServerInfoMessage message) {
+			base.OnServerInfoMessage(message);
+			var item = items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
 			if (item != null) {
-/*				if (message.Status != Models.ConnectionStatus.Disconnected) {
-					Items.Move(Items.IndexOf(item), 0);
-				}*/
+				if (message.Status != Models.ConnectionStatus.Disconnected
+					&& item.Status == Models.ConnectionStatus.Disconnected) {
+					MoveItem(item, 0);
+				}
 				item.Set(message.ServerInfo, message.Status);
-				cacheService.UpdateRecentServer(item);
 			}
 		}
 
+		protected override void OnFavouriteMessage(FavouriteMessage message) {
+			base.OnFavouriteMessage(message);
+			var item = items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+			item?.SetFavourite(message.IsFavourite);
+		}
+
+		private async Task FilterExecute() {
+			await NavigationService.NavigateFromRoot<FilterViewModel, Filter>(filter, viewModel => viewModel is not FilterViewModel);
+		}
+
 		private async Task AddServerExecute() {
-			string inputAddress = null;
 			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Add server",
-				RightButton = "Add",
-				LeftButton = "Cancel",
-				RightClick = (input) => {
-					inputAddress = input as string;
+				Title = "Add Server",
+				OkText = "Add",
+				CancelText = "Cancel",
+				OkAction = config => {
+					string inputAddress = config?.Input?.Text;
+					if (string.IsNullOrEmpty(inputAddress)) {
+						return;
+					}
+					Task.Run(async () => await addServerContinue(inputAddress));
 				},
-				Type = JKDialogType.Title | JKDialogType.Input
+				Input = new DialogInputViewModel()
 			});
-			if (string.IsNullOrEmpty(inputAddress)) {
-				return;
-			}
-			IsLoading = true;
-			NetAddress netAddress = null;
-			bool success = await JKChat.Core.Helpers.Common.ExceptionalTaskRun(() => {
-				try {
-					netAddress = NetAddress.FromString(inputAddress);
-				} catch {
+			async Task addServerContinue(string inputAddress) {
+				IsLoading = true;
+				NetAddress netAddress = null;
+				bool success = await JKChat.Core.Helpers.Common.ExceptionalTaskRun(() => {
+					try {
+						netAddress = NetAddress.FromString(inputAddress);
+					} catch {
+						IsLoading = false;
+						throw;
+					}
+				});
+				if (!success) {
 					IsLoading = false;
-					throw;
+					return;
 				}
-			});
-			if (!success) {
-				IsLoading = false;
-				return;
-			}
-			if (netAddress == null) {
-				IsLoading = false;
-				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Failed adding server",
-					Message = $"Could not resolve \"{inputAddress}\"",
-					RightButton = "OK",
-					Type = JKDialogType.Title | JKDialogType.Message
-				});
-				return;
-			}
-			bool connect = false;
-			if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
-				IsLoading = false;
-				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Server exists",
-					Message = $"Would you like to connect to \"{item.ServerName}{JKClient.Common.EscapeCharacter}\" (\"{inputAddress}\")?",
-					RightButton = "Connect",
-					LeftButton = "Cancel",
-					RightClick = _ => {
-						connect = true;
-					},
-					Type = JKDialogType.Title | JKDialogType.Message
-				});
-				if (connect) {
-					await ItemClickExecute(item);
+				if (netAddress == null) {
+					IsLoading = false;
+					await DialogService.ShowAsync(new JKDialogConfig() {
+						Title = "Failed Adding Server",
+						Message = $"Could not resolve \"{inputAddress}\"",
+						OkText = "OK"
+					});
+					return;
 				}
-				return;
-			}
-			var infoString = await serverListService.GetServerInfo(netAddress);
-			IsLoading = false;
-			if (infoString == null) {
+				if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
+					IsLoading = false;
+					await DialogService.ShowAsync(new JKDialogConfig() {
+						Title = "Server Exists",
+						Message = $"Would you like to connect to \"{item.ServerName}{JKClient.Common.EscapeCharacter}\" (\"{inputAddress}\")?",
+						OkText = "Connect",
+						CancelText = "Cancel",
+						OkAction = _ => {
+							Task.Run(async () => await ItemClickExecute(item));
+						}
+					});
+					return;
+				}
+				var serverInfo = await serverListService.GetServerInfo(netAddress);
+				IsLoading = false;
+				if (serverInfo == null) {
+					await DialogService.ShowAsync(new JKDialogConfig() {
+						Title = "Failed Adding Server",
+						Message = $"There is no server with address \"{inputAddress}\"",
+						OkText = "OK"
+					});
+					return;
+				}
+				var server = new ServerListItemVM(serverInfo);
+				InsertItem(0, server);
+				IsLoading = false;
 				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Failed adding server",
-					Message = $"There is no server with address \"{inputAddress}\"",
-					RightButton = "OK",
-					Type = JKDialogType.Title | JKDialogType.Message
+					Title = "Server Added",
+					Message = $"Would you like to connect to \"{inputAddress}\"?",
+					OkText = "Connect",
+					CancelText = "Cancel",
+					OkAction = config => {
+						Task.Run(async () => await ItemClickExecute(server));
+					}
 				});
-				return;
-			}
-			var serverInfo = new ServerInfo(infoString) {
-				Address = netAddress,
-				HostName = inputAddress
-			};
-			var server = new ServerListItemVM(serverInfo);
-			items.Insert(0, server);
-			Items.Insert(0, server);
-			IsLoading = false;
-			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Server added",
-				Message = $"Would you like to connect to \"{inputAddress}\"?",
-				RightButton = "Connect",
-				LeftButton = "Cancel",
-				RightClick = _ => {
-					connect = true;
-				},
-				Type = JKDialogType.Title | JKDialogType.Message
-			});
-			if (connect) {
-				await ItemClickExecute(server);
 			}
 		}
 
@@ -180,7 +187,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
 				var servers = await serverListService.RefreshList();
-				if (servers != null && servers.Any()) {
+				if (!servers.IsNullOrEmpty()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
 					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
 					AddRecentServers(newCollection, recentServers);
@@ -192,8 +199,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 				}
 				if (newItems != null) {
 					var reportedServer = await cacheService.LoadReportedServers();
-					items.ReplaceWith(newItems.Except(reportedServer));
-					Items.ReplaceWith(items);
+					await UpdateFavourites(newItems);
+					filter.AddGameMods(newItems);
+					SetItems(newItems.Except(reportedServer));
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
@@ -205,22 +213,25 @@ namespace JKChat.Core.ViewModels.ServerList {
 			if (SelectedItem != null) {
 				return;
 			}
-			items.Move(items.IndexOf(item), 0);
-			Items.Move(Items.IndexOf(item), 0);
-			await NavigationService.NavigateFromRoot<ChatViewModel, ServerListItemVM>(item, viewModel => {
-				return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
-			});
-			await cacheService.SaveRecentServer(item);
+			if (item.Status != Models.ConnectionStatus.Disconnected) {
+				await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(item), viewModel => {
+					return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
+				});
+				MoveItem(item, 0);
+			} else {
+				await NavigationService.NavigateFromRoot<ServerInfoViewModel, ServerInfoParameter>(new(item) { LoadInfo = true }, viewModel => {
+					return (viewModel as ServerInfoViewModel)?.ServerInfo != item.ServerInfo;
+				});
+			}
 		}
 
-		protected override async Task<bool> ReportExecute(ServerListItemVM item) {
-			bool report = await base.ReportExecute(item);
-			if (report) {
-				items.Remove(item);
-				Items.Remove(item);
-				await cacheService.AddReportedServer(item);
-			}
-			return report;
+		protected override async Task ReportExecute(ServerListItemVM item, Action<bool> reported = null) {
+			await base.ReportExecute(item, report => {
+				if (report) {
+					RemoveItem(item);
+					Task.Run(async () => await cacheService.AddReportedServer(item));
+				}
+			});
 		}
 
 		protected override void SelectExecute(ServerListItemVM item) {
@@ -244,15 +255,14 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private async Task RequestPlayerName() {
 			string name = AppSettings.PlayerName;
 			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Choose your name",
-				Input = name,
-				RightButton = "OK",
-				RightClick = (input) => {
-					name = input as string;
+				Title = "Enter Player Name",
+				Input = new DialogInputViewModel(name, true),
+				OkText = "OK",
+				OkAction = config => {
+					AppSettings.PlayerName = config?.Input?.Text;
 				},
-				Type = JKDialogType.Title | JKDialogType.Input
+				CancelText = "Cancel"
 			});
-			AppSettings.PlayerName = name;
 		}
 
 		private async Task LoadServerList() {
@@ -261,9 +271,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
 				var servers = await serverListService.GetCurrentList();
-				if (servers != null && servers.Any()) {
+				if (!servers.IsNullOrEmpty()) {
 					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem);
-					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems/*.Where(s => s.GameType.Contains("Siege"))*/);
+					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
 					AddRecentServers(newCollection, recentServers);
 					UpdateServersStatuses(newCollection);
 					newItems = newCollection;
@@ -272,14 +282,39 @@ namespace JKChat.Core.ViewModels.ServerList {
 					newItems = recentServers.Reverse();
 				}
 				if (newItems != null) {
-					var reportedServer = await cacheService.LoadReportedServers();
-					items.ReplaceWith(newItems.Except(reportedServer));
-					Items.ReplaceWith(items);
+					var reportedServers = await cacheService.LoadReportedServers();
+					await UpdateFavourites(newItems);
+					filter.AddGameMods(newItems);
+					SetItems(newItems.Except(reportedServers));
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
 			}
 			IsLoading = false;
+		}
+
+		private void SetItems(IEnumerable<ServerListItemVM> items) {
+			this.items.ReplaceWith(items);
+			this.Items.ReplaceWith(filter.Apply(this.items));
+		}
+
+		private void MoveItem(ServerListItemVM item, int newIndex) {
+			int oldIndex = items.IndexOf(item);
+			if (oldIndex >= 0)
+				items.Move(oldIndex, newIndex);
+			oldIndex = Items.IndexOf(item);
+			if (oldIndex >= 0)
+				Items.Move(oldIndex, newIndex);
+		}
+
+		private void InsertItem(int index, ServerListItemVM item) {
+			items.Insert(index, item);
+			Items.Insert(index, item);
+		}
+
+		private void RemoveItem(ServerListItemVM item) {
+			items.Remove(item);
+			Items.Remove(item);
 		}
 
 		private static void AddRecentServers(ObservableCollection<ServerListItemVM> items, IEnumerable<ServerListItemVM> recentServers) {
@@ -308,23 +343,27 @@ namespace JKChat.Core.ViewModels.ServerList {
 			}
 		}
 
+		private async Task UpdateFavourites(IEnumerable<ServerListItemVM> items) {
+			var favouriteItems = await cacheService.LoadFavouriteServers();
+			foreach (var favouriteItem in favouriteItems) {
+				var existingItem = items.FirstOrDefault(item => item.ServerInfo == favouriteItem.ServerInfo);
+				existingItem?.SetFavourite(true);
+			}
+		}
+
 		private ServerListItemVM SetupItem(ServerInfo server) {
 			return new ServerListItemVM(server);
 		}
 
 		public override void ViewCreated() {
 			base.ViewCreated();
-			if (serverInfoMessageToken == null) {
-				serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
-			}
+			filter.PropertyChanged -= FilterPropertyChanged;
+			filter.PropertyChanged += FilterPropertyChanged;
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
-				if (serverInfoMessageToken != null) {
-					Messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
-					serverInfoMessageToken = null;
-				}
+				filter.PropertyChanged -= FilterPropertyChanged;
 			}
 			base.ViewDestroy(viewFinishing);
 		}

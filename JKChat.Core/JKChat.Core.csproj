@@ -8,6 +8,8 @@
     <Compile Remove="Resources\Fonts\**" />
     <EmbeddedResource Remove="Resources\Fonts\**" />
     <None Remove="Resources\Fonts\**" />
+    <None Remove="Navigation\Parameters\" />
+    <None Remove="ViewModels\Favourites\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MvvmCross" Version="9.1.1" />
@@ -17,5 +19,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JKClient\JKClient\JKClient.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Navigation\Parameters\" />
+    <Folder Include="ViewModels\Favourites\" />
   </ItemGroup>
 </Project>

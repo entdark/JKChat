@@ -8,6 +8,8 @@ using Android.OS;
 using Android.Views;
 using Android.Views.Animations;
 
+using Google.Android.Material.Internal;
+
 using JKChat.Android.Helpers;
 using JKChat.Android.Services;
 using JKChat.Android.Views.Base;
@@ -24,11 +26,11 @@ using MvvmCross.ViewModels;
 namespace JKChat.Android.Views.Main {
 	[Activity(
 		Label = "@string/app_name",
-		Theme = "@style/AppTheme",
+		Theme = "@style/AppThemeMaterial3",
 		MainLauncher = true,
 		LaunchMode = LaunchMode.SingleTop,
 		ConfigurationChanges = ConfigChanges.ScreenLayout | ConfigChanges.ScreenSize | ConfigChanges.SmallestScreenSize | ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden,
-		WindowSoftInputMode = SoftInput.StateHidden
+		WindowSoftInputMode = SoftInput.StateAlwaysHidden | SoftInput.AdjustResize
 	)]
 	[MvxActivityPresentation]
 	public class MainActivity : BaseActivity<MainActivityViewModel> {
@@ -39,6 +41,7 @@ namespace JKChat.Android.Views.Main {
 
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
+			EdgeToEdgeUtils.ApplyEdgeToEdge(this.Window, true);
 			Platform.Init(this, savedInstanceState);
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);

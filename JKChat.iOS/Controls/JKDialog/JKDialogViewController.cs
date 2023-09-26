@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using CoreGraphics;
 
 using Foundation;
 
 using JKChat.Core.Services;
+using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 using JKChat.iOS.Controls.JKDialog.Cells;
 using JKChat.iOS.Helpers;
 using JKChat.iOS.ValueConverters;
+
+using MvvmCross.Commands;
 using MvvmCross.Platforms.Ios.Binding.Views;
 
 using ObjCRuntime;
@@ -19,25 +21,15 @@ using UIKit;
 namespace JKChat.iOS.Controls.JKDialog {
 	public partial class JKDialogViewController : UIViewController {
 		private readonly JKDialogConfig config;
-		private readonly TaskCompletionSource<object> tcs;
-		private readonly bool handleKeyboard = false;
-		private readonly ColourTextValueConverter colourTextConverter = new ColourTextValueConverter();
+		private bool handleKeyboard = false;
 		private NSObject keyboardWillShowObserver, keyboardWillHideObserver;
-
-		private string message => MessageLabel.Text;
-		private string input => InputTextField.Text;
-		private DialogItemVM selectedItem => config.ListViewModel.Items.Find(item => item.IsSelected);
 
 		public override bool CanBecomeFirstResponder => true;
 
-		public JKDialogViewController(JKDialogConfig config, TaskCompletionSource<object> tcs) : base("JKDialogViewController", null) {
+		public JKDialogViewController(JKDialogConfig config) : base("JKDialogViewController", null) {
 			ModalPresentationStyle = UIModalPresentationStyle.Custom;
 			ModalTransitionStyle = UIModalTransitionStyle.CrossDissolve;
 			this.config = config;
-			this.tcs = tcs;
-			if ((config.Type & JKDialogType.Input) != 0) {
-				handleKeyboard = true;
-			}
 		}
 
 		public JKDialogViewController(NativeHandle handle) : base(handle) {
@@ -51,34 +43,54 @@ namespace JKChat.iOS.Controls.JKDialog {
 			DialogView.Transform = CGAffineTransform.MakeScale(1.337f, 1.337f);
 			DialogView.Alpha = 0.0f;
 
-			TitleLabel.Text = config?.Title;
+			TitleLabel.Text = config.Title;
 
-			if (!string.IsNullOrEmpty(config?.Message)) {
-				SetMessageText(config?.Message);
-			}
+			string message = (config.HasInput && config.Input.HintAsColourText) ? config.Input.Text : config.Message;
+			SetMessageText(message);
 
-			if (!string.IsNullOrEmpty(config?.LeftButton)) {
-				LeftButton.SetTitle(config?.LeftButton, UIControlState.Normal);
+			if (config.HasCancel) {
+				LeftButton.SetTitle(config.CancelText, UIControlState.Normal);
 				LeftButton.TouchUpInside += LeftButtonTouchUpInside;
 			} else {
 				LeftButton.Hidden = true;
 			}
+			if (config.HasOk) {
+				RightButton.SetTitle(config.OkText, UIControlState.Normal);
+				RightButton.TouchUpInside += RightButtonTouchUpInside;
+			} else {
+				RightButton.Hidden = true;
+			}
+			ButtonsSeparatorView.Hidden = !config.HasCancel || !config.HasOk;
 
-			RightButton.SetTitle(config?.RightButton, UIControlState.Normal);
-			RightButton.TouchUpInside += RightButtonTouchUpInside;
-
-			InputTextField.Text = config?.Input;
+			handleKeyboard = config.HasInput;
+			InputTextField.Text = config.Input?.Text;
 			InputTextField.EditingChanged += InputTextFieldEditingChanged;
 
-			if (config?.ListViewModel != null) {
+			if (config.HasList) {
+				var list = config.List;
 				ListTableView.RegisterNibForCellReuse(JKDialogViewCell.Nib, JKDialogViewCell.Key);
+				ListTableView.AllowsMultipleSelection = list.SelectionType == DialogSelectionType.MultiSelection;
 
-				int count = config.ListViewModel.Items.Count;
+				int count = list.Items.Count;
 				ListHeightConstraint.Constant = count > 5 ? 242.0f : (count * 44.0f);
 
 				var source = new MvxSimpleTableViewSource(ListTableView, JKDialogViewCell.Key) {
-					ItemsSource = config?.ListViewModel.Items,
-					SelectionChangedCommand = config?.ListViewModel.ItemClickCommand
+					ItemsSource = list.Items,
+					SelectionChangedCommand = new MvxCommand<DialogItemVM>(item => {
+						switch (list.SelectionType) {
+							case DialogSelectionType.NoSelection:
+								item.IsSelected = true;
+								ButtonTouchUpInside(config.OkAction);
+								break;
+							case DialogSelectionType.SingleSelection:
+								list.ItemClickCommand?.Execute(item);
+								break;
+							case DialogSelectionType.MultiSelection:
+								item.IsSelected = !item.IsSelected;
+								break;
+						}
+					}),
+					DeselectAutomatically = true
 				};
 
 				ListTableView.Source = source;
@@ -88,40 +100,30 @@ namespace JKChat.iOS.Controls.JKDialog {
 				ListView.Hidden = true;
 			}
 
-			if (config == null) {
-				MessageView.Hidden = true;
-				InputView.Hidden = true;
-				ListView.Hidden = true;
-			} else {
-				if ((config.Type & JKDialogType.Title) == 0) {
-					TitleView.Hidden = true;
-				}
-				if ((config.Type & JKDialogType.Message) == 0) {
-					MessageView.Hidden = true;
-				}
-				if ((config.Type & JKDialogType.Input) == 0) {
-					InputView.Hidden = true;
-				}
-				if ((config.Type & JKDialogType.List) == 0) {
-					ListView.Hidden = true;
-				}
-			}
+			TitleView.Hidden = !config.HasTitle;
+			MessageView.Hidden = !config.HasMessage && (!config.HasInput || (config.HasInput && !config.Input.HintAsColourText));
+			InputView.Hidden = !config.HasInput;
+			ListView.Hidden = !config.HasList;
 
 			BackgroundButton.TouchUpInside += BackgroundButtonTouchUpInside;
 		}
 
 		private void InputTextFieldEditingChanged(object sender, EventArgs ev) {
-			SetMessageText((sender as UITextField)?.Text);
+			string text = (sender as UITextField)?.Text;
+			config.Input.Text = text;
+			if (!config.Input.HintAsColourText)
+				return;
+			SetMessageText(text);
 		}
 
 		private void SetMessageText(string text) {
-			var message = colourTextConverter.Convert(text);
+			var message = ColourTextValueConverter.Convert(text);
 			MessageLabel.AttributedText = message;
 
 			var helperLabel = new UILabel(new CGRect(0.0f, 0.0f, 230.0f, 0.0f)) {
 				AttributedText = message,
 				Lines = 0,
-				Font = Theme.Font.ErgoeMedium(15.0f),
+				Font = UIFont.PreferredFootnote,
 				TextAlignment = UITextAlignment.Left,
 				LineBreakMode = UILineBreakMode.WordWrap
 			};
@@ -139,56 +141,28 @@ namespace JKChat.iOS.Controls.JKDialog {
 			}
 		}
 
-#nullable enable
-		public override void DismissViewController(bool animated, Action? action) {
-			base.DismissViewController(animated, action);
-			if (config?.ImmediateResult ?? true) {
-				DismissAction();
-			}
-		}
-#nullable disable
-
 		private void BackgroundButtonTouchUpInside(object sender, EventArgs ev) {
-			ButtonTouchUpInside(config?.BackgroundClick);
+//			ButtonTouchUpInside(config?.CancelAction);
 		}
 
 		private void LeftButtonTouchUpInside(object sender, EventArgs ev) {
-			ButtonTouchUpInside(config?.LeftClick);
+			ButtonTouchUpInside(config.CancelAction);
 		}
 
 		private void RightButtonTouchUpInside(object sender, EventArgs ev) {
-			ButtonTouchUpInside(config?.RightClick);
+			ButtonTouchUpInside(config.OkAction);
 		}
 
-		private void ButtonTouchUpInside(Action<object> action) {
-			object obj;
-			if ((config.Type & JKDialogType.Input) != 0) {
-				obj = input;
-			} else if ((config.Type & JKDialogType.List) != 0) {
-				obj = selectedItem;
-			} else if ((config.Type & JKDialogType.Message) != 0) {
-				obj = message;
-			} else {
-				obj = null;
-			}
-			action?.Invoke(obj);
-			config?.AnyClick?.Invoke(obj);
-
+		private void ButtonTouchUpInside(Action<JKDialogConfig> action) {
+			action?.Invoke(config);
 			InvokeOnMainThread(() => {
-				Action action = null;
-				if (!(config?.ImmediateResult ?? true)) {
-					action = DismissAction;
-				}
+				Action action2 = () => { };
 				UIView.Animate(0.200, () => {
 //					DialogView.Transform = CGAffineTransform.MakeScale(1.337f, 1.337f);
 					DialogView.Alpha = 0.0f;
 				});
-				DismissViewController(true, action);
+				DismissViewController(true, action2);
 			});
-		}
-
-		private void DismissAction() {
-			tcs?.TrySetResult(null);
 		}
 
 		public override void ViewWillAppear(bool animated) {
@@ -202,23 +176,17 @@ namespace JKChat.iOS.Controls.JKDialog {
 			}
 		}
 
-		public override void ViewDidAppear(bool animated) {
-			base.ViewDidAppear(animated);
-		}
-
 		public override void ViewWillDisappear(bool animated) {
 			base.ViewWillDisappear(animated);
 			UnsubscribeForKeyboardNotifications();
 		}
 
-		public override void ViewDidDisappear(bool animated) {
-			base.ViewDidDisappear(animated);
-		}
-
 		protected override void Dispose(bool disposing) {
 			if (disposing) {
-				BackgroundButton.TouchUpInside -= BackgroundButtonTouchUpInside;
+				LeftButton.TouchUpInside -= LeftButtonTouchUpInside;
+				RightButton.TouchUpInside -= RightButtonTouchUpInside;
 				InputTextField.EditingChanged -= InputTextFieldEditingChanged;
+				BackgroundButton.TouchUpInside -= BackgroundButtonTouchUpInside;
 			}
 			base.Dispose(disposing);
 		}

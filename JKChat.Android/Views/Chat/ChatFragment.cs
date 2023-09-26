@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Threading.Tasks;
 
-using Android.Animation;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
@@ -11,17 +9,26 @@ using Android.Views;
 using Android.Views.Animations;
 using Android.Widget;
 
+using AndroidX.AppCompat.View.Menu;
+using AndroidX.Core.Content;
 using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
 
+using Java.Lang;
+using Java.Util.Concurrent;
+
+using JKChat.Android.Adapters;
 using JKChat.Android.Controls;
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross;
 using MvvmCross.Binding.Extensions;
@@ -29,25 +36,51 @@ using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Plugin.Messenger;
 
-using Microsoft.Maui.ApplicationModel;
-
 using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 
 namespace JKChat.Android.Views.Chat {
 	[PushFragmentPresentation]
 	public class ChatFragment : ReportFragment<ChatViewModel, ChatItemVM> {
-		private IMenuItem copyItem;
-		private ImageView sendButton;
+		private IMenuItem copyItem, favouriteItem;
+		private ImageButton sendButton, commandButton, chatTypeButton;
+		private EditText messageEditText;
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
+		private MvxRecyclerView recyclerView;
 
 		private string message;
 		public string Message {
 			get => message;
 			set {
 				if (string.IsNullOrEmpty(message) != string.IsNullOrEmpty(value)) {
-					ScaleSendButton(!string.IsNullOrEmpty(value));
+					ScaleButton(sendButton, !string.IsNullOrEmpty(value));
+					ScaleButton(commandButton, string.IsNullOrEmpty(value));
 				}
 				message = value;
+			}
+		}
+
+		private ChatType chatType;
+		public ChatType ChatType {
+			get => chatType;
+			set {
+				if (chatType != value) {
+					int tintColor = value switch {
+						ChatType.Team => Resource.Color.chat_type_team,
+						ChatType.Private => Resource.Color.chat_type_private,
+						_ => Resource.Color.chat_type_common,
+					};
+					chatTypeButton.ImageTintList = global::Android.Content.Res.ColorStateList.ValueOf(new global::Android.Graphics.Color(ContextCompat.GetColor(Context, tintColor)));
+				}
+				chatType = value;
+			}
+		}
+
+		private bool isFavourite;
+		public bool IsFavourite {
+			get => isFavourite;
+			set {
+				isFavourite = value;
+				UpdateFavouriteItem();
 			}
 		}
 
@@ -57,42 +90,59 @@ namespace JKChat.Android.Views.Chat {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
 			using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
+			set.Bind(this).For(v => v.ChatType).To(vm => vm.ChatType);
+			set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
 			return view;
 		}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
-			var recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
-			var layoutManager = new LinearLayoutManager(Context, LinearLayoutManager.Vertical, false) {
-				StackFromEnd = true
-			};
-			recyclerView.SetLayoutManager(layoutManager);
-			if (scrollToBottomRecyclerAdapter == null) {
-				scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext, recyclerView) {
-					AdjustItem = (vh, pos) => {
-						var textView = vh.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
+			PostponeEnterTransition(2, TimeUnit.Milliseconds);
+
+			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
+			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
+				recyclerView.Adapter = scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
+					AdjustHolderOnBind = (viewHolder, position) => {
+						var textView = viewHolder.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
 					}
 				};
 			}
-			scrollToBottomRecyclerAdapter.Start();
-			recyclerView.Adapter = scrollToBottomRecyclerAdapter;
+			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
 
-			sendButton = view.FindViewById<ImageView>(Resource.Id.send_button);
-			ScaleSendButton(!string.IsNullOrEmpty(ViewModel.Message), false);
+			sendButton = view.FindViewById<ImageButton>(Resource.Id.send_button);
+			ScaleButton(sendButton, !string.IsNullOrEmpty(ViewModel.Message), false);
+
+			commandButton = view.FindViewById<ImageButton>(Resource.Id.command_button);
+			ScaleButton(commandButton, string.IsNullOrEmpty(ViewModel.Message), false);
+
+			chatTypeButton = view.FindViewById<ImageButton>(Resource.Id.chat_type_button);
+
+			messageEditText = view.FindViewById<EditText>(Resource.Id.message_edittext);
+			messageEditText.AfterTextChanged += AfterMessageTextChanged;
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
 			SetCustomTitleView(titleView);
 		}
 
-		public override void OnDestroyView() {
-			if (scrollToBottomRecyclerAdapter != null) {
-				scrollToBottomRecyclerAdapter.Finish();
-				//scrollToBottomRecyclerAdapter = null;
+		private void AfterMessageTextChanged(object sender, AfterTextChangedEventArgs ev) {
+			if (ViewModel.CommandSetAutomatically) {
+				ViewModel.CommandSetAutomatically = false;
+				Selection.SetSelection(ev.Editable, ev.Editable.Length());
+				ShowKeyboard(sender as View);
 			}
-			//CloseSelection();
-			//base.DisplayCustomTitle(false);
+		}
+
+		public override void OnDestroyView() {
+			if (messageEditText != null) {
+				messageEditText.AfterTextChanged -= AfterMessageTextChanged;
+				messageEditText = null;
+			}
+			if (recyclerView != null) {
+				recyclerView.Adapter = null;
+				recyclerView = null;
+			}
 			base.OnDestroyView();
 		}
 
@@ -109,31 +159,41 @@ namespace JKChat.Android.Views.Chat {
 			scrollToBottomRecyclerAdapter?.ScrollToBottom();
 		}
 
-		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
-			base.OnCreateOptionsMenu(menu, inflater);
-		}
-
 		protected override void CreateOptionsMenu() {
 			base.CreateOptionsMenu();
-
+			if (Menu is MenuBuilder menuBuilder) {
+				menuBuilder.SetOptionalIconsVisible(true);
+			}
+			favouriteItem = Menu.FindItem(Resource.Id.favourite_item);
+			favouriteItem.AdjustIconInsets();
+			favouriteItem.SetClickAction(() => {
+				ViewModel?.FavouriteCommand?.Execute();
+			});
+			UpdateFavouriteItem();
+			var shareItem = Menu.FindItem(Resource.Id.share_item);
+			shareItem.AdjustIconInsets();
+			shareItem.SetClickAction(() => {
+				ViewModel?.ShareCommand?.Execute();
+			});
+			var infoItem = Menu.FindItem(Resource.Id.info_item);
+			infoItem.AdjustIconInsets();
+			infoItem.SetClickAction(() => {
+				ViewModel?.ServerInfoCommand?.Execute();
+			});
+			var reportServerItem = Menu.FindItem(Resource.Id.report_server_item);
+			reportServerItem.AdjustIconInsets();
+			reportServerItem.SetClickAction(() => {
+				ViewModel?.ServerReportCommand?.Execute();
+			});
+			var disconnectItem = Menu.FindItem(Resource.Id.disconnect_item);
+			disconnectItem.AdjustIconInsets();
+			disconnectItem.SetClickAction(() => {
+				ViewModel?.DisconnectCommand?.Execute();
+			});
 			copyItem = Menu.FindItem(Resource.Id.copy_item);
 			copyItem.SetClickAction(() => {
-				this.OnOptionsItemSelected(copyItem);
+				ViewModel?.CopyCommand?.Execute(SelectedItem);
 			});
-		}
-
-		public override bool OnOptionsItemSelected(IMenuItem item) {
-			if (SelectedItem != null) {
-				if (item == copyItem) {
-					ViewModel.CopyCommand?.Execute(SelectedItem);
-				}
-				return base.OnOptionsItemSelected(item);
-			}
-			if (ViewModel == null) {
-				return base.OnOptionsItemSelected(item);
-			}
-			Task.Run(ViewModel.OfferDisconnect);
-			return true;
 		}
 
 		protected override void ShowSelection(bool animated = true) {
@@ -152,39 +212,47 @@ namespace JKChat.Android.Views.Chat {
 			base.DisplayCustomTitle(SelectedItem == null);
 		}
 
-		protected override void BackNavigationClick(object sender, AndroidX.AppCompat.Widget.Toolbar.NavigationClickEventArgs ev) {
-			if (!OnBackPressed()) {
-				Task.Run(ViewModel.OfferDisconnect);
-			}
+		private void UpdateFavouriteItem() {
+			if (favouriteItem == null)
+				return;
+			favouriteItem.SetIcon(IsFavourite ? Resource.Drawable.ic_star_filled : Resource.Drawable.ic_star_outlined);
+			favouriteItem.SetTitle(IsFavourite ? "Remove from favourites" : "Add to favourites");
+			favouriteItem.AdjustIconInsets();
 		}
 
-		private void ScaleSendButton(bool show, bool animated = true) {
+		private static void ScaleButton(View view, bool show, bool animated = true) {
 			float scale = show ? 1.0f : 0.0f;
-			if (animated) {
-				sendButton.ScaleX = scale;
-				sendButton.ScaleY = scale;
+			if (scale == 1.0f)
+				view.Visibility = ViewStates.Visible;
+			if (!animated) {
+				view.ScaleX = scale;
+				view.ScaleY = scale;
+				view.Alpha = scale;
+				if (scale == 0.0f)
+					view.Visibility = ViewStates.Gone;
 				return;
 			}
-			var scaleX = ObjectAnimator.OfFloat(sendButton, "scaleX", scale);
-			var scaleY = ObjectAnimator.OfFloat(sendButton, "scaleY", scale);
-			var set = new AnimatorSet();
-			set.PlayTogether(scaleX, scaleY);
-			set.SetDuration(200);
-			set.SetInterpolator(new DecelerateInterpolator());
-			set.Start();
+			view.Animate()
+				.ScaleX(scale)
+				.ScaleY(scale)
+				.Alpha(scale)
+				.SetDuration(200)
+				.SetInterpolator(new DecelerateInterpolator())
+				.WithEndAction(new Runnable(() => {
+					if (scale == 0.0f)
+						view.Visibility = ViewStates.Gone;
+				}))
+				.Start();
 		}
 
-		private class ScrollToBottomRecyclerAdapter : MvxRecyclerAdapter {
-			private readonly MvxRecyclerView recyclerView;
+		private class ScrollToBottomRecyclerAdapter : BaseRecyclerViewAdapter {
 			private bool dragging = false, touched = false;
 			private MvxSubscriptionToken sentMessageMessageToken;
 			private ScrollToBottomOnScrollListener onScrollListener;
 
 			public bool ScrolledToBottom { get; set; } = true;
-			public Action<RecyclerView.ViewHolder, int> AdjustItem { get; set; }
 
-			public ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext, MvxRecyclerView recyclerView) : base(bindingContext) {
-				this.recyclerView = recyclerView;
+			public ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext) : base(bindingContext) {
 			}
 
 			private void RecyclerViewTouch(object sender, View.TouchEventArgs ev) {
@@ -198,9 +266,11 @@ namespace JKChat.Android.Views.Chat {
 			}
 
 			private void OnSentMessageMessage(SentMessageMessage message) {
-				int position = recyclerView.ItemsSource.Count()-1;
+				if (RecyclerView == null)
+					return;
+				int position = RecyclerView.ItemsSource.Count()-1;
 				if (position >= 0) {
-					recyclerView.ScrollToPosition(position);
+					RecyclerView.ScrollToPosition(position);
 				}
 			}
 
@@ -216,39 +286,42 @@ namespace JKChat.Android.Views.Chat {
 			}
 
 			public void ScrollToBottom() {
-				int position = recyclerView.ItemsSource.Count()-1;
+				if (RecyclerView == null)
+					return;
+				int position = RecyclerView.ItemsSource.Count()-1;
 				if (ScrolledToBottom && position >= 0) {
-					recyclerView.ScrollToPosition(position);
+					RecyclerView.ScrollToPosition(position);
 					return;
 					int visiblePosition;
-					if (recyclerView.GetLayoutManager() is LinearLayoutManager linearLayoutManager) {
+					if (RecyclerView.GetLayoutManager() is LinearLayoutManager linearLayoutManager) {
 						visiblePosition = linearLayoutManager.FindLastVisibleItemPosition();
 					} else {
 						visiblePosition = -1;
 					}
 					if (visiblePosition == -1 || (position - visiblePosition) > 5) {
-						recyclerView.ScrollToPosition(position);
+						RecyclerView.ScrollToPosition(position);
 					} else {
-						recyclerView.SmoothScrollToPosition(position);
+						RecyclerView.SmoothScrollToPosition(position);
 					}
 				}
 			}
 
-			public void Start() {
+			public override void OnAttachedToRecyclerView(RecyclerView recyclerView) {
+				base.OnAttachedToRecyclerView(recyclerView);
 				onScrollListener = new ScrollToBottomOnScrollListener((idle) => {
 					if (idle && touched) {
-						this.ScrolledToBottom = idle && !recyclerView.CanScrollVertically(2);
+						this.ScrolledToBottom = idle && !RecyclerView.CanScrollVertically(2);
 						touched = false;
 					}
 				});
-				this.recyclerView.AddOnScrollListener(onScrollListener);
-				this.recyclerView.Touch += RecyclerViewTouch;
+				this.RecyclerView.AddOnScrollListener(onScrollListener);
+				this.RecyclerView.Touch += RecyclerViewTouch;
 				sentMessageMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<SentMessageMessage>(OnSentMessageMessage);
 			}
 
-			public void Finish() {
-				if (this.recyclerView != null) {
-					this.recyclerView.Touch -= RecyclerViewTouch;
+			public override void OnDetachedFromRecyclerView(RecyclerView recyclerView) {
+				if (this.RecyclerView != null) {
+					this.RecyclerView.Touch -= RecyclerViewTouch;
 				}
 				if (sentMessageMessageToken != null) {
 					Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<SentMessageMessage>(sentMessageMessageToken);
@@ -258,18 +331,7 @@ namespace JKChat.Android.Views.Chat {
 					recyclerView?.RemoveOnScrollListener(onScrollListener);
 					onScrollListener = null;
 				}
-			}
-
-			protected override void Dispose(bool disposing) {
-				if (disposing) {
-					Finish();
-				}
-				base.Dispose(disposing);
-			}
-
-			public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-				base.OnBindViewHolder(holder, position);
-				AdjustItem?.Invoke(holder, position);
+				base.OnDetachedFromRecyclerView(recyclerView);
 			}
 
 			private class ScrollToBottomOnScrollListener : RecyclerView.OnScrollListener {
@@ -278,7 +340,7 @@ namespace JKChat.Android.Views.Chat {
 					this.scrollStateChangedCallback = scrollStateChangedCallback;
 				}
 				public override void OnScrollStateChanged(RecyclerView recyclerView, int newState) {
-					bool idle = newState == RecyclerView.ScrollStateIdle;
+					bool idle = newState == AndroidX.RecyclerView.Widget.RecyclerView.ScrollStateIdle;
 					scrollStateChangedCallback?.Invoke(idle);
 					base.OnScrollStateChanged(recyclerView, newState);
 				}

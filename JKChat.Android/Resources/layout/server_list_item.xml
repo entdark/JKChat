@@ -4,151 +4,106 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <LinearLayout
-        android:orientation="vertical"
+    <com.google.android.material.card.MaterialCardView
+        style="?attr/materialCardViewFilledStyle"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginVertical="5dp"
-        android:layout_marginHorizontal="20dp"
-        android:padding="4dp"
-        android:background="@color/item_background">
-        <LinearLayout
-            android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="8dp"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerHighest"
+        app:MvxBind="Selected IsSelected">
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_password"
-                android:scaleType="centerInside"
-                app:MvxBind="Visibility Visibility(NeedPassword, true)"/>
-            <TextView
-                tools:text="Server name"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:theme="@style/RegularText.18.Bold"
-                android:ellipsize="end"
-                android:lines="1"
-                app:MvxBind="TextFormatted ColourText(ServerName)"/>
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_map"
-                android:scaleType="centerInside"/>
-            <TextView
-                tools:text="Map name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:theme="@style/RegularText.15.Medium"
-                android:ellipsize="end"
-                android:lines="1"
-                app:MvxBind="Text MapName"/>
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
+                android:layout_alignLeft="@id/cardview_content"
+                android:layout_alignRight="@id/cardview_content"
+                android:layout_alignTop="@id/cardview_content"
+                android:layout_alignBottom="@id/cardview_content"
+                android:scaleType="centerCrop"
+                app:tint="@color/bg_preview_tint"
+                app:tintMode="src_over"
+                app:srcCompat="@drawable/bg_ja_preview"
+                app:MvxBind="DrawableName ServerPreview(Game)"/>
             <LinearLayout
-                android:orientation="horizontal"
+                android:id="@+id/cardview_content"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_players"
-                android:scaleType="centerInside"/>
-                <TextView
-                    tools:text="16/32"
-                    android:layout_width="wrap_content"
+                android:minHeight="162dp">
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginVertical="12dp"
+                        android:layout_weight="1">
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/OnSurfaceText.TitleMedium"
+                            tools:text="Server Title 01"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:MvxBind="TextFormatted ColourText(ServerName)"/>
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/OnSurfaceText.BodyMedium"
+                            tools:text="JA 1.00 - Movie battles II"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:MvxBind="TextFormatted ColourText(If(Modification, Format('{0} - {1}', GameName, Modification), GameName))"/>
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/OnSurfaceText.BodyMedium"
+                            tools:text="27/32 players"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:MvxBind="Text Format('{0} players', Players)"/>
+                        <com.google.android.material.textview.MaterialTextView
+                            style="@style/OnSurfaceText.BodyMedium"
+                            tools:text="MPA/FFA 2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            app:MvxBind="Text MapName"/>
+                    </LinearLayout>
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:button="@drawable/ic_star_states"
+                        app:MvxBind="Checked IsFavourite"/>
+                </LinearLayout>
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:theme="@style/RegularText.15.Medium"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    app:MvxBind="Text Players"/>
+                    app:dividerColor="?attr/colorOutline"/>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
+                    <include layout="@layout/connection_status"/>
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/connect_button"
+                        style="?attr/materialButtonOutlinedStyle"
+                        tools:text="Disconnect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        app:iconPadding="8dp"
+                        app:MvxBind="Click ConnectCommand; Text If(EnumBool(Status, 'Disconnected'), 'Connect', 'Disconnect')"/>
+                </LinearLayout>
             </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_ping"
-                android:scaleType="centerInside"/>
-                <TextView
-                    tools:text="32"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/RegularText.15.Medium"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    app:MvxBind="Text Ping"/>
-            </LinearLayout>
-        </LinearLayout>
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical">
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ic_gametype"
-                android:scaleType="centerInside"/>
-                <TextView
-                    tools:text="CTF"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/RegularText.15.Medium"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    app:MvxBind="Text GameType"/>
-            </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_vertical">
-                <FrameLayout
-                    android:layout_width="28dp"
-                    android:layout_height="28dp">
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/disconnected_background"
-                        android:scaleType="fitCenter"
-                        app:MvxBind="DrawableName ConnectionIcon(Status)"/>
-                </FrameLayout>
-                <TextView
-                    tools:text="Connected"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:theme="@style/RegularText.15.Medium"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    app:MvxBind="Text Status"/>
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-    <include layout="@layout/item_selection"/>">
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 </FrameLayout>

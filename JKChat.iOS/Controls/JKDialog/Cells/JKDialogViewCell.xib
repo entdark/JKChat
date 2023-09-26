@@ -1,45 +1,38 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7026.1"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" customClass="JKDialogViewCell" id="cxk-wN-pdQ" rowHeight="44" opaque="NO">
-            <color key="backgroundColor" colorSpace="calibratedRGB" red="0.22745098039215686" green="0.2627450980392157" blue="0.45490196078431372" alpha="1"/>
+        <tableViewCell opaque="NO" contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" textLabel="vW7-Ne-SRo" rowHeight="44" style="IBUITableViewCellStyleDefault" id="cxk-wN-pdQ" customClass="JKDialogViewCell">
             <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="cxk-wN-pdQ" id="YTl-1W-gDM">
-                <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                <rect key="frame" x="0.0" y="0.0" width="280" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <view contentMode="scaleToFill" id="726" translatesAutoresizingMaskIntoConstraints="NO">
-                        <rect key="frame" x="20" y="0.0" width="300" height="0.5"/>
-                        <color key="backgroundColor" colorSpace="calibratedRGB" red="0.58039215686274515" green="0.92549019607843142" blue="0.9137254901960784" alpha="0.30196078431372547"/>
-                        <constraints>
-                            <constraint id="1325" firstAttribute="height" constant="0.5"/>
-                        </constraints>
-                    </view>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Player" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="289" translatesAutoresizingMaskIntoConstraints="NO" misplaced="YES">
-                        <rect key="frame" x="20" y="12" width="280" height="20.5"/>
-                        <fontDescription key="fontDescription" name="ErgoeMedium" family="ErgoeMedium" pointSize="15"/>
-                        <color key="textColor" colorSpace="calibratedRGB" red="0.66666666666666663" green="0.84705882352941175" blue="0.8666666666666667" alpha="1"/>
+                    <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="vW7-Ne-SRo">
+                        <rect key="frame" x="16" y="0.0" width="256" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                        <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                 </subviews>
-                <constraints>
-                    <constraint id="334" firstItem="289" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="20"/>
-                    <constraint id="379" firstAttribute="trailing" secondItem="289" secondAttribute="trailing" constant="20"/>
-                    <constraint id="424" firstItem="289" firstAttribute="centerY" secondItem="YTl-1W-gDM" secondAttribute="centerY"/>
-                    <constraint id="919" firstItem="726" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" constant="20"/>
-                    <constraint id="968" firstItem="726" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top"/>
-                    <constraint id="1017" firstAttribute="trailing" secondItem="726" secondAttribute="trailing"/>
-                </constraints>
             </tableViewCellContentView>
-            <connections>
-                <outlet property="NameLabel" destination="289" id="name-outlet-289"/>
-            </connections>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <color key="tintColor" systemColor="systemMintColor"/>
+            <point key="canvasLocation" x="-38" y="-53"/>
         </tableViewCell>
     </objects>
+    <resources>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
 </document>

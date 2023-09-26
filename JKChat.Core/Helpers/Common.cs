@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 using JKChat.Core.Services;
 
-using MvvmCross;
-
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+
+using MvvmCross;
 
 namespace JKChat.Core.Helpers {
 	public static class Common {
@@ -18,12 +18,11 @@ namespace JKChat.Core.Helpers {
 			await Mvx.IoCProvider.Resolve<IDialogService>().ShowAsync(new JKDialogConfig() {
 				Title = "Error",
 				Message = message,
-				LeftButton = "Copy",
-				LeftClick = (_) => {
+				OkText = "Copy",
+				OkAction = (_) => {
 					Clipboard.SetTextAsync(message);
 				},
-				RightButton = "OK",
-				Type = JKDialogType.Title | JKDialogType.Message
+				CancelText = "OK"
 			});
 		}
 

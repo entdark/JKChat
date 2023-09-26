@@ -1,5 +1,7 @@
 ﻿using System;
+
 using JKChat.Android.Views.Main;
+
 using MvvmCross;
 using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
@@ -7,6 +9,9 @@ using MvvmCross.Platforms.Android.Presenters.Attributes;
 namespace JKChat.Android.Presenter.Attributes {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class TabFragmentPresentationAttribute : MvxViewPagerFragmentPresentationAttribute {
+		public int BottomNavigationViewResourceId { get; set; }
+		public int IconDrawableResourceId { get; set; }
+
 		public TabFragmentPresentationAttribute(string title, int iconDrawableResourceId) : this(
 			title,
 			Resource.Id.tabs_viewpager,
@@ -23,9 +28,11 @@ namespace JKChat.Android.Presenter.Attributes {
 			Type activityHostViewModelType = null,
 			bool addToBackStack = false,
 			Type fragmentHostViewType = null,
-			bool isCacheableFragment = false) : base(title, viewPagerResourceId, activityHostViewModelType,
-			addToBackStack, fragmentHostViewType, isCacheableFragment)
-		{
+			bool isCacheableFragment = false
+		) : base(
+			title, viewPagerResourceId, activityHostViewModelType,
+			addToBackStack, fragmentHostViewType, isCacheableFragment
+		) {
 			BottomNavigationViewResourceId = bottomNavigationViewResourceId;
 			IconDrawableResourceId = iconDrawableResourceId;
 		}
@@ -38,9 +45,11 @@ namespace JKChat.Android.Presenter.Attributes {
 			Type activityHostViewModelType = null,
 			bool addToBackStack = false,
 			Type fragmentHostViewType = null,
-			bool isCacheableFragment = false) : base(title, viewPagerResourceId,
-			activityHostViewModelType, addToBackStack, fragmentHostViewType, isCacheableFragment)
-		{
+			bool isCacheableFragment = false
+		) : base(
+			title, viewPagerResourceId, activityHostViewModelType,
+			addToBackStack, fragmentHostViewType, isCacheableFragment
+		) {
 			var context = Mvx.IoCProvider.Resolve<IMvxAndroidGlobals>().ApplicationContext;
 
 			BottomNavigationViewResourceId = !string.IsNullOrEmpty(bottomNavigationViewResourceId)
@@ -49,15 +58,5 @@ namespace JKChat.Android.Presenter.Attributes {
 
 			IconDrawableResourceId = iconDrawableResourceId;
 		}
-
-		/// <summary>
-		/// The resource id used to get the BottomNavigationView from the view
-		/// </summary>
-		public int BottomNavigationViewResourceId { get; set; }
-
-		/// <summary>
-		/// The resource id used to get the menu item from the view
-		/// </summary>
-		public int IconDrawableResourceId { get; set; }
 	}
 }

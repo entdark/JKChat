@@ -8,40 +8,41 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginBottom="15dp"
-        app:MvxBind="MarginTop ChatMessageMargin(TopVMType); MarginBottom ChatMessageMargin(BottomVMType)">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginVertical="8dp">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom">
+            android:gravity="center_vertical">
             <TextView
+                style="@style/OnSurfaceText.BodyLarge"
+                android:fontFamily="@font/roboto_mono_regular"
                 tools:text="Padawan PadawanPadawan PadawanPadawan Padawan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="2"
-                android:theme="@style/ChatText"
                 android:lines="1"
                 android:ellipsize="end"
                 app:MvxBind="TextFormatted ColourText(PlayerName, ColourTextParameter(false, Shadow))"/>
             <TextView
+                style="@style/OnSurfaceText.LabelSmall"
+                android:fontFamily="@font/roboto_mono_medium"
                 tools:text="13:37"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="16dp"
                 android:layout_weight="0"
-                android:theme="@style/ChatTimeText"
                 android:lines="1"
                 app:MvxBind="Text Time"/>
         </LinearLayout>
         <LinkTextView
+            style="@style/OnSurfaceText.BodyMedium"
+            android:fontFamily="@font/roboto_mono_regular"
             android:id="@+id/message"
             tools:text="Structuralism, as is commonly believed, unbiased decomposes the elements of the subject of activity. Positivism categorically emphasizes the transcendental principle of perception. Apperception has an open mind about the ontological gravitational paradox."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            style="@style/ChatText"
             app:MvxBind="TextFormatted ColourText(Message, ColourTextParameter(true, Shadow))"/>
     </LinearLayout>
     <include layout="@layout/item_selection"/>

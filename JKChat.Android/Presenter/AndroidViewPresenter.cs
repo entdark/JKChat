@@ -25,8 +25,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Presenter {
 	public class AndroidViewPresenter : MvxAndroidViewPresenter {
-		public AndroidViewPresenter(IEnumerable<Assembly> androidViewAssemblies) : base(androidViewAssemblies) {
-		}
+		public AndroidViewPresenter(IEnumerable<Assembly> androidViewAssemblies) : base(androidViewAssemblies) {}
 
 		public override void RegisterAttributeTypes() {
 			base.RegisterAttributeTypes();
@@ -52,11 +51,7 @@ namespace JKChat.Android.Presenter {
 			return base.CloseFragment(viewModel, attribute);
 		}
 
-		protected virtual async Task<bool> ShowTabFragment(
-			Type view,
-			TabFragmentPresentationAttribute attribute,
-			MvxViewModelRequest request)
-		{
+		protected virtual async Task<bool> ShowTabFragment(Type view, TabFragmentPresentationAttribute attribute, MvxViewModelRequest request) {
 //			ValidateArguments(view, attribute, request);
 			var showViewPagerFragment = await ShowViewPagerFragment(view, attribute, request).ConfigureAwait(true);
 			if (!showViewPagerFragment)

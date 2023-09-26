@@ -4,22 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?android:attr/colorBackground">
     <!--<include layout="@layout/appbar"/>-->
     <FrameLayout
         android:id="@id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <FrameLayout
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/content_master"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <FrameLayout
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/content_detail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-        <FrameLayout
+        <androidx.fragment.app.FragmentContainerView
             android:id="@+id/content_modal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

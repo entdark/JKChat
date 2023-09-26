@@ -15,11 +15,11 @@ namespace JKChat.iOS.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, NSAttributedString> {
 		private static readonly UIColor ShadowColor = UIColor.FromRGB(38, 38, 38);
 
-		public NSAttributedString Convert(string value, ColourTextParameter parameter = null) {
-			return Convert(value, typeof(NSAttributedString), parameter, null) as NSAttributedString;
+		protected override NSAttributedString Convert(string value, Type targetType, object parameter, CultureInfo culture) {
+			return Convert(value, parameter);
 		}
 
-		protected override NSAttributedString Convert(string value, Type targetType, object parameter, CultureInfo culture) {
+		public static NSAttributedString Convert(string value, object parameter = null) {
 			if (string.IsNullOrEmpty(value)) {
 				return new NSAttributedString(string.Empty);
 			}
@@ -60,27 +60,16 @@ namespace JKChat.iOS.ValueConverters {
 		}
 
 		private static UIColor GetColor(int code) {
-			switch (code) {
-			case 0:
-			case 8:
-				return UIColor.FromRGB(0, 0, 0);
-			case 1:
-			case 9:
-				return UIColor.FromRGB(255, 0, 0);
-			case 2:
-				return UIColor.FromRGB(0, 255, 0);
-			case 3:
-				return UIColor.FromRGB(255, 255, 0);
-			case 4:
-				return UIColor.FromRGB(0, 0, 255);
-			case 5:
-				return UIColor.FromRGB(0, 255, 255);
-			case 6:
-				return UIColor.FromRGB(255, 0, 255);
-			default:
-			case 7:
-				return UIColor.FromRGB(255, 255, 255);
-			}
+			return code switch {
+				0 or 8 => UIColor.FromRGB(0, 0, 0),
+				1 or 9 => UIColor.FromRGB(255, 0, 0),
+				2 => UIColor.FromRGB(0, 255, 0),
+				3 => UIColor.FromRGB(255, 255, 0),
+				4 => UIColor.FromRGB(0, 0, 255),
+				5 => UIColor.FromRGB(0, 255, 255),
+				6 => UIColor.FromRGB(255, 0, 255),
+				_ => UIColor.FromRGB(255, 255, 255),
+			};
 		}
 		private static NSShadow GetShadow(int code = -1) {
 			return new NSShadow() {

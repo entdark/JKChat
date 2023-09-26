@@ -47,7 +47,7 @@ namespace JKChat.iOS.Views.Main {
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
 			var observer = NSNotificationCenter.DefaultCenter.AddObserver(ShowDetailTargetDidChangeNotification, DetailTargetNotification);
-			View.BackgroundColor = Theme.Color.Background;
+			View.BackgroundColor = UIColor.SystemBackground;
 			if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
 //				PreferredSplitBehavior = UISplitViewControllerSplitBehavior.Tile;
 				PreferredDisplayMode = UISplitViewControllerDisplayMode.OneBesideSecondary;

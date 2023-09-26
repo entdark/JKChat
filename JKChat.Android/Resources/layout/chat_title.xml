@@ -6,35 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingRight="20dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    app:MvxBind="Click ServerInfoCommand">
     <TextView
+        style="@style/OnSurfaceText.TitleLarge"
         tools:text="Server name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:theme="@style/ToolbarTitle"
         android:ellipsize="end"
         android:lines="1"
         app:MvxBind="TextFormatted ColourText(Title)"/>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:gravity="center_vertical">
-        <ImageView
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:src="@drawable/connected_background"
-            android:scaleType="fitCenter"
-            app:MvxBind="DrawableName ConnectionIcon(Status)"/>
-        <TextView
-            tools:text="Connected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:theme="@style/ToolbarSubtitle"
-            android:ellipsize="none"
-            android:lines="1"
-            app:MvxBind="Text Status"/>
-    </LinearLayout>
+    <include layout="@layout/connection_status"/>
 </LinearLayout>

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Specialized;
-
-using Foundation;
 
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.iOS.Views.Base;
-using JKChat.iOS.Views.ServerList.Cells;
+using JKChat.iOS.ViewSources;
 
-using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 using MvvmCross.Platforms.Ios.Views;
 using MvvmCross.Presenters.Attributes;
@@ -16,28 +12,16 @@ using MvvmCross.ViewModels;
 using UIKit;
 
 namespace JKChat.iOS.Views.ServerList {
-	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "ServerList", TabSelectedIconName = "ServerListSelected")]
+	[MvxTabPresentation(WrapInNavigationController = true, TabName = "Server List", TabIconName = "server.rack")]
 	public partial class ServerListViewController : BaseViewController<ServerListViewModel> {
 		private UISearchBar searchBar;
 
-		public ServerListViewController() : base("ServerListViewController", null) {
-			SetUpBackButton = false;
-		}
-
-		public override void DidReceiveMemoryWarning() {
-			// Releases the view if it doesn't have a superview.
-			base.DidReceiveMemoryWarning();
-
-			// Release any cached data, images, etc that aren't in use.
-		}
+		public ServerListViewController() : base("ServerListViewController", null) {}
 
 		public override void LoadView() {
 			base.LoadView();
-			ServerListTableView.RegisterNibForCellReuse(ServerListViewCell.Nib, ServerListViewCell.Key);
-			ServerListTableView.ContentInset = new UIEdgeInsets(15.0f, 0.0f, 15.0f, 0.0f);
-			ServerListTableView.ScrollIndicatorInsets = new UIEdgeInsets(0.0f, 0.0f, 0.0f, 0.0f);
 			ServerListTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.OnDrag;
-			ServerListTableView.AutomaticallyAdjustsScrollIndicatorInsets = false;
+			ServerListTableView.ContentInset = new UIEdgeInsets(8.0f, 0.0f, 8.0f, 0.0f);
 
 			var searchController = new UISearchController() {
 				DimsBackgroundDuringPresentation = false,
@@ -58,9 +42,7 @@ namespace JKChat.iOS.Views.ServerList {
 
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
-			var refreshControl = new MvxUIRefreshControl() {
-				TintColor = Theme.Color.Accent
-			};
+			var refreshControl = new MvxUIRefreshControl();
 			ServerListTableView.RefreshControl = refreshControl;
 
 			var source = new ServerListTableViewSource(ServerListTableView);
@@ -87,20 +69,13 @@ namespace JKChat.iOS.Views.ServerList {
 			var addButtomItem = new UIBarButtonItem(UIBarButtonSystemItem.Add, (sender, ev) => {
 				ViewModel.AddServerCommand?.Execute();
 			});
+			var filterButtomItem = new UIBarButtonItem(UIImage.GetSystemImage("line.3.horizontal.decrease.circle"), UIBarButtonItemStyle.Plain, (sender, ev) => {
+				ViewModel.FilterCommand?.Execute();
+			});
 
-			NavigationItem.RightBarButtonItem = addButtomItem;
-		}
-
-		public override void ViewDidAppear(bool animated) {
-			base.ViewDidAppear(animated);
-		}
-
-		public override void ViewWillDisappear(bool animated) {
-			base.ViewWillDisappear(animated);
-		}
-
-		public override void ViewDidDisappear(bool animated) {
-			base.ViewDidDisappear(animated);
+			NavigationItem.RightBarButtonItems = new []{ addButtomItem, filterButtomItem };
+			NavigationItem.LargeTitleDisplayMode = UINavigationItemLargeTitleDisplayMode.Always;
+			NavigationController.NavigationBar.PrefersLargeTitles = true;
 		}
 
 		#endregion
@@ -112,25 +87,9 @@ namespace JKChat.iOS.Views.ServerList {
 		protected override void Dispose(bool disposing) {
 			base.Dispose(disposing);
 			if (searchBar != null) {
-				searchBar.SearchButtonClicked += SearchButtonClicked;
-				searchBar.CancelButtonClicked += CancelButtonClicked;
+				searchBar.SearchButtonClicked -= SearchButtonClicked;
+				searchBar.CancelButtonClicked -= CancelButtonClicked;
 				searchBar = null;
-			}
-		}
-	}
-
-	public class ServerListTableViewSource : MvxStandardTableViewSource {
-		public ServerListTableViewSource(UITableView tableView) : base(tableView, ServerListViewCell.Key) {
-			tableView.Source = this;
-			this.UseAnimations = true;
-			this.AddAnimation = UITableViewRowAnimation.Top;
-			this.RemoveAnimation = UITableViewRowAnimation.Bottom;
-		}
-
-		protected override void CollectionChangedOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args){
-			base.CollectionChangedOnCollectionChanged(sender, args);
-			if (args.Action == NotifyCollectionChangedAction.Add) {
-				TableView.ScrollToRow(NSIndexPath.FromRowSection(0, 0), UITableViewScrollPosition.Top, true);
 			}
 		}
 	}

@@ -4,6 +4,7 @@
 	<item
 		android:id="@+id/copy_item"
 		android:icon="@drawable/ic_copy"
+		android:iconTint="?attr/colorOnSurfaceVariant"
 		app:showAsAction="ifRoom"
 		app:actionLayout="@layout/copy_menu_item"/>
 	<item
@@ -11,4 +12,34 @@
 		android:icon="@drawable/ic_report"
 		app:showAsAction="ifRoom"
 		app:actionLayout="@layout/report_menu_item"/>
+	<item
+		android:id="@+id/favourite_item"
+		android:icon="@drawable/ic_star_outlined"
+		android:title="Add to favourites"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/share_item"
+		android:icon="@drawable/ic_share"
+		android:title="Share"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/info_item"
+		android:icon="@drawable/ic_info"
+		android:title="Info"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/report_server_item"
+		android:icon="@drawable/ic_report_problem"
+		android:title="Report"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/disconnect_item"
+		android:icon="@drawable/ic_logout"
+		android:title="Disconnect &amp; exit"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
 </menu>

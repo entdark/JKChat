@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
+        app:paddingRightFitsWindowInsets="true"
+        app:paddingTopFitsWindowInsets="true">
+        <include layout="@layout/toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
+    <mvvmcross.droidx.recyclerview.MvxRecyclerView
+        android:id="@+id/mvxrecyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:paddingBottomFitsWindowInsets="true"
+        app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

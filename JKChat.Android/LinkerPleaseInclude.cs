@@ -22,5 +22,8 @@ namespace JKChat.Android {
 			textView.AfterTextChanged += (sender, args) => { textView.Text = string.Empty; };
 			textView.Hint = string.Empty;
 		}
+		public void Include(CheckBox checkBox) {
+			checkBox.CheckedChange += (sender, args) => { checkBox.Checked = !checkBox.Checked; };
+		}
 	}
 }

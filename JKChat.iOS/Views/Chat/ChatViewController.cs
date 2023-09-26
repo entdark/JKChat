@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Timers;
 
 using CoreGraphics;
@@ -15,6 +16,8 @@ using JKChat.iOS.Helpers;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.ViewSources;
 
+using MvvmCross.Binding.BindingContext;
+using MvvmCross.Platforms.Ios.Binding.Views;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 
 using ObjCRuntime;
@@ -24,7 +27,7 @@ using UIKit;
 namespace JKChat.iOS.Views.Chat {
 	[MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
 	public partial class ChatViewController : BaseViewController<ChatViewModel>, IUIGestureRecognizerDelegate {
-		private UIView statusView;
+		private UIImageView statusImageView;
 		private UILabel statusLabel, titleLabel;
 		private UIStackView titleStackView;
 		private readonly InputAccessoryView inputAccessoryView;
@@ -36,13 +39,20 @@ namespace JKChat.iOS.Views.Chat {
 		private CGPoint lastTappedPoint = CGPoint.Empty;
 		private long lastTappedTime = 0L;
 		private ChatItemVM lastTappedItem = null;
+		private UIBarButtonItem moreButtonItem;
+
+		public override string Title {
+			get => base.Title;
+			set => base.Title = null;
+		}
 
 		private string message;
 		public string Message {
 			get => message;
 			set {
 				if (string.IsNullOrEmpty(message) != string.IsNullOrEmpty(value)) {
-					AnimateSendButton(!string.IsNullOrEmpty(value));
+					AnimateButton(SendButton, !string.IsNullOrEmpty(value));
+					AnimateButton(CommandsButton, string.IsNullOrEmpty(value));
 				}
 				message = value;
 //				ResizeInputAccessoryView();
@@ -67,22 +77,43 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
+		private int commandItemsCount;
+		public int CommandItemsCount {
+			get => commandItemsCount;
+			set {
+				commandItemsCount = value;
+				UpdateCommandsTableView();
+			}
+		}
+
+		private bool isFavourite;
+		public bool IsFavourite {
+			get => isFavourite;
+			set {
+				isFavourite = value;
+				UpdateMoreButtonItem();
+			}
+		}
+
+		private bool commandSetAutomatically;
+		public bool CommandSetAutomatically {
+			get => commandSetAutomatically;
+			set {
+				commandSetAutomatically = value;
+				if (commandSetAutomatically) {
+					ViewModel.CommandSetAutomatically = false;
+					MessageTextView.BecomeFirstResponder();
+				}
+			}
+		}
+
 		public override bool CanBecomeFirstResponder => !DeviceInfo.IsRunningOnMacOS;//appeared;
 		public override UIView InputAccessoryView => inputAccessoryView;//MessageView;
-
-		protected override Task<bool> BackButtonClick => ViewModel?.OfferDisconnect();
 
 		public ChatViewController() : base("ChatViewController", null) {
 			HandleKeyboard = true;
 			HidesBottomBarWhenPushed = true;
 			inputAccessoryView = new InputAccessoryView(this);
-		}
-
-		public override void DidReceiveMemoryWarning() {
-			// Releases the view if it doesn't have a superview.
-			base.DidReceiveMemoryWarning();
-
-			// Release any cached data, images, etc that aren't in use.
 		}
 
 		public override void LoadView() {
@@ -96,9 +127,11 @@ namespace JKChat.iOS.Views.Chat {
 				ViewBottomConstraint.Active = true;
 				ChatBottomMessageTopConstraint.Active = false;
 				MessageToolbar.Hidden = true;
+				CommandsTableViewBottomConstraint.Constant = -ChatTableView.SpecialOffset;
 			} else {
 				ViewBottomConstraint.Active = false;
 				ChatBottomMessageTopConstraint.Active = true;
+				CommandsTableViewBottomConstraint.Constant = 0.0f;
 			}
 			ChatTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive;
 			ChatTableView.KeyboardViewController = this;
@@ -169,31 +202,28 @@ namespace JKChat.iOS.Views.Chat {
 			ViewBottomConstraint.Constant = 44.0f + DeviceInfo.SafeAreaInsets.Bottom - ChatTableView.SpecialOffset;
 
 			MessageTextView.Placeholder = "Write a message...";
-			MessageTextView.PlaceholderColor = Theme.Color.Placeholder;
-			MessageTextView.PlaceholderFont = Theme.Font.Arial(18.0f);
-			MessageTextView.TextContainerInset = new UIEdgeInsets(10.0f, 0.0f, 10.0f, 0.0f);
+			MessageTextView.PlaceholderColor = UIColor.TertiaryLabel;
+			MessageTextView.PlaceholderFont = UIFont.PreferredBody;
+			MessageTextView.TextContainerInset = new UIEdgeInsets(11.0f, 0.0f, 11.0f, 0.0f);
 			MessageTextView.MaxLength = 149;
 
 			SendButton.Transform = CGAffineTransform.MakeScale(0.0f, 0.0f);
 
 			titleLabel = new UILabel() {
-				TextColor = Theme.Color.Title,
+				TextColor = UIColor.Label,
 				TextAlignment = UITextAlignment.Center,
-				Font = Theme.Font.ANewHope(13.0f)
+				Font = UIFont.FromDescriptor(UIFontDescriptor.GetPreferredDescriptorForTextStyle(UIFontTextStyle.Body).CreateWithTraits(UIFontDescriptorSymbolicTraits.Bold), 0.0f),
 			};
 
-			statusView = new UIView();
-			statusView.Layer.CornerRadius = 4.0f;
-			statusView.WidthAnchor.ConstraintEqualTo(8.0f).Active = true;
-			statusView.HeightAnchor.ConstraintEqualTo(8.0f).Active = true;
+			statusImageView = new UIImageView(UIImage.GetSystemImage("circle.fill", UIImageSymbolConfiguration.Create(UIFontTextStyle.Caption1, UIImageSymbolScale.Small)));
 
 			statusLabel = new UILabel() {
-				TextColor = Theme.Color.Subtitle,
+				TextColor = UIColor.SecondaryLabel,
 				TextAlignment = UITextAlignment.Left,
-				Font = Theme.Font.ErgoeBold(14.0f)
+				Font = UIFont.PreferredCaption1
 			};
 
-			var statusStackView = new UIStackView(new UIView[] { statusView, statusLabel }) {
+			var statusStackView = new UIStackView(new UIView[] { statusImageView, statusLabel }) {
 				Axis = UILayoutConstraintAxis.Horizontal,
 				Spacing = 4.0f,
 				Alignment = UIStackViewAlignment.Center
@@ -201,9 +231,11 @@ namespace JKChat.iOS.Views.Chat {
 
 			titleStackView = new UIStackView(new UIView[] { titleLabel, statusStackView }) {
 				Axis = UILayoutConstraintAxis.Vertical,
-				Spacing = 2.0f,
 				Alignment = UIStackViewAlignment.Center
 			};
+			titleStackView.AddGestureRecognizer(new UITapGestureRecognizer(() => {
+				ViewModel.ServerInfoCommand?.Execute();
+			}));
 			RespaceTitleView();
 
 			NavigationItem.TitleView = titleStackView;
@@ -218,19 +250,45 @@ namespace JKChat.iOS.Views.Chat {
 			ResizeInputAccessoryView();
 		}
 
+		private void UpdateMoreButtonItem() {
+			if (moreButtonItem == null)
+				return;
+			var disconnectAction = UIAction.Create("Disconnect & exit", UIImage.GetSystemImage("door.left.hand.open"), null, action => {
+				ViewModel.DisconnectCommand?.Execute();
+			});
+			disconnectAction.Attributes = UIMenuElementAttributes.Destructive;
+			var menu = UIMenu.Create(new UIMenuElement []{
+				UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? UIImage.GetSystemImage("star.fill") : UIImage.GetSystemImage("star"), null, action => {
+					ViewModel.FavouriteCommand?.Execute();
+				}),
+				UIAction.Create("Share", UIImage.GetSystemImage("square.and.arrow.up"), null, action => {
+					ViewModel.ShareCommand?.Execute();
+				}),
+				UIAction.Create("Info", UIImage.GetSystemImage("info.circle"), null, action => {
+					ViewModel.ServerInfoCommand?.Execute();
+				}),
+				disconnectAction
+			});
+			moreButtonItem.Menu = menu;
+		}
+
 		#region View lifecycle
 
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
-			var source = new ChatTableViewSource(ChatTableView) {
+			var chatSource = new ChatTableViewSource(ChatTableView) {
 				ViewControllerWithKeyboard = this,
 				ViewBottomConstraint = ViewBottomConstraint
 			};
-			ChatTableView.Source = source;
+			var commandsSource = new CommandsViewSource(CommandsTableView);
 
 			using var set = this.CreateBindingSet();
-			set.Bind(source).For(s => s.ItemsSource).To(vm => vm.Items);
-//			set.Bind(source).For(s => s.SelectionChangedCommand).To(vm => vm.SelectionChangedCommand);
+			set.Bind(chatSource).For(s => s.ItemsSource).To(vm => vm.Items);
+//			set.Bind(chatSource).For(s => s.SelectionChangedCommand).To(vm => vm.SelectionChangedCommand);
+			set.Bind(commandsSource).For(s => s.ItemsSource).To(vm => vm.CommandItems);
+			set.Bind(commandsSource).For(s => s.SelectionChangedCommand).To(vm => vm.CommandItemClickCommand);
+			set.Bind(this).For(v => v.CommandItemsCount).To(vm => vm.CommandItems.Count);
+			set.Bind(CommandsButton).To(vm => vm.StartCommandCommand);
 			set.Bind(MessageTextView).For(v => v.Text).To(vm => vm.Message).TwoWay();
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
 			set.Bind(SendButton).To(vm => vm.SendMessageCommand);
@@ -242,18 +300,45 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(ChatTypeStackView).For("Visibility").To(vm => vm.SelectingChatType).WithConversion("Visibility");
 			set.Bind(this).For(v => v.SelectingChatType).To(vm => vm.SelectingChatType);
 			set.Bind(titleLabel).For(v => v.AttributedText).To(vm => vm.Title).WithConversion("ColourText");
-			set.Bind(statusView).For(v => v.BackgroundColor).To(vm => vm.Status).WithConversion("ConnectionColor");
 			set.Bind(statusLabel).For(v => v.Text).To(vm => vm.Status);
+			set.Bind(statusLabel).For(v => v.TextColor).To(vm => vm.Status).WithDictionaryConversion(new Dictionary<ConnectionStatus, UIColor>() {
+				[ConnectionStatus.Connected] = UIColor.Label
+			}, UIColor.SecondaryLabel);
+			set.Bind(statusImageView).For(v => v.TintColor).To(vm => vm.Status).WithConversion("ConnectionColor");
+			set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
+			set.Bind(this).For(v => v.CommandSetAutomatically).To(vm => vm.CommandSetAutomatically);
+
+			UpdateCommandsTableView();
 		}
 
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
 			ResizeInputAccessoryView();
 			RespaceTitleView();
+
+			var appearance = new UINavigationBarAppearance();
+			appearance.ConfigureWithDefaultBackground();
+			if (!UIAccessibility.IsReduceTransparencyEnabled)
+				appearance.BackgroundEffect = UIBlurEffect.FromStyle(UIBlurEffectStyle.SystemMaterial);
+			else
+				appearance.BackgroundColor = UIColor.SystemBackground;
+			NavigationController.NavigationBar.BarTintColor = UIColor.SystemBackground;
+			NavigationController.NavigationBar.StandardAppearance = appearance;
+			NavigationController.NavigationBar.ScrollEdgeAppearance = appearance;
+			NavigationController.NavigationBar.CompactAppearance = appearance;
+			NavigationController.NavigationBar.CompactScrollEdgeAppearance = appearance;
+			//HACK: to blur NavigationBar since it starts blurring after scrolling
+			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset-1.0f), false);
+
+			moreButtonItem = new UIBarButtonItem(UIImage.GetSystemImage("ellipsis.circle"), null);
+			UpdateMoreButtonItem();
+
+			NavigationItem.RightBarButtonItem = moreButtonItem;
 		}
 
 		public override void ViewDidAppear(bool animated) {
 			base.ViewDidAppear(animated);
+			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset), true);
 		}
 
 		public override void ViewWillDisappear(bool animated) {
@@ -266,34 +351,52 @@ namespace JKChat.iOS.Views.Chat {
 
 		#endregion
 
-		private void AnimateSendButton(bool show) {
+		private void AnimateButton(UIButton button, bool show) {
 			if (show) {
+				button.Hidden = false;
 				UIView.Animate(0.200, () => {
-					SendButton.Transform = CGAffineTransform.MakeScale(1.0f, 1.0f);
+					button.Transform = CGAffineTransform.MakeScale(1.0f, 1.0f);
 				});
 			} else {
 				UIView.Animate(0.200, () => {
 					//setting 0.0f, 0.0f causes the bug where animation happens instantly
-					SendButton.Transform = CGAffineTransform.MakeScale(float.Epsilon, float.Epsilon);
+					button.Transform = CGAffineTransform.MakeScale(float.Epsilon, float.Epsilon);
+				}, () => {
+					button.Hidden = true;
 				});
 			}
 		}
 
 		private void SetChatTypeImage() {
 			UIImage image;
+			UIColor tintColor;
 			switch (ChatType) {
 			default:
 			case ChatType.Common:
-				image = UIImage.FromBundle("ChatTypeCommon");
+				image = UIImage.GetSystemImage("person.3.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				tintColor = UIColor.FromRGB(0, 255, 0);
 				break;
 			case ChatType.Team:
-				image = UIImage.FromBundle("ChatTypeTeam");
+				image = UIImage.GetSystemImage("person.2.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				tintColor = UIColor.FromRGB(0, 255, 255);
 				break;
 			case ChatType.Private:
-				image = UIImage.FromBundle("ChatTypePrivate");
+				image = UIImage.GetSystemImage("person.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				tintColor = UIColor.FromRGB(255, 0, 255);
 				break;
 			}
 			ChatTypeButton.SetImage(image, UIControlState.Normal);
+			ChatTypeButton.TintColor = tintColor;
+		}
+
+		private void UpdateCommandsTableView() {
+			if (CommandItemsCount > 0) {
+				CommandsTableView.Hidden = false;
+				CommandsTableViewHeightConstraint.Constant = Math.Min(CommandItemsCount*44.0f, 242.0f);
+				this.View.LayoutIfNeeded();
+			} else {
+				CommandsTableView.Hidden = true;
+			}
 		}
 
 		private void ResizeInputAccessoryView() {
@@ -308,7 +411,7 @@ namespace JKChat.iOS.Views.Chat {
 		private void RespaceTitleView() {
 			NavigationItem.TitleView = null;
 			NavigationItem.TitleView = titleStackView;
-			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
+//			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
 		}
 
 		private void RecountAllCellHeights(CGSize newSize) {
@@ -317,20 +420,14 @@ namespace JKChat.iOS.Views.Chat {
 
 		public override void ViewWillTransitionToSize(CGSize toSize, IUIViewControllerTransitionCoordinator coordinator) {
 			base.ViewWillTransitionToSize(toSize, coordinator);
-			coordinator.AnimateAlongsideTransition(animateContext =>
-			{
+			coordinator.AnimateAlongsideTransition(animateContext => {
 //				RecountAllCellHeights(toSize);
 			},
-			completionContext =>
-			{
+			completionContext => {
 				RecountAllCellHeights(toSize);
 			});
 			ResizeInputAccessoryView(toSize);
 			RespaceTitleView();
-		}
-
-		public override void ViewSafeAreaInsetsDidChange() {
-			base.ViewSafeAreaInsetsDidChange();
 		}
 
 		protected override void KeyboardWillShowNotification(NSNotification notification) {
@@ -360,6 +457,33 @@ namespace JKChat.iOS.Views.Chat {
 			base.TouchesBegan(touches, evt);
 			this.View.EndEditing(true);
 		}
+
+		private class CommandsViewSource : MvxStandardTableViewSource {
+			public CommandsViewSource(UITableView tableView) : base(tableView, CommandViewCell.Key) {
+				tableView.RegisterClassForCellReuse(typeof(CommandViewCell), CommandViewCell.Key);
+				tableView.Source = this;
+				DeselectAutomatically = true;
+			}
+
+			public override void ReloadTableData() {
+				base.ReloadTableData();
+				if (ItemsSource is IList listSource && listSource.Count > 0) {
+					TableView.ScrollToRow(NSIndexPath.FromRowSection(listSource.Count - 1, 0), UITableViewScrollPosition.Bottom, false);
+				}
+			}
+
+			private class CommandViewCell : MvxTableViewCell {
+				public static NSString Key = new(nameof(CommandViewCell));
+
+				public CommandViewCell(NativeHandle handle) : base(handle) {
+					SeparatorInset = new UIEdgeInsets(0.0f, 56.0f, 0.0f, 0.0f);
+					this.DelayBind(() => {
+						using var set = this.CreateBindingSet<CommandViewCell, string>();
+						set.Bind(TextLabel).For(v => v.Text).To(".");
+					});
+				}
+			}
+		}
 	}
 
 	public class InputAccessoryView : UIView {
@@ -382,7 +506,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 		private void UpdateInsets() {
-			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
+//			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
 			if (leftConstraint != null) {
 				if (DeviceInfo.IsCollapsed) {
 					leftConstraint.Constant = DeviceInfo.SafeAreaInsets.Left;
@@ -411,11 +535,11 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 		public void AddAccessoryView(UIView view) {
-			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
+//			BackgroundColor = DeviceInfo.IsCollapsed ? Theme.Color.Bar : UIColor.Clear;
 			ClipsToBounds = false;
 
 			var backgroundView = new UIView() {
-				BackgroundColor = Theme.Color.Bar,
+//				BackgroundColor = Theme.Color.Bar,
 				TranslatesAutoresizingMaskIntoConstraints = false
 			};
 			view.ClipsToBounds = false;
@@ -426,9 +550,9 @@ namespace JKChat.iOS.Views.Chat {
 			(bgBottomConstraint = backgroundView.BottomAnchor.ConstraintEqualTo(view.BottomAnchor, DeviceInfo.SafeAreaInsets.Bottom)).Active = true;
 
 			var backgroundToolbar = new UIToolbar() {
-				BarTintColor = Theme.Color.Toolbar,
+				BarTintColor = UIColor.SystemBackground,
 				BarStyle = UIBarStyle.Default,
-				Translucent = false,
+				Translucent = true,
 				TranslatesAutoresizingMaskIntoConstraints = false
 			};
 			this.AddSubview(backgroundToolbar);
@@ -436,7 +560,7 @@ namespace JKChat.iOS.Views.Chat {
 			(toolbarLeftConstraint = backgroundToolbar.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor, -DeviceInfo.SafeAreaInsets.Left)).Active = true;
 			(toolbarRightConstraint = backgroundToolbar.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor, 0.0f)).Active = true;
 			backgroundToolbar.TopAnchor.ConstraintEqualTo(this.TopAnchor, 0.0f).Active = true;
-			backgroundToolbar.HeightAnchor.ConstraintEqualTo(44.0f).Active = true;
+			backgroundToolbar.HeightAnchor.ConstraintEqualTo(500.0f).Active = true;
 			(leftConstraint = view.LeadingAnchor.ConstraintEqualTo(this.LeadingAnchor, 0.0f)).Active = true;
 			(rightConstraint = view.TrailingAnchor.ConstraintEqualTo(this.TrailingAnchor, 0.0f)).Active = true;
 			view.TopAnchor.ConstraintEqualTo(this.TopAnchor, 0.0f).Active = true;

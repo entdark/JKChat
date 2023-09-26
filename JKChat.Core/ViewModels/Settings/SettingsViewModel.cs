@@ -1,11 +1,16 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Base.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
@@ -13,107 +18,113 @@ using MvvmCross.Plugin.Messenger;
 namespace JKChat.Core.ViewModels.Settings {
 	public class SettingsViewModel : BaseViewModel {
 		private readonly IJKClientService jkclientService;
+		private readonly TableValueItemVM playerNameItem;
 		private MvxSubscriptionToken playerNameMessageToken;
+		
+		public IMvxCommand ItemClickCommand { get; init; }
+		public IMvxCommand PrivacyPolicyCommand { get; init; }
 
-		public IMvxCommand PlayerNameCommand { get; init; }
-		public IMvxCommand EncodingCommand { get; init; }
-		public IMvxCommand LocationUpdateCommand { get; init; }
-
-		private string playerName;
-		public string PlayerName {
-			get => playerName;
-			set => SetProperty(ref playerName, value);
-		}
-
-		private Encoding encoding;
-		public Encoding Encoding {
-			get => encoding;
-			set => SetProperty(ref encoding, value);
-		}
-
-		private bool locationUpdate;
-		public bool LocationUpdate {
-			get => locationUpdate;
-			set {
-				if (SetProperty(ref locationUpdate, value)) {
-					AppSettings.LocationUpdate = value;
-				}
-			}
-		}
+		public List<TableGroupedItemVM> Items { get; init; }
 
 		public SettingsViewModel(IJKClientService jkclientService) {
 			this.jkclientService = jkclientService;
 			Title = "Settings";
-			PlayerNameCommand = new MvxAsyncCommand(PlayerNameExecute);
-			EncodingCommand = new MvxAsyncCommand(EncodingExecute);
-			LocationUpdateCommand = new MvxCommand(LocationUpdateExecute);
-			PlayerName = AppSettings.PlayerName;
-			Encoding = jkclientService.Encoding;
-			locationUpdate = AppSettings.LocationUpdate;
+			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
+			PrivacyPolicyCommand = new MvxAsyncCommand(PrivacyPolicyExecute);
+			Items = new() {
+				new() {
+					Items = new() {
+						new TableToggleItemVM() {
+							Title = "Notifications",
+							IsChecked = true
+						}
+					}
+				},
+				new() {
+					Items = new() {
+						(playerNameItem = new() {
+							Title = "Player Name",
+							Value = AppSettings.PlayerName,
+							OnClick = PlayerNameExecute
+						})
+					}
+				},
+				new() {
+					Items = new() {
+						new TableValueItemVM() {
+							Title = "Encoding",
+							Value = jkclientService.Encoding.EncodingName,
+							OnClick = EncodingExecute
+						}
+					}
+				},
+				new() {
+					Items = new() {
+						new TableToggleItemVM() {
+							Title = "Location Updates",
+							IsChecked = AppSettings.LocationUpdate,
+							Toggled = item => AppSettings.LocationUpdate = item.IsChecked
+						}
+					}
+				}
+			};
+			playerNameMessageToken ??= Messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 		}
 
-		public override void ViewAppearing() {
-			base.ViewAppearing();
+		private async Task ItemClickExecute(TableItemVM item) {
+			await item.ClickCommand.ExecuteAsync();
 		}
 
-		private async Task PlayerNameExecute() {
+		private async Task PlayerNameExecute(TableValueItemVM item) {
 			string name = AppSettings.PlayerName;
 			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Choose your name",
-				Message = name,
-				Input = name,
-				RightButton = "OK",
-				RightClick = (input) => {
-					name = input as string;
+				Title = "Enter Player Name",
+				Input = new DialogInputViewModel(name, true),
+				OkText = "OK",
+				OkAction = config => {
+					AppSettings.PlayerName = config?.Input?.Text;
 				},
-				LeftButton = "Cancel",
-				Type = JKDialogType.Title | JKDialogType.MessageFromInput
+				CancelText = "Cancel"
 			});
-			AppSettings.PlayerName = name;
 //			await NavigationService.NavigateFromRoot<SettingsNameViewModel>();
 		}
 
-		private async Task EncodingExecute() {
-			var dialogList = new DialogListViewModel();
+		private async Task EncodingExecute(TableValueItemVM item) {
 			var availableEncodings = jkclientService.AvailableEncodings;
-			for (int i = 0; i < availableEncodings.Length; i++) {
-				dialogList.Items.Add(new DialogItemVM() {
-					Id = i,
-					Name = availableEncodings[i].EncodingName,
-					IsSelected = availableEncodings[i].Equals(Encoding)
-				});
-			}
-			int id = -1;
+			var dialogList = new DialogListViewModel(availableEncodings.Select(encoding => {
+				return new DialogItemVM() {
+					Name = encoding.EncodingName,
+					IsSelected = encoding.Equals(jkclientService.Encoding)
+				};
+			}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
-				Title = "Select encoding",
-				RightButton = "OK",
-				RightClick = (input) => {
-					if (input is DialogItemVM dialogItem) {
-						id = dialogItem.Id;
+				Title = "Select Encoding",
+				CancelText = "Cancel",
+				OkText = "OK",
+				OkAction = config => {
+					if (config?.List?.SelectedIndex is int id && id >= 0) {
+						jkclientService.SetEncodingById(id);
+						item.Value = jkclientService.Encoding.EncodingName;
+						AppSettings.EncodingId = id;
 					}
 				},
-				LeftButton = "Cancel",
-				ListViewModel = dialogList,
-				Type = JKDialogType.Title | JKDialogType.List
+				List = dialogList
 			});
-			jkclientService.SetEncodingById(id);
-			Encoding = jkclientService.Encoding;
-			AppSettings.EncodingId = id;
 		}
 
 		private void OnPlayerNameMessage(PlayerNameMessage message) {
-			PlayerName = AppSettings.PlayerName;
+			playerNameItem.Value = AppSettings.PlayerName;
 		}
 
-		private void LocationUpdateExecute() {
-			LocationUpdate = !LocationUpdate;
+		private async Task PrivacyPolicyExecute() {
+			try {
+				await Browser.OpenAsync("https://github.com/entdark/JKChat/blob/master/jkchat-terms-conditions.md");
+			} catch {}
 		}
 
 		public override void ViewCreated() {
 			base.ViewCreated();
-			if (playerNameMessageToken == null) {
-				playerNameMessageToken = Messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
-			}
+			playerNameMessageToken ??= Messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {

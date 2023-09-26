@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace JKChat.Core.Services {
 	public interface IJKClientService {
@@ -8,4 +7,3 @@ namespace JKChat.Core.Services {
 		void SetEncodingById(int id);
 	}
 }
-

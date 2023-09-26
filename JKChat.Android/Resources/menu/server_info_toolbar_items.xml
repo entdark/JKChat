@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+	<item
+		android:id="@+id/favourite_item"
+		android:icon="@drawable/ic_star_outlined"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="always"/>
+	<item
+		android:id="@+id/share_item"
+		android:icon="@drawable/ic_share"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="always"/>
+	<item
+		android:id="@+id/report_server_item"
+		android:icon="@drawable/ic_report_problem"
+		android:title="Report"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+</menu>

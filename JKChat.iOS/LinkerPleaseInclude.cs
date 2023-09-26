@@ -28,5 +28,8 @@ namespace JKChat.iOS {
 			searchBar.Placeholder = searchBar.Placeholder + "";
 			searchBar.TextChanged += (sender, ev) => {};
 		}
+		public void Include(UIBarButtonItem buttonItem) {
+			buttonItem.Clicked += (sender, ev) => {};
+		}
 	}
 }

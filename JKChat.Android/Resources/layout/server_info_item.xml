@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="24dp"
+    android:gravity="center_vertical">
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/OnSurfaceText.BodyLarge"
+        tools:text="w00ki’o_o"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:lines="1"
+        android:ellipsize="end"
+        android:gravity="start"
+        app:MvxBind="TextFormatted ColourText(Key)"/>
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/OnSurfaceText.BodyLarge"
+        tools:text="44/1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:lines="1"
+        android:ellipsize="none"
+        android:gravity="end"
+        app:MvxBind="TextFormatted ColourText(Value)"/>
+</LinearLayout>

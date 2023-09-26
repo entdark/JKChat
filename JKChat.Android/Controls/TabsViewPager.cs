@@ -6,7 +6,7 @@ using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
-
+using AndroidX.Core.OS;
 using AndroidX.Fragment.App;
 
 using Java.Interop;
@@ -135,8 +135,8 @@ namespace JKChat.Android.Controls {
 			private void RestoreFragmentsInfoState(Bundle bundle) {
 				if (bundle == null)
 					return;
-
-				var fragmentInfoParcelables = bundle.GetParcelableArray(bundleFragmentsInfoKey);
+				
+				var fragmentInfoParcelables = BundleCompat.GetParcelableArray(bundle, bundleFragmentsInfoKey, Class);
 
 				if (fragmentInfoParcelables == null)
 					return;

@@ -31,21 +31,6 @@ namespace JKChat.Android.Views.Base {
 			CheckSelection();
 		}
 
-		public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater) {
-			base.OnCreateOptionsMenu(menu, inflater);
-		}
-
-		public override bool OnOptionsItemSelected(IMenuItem item) {
-			if (SelectedItem != null) {
-				if (item == ReportItem) {
-					ViewModel.ReportCommand?.Execute(SelectedItem);
-				}
-				CloseSelection();
-				return true;
-			}
-			return base.OnOptionsItemSelected(item);
-		}
-
 		public override bool OnBackPressed() {
 			if (SelectedItem != null) {
 				CloseSelection();
@@ -65,7 +50,10 @@ namespace JKChat.Android.Views.Base {
 
 			ReportItem = Menu.FindItem(Resource.Id.report_item);
 			ReportItem.SetClickAction(() => {
-				this.OnOptionsItemSelected(ReportItem);
+				if (SelectedItem != null) {
+					ViewModel.ReportCommand?.Execute(SelectedItem);
+					CloseSelection();
+				}
 			});
 			CheckSelection();
 		}

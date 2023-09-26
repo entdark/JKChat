@@ -3,36 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/background">
+    android:layout_height="wrap_content">
     <FrameLayout
-        android:alpha="0.23"
+        android:alpha="0.8"
+        android:id="@+id/gradient_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="68dp"
-        android:background="@drawable/chat_info_background"/>
+        android:layout_marginRight="76.5dp">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/chat_info_background"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/chat_info_overlay_background"/>
+    </FrameLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
-        android:layout_marginVertical="10dp"
-        android:gravity="bottom">
-        <LinkTextView
-            android:id="@+id/message"
-            tools:text="Structuralism, as is commonly believed, unbiased decomposes the elements of the subject of activity. Positivism categorically emphasizes the transcendental principle of perception. Apperception has an open mind about the ontological gravitational paradox."
+        android:layout_height="wrap_content">
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            style="@style/ChatInfoText"
-            app:MvxBind="TextFormatted ColourText(Text, ColourTextParameter(true, Shadow))"/>
+            android:paddingLeft="16dp"
+            android:paddingVertical="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="none">
+            <LinkTextView
+                android:id="@+id/message"
+                style="@style/OnSurfaceText.BodyMedium"
+                android:fontFamily="@font/roboto_mono_regular"
+                tools:text="Structuralism, as is commonly believed, unbiased decomposes the elements of the subject of activity. Positivism categorically emphasizes the transcendental principle of perception. Apperception has an open mind about the ontological gravitational paradox."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:MvxBind="TextFormatted ColourText(Text, ColourTextParameter(true, Shadow))"/>
+        </HorizontalScrollView>
         <TextView
+            style="@style/OnSurfaceText.LabelSmall"
+            android:fontFamily="@font/roboto_mono_medium"
             tools:text="13:37"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="10dp"
             android:layout_weight="0"
-            android:theme="@style/ChatTimeText"
             android:lines="1"
             app:MvxBind="Text Time"/>
     </LinearLayout>

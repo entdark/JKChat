@@ -4,103 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
-    <include layout="@layout/appbar"/>
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
+        app:paddingTopFitsWindowInsets="true">
+        <include layout="@layout/toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <ScrollView
-            android:id="@+id/scrollview"
-            style="@style/ScrollView"
+        <mvvmcross.droidx.recyclerview.MvxRecyclerView
+            android:id="@+id/mvxrecyclerview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <LinearLayout
-                android:orientation="vertical"
+            android:layout_height="match_parent"
+            android:paddingBottom="64dp"
+            android:clipToPadding="false"
+            app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand"/>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="bottom"
+            app:paddingLeftFitsWindowInsets="true"
+            app:paddingRightFitsWindowInsetsButExpanded="true">
+            <com.google.android.material.button.MaterialButton
+                style="?attr/borderlessButtonStyle"
+                android:text="Privacy Policy"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@color/item_background">
-                    <TextView
-                        style="@style/SettingsHeaderText"
-                        android:text="Player Name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_gravity="bottom"
-                        android:lines="1"
-                        android:ellipsize="end"/>
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="@color/item_background"
-                    android:foreground="@drawable/item_selection_foreground"
-                    app:MvxBind="Click PlayerNameCommand">
-                    <TextView
-                        style="@style/SettingsText"
-                        android:text="Jedi Knight"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginHorizontal="20dp"
-                        android:lines="1"
-                        android:ellipsize="end"
-                        app:MvxBind="TextFormatted ColourText(PlayerName)"/>
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/item_background">
-                    <TextView
-                        style="@style/SettingsHeaderText"
-                        android:text="Encoding (Jedi Academy only)"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_gravity="bottom"
-                        android:lines="1"
-                        android:ellipsize="end"/>
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="@color/item_background"
-                    android:foreground="@drawable/item_selection_foreground"
-                    app:MvxBind="Click EncodingCommand">
-                    <TextView
-                        style="@style/SettingsText"
-                        android:text="windows-1252"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginHorizontal="20dp"
-                        android:lines="1"
-                        android:ellipsize="end"
-                        app:MvxBind="Text Encoding.EncodingName"/>
-                </FrameLayout>
-                <!--<RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="12dp"
-                    android:background="@color/item_background">
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        style="@style/SettingsText"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_centerVertical="true"
-                        android:paddingHorizontal="20dp"
-                        android:checked="true"
-                        android:text="Notifications"
-                        android:foreground="@drawable/item_selection_foreground"/>
-                </RelativeLayout>-->
-            </LinearLayout>
-        </ScrollView>
-        <include layout="@layout/loading"/>
+                android:layout_height="wrap_content"
+                app:MvxBind="Click PrivacyPolicyCommand"/>
+        </FrameLayout>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

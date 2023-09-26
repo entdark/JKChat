@@ -19,10 +19,18 @@ namespace JKChat.iOS.Views.Chat.Cells
 		UIKit.UILabel TextLabel { get; set; }
 
 		[Outlet]
+		UIKit.UIScrollView TextScrollView { get; set; }
+
+		[Outlet]
 		UIKit.UILabel TimeLabel { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (BackgroundView != null) {
+				BackgroundView.Dispose ();
+				BackgroundView = null;
+			}
+
 			if (TextLabel != null) {
 				TextLabel.Dispose ();
 				TextLabel = null;
@@ -33,9 +41,9 @@ namespace JKChat.iOS.Views.Chat.Cells
 				TimeLabel = null;
 			}
 
-			if (BackgroundView != null) {
-				BackgroundView.Dispose ();
-				BackgroundView = null;
+			if (TextScrollView != null) {
+				TextScrollView.Dispose ();
+				TextScrollView = null;
 			}
 		}
 	}

@@ -11,7 +11,7 @@ using MvvmCross.Commands;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
-	public abstract class ReportViewModel<TItem> : BaseViewModel where TItem : class, ISelectableItemVM {
+	public abstract class ReportViewModel<TItem> : BaseServerViewModel where TItem : class, ISelectableItemVM {
 		private static readonly string []reportReasons = { "Spam", "Violence", "Child abuse", "Pornography", "Other" };
 		private static readonly Random reportDelayerRandom = new Random();
 		
@@ -46,38 +46,48 @@ namespace JKChat.Core.ViewModels.Base {
 			Items = new MvxObservableCollection<TItem>();
 		}
 
-		protected virtual async Task<bool> ReportExecute(TItem item) {
-			bool report = false;
-			int reportReasonIndex = 0;
-			int reportReasonId = -1;
+		private async Task ReportExecute(TItem item) {
+			await ReportExecute(item, null);
+		}
+
+		protected virtual async Task ReportExecute(TItem item, Action<bool> reported = null) {
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = ReportTitle,
-				//Message = ReportMessage,
-				ListViewModel = new DialogListViewModel() {
-					Items = reportReasons.Select(s => new DialogItemVM() { Id = reportReasonIndex++, Name = s, IsSelected = reportReasonIndex == 1 }).ToList(),
-				},
-				LeftButton = "Cancel",
-				RightButton = "Yes",
-				RightClick = (input) => {
-					if (input is DialogItemVM dialogItem) {
-						reportReasonId = dialogItem.Id;
+				List = new DialogListViewModel(reportReasons.Select(s => new DialogItemVM() {
+					Name = s,
+					IsSelected = s == reportReasons[0]
+				}), DialogSelectionType.SingleSelection),
+				CancelText = "Cancel",
+				OkText = "Yes",
+				OkAction = config => {
+					if (config?.List?.SelectedIndex is int id && id >= 0) {
+						int reportReasonId = id;
+						if (reportReasonId == reportReasons.Length-1) {
+							Task.Run(reportExecuteContinue);
+						} else {
+							Task.Run(reportExecuteDone);
+						}
 					}
-					report = true;
 				},
-				Type = JKDialogType.Title/* | JKDialogType.Message*/ | JKDialogType.List
+				CancelAction = _ => {
+					reported?.Invoke(false);
+				}
 			});
-			if (report && reportReasonId == reportReasons.Length-1) {
+			async Task reportExecuteContinue() {
 				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Report reason",
-					LeftButton = "Cancel",
-					LeftClick = (_) => {
-						report = false;
+					Title = "Report Reason",
+					CancelText = "Cancel",
+					CancelAction = _ => {
+						reported?.Invoke(false);
 					},
-					RightButton = "Report",
-					Type = JKDialogType.Title | JKDialogType.Input
+					OkText = "Report",
+					OkAction = _ => {
+						Task.Run(reportExecuteDone);
+					},
+					Input = new DialogInputViewModel()
 				});
 			}
-			if (report) {
+			async Task reportExecuteDone() {
 				IsLoading = true;
 				//emulate reporting
 				await Task.Delay(reportDelayerRandom.Next(512, 2048));
@@ -85,11 +95,12 @@ namespace JKChat.Core.ViewModels.Base {
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = ReportedTitle,
 					Message = ReportedMessage,
-					RightButton = "OK",
-					Type = JKDialogType.Title | JKDialogType.Message
+					OkText = "OK",
+					OkAction = _ => {
+						reported?.Invoke(true);
+					}
 				});
 			}
-			return report;
 		}
 
 		protected virtual void SelectExecute(TItem item) {

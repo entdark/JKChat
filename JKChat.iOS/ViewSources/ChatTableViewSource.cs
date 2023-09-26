@@ -29,6 +29,7 @@ namespace JKChat.iOS.ViewSources {
 		public NSLayoutConstraint ViewBottomConstraint { get; set; }
 
 		public ChatTableViewSource(UITableView tableView) : base(tableView) {
+			tableView.Source = this;
 			tableView.RegisterNibForCellReuse(ChatMessageViewCell.Nib, ChatMessageViewCell.Key);
 			tableView.RegisterNibForCellReuse(ChatInfoViewCell.Nib, ChatInfoViewCell.Key);
 			this.UseAnimations = true;
@@ -162,30 +163,29 @@ namespace JKChat.iOS.ViewSources {
 			RecountAllCellHeights(DeviceInfo.ScreenBounds.Size);
 		}
 
-		private ColourTextValueConverter converter = new ColourTextValueConverter();
 		private readonly UILabel
-			timeLabel = new UILabel() {
+			timeLabel = new() {
 				TextAlignment = UITextAlignment.Right,
-				Font = Theme.Font.OCRAStd(11.0f),
+				Font = UIFont.GetMonospacedSystemFont(12.0f, UIFontWeight.Medium),
 				LineBreakMode = UILineBreakMode.TailTruncation,
 				Lines = 1
 			},
-			nameLabel = new UILabel() {
+			nameLabel = new() {
 				TextAlignment = UITextAlignment.Left,
-				Font = Theme.Font.OCRAStd(14.0f),
+				Font = UIFont.GetMonospacedSystemFont(17.0f, UIFontWeight.Regular),
 				LineBreakMode = UILineBreakMode.TailTruncation,
 				Lines = 1
 			},
-			messageLabel = new UILabel() {
+			messageLabel = new() {
 				TextAlignment = UITextAlignment.Left,
-				Font = Theme.Font.OCRAStd(14.0f),
-				LineBreakMode = UILineBreakMode.TailTruncation,
+				Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular),
+				LineBreakMode = UILineBreakMode.WordWrap,
 				Lines = 0
 			},
-			textLabel = new UILabel() {
+			textLabel = new() {
 				TextAlignment = UITextAlignment.Left,
-				Font = Theme.Font.OCRAStd(13.0f),
-				LineBreakMode = UILineBreakMode.TailTruncation,
+				Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular),
+				LineBreakMode = UILineBreakMode.WordWrap,
 				Lines = 0
 			};
 		private nfloat CountHeightForRow(int row, bool recount = false) {
@@ -197,39 +197,39 @@ namespace JKChat.iOS.ViewSources {
 				return (nfloat)item.EstimatedHeight;
 
 			nfloat height = 0.0f;
-			nfloat leftMargin = 20.0f + (DeviceInfo.IsCollapsed ? DeviceInfo.SafeAreaInsets.Left : 0.0f),
-				rightMargin = 20.0f + DeviceInfo.SafeAreaInsets.Right;
+			nfloat leftMargin = 16.0f + (DeviceInfo.IsCollapsed ? DeviceInfo.SafeAreaInsets.Left : 0.0f),
+				rightMargin = 16.0f + DeviceInfo.SafeAreaInsets.Right;
 			timeLabel.Frame = new CGRect(0.0f, 0.0f, 0.0f, 0.0f);
 			timeLabel.Text = item.Time;
 			timeLabel.SizeToFit();
 			if (item is ChatMessageItemVM messageItem) {
-				nameLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin - timeLabel.Frame.Width - 7.0f, 0.0f);
-				nameLabel.AttributedText = converter.Convert(messageItem.PlayerName, new ColourTextParameter() {
+				nameLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin - timeLabel.Frame.Width - 16.0f, 0.0f);
+				nameLabel.AttributedText = ColourTextValueConverter.Convert(messageItem.PlayerName, new ColourTextParameter() {
 					ParseUri = true,
 					ParseShadow = messageItem.Shadow
 				});
 				nameLabel.SizeToFit();
 				messageLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin, 0.0f);
-				messageLabel.AttributedText = converter.Convert(messageItem.Message, new ColourTextParameter() {
+				messageLabel.AttributedText = ColourTextValueConverter.Convert(messageItem.Message, new ColourTextParameter() {
 					ParseUri = true,
 					ParseShadow = messageItem.Shadow
 				});
 				messageLabel.SizeToFit();
-				height += messageItem.TopVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+				height += 8.0f;//messageItem.TopVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
 				height += nameLabel.Frame.Height;
-				height += 5.0f;
+				height += 0.0f;
 				height += messageLabel.Frame.Height;
-				height += messageItem.BottomVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+				height += 8.0f;//messageItem.BottomVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
 			} else if (item is ChatInfoItemVM infoItem) {
-				textLabel.Frame = new CGRect(leftMargin, 0.0f, size.Width - leftMargin - rightMargin - timeLabel.Frame.Width - 7.0f, 0.0f);
-				textLabel.AttributedText = converter.Convert(infoItem.Text, new ColourTextParameter() {
+				textLabel.Frame = new CGRect(0.0f, 0.0f, 0.0f, 0.0f);
+				textLabel.AttributedText = ColourTextValueConverter.Convert(infoItem.Text, new ColourTextParameter() {
 					ParseUri = true,
 					ParseShadow = infoItem.Shadow
 				});
 				textLabel.SizeToFit();
-				height += 10.0f;
+				height += 8.0f;
 				height += textLabel.Frame.Height;
-				height += 10.0f;
+				height += 8.0f;
 			}
 			item.EstimatedHeight = height;
 			return height;

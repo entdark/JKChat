@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace JKChat.Core.Helpers {
-	public static class ColourTextHelper {
+	public static partial class ColourTextHelper {
 		public static string CleanString(this string value, List<AttributeData<int>> colorAttributes = null, List<AttributeData<Uri>> uriAttributes = null, bool shadow = false) {
 			if (string.IsNullOrEmpty(value)) {
 				return string.Empty;
@@ -15,7 +15,7 @@ namespace JKChat.Core.Helpers {
 					if (value[i] == '\0') {
 						break;
 					} else if (value[i] == '^') {
-						if ((i <  1 || value[i-1] != '^')
+						if ((i < 1 || value[i-1] != '^')
 							&& (value[i+1] != '\0' || value[i+1] != '^')) {
 							i += 2;
 						}
@@ -42,7 +42,7 @@ namespace JKChat.Core.Helpers {
 					continue;
 				}
 				if (!escaped) {
-					if (value[i] == '^' && i+1 < value.Length && (char.IsDigit(value[i+1]))) {
+					if (value[i] == '^' && i+1 < value.Length && char.IsDigit(value[i+1])) {
 						colorLength = 0;
 						if (colorAttributes != null) {
 							colorAttributes.Add(new AttributeData<int>() {
@@ -65,12 +65,11 @@ namespace JKChat.Core.Helpers {
 						uriStringBuilder.Append(value[i]);
 					}
 					if ((value[i] == ' ' || i+1 >= value.Length) && uriStringBuilder.Length > 0) {
-						const string webUrls = @"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Za-z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Za-z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Za-z0-9+&@#\/%=~_|$])";
 						const string schemeSep = "://";
 						const string telScheme = "tel:";
 						const string mailtoScheme = "mailto:";
 						string uriStr = uriStringBuilder.ToString();
-						var match = Regex.Match(uriStr, webUrls, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+						var match = WebUrlsRegex().Match(uriStr);
 						/* valid:
 						 * www.site.com
 						 * http(s)://site.com
@@ -79,7 +78,7 @@ namespace JKChat.Core.Helpers {
 						 * scheme://path
 						 */
 						if (match.Success
-							|| (uriStr.Contains(schemeSep, StringComparison.OrdinalIgnoreCase) && !uriStr.StartsWith(schemeSep, StringComparison.OrdinalIgnoreCase))
+							|| uriStr.Contains(schemeSep, StringComparison.OrdinalIgnoreCase) && !uriStr.StartsWith(schemeSep, StringComparison.OrdinalIgnoreCase)
 							|| uriStr.StartsWith(telScheme, StringComparison.OrdinalIgnoreCase)
 							|| uriStr.StartsWith(mailtoScheme, StringComparison.OrdinalIgnoreCase)) {
 							if (!uriStr.Contains(schemeSep, StringComparison.OrdinalIgnoreCase)) {
@@ -103,6 +102,9 @@ namespace JKChat.Core.Helpers {
 			}
 			return stringBuilder.ToString();
 		}
+
+		[GeneratedRegex("(?:(?:https?|ftp|file):\\/\\/|www\\.|ftp\\.)(?:\\([-A-Z0-9+&@#\\/%=~_|$?!:,.]*\\)|[-A-Za-z0-9+&@#\\/%=~_|$?!:,.])*(?:\\([-A-Za-z0-9+&@#\\/%=~_|$?!:,.]*\\)|[A-Za-z0-9+&@#\\/%=~_|$])", RegexOptions.IgnoreCase | RegexOptions.Multiline, "en-US")]
+		private static partial Regex WebUrlsRegex();
 	}
 
 	public class AttributeData<T> {

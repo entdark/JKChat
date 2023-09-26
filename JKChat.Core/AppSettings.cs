@@ -1,29 +1,33 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
+
+using Microsoft.Maui.Storage;
 
 using MvvmCross;
 using MvvmCross.Plugin.Messenger;
-
-using Microsoft.Maui.Storage;
 
 namespace JKChat.Core {
 	public static class AppSettings {
 		public const string DefaultName = "^5Jedi Knight";
 		public static bool FirstLaunch {
 			get {
-				bool firstLaunch = Preferences.Get(nameof(FirstLaunch), true);
+				bool firstLaunch = Get(true);
 				if (firstLaunch) {
-					Preferences.Set(nameof(FirstLaunch), false);
+					Set(false);
 				}
 				return firstLaunch;
 			}
-			set => Preferences.Set(nameof(FirstLaunch), value);
+			set => Set(value);
 		}
 		public static string PlayerName {
-			get => Preferences.Get(nameof(PlayerName), DefaultName);
+			get => Get(DefaultName);
 			set {
-				if (value == Preferences.Get(nameof(PlayerName), DefaultName)) {
+				if (value == Get(DefaultName)) {
 					return;
 				}
 				if (string.IsNullOrEmpty(value)) {
@@ -31,31 +35,62 @@ namespace JKChat.Core {
 				} else if (value.Length > 31) {
 					value = value.Substring(0, 31);
 				}
-				Preferences.Set(nameof(PlayerName), value);
+				Set(value);
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new PlayerNameMessage(value));
 			}
 		}
 		private static readonly Guid DefaultPlayerId = Guid.NewGuid();
 		public static Guid PlayerId {
 			get {
-				if (!Preferences.ContainsKey(nameof(PlayerId))) {
-					Preferences.Set(nameof(PlayerId), DefaultPlayerId.ToString());
+				if (!Exists()) {
+					Set(DefaultPlayerId.ToString());
 					return DefaultPlayerId;
 				}
-				return Guid.TryParse(Preferences.Get(nameof(PlayerId), DefaultPlayerId.ToString()), out Guid playerId) ? playerId : DefaultPlayerId;
+				return Guid.TryParse(Get(DefaultPlayerId.ToString()), out Guid playerId) ? playerId : DefaultPlayerId;
 			}
-			set => Preferences.Set(nameof(PlayerId), value.ToString());
+			set => Set(value.ToString());
 		}
 		public static int EncodingId {
-			get => Preferences.Get(nameof(EncodingId), 1);
-			set => Preferences.Set(nameof(EncodingId), value);
+			get => Get(1);
+			set => Set(value);
 		}
 		public static bool LocationUpdate {
-			get => Preferences.Get(nameof(LocationUpdate), false);
+			get => Get(false);
 			set {
-				Preferences.Set(nameof(LocationUpdate), value);
+				Set(value);
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new LocationUpdateMessage(value));
 			}
 		}
+		public static Filter Filter {
+			get {
+				string filter = Get(null);
+				if (filter == null)
+					return null;
+				try {
+					return JsonSerializer.Deserialize<Filter>(filter);
+				} catch (Exception exception) {
+					Debug.WriteLine(exception);
+				}
+				return null;
+			}
+			set {
+				try {
+					Set(JsonSerializer.Serialize(value));
+				} catch (Exception exception) {
+					Debug.WriteLine(exception);
+				}
+			}
+		}
+
+		private static bool Get(bool defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
+		private static void Set(bool value, [CallerMemberName] string key = "") => Preferences.Set(key, value);
+
+		private static string Get(string defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
+		private static void Set(string value, [CallerMemberName] string key = "") => Preferences.Set(key, value);
+
+		private static int Get(int defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
+		private static void Set(int value, [CallerMemberName] string key = "") => Preferences.Set(key, value);
+
+		private static bool Exists([CallerMemberName] string key = "") => Preferences.ContainsKey(key);
 	}
 }

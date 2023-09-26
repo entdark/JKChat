@@ -1,33 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using JKChat.Core.ViewModels.ServerList.Items;
+using JKChat.Core.Messages;
 
 using JKClient;
 
-using SQLite;
-
 using Microsoft.Maui.Storage;
+
+using MvvmCross;
+using MvvmCross.Plugin.Messenger;
+
+using SQLite;
 
 namespace JKChat.Core.Services {
 	public class CacheService : ICacheService {
 		private readonly SQLiteAsyncConnection connection;
+		private readonly MvxSubscriptionToken serverInfoMessageToken, favouriteMessageToken;
 
 		public CacheService() {
 			var path = Path.Combine(FileSystem.AppDataDirectory, "jkchat.db3");
 			connection = new SQLiteAsyncConnection(path);
-			connection.CreateTableAsync<RecentServer>().Wait();
-			connection.CreateTableAsync<ReportedServer>().Wait();
+			connection.CreateTableAsync<CachedServer>().Wait();
+			var messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
+			serverInfoMessageToken = messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			favouriteMessageToken = messenger.Subscribe<FavouriteMessage>(OnFavouriteMessage);
+		}
+
+		private void OnServerInfoMessage(ServerInfoMessage message) {
+			Task.Run(updateServerInfoTask);
+			Task updateServerInfoTask() => UpdateServer(message.ServerInfo);
+		}
+
+		private void OnFavouriteMessage(FavouriteMessage message) {
+			Task.Run(updateFavouriteTask);
+			async Task updateFavouriteTask() {
+				var cachedServer = await GetCachedServerAsync(message.ServerInfo);
+				cachedServer ??= new CachedServer(message.ServerInfo);
+				cachedServer.IsFavourite = message.IsFavourite;
+				await connection.InsertOrReplaceAsync(cachedServer);
+			}
 		}
 
 		public async Task SaveRecentServer(ServerListItemVM server) {
-			var recentServer = new RecentServer(server);
-			await connection.InsertOrReplaceAsync(recentServer);
+			await (this as ICacheService).SaveRecentServer(server.ServerInfo);
+		}
+
+		async Task ICacheService.SaveRecentServer(ServerInfo serverInfo) {
+			var cachedServer = await GetCachedServerAsync(serverInfo);
+			cachedServer ??= new CachedServer(serverInfo);
+			cachedServer.LastConnected = DateTime.UtcNow;
+			await connection.InsertOrReplaceAsync(cachedServer);
 		}
 
 		public async Task SaveRecentServers(IList<ServerListItemVM> servers) {
@@ -39,93 +66,118 @@ namespace JKChat.Core.Services {
 			}
 		}
 
-		public async Task UpdateRecentServer(ServerListItemVM server) {
-			var recentServer = await connection.GetAsync<RecentServer>(server.ServerInfo.Address.ToString());
-			await connection.UpdateAsync(recentServer);
+		public async Task UpdateServer(ServerListItemVM server) {
+			await UpdateServer(server.ServerInfo);
+		}
+
+		internal async Task UpdateServer(ServerInfo serverInfo) {
+			var cachedServer = await GetCachedServerAsync(serverInfo);
+			if (cachedServer != null) {
+				cachedServer.Update(serverInfo);
+				await connection.UpdateAsync(cachedServer);
+			}
 		}
 
 		public async Task<IEnumerable<ServerListItemVM>> LoadRecentServers() {
-			return (await connection.Table<RecentServer>().ToArrayAsync())
-				.OrderBy(recentServer => recentServer.LastConnected)
-				.Select(recentServer => recentServer.ToServerVM());
-		}
-
-		private class RecentServer {
-			[PrimaryKey]
-			public string Address { get; set; }
-			public bool NeedPassword { get; set; }
-			public string ServerName { get; set; }
-			public string MapName { get; set; }
-			public string Players { get; set; }
-			public string Ping { get; set; }
-			public string GameType { get; set; }
-			public DateTime LastConnected { get; set; }
-			public ProtocolVersion Protocol { get; set; }
-
-			public RecentServer() {}
-			public RecentServer(ServerListItemVM server) {
-				Address = server.ServerInfo.Address.ToString();
-				NeedPassword = server.NeedPassword;
-				ServerName = server.ServerName;
-				MapName = server.MapName;
-				Players = server.Players;
-				Ping = server.Ping;
-				GameType = server.GameType;
-				LastConnected = DateTime.UtcNow;
-				Protocol = server.ServerInfo.Protocol;
-			}
-
-			public ServerListItemVM ToServerVM() {
-				string []players = null;
-				if (!string.IsNullOrEmpty(this.Players)) {
-					players = this.Players.Split('/');
-				}
-				if (players == null) {
-					players = new string [2]{ string.Empty, string.Empty };
-				}
-				return new ServerListItemVM(new ServerInfo() {
-					Address = NetAddress.FromString(this.Address),
-					NeedPassword = this.NeedPassword,
-					HostName = this.ServerName,
-					MapName = this.MapName,
-					Clients = int.TryParse(players[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int clients) ? clients : 0,
-					MaxClients = int.TryParse(players[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out int maxClients) ? maxClients : 0,
-					Ping = int.TryParse(this.Ping, NumberStyles.Integer, CultureInfo.InvariantCulture, out int ping) ? ping : 0,
-					Protocol = this.Protocol,
-					GameType = ServerListItemVM.GetGameType(this.GameType)
-				});
-			}
+			return await LoadCachedServers(server => server.IsRecent);
 		}
 
 		public async Task AddReportedServer(ServerListItemVM server) {
-			var reportedServer = new ReportedServer(server);
-			await connection.InsertOrReplaceAsync(reportedServer);
+			var cachedServer = await GetCachedServerAsync(server.ServerInfo);
+			cachedServer ??= new CachedServer(server);
+			cachedServer.IsReported = true;
+			await connection.InsertOrReplaceAsync(cachedServer);
 		}
 
 		public async Task<IEnumerable<ServerListItemVM>> LoadReportedServers() {
-			return (await connection.Table<ReportedServer>().ToArrayAsync())
-				.OrderBy(recentServer => recentServer.AddedTime)
+			return await LoadCachedServers(server => server.IsReported);
+		}
+
+		public async Task AddFavouriteServer(ServerListItemVM server) {
+			var cachedServer = await GetCachedServerAsync(server.ServerInfo);
+			cachedServer ??= new CachedServer(server);
+			cachedServer.IsFavourite = true;
+			await connection.InsertOrReplaceAsync(cachedServer);
+		}
+
+		public async Task<IEnumerable<ServerListItemVM>> LoadFavouriteServers() {
+			return await LoadCachedServers(server => server.IsFavourite);
+		}
+
+		private async Task<IEnumerable<ServerListItemVM>> LoadCachedServers(Func<CachedServer, bool> predicate) {
+			return (await connection.Table<CachedServer>().ToArrayAsync()).Where(predicate)
 				.Select(recentServer => recentServer.ToServerVM());
 		}
 
-		private class ReportedServer {
+		private async Task<T> GetAsync<T>(object pk) where T : new() {
+			try {
+				return await connection.GetAsync<T>(pk);
+			} catch (Exception exception) {
+				Debug.WriteLine(exception);
+			}
+			return default;
+		}
+
+		private async Task<CachedServer> GetCachedServerAsync(ServerInfo serverInfo) {
+			return await GetAsync<CachedServer>(serverInfo.Address.ToString());
+		}
+
+		private class CachedServer {
 			[PrimaryKey]
 			public string Address { get; set; }
 			public string ServerName { get; set; }
-			public DateTime AddedTime { get; set; }
+			public string MapName { get; set; }
+			public int Players { get; set; }
+			public int MaxPlayers { get; set; }
+			public bool NeedPassword { get; set; }
+			public ProtocolVersion Protocol { get; set; }
+			public ClientVersion Version { get; set; }
+			public string Modification { get; set; }
+			public DateTime LastConnected { get; set; }
+			public bool IsReported { get; set; }
+			public bool IsFavourite { get; set; }
+			[Ignore]
+			public bool IsRecent => LastConnected != default;
 
-			public ReportedServer() {}
-			public ReportedServer(ServerListItemVM server) {
-				Address = server.ServerInfo.Address.ToString();
-				ServerName = server.ServerName;
-				AddedTime = DateTime.UtcNow;
+			public CachedServer() {}
+			public CachedServer(ServerListItemVM server) : this(server.ServerInfo) {
+				IsFavourite = server.IsFavourite;
+			}
+			public CachedServer(ServerInfo serverInfo) {
+				Set(serverInfo);
+			}
+			public void Update(ServerListItemVM server) {
+				Set(server.ServerInfo);
+				IsFavourite = server.IsFavourite;
+			}
+			public void Update(ServerInfo serverInfo) {
+				Set(serverInfo);
+			}
+			private void Set(ServerInfo serverInfo) {
+				Address = serverInfo.Address.ToString();
+				ServerName = serverInfo.HostName;
+				MapName = serverInfo.MapName;
+				Players = serverInfo.Clients;
+				MaxPlayers = serverInfo.MaxClients;
+				NeedPassword = serverInfo.NeedPassword;
+				Protocol = serverInfo.Protocol;
+				Version = serverInfo.Version;
+				Modification = serverInfo.GameName;
 			}
 
 			public ServerListItemVM ToServerVM() {
-				return new ServerListItemVM(new ServerInfo() {
-					Address = NetAddress.FromString(this.Address),
-					HostName = this.ServerName
+				var server = new ServerListItemVM(new ServerInfo(NetAddress.FromString(this.Address)) {
+					HostName = this.ServerName,
+					MapName = this.MapName,
+					Clients = this.Players,
+					MaxClients = this.MaxPlayers,
+					NeedPassword = this.NeedPassword,
+					Protocol = this.Protocol,
+					Version = this.Version,
+					GameName = this.Modification
 				});
+				server.SetFavourite(this.IsFavourite);
+				return server;
 			}
 		}
 	}

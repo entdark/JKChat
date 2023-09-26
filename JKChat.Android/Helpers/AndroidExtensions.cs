@@ -2,6 +2,7 @@
 
 using Android.App;
 using Android.Content;
+using Android.Graphics.Drawables;
 using Android.InputMethodServices;
 using Android.Util;
 using Android.Views;
@@ -28,6 +29,18 @@ namespace JKChat.Android.Helpers {
 			return TypedValue.ApplyDimension(ComplexUnitType.Px, px, Application.Context.Resources.DisplayMetrics);
 		}
 
+		public static int GetDimensionInPx(this Context context, int id) {
+			return (int)(context?.Resources.GetDimension(id) ?? 0.0f);
+		}
+
+		public static float GetDimensionInPxF(this Context context, int id) {
+			return context?.Resources.GetDimension(id) ?? 0.0f;
+		}
+
+		public static float GetDimensionInDp(this Context context, int id) {
+			return (context?.Resources.GetDimension(id) ?? 0.0f).PxToDp();
+		}
+
 		public static void SetClickAction(this IMenuItem item, Action action) {
 			if (item?.ActionView is FadingImageView imageView) {
 				imageView.Action = action;
@@ -39,6 +52,10 @@ namespace JKChat.Android.Helpers {
 					}
 				});
 			}
+		}
+		public static void AdjustIconInsets(this IMenuItem item) {
+			if (item.Icon != null && item.Icon is not InsetDrawable)
+				item.SetIcon(new InsetDrawable(item.Icon, 4.0f.DpToPx(), 0, 4.0f.DpToPx(), 0));
 		}
 		public static void SetVisible(this IMenuItem item, bool visible, bool animated) {
 			if (visible || !animated) {
@@ -59,10 +76,10 @@ namespace JKChat.Android.Helpers {
 			}
 		}
 		public static void HideKeyboard(this Context context, View view = null, bool clearFocus = false) {
-			view ??= (context as Activity)?.CurrentFocus;
+			view = (context as Activity)?.CurrentFocus ?? view;
 			if (view != null) {
 				var imm = (InputMethodManager)context.GetSystemService(InputMethodService.InputMethodService);
-				imm.HideSoftInputFromWindow(view.WindowToken, HideSoftInputFlags.None);
+				imm.HideSoftInputFromWindow(view.WindowToken, HideSoftInputFlags.ImplicitOnly);
 				if (clearFocus)
 					view.ClearFocus();
 			}

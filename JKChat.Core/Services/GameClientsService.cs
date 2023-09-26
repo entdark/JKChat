@@ -6,7 +6,7 @@ using JKChat.Core.Models;
 
 namespace JKChat.Core.Services {
 	public class GameClientsService : IGameClientsService {
-		private Dictionary<JKClient.NetAddress, GameClient> clients = new Dictionary<JKClient.NetAddress, GameClient>(new JKClient.NetAddressComparer());
+		private readonly Dictionary<JKClient.NetAddress, GameClient> clients = new(new JKClient.NetAddressComparer());
 
 		public int ActiveClients => clients.Count(kv => kv.Value.Status != ConnectionStatus.Disconnected);
 
@@ -14,8 +14,8 @@ namespace JKChat.Core.Services {
 
 		public GameClient GetOrStartClient(JKClient.ServerInfo serverInfo) {
 			var address = serverInfo.Address;
-			if (clients.ContainsKey(address)) {
-				return clients[address];
+			if (clients.TryGetValue(address, out var client)) {
+				return client;
 			} else {
 				return (clients[address] = new GameClient(serverInfo));
 			}

@@ -55,66 +55,9 @@ namespace JKChat.iOS {
 #if !__MACCATALYST__
 			AppCenter.Start(Core.ApiKeys.AppCenter.iOS, typeof(Crashes));
 #endif
-			var titleTextAttributes = new UIStringAttributes() {
-				ForegroundColor = Theme.Color.Title,
-				Font = Theme.Font.ANewHope(13.0f)
-			};
-			if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-				var appearance = new UINavigationBarAppearance();
-				appearance.ConfigureWithOpaqueBackground();
-				appearance.BackgroundColor = Theme.Color.NavigationBar;
-				appearance.TitleTextAttributes = titleTextAttributes;
-				UINavigationBar.Appearance.StandardAppearance = appearance;
-				UINavigationBar.Appearance.ScrollEdgeAppearance = appearance;
-			} else {
-				UINavigationBar.Appearance.TitleTextAttributes = titleTextAttributes;
-				UINavigationBar.Appearance.BarTintColor = Theme.Color.NavigationBar;
-				UINavigationBar.Appearance.Translucent = false;
-			}
-
-			UITabBar.Appearance.BarTintColor = Theme.Color.TabBar;
-			UITabBar.Appearance.UnselectedItemTintColor = Theme.Color.TabBarItemUnselected;
-			UITabBar.Appearance.SelectedImageTintColor = Theme.Color.TabBarItemSelected;
-			var tabBarTitleNormalStringAttributes = new UIStringAttributes() {
-				ForegroundColor = Theme.Color.TabBarItemUnselected,
-				Font = Theme.Font.ErgoeBold(10.0f)
-			};
-			var tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
-				ForegroundColor = Theme.Color.TabBarItemSelected,
-				Font = Theme.Font.ErgoeBold(10.0f)
-			};
-			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleNormalStringAttributes, UIControlState.Normal);
-			UITabBarItem.Appearance.SetTitleTextAttributes(tabBarTitleSelectedStringAttributes, UIControlState.Selected);
-			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
-				var appearance = new UITabBarAppearance();
-				appearance.ConfigureWithDefaultBackground();
-				appearance.BackgroundColor = Theme.Color.TabBar;
-				UITabBar.Appearance.StandardAppearance = appearance;
-				if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
-					UITabBar.Appearance.ScrollEdgeAppearance = appearance;
-				}
-				tabBarTitleNormalStringAttributes = new UIStringAttributes() {
-					ForegroundColor = Theme.Color.TabBarItemUnselected,
-					Font = Theme.Font.ErgoeBold(10.0f)
-				};
-				tabBarTitleSelectedStringAttributes = new UIStringAttributes() {
-					ForegroundColor = Theme.Color.TabBarItemSelected,
-					Font = Theme.Font.ErgoeBold(10.0f)
-				};
-				var tabAppearance = new UITabBarItemAppearance();
-				tabAppearance.Normal.TitleTextAttributes = tabBarTitleNormalStringAttributes;
-				tabAppearance.Normal.IconColor = Theme.Color.TabBarItemUnselected;
-				tabAppearance.Selected.TitleTextAttributes = tabBarTitleSelectedStringAttributes;
-				tabAppearance.Selected.IconColor = Theme.Color.TabBarItemSelected;
-				appearance.StackedLayoutAppearance = tabAppearance;
-				appearance.InlineLayoutAppearance = tabAppearance;
-				appearance.CompactInlineLayoutAppearance = tabAppearance;
-			}
-			if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
-				UIBarButtonItem.Appearance.TintColor = Theme.Color.NavigationBarButton;
-			}
 
 			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
+			Window.TintColor = Theme.Color.Accent;
 
 			UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert, (approved, error) => {
 				Debug.WriteLine("UserNotifications approved: " + approved);

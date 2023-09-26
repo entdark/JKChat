@@ -5,7 +5,6 @@ using CoreGraphics;
 using Foundation;
 
 using JKChat.Core.ViewModels.Chat.Items;
-using JKChat.iOS.Helpers;
 
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
@@ -47,8 +46,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 				using var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
-
-				this.AddBindings(TextLabel, "AttributedText ColourText(Text, ColourTextParameter(true, Shadow))");
+				set.Bind(TextLabel).For(v => v.AttributedText).To("ColourText(Text, ColourTextParameter(true, Shadow))");
 			});
 		}
 
@@ -57,13 +55,17 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 			this.ContentView.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);
 
-			gradientLayer = new CAGradientLayer {
+			gradientLayer = new CAGradientLayer() {
 				LayerType = CAGradientLayerType.Axial,
 				Colors = new CGColor []{ Theme.Color.ChatInfoGradientStart.CGColor, Theme.Color.ChatInfoGradientEnd.CGColor },
 				StartPoint = new CGPoint(0.0f, 0.5f),
-				EndPoint = new CGPoint(1.0f, 0.5f)
+				EndPoint = new CGPoint(1.0f, 0.5f),
+				Opacity = 0.8f
 			};
 			this.Layer.InsertSublayer(gradientLayer, 0);
+
+			TextLabel.Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular);
+			TimeLabel.Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular);
 		}
 
 		public override void LayoutSubviews() {
@@ -75,7 +77,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			if (gradientLayer == null || BackgroundView == null) {
 				return;
 			}
-			gradientLayer.Frame = new CGRect(0.0f, 0.0f, DeviceInfo.SafeAreaInsets.Left + BackgroundView.Bounds.Width, Frame.Height);
+			gradientLayer.Frame = new CGRect(0.0f, 0.0f, /*DeviceInfo.SafeAreaInsets.Left + */BackgroundView.Bounds.Width, Frame.Height);
 		}
 	}
 }

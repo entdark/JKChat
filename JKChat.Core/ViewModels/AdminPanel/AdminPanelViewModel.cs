@@ -30,12 +30,12 @@ namespace JKChat.Core.ViewModels.AdminPanel {
 			string address = string.Empty;
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Enter server address",
-				Input = address,
-				RightButton = "OK",
-				RightClick = (input) => {
-					address = input as string;
+				Input = new(address),
+				OkText = "OK",
+				OkAction = config => {
+					address = config?.Input?.Text;
 				},
-				Type = JKDialogType.Title | JKDialogType.Input
+				CancelText = "Cancel"
 			});
 		}
 

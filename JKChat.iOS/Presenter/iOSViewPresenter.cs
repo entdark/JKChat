@@ -57,7 +57,7 @@ namespace JKChat.iOS.Presenter {
 //							while (navigationController.ViewControllers?.Length > 1)
 							{
 								var closeViewController = navigationController.ViewControllers.LastOrDefault();
-								if ((closeViewController as IMvxIosView)?.ViewModel is IMvxViewModel viewModel && (popToRootHint.Condition?.Invoke(viewModel) ?? true)) {
+								if (closeViewController is IMvxIosView { ViewModel: IMvxViewModel viewModel } && (popToRootHint.Condition?.Invoke(viewModel) ?? true)) {
 									await Close(viewModel);
 								} else {
 									popToRootHint.PoppedToRoot = false;
@@ -107,13 +107,12 @@ namespace JKChat.iOS.Presenter {
 			base.ViewWillAppear(animated);
 			NavigationController.NavigationBarHidden = true;
 		}
+		protected override void SetTitleAndTabBarItem(UIViewController viewController, MvxTabPresentationAttribute attribute) {
+			base.SetTitleAndTabBarItem(viewController, attribute);
+			viewController.TabBarItem = new UITabBarItem(attribute.TabName, UIImage.GetSystemImage(attribute.TabIconName), viewController.TabBarItem.Tag);
+		}
 	}
 
 	public class WrapperDetailViewModel : MvxViewModel {}
-	public class WrapperDetailViewController : MvxViewController<WrapperDetailViewModel> {
-		public override void ViewDidLoad() {
-			base.ViewDidLoad();
-			View.BackgroundColor = Theme.Color.Background;
-		}
-	}
+	public class WrapperDetailViewController : MvxViewController<WrapperDetailViewModel> {}
 }

@@ -9,8 +9,12 @@ using JKChat.Core.Messages;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat.Items;
+using JKChat.Core.ViewModels.Dialog;
 
 using JKClient;
+
+using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Devices;
 
 using MvvmCross;
 using MvvmCross.Base;
@@ -19,14 +23,10 @@ using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
-using Microsoft.Maui.ApplicationModel.DataTransfer;
-using Microsoft.Maui.Devices;
-
 namespace JKChat.Core.Models {
 	public class GameClient {
 		private const int MaxChatMessages = 512;
 		private JKClient.JKClient Client;
-		private bool showingDialog;
 		private readonly IMvxMainThreadAsyncDispatcher mainThread;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
@@ -167,53 +167,66 @@ namespace JKChat.Core.Models {
 				} catch {}
 				Client.ServerCommandExecuted += ServerCommandExecuted;
 				Client.ServerInfoChanged += ServerInfoChanged;
+				Client.FrameExecuted += FrameExecuted;
 				Client.Start(ExceptionCallback);
 			});
 		}
 
+		private long lastFrameTime = 0L, lastScoresTime = 0L;
+		private void FrameExecuted(long frameTime) {
+			if (Status == ConnectionStatus.Connected) {
+				if ((frameTime - lastScoresTime) > 2000L) {
+					ExecuteCommand("score", false);
+					lastScoresTime = frameTime;
+				}
+			}
+			lastFrameTime = frameTime;
+		}
+
 		internal async Task Connect(bool ignoreDialog = true) {
-			if (Status != ConnectionStatus.Disconnected || (!ignoreDialog && showingDialog)) {
+			if (Status != ConnectionStatus.Disconnected) {
 				return;
 			}
 			Status = ConnectionStatus.Connecting;
-			try {
-				await Start();
-				if (ServerInfo.NeedPassword/* && string.IsNullOrEmpty(Client.Password)*/) {
-					string password = Client.Password;
-					bool close = false;
-					await ShowDialog(new JKDialogConfig() {
-						Title = "Enter Password",
-						LeftButton = "Cancel",
-						LeftClick = (_) => {
-							close = true;
-						},
-						RightButton = "Connect",
-						RightClick = (input) => {
-							password = input as string;
-						},
-						BackgroundClick = (_) => {
-							close = true;
-						},
-						Type = JKDialogType.Title | JKDialogType.Input
-					});
-					if (close) {
-						Disconnect();
-						await navigationService.Close(ViewModel);
-						return;
-					} else {
-						Client.Password = password;
+			await Start();
+			if (ServerInfo.NeedPassword/* && string.IsNullOrEmpty(Client.Password)*/) {
+				string password = Client.Password;
+				await ShowDialog(new JKDialogConfig() {
+					Title = "Enter Password",
+					CancelText = "Cancel",
+					CancelAction = (_) => {
+						Task.Run(disconnect);
+					},
+					OkText = "Connect",
+					OkAction = config => {
+						Client.Password = config?.Input?.Text;
+						Task.Run(connect);
+					},
+					Input = new DialogInputViewModel(password)
+				});
+			} else {
+				await connect();
+			}
+			async Task connect() {
+				try {
+					await Client.Connect(ServerInfo);
+					if (Client.Status == JKClient.ConnectionStatus.Active) {
+						Status = ConnectionStatus.Connected;
 					}
+					if (Status != ConnectionStatus.Connected) {
+						Status = ConnectionStatus.Disconnected;
+					}
+				} catch (Exception exception) {
+					Debug.WriteLine(exception);
 				}
-				await Client.Connect(ServerInfo);
-				if (Client.Status == JKClient.ConnectionStatus.Active) {
-					Status = ConnectionStatus.Connected;
-				}
-			} catch (Exception exception) {
-				Debug.WriteLine(exception);
 			}
-			if (Status != ConnectionStatus.Connected) {
-				Status = ConnectionStatus.Disconnected;
+			async Task disconnect() {
+				Disconnect();
+				await navigationService.Close(ViewModel);
 			}
+		}
+		private async Task Connect() {
+			await Connect(true);
 		}
 
 		internal void Disconnect(bool showDisconnected = false) {
@@ -231,25 +244,19 @@ namespace JKChat.Core.Models {
 		}
 
 		private async Task ShowDisconnected() {
-			bool close = false;
 			await ShowDialog(new JKDialogConfig() {
 				Title = "Disconnected",
-				LeftButton = "OK",
-				LeftClick = (_) => {
-					close = true;
+				CancelText = "OK",
+				CancelAction = (_) => {
+					if (Status == ConnectionStatus.Disconnected) {
+						Task.Run(CloseViewModel);
+					}
 				},
-				RightButton = "Reconnect",
-				RightClick = (_) => {
-					Connect();
-				},
-				BackgroundClick = (_) => {
-					close = true;
-				},
-				Type = JKDialogType.Title
+				OkText = "Reconnect",
+				OkAction = (_) => {
+					Task.Run(Connect);
+				}
 			});
-			if (close && Status == ConnectionStatus.Disconnected) {
-				await navigationService.Close(ViewModel);
-			}
 		}
 
 		internal void Shutdown() {
@@ -257,6 +264,7 @@ namespace JKChat.Core.Models {
 			if (Client != null) {
 				Client.ServerCommandExecuted -= ServerCommandExecuted;
 				Client.ServerInfoChanged -= ServerInfoChanged;
+				Client.FrameExecuted -= FrameExecuted;
 				Client.Dispose();
 			}
 			lifetime.LifetimeChanged -= LifetimeChanged;
@@ -266,7 +274,11 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		internal void ExecuteCommand(string cmd) {
+		internal async void ExecuteCommand(string cmd, bool addToChat = false) {
+			if (addToChat && Client != null) {
+				string cmd2 = cmd.StartsWith("/", StringComparison.Ordinal) ? cmd : ("/" + cmd);
+				await AddItem(new ChatMessageItemVM(Client.Name, Client.Name+":", cmd2, Client.Version == ClientVersion.JO_v1_02));
+			}
 			Client?.ExecuteCommand(cmd);
 		}
 
@@ -306,18 +318,13 @@ namespace JKChat.Core.Models {
 					return;
 				}
 				Disconnect();
-				bool close = false;
 				await ShowDialog(new JKDialogConfig() {
 					Title = title,
-					RightButton = "OK",
-					AnyClick = (_) => {
-						close = true;
-					},
-					Type = JKDialogType.Title
+					OkText = "OK",
+					OkAction = _ => {
+						Task.Run(CloseViewModel);
+					}
 				});
-				if (close) {
-					await navigationService.Close(ViewModel);
-				}
 			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
 				string reason;
 				if (string.Compare(command[1], 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0
@@ -329,31 +336,19 @@ namespace JKChat.Core.Models {
 				} else {
 					reason = command[1];
 				}
-				JKDialogType type = JKDialogType.Title;
-				if (!string.IsNullOrEmpty(reason)) {
-					type |= JKDialogType.Message;
-				}
 				Disconnect();
-				bool close = false;
 				await ShowDialog(new JKDialogConfig() {
 					Title = "Disconnected",
 					Message = reason,
-					LeftButton = "OK",
-					LeftClick = (_) => {
-						close = true;
+					CancelText = "OK",
+					CancelAction = (_) => {
+						Task.Run(CloseViewModel);
 					},
-					RightButton = "Reconnect",
-					RightClick = (_) => {
-						Connect();
-					},
-					BackgroundClick = (_) => {
-						close = true;
-					},
-					Type = type
+					OkText = "Reconnect",
+					OkAction = (_) => {
+						Task.Run(Connect);
+					}
 				});
-				if (close) {
-					await navigationService.Close(ViewModel);
-				}
 			}
 		}
 
@@ -367,7 +362,7 @@ namespace JKChat.Core.Models {
 			string name = fullMessage.Substring(0, separator);
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
-			string message = fullMessage.Substring(separator, fullMessage.Length-separator).Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
+			string message = fullMessage[separator..].Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			await AddItem(chatItem);
 		}
@@ -450,7 +445,7 @@ namespace JKChat.Core.Models {
 					}
 				}
 			}
-			if (!pending)  {
+			if (!pending) {
 				await mainThread.ExecuteOnMainThreadAsync(() => {
 					lock (Items) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
@@ -519,7 +514,7 @@ namespace JKChat.Core.Models {
 		public void MakeAllPending() {
 			lock (pendingItems) {
 				lock (Items) {
-					if (DeviceInfo.Platform == DevicePlatform.Android) {
+					if (false&&DeviceInfo.Platform == DevicePlatform.Android) {
 						Items.AddRange(pendingItems);
 						pendingItems.ReplaceWith(Items);
 						Items.Clear();
@@ -529,42 +524,35 @@ namespace JKChat.Core.Models {
 		}
 
 		private async Task ShowDialog(JKDialogConfig config) {
-			if (!showingDialog) {
-				showingDialog = true;
-				while (ViewModel == null);
-				if (dialogService.Showing) {
-					while (dialogService.Showing);
-					//delay only if pending any
-					await Task.Delay(500);
-				}
-				await dialogService.ShowAsync(config);
-				showingDialog = false;
-			}
+			while (ViewModel == null);
+			await dialogService.ShowAsync(config);
 		}
 
 		private async Task ExceptionCallback(JKClientException exception) {
 			string message = Helpers.Common.GetExceptionMessage(exception);
 
 			Disconnect();
-			bool close = false;
 			await ShowDialog(new JKDialogConfig() {
 				Title = "Error",
 				Message = message,
-				LeftButton = "Copy",
-				LeftClick = (_) => {
-					Clipboard.SetTextAsync(message);
+				CancelText = "Copy",
+				CancelAction = (_) => {
+					Task.Run(copyAndClose);
 				},
-				RightButton = "OK",
-				AnyClick = (_) => {
-					close = true;
-				},
-				Type = JKDialogType.Title | JKDialogType.Message
-			});
-			if (close) {
-				Disconnect();
-				if (ViewModel != null) {
-					await navigationService.Close(ViewModel);
+				OkText = "OK",
+				OkAction = _ => {
+					Task.Run(CloseViewModel);
 				}
+			});
+			async Task copyAndClose() {
+				await Clipboard.SetTextAsync(message);
+				await CloseViewModel();
+			}
+		}
+
+		private async Task CloseViewModel() {
+			if (ViewModel != null) {
+				await navigationService.Close(ViewModel);
 			}
 		}
 	}

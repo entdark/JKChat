@@ -8,10 +8,11 @@ namespace JKChat.Core.Services {
 		Task<IEnumerable<ServerInfo>> GetCurrentList();
 		Task<IEnumerable<ServerInfo>> GetNewList();
 		Task<IEnumerable<ServerInfo>> RefreshList();
-		Task<InfoString> GetServerInfo(string address, ushort port, ProtocolVersion protocol);
-		Task<InfoString> GetServerInfo(string address, ushort port, int protocol = 0);
-		Task<InfoString> GetServerInfo(NetAddress address, ProtocolVersion protocol);
-		Task<InfoString> GetServerInfo(NetAddress address, int protocol = 0);
-		Task<InfoString> GetServerInfo(ServerInfo serverInfo);
+		Task<IEnumerable<ServerInfo>> RefreshList(IEnumerable<ServerInfo> serverInfos);
+		Task<ServerInfo> GetServerInfo(string address, ushort port, ProtocolVersion protocol);
+		Task<ServerInfo> GetServerInfo(string address, ushort port, int protocol = 0);
+		Task<ServerInfo> GetServerInfo(NetAddress address, ProtocolVersion protocol);
+		Task<ServerInfo> GetServerInfo(NetAddress address, int protocol = 0);
+		Task<ServerInfo> GetServerInfo(ServerInfo serverInfo);
 	}
 }

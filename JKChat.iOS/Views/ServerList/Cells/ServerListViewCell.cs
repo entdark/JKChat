@@ -1,7 +1,7 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Foundation;
-
+using JKChat.Core.Models;
 using JKChat.Core.ViewModels.ServerList.Items;
 
 using MvvmCross.Binding.BindingContext;
@@ -16,6 +16,15 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 		public static readonly NSString Key = new NSString("ServerListViewCell");
 		public static readonly UINib Nib;
 
+		private bool needPassword;
+		public bool NeedPassword {
+			get => needPassword;
+			set {
+				needPassword = value;
+				ConnectButton.SetImage(needPassword ? UIImage.GetSystemImage("lock", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Medium)) : null, UIControlState.Normal);
+			}
+		}
+
 		static ServerListViewCell() {
 			Nib = UINib.FromName("ServerListViewCell", NSBundle.MainBundle);
 		}
@@ -25,15 +34,33 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 		}
 
 		private void BindingControls() {
+			var tintedStyle = UIButtonConfiguration.TintedButtonConfiguration;
+			tintedStyle.CornerStyle = UIButtonConfigurationCornerStyle.Capsule;
+			var grayStyle = UIButtonConfiguration.GrayButtonConfiguration;
+			grayStyle.CornerStyle = UIButtonConfigurationCornerStyle.Capsule;
 			using var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
-			set.Bind(PasswordImageView).For("Visibility").To(vm => vm.NeedPassword).WithConversion("Visibility");
 			set.Bind(ServerNameLabel).For(v => v.AttributedText).To(vm => vm.ServerName).WithConversion("ColourText");
 			set.Bind(MapNameLabel).For(v => v.Text).To(vm => vm.MapName);
-			set.Bind(PlayersLabel).For(v => v.Text).To(vm => vm.Players);
-			set.Bind(GameTypeLabel).For(v => v.Text).To(vm => vm.GameType);
-			set.Bind(PingLabel).For(v => v.Text).To(vm => vm.Ping);
+			set.Bind(PlayersLabel).For(v => v.Text).To("Format('{0} players', Players)");
+			set.Bind(GameLabel).For(v => v.AttributedText).To("ColourText(If(Modification, Format('{0} - {1}', GameName, Modification), GameName))");
+			set.Bind(FavouriteButton).For(v => v.Selected).To(vm => vm.IsFavourite);
 			set.Bind(StatusLabel).For(v => v.Text).To(vm => vm.Status);
-			set.Bind(StatusView).For(v => v.BackgroundColor).To(vm => vm.Status).WithConversion("ConnectionColor");
+			set.Bind(StatusLabel).For(v => v.TextColor).To(vm => vm.Status).WithDictionaryConversion(new Dictionary<ConnectionStatus, UIColor>() {
+				[ConnectionStatus.Connected] = UIColor.Label
+			}, UIColor.SecondaryLabel);
+			set.Bind(StatusImageView).For(v => v.TintColor).To(vm => vm.Status).WithConversion("ConnectionColor");
+			set.Bind(ConnectButton).To(vm => vm.ConnectCommand);
+			set.Bind(ConnectButton).For(v => v.Configuration).To(vm => vm.Status).WithDictionaryConversion(new Dictionary<ConnectionStatus, UIButtonConfiguration>() {
+				[ConnectionStatus.Disconnected] = tintedStyle
+			}, grayStyle);
+			set.Bind(ConnectButton).For("Title").To("If(EnumBool(Status, 'Disconnected'), 'Connect', 'Disconnect')");
+			set.Bind(this).For(v => v.NeedPassword).To(vm => vm.NeedPassword);
+			set.Bind(PreviewImageView).For(v => v.Image).To(vm => vm.Game).WithDictionaryConversion(new Dictionary<Game, UIImage>() {
+				[Game.JediAcademy] = UIImage.FromBundle("JAPreviewBackground"),
+				[Game.JediOutcast] = UIImage.FromBundle("JOPreviewBackground"),
+				[Game.Quake3] = UIImage.FromBundle("Q3PreviewBackground")
+			}, null);
+			set.Bind(PreviewView).For("Visibility").To("EnumBool(Game, 'Unknown')").WithConversion("InvertedVisibility");
 		}
 	}
 }

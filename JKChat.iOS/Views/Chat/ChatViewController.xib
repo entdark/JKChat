@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina5_9" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina5_9" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -16,6 +18,10 @@
                 <outlet property="ChatTypePrivateButton" destination="1428" id="name-outlet-1428"/>
                 <outlet property="ChatTypeStackView" destination="1046" id="name-outlet-1046"/>
                 <outlet property="ChatTypeTeamButton" destination="1417" id="name-outlet-1417"/>
+                <outlet property="CommandsButton" destination="02t-5t-fLm" id="59Y-ia-ZXP"/>
+                <outlet property="CommandsTableView" destination="Fa1-th-FG9" id="sDU-gb-ecv"/>
+                <outlet property="CommandsTableViewBottomConstraint" destination="ldY-wp-dQ9" id="34n-On-1KY"/>
+                <outlet property="CommandsTableViewHeightConstraint" destination="CFb-la-hMt" id="aqD-QI-X2V"/>
                 <outlet property="MessageTextView" destination="1903" id="name-outlet-1903"/>
                 <outlet property="MessageToolbar" destination="fup-dp-pgP" id="5Km-1m-lhf"/>
                 <outlet property="MessageView" destination="3687" id="name-outlet-3687"/>
@@ -29,62 +35,74 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
-                    <rect key="frame" x="0.0" y="0.0" width="375" height="676.33333333333337"/>
-                    <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                    <color key="tintColor" red="0.039215686274509803" green="0.37647058823529411" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="674"/>
+                    <color key="backgroundColor" systemColor="tertiarySystemBackgroundColor"/>
+                    <color key="tintColor" systemColor="systemTealColor"/>
                 </tableView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0BW-om-Vsj">
-                    <rect key="frame" x="0.0" y="676.33333333333337" width="375" height="101.66666666666663"/>
+                    <rect key="frame" x="0.0" y="674" width="375" height="104"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3687">
-                            <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
+                            <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                             <subviews>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JrR-ah-AEs">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
-                                    <color key="backgroundColor" red="0.19437411430000001" green="0.20945405959999999" blue="0.26679441329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                                 </view>
-                                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fup-dp-pgP">
+                                <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fup-dp-pgP">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="44" id="xny-wn-Fdp"/>
                                     </constraints>
                                     <items/>
-                                    <color key="barTintColor" red="0.1960784314" green="0.20784313730000001" blue="0.2666666667" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </toolbar>
                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="882">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="101.66666666666667"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                                     <subviews>
-                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="1046">
+                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="1046">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <subviews>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1276">
-                                                    <rect key="frame" x="0.0" y="0.0" width="125" height="44"/>
-                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
-                                                    <inset key="titleEdgeInsets" minX="26" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <inset key="imageEdgeInsets" minX="20" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                                    <state key="normal" title="COMMON" image="ChatTypeCommon">
-                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </state>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1276">
+                                                    <rect key="frame" x="0.0" y="0.0" width="151.66666666666666" height="44"/>
+                                                    <color key="tintColor" systemColor="labelColor"/>
+                                                    <state key="normal" title="COMMON" image="ChatTypeCommon"/>
+                                                    <buttonConfiguration key="configuration" style="plain" title="Common" imagePadding="4" buttonSize="small">
+                                                        <imageReference key="image" image="person.3.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical" variableValue="1">
+                                                            <hierarchicalColors>
+                                                                <color red="0.0" green="1" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="0.0" green="1" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="0.0" green="1" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            </hierarchicalColors>
+                                                        </imageReference>
+                                                    </buttonConfiguration>
                                                 </button>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1417">
-                                                    <rect key="frame" x="125" y="0.0" width="125" height="44"/>
-                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
-                                                    <inset key="titleEdgeInsets" minX="3" minY="0.0" maxX="-3" maxY="0.0"/>
-                                                    <inset key="imageEdgeInsets" minX="-3" minY="0.0" maxX="3" maxY="0.0"/>
-                                                    <state key="normal" title="TEAM" image="ChatTypeTeam">
-                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </state>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1417">
+                                                    <rect key="frame" x="151.66666666666666" y="0.0" width="110.33333333333334" height="44"/>
+                                                    <color key="tintColor" systemColor="labelColor"/>
+                                                    <state key="normal" title="Team" image="ChatTypeTeam"/>
+                                                    <buttonConfiguration key="configuration" style="plain" title="Team" imagePadding="4" buttonSize="small">
+                                                        <imageReference key="image" image="person.2.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical">
+                                                            <hierarchicalColors>
+                                                                <color red="0.0" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="0.0" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="0.0" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            </hierarchicalColors>
+                                                        </imageReference>
+                                                    </buttonConfiguration>
                                                 </button>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1428">
-                                                    <rect key="frame" x="250" y="0.0" width="125" height="44"/>
-                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="14"/>
-                                                    <inset key="titleEdgeInsets" minX="0.0" minY="0.0" maxX="20" maxY="0.0"/>
-                                                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="26" maxY="0.0"/>
-                                                    <state key="normal" title="PRIVATE" image="ChatTypePrivate">
-                                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    </state>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1428">
+                                                    <rect key="frame" x="262" y="0.0" width="113" height="44"/>
+                                                    <color key="tintColor" systemColor="labelColor"/>
+                                                    <state key="normal" title="PRIVATE" image="ChatTypePrivate"/>
+                                                    <buttonConfiguration key="configuration" style="plain" title="Private" imagePadding="4" buttonSize="small">
+                                                        <imageReference key="image" image="person.fill" catalog="system" symbolScale="medium" renderingMode="hierarchical">
+                                                            <hierarchicalColors>
+                                                                <color red="1" green="0.0" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="1" green="0.0" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                                <color red="1" green="0.0" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            </hierarchicalColors>
+                                                        </imageReference>
+                                                    </buttonConfiguration>
                                                 </button>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -93,31 +111,29 @@
                                             </constraints>
                                         </stackView>
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="1120">
-                                            <rect key="frame" x="0.0" y="44" width="375" height="57.666666666666657"/>
+                                            <rect key="frame" x="0.0" y="44" width="375" height="60"/>
                                             <subviews>
                                                 <view autoresizesSubviews="NO" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3295">
-                                                    <rect key="frame" x="0.0" y="7" width="51" height="44"/>
-                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <rect key="frame" x="0.0" y="8" width="56" height="44"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="51" id="3317"/>
+                                                        <constraint firstAttribute="width" constant="56" id="3317"/>
                                                         <constraint firstAttribute="height" constant="44" id="VyP-11-IcJ"/>
                                                     </constraints>
                                                 </view>
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" text="Lorem ipsum dolor sit er elit lamet," translatesAutoresizingMaskIntoConstraints="NO" id="1903" customClass="PlaceholderTextView">
-                                                    <rect key="frame" x="51" y="0.0" width="280" height="57.666666666666664"/>
+                                                    <rect key="frame" x="56" y="0.0" width="265" height="60"/>
                                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" relation="greaterThanOrEqual" id="1914"/>
                                                     </constraints>
-                                                    <color key="textColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="18"/>
+                                                    <color key="textColor" systemColor="labelColor"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textView>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3401">
-                                                    <rect key="frame" x="331" y="7" width="44" height="44"/>
-                                                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <rect key="frame" x="321" y="8" width="54" height="44"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="44" id="3402"/>
+                                                        <constraint firstAttribute="width" constant="54" id="3402"/>
                                                         <constraint firstAttribute="height" constant="44" id="Skq-15-taw"/>
                                                     </constraints>
                                                 </view>
@@ -127,33 +143,45 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </stackView>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
-                                    <rect key="frame" x="0.0" y="57.666666666666629" width="51" height="44"/>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
+                                    <rect key="frame" x="0.0" y="60" width="56" height="44"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" constant="51" id="1691"/>
+                                        <constraint firstAttribute="width" constant="56" id="1691"/>
                                         <constraint firstAttribute="height" constant="44" id="2165"/>
                                     </constraints>
-                                    <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="12"/>
                                     <inset key="imageEdgeInsets" minX="20" minY="16" maxX="16" maxY="13"/>
-                                    <state key="normal" image="ChatTypeCommon">
-                                        <color key="titleColor" red="0.78431372549019607" green="0.78431372549019607" blue="0.78431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </state>
+                                    <state key="normal" image="ChatTypeCommon"/>
+                                    <buttonConfiguration key="configuration" style="plain" imagePadding="16">
+                                        <imageReference key="image" image="person.3.fill" catalog="system" symbolScale="small"/>
+                                    </buttonConfiguration>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2313">
-                                    <rect key="frame" x="331" y="57.666666666666629" width="44" height="44"/>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2313">
+                                    <rect key="frame" x="321" y="60" width="54" height="44"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="44" id="2334"/>
-                                        <constraint firstAttribute="width" constant="44" id="2376"/>
+                                        <constraint firstAttribute="width" constant="54" id="2376"/>
                                     </constraints>
-                                    <state key="normal" image="Send">
-                                        <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                                    </state>
+                                    <color key="tintColor" systemColor="systemMintColor"/>
+                                    <state key="normal" image="Send"/>
+                                    <buttonConfiguration key="configuration" style="plain" image="arrow.up.circle.fill" catalog="system"/>
+                                </button>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="02t-5t-fLm">
+                                    <rect key="frame" x="321" y="60" width="54" height="44"/>
+                                    <constraints>
+                                        <constraint firstAttribute="height" constant="44" id="ILG-Ek-Xo3"/>
+                                        <constraint firstAttribute="width" constant="54" id="voq-qe-xFj"/>
+                                    </constraints>
+                                    <color key="tintColor" systemColor="systemMintColor"/>
+                                    <state key="normal" image="Send"/>
+                                    <buttonConfiguration key="configuration" style="plain" image="slash.circle" catalog="system"/>
                                 </button>
                             </subviews>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <constraints>
                                 <constraint firstAttribute="trailing" secondItem="fup-dp-pgP" secondAttribute="trailing" id="3tN-YY-ffo"/>
+                                <constraint firstItem="2313" firstAttribute="bottom" secondItem="02t-5t-fLm" secondAttribute="bottom" id="4J6-nI-4yB"/>
                                 <constraint firstAttribute="trailing" secondItem="JrR-ah-AEs" secondAttribute="trailing" id="94A-Zi-Ox5"/>
+                                <constraint firstItem="2313" firstAttribute="trailing" secondItem="02t-5t-fLm" secondAttribute="trailing" id="9Wr-IH-AnZ"/>
+                                <constraint firstItem="2313" firstAttribute="top" secondItem="02t-5t-fLm" secondAttribute="top" id="Bbd-Cy-XwR"/>
                                 <constraint firstAttribute="bottom" secondItem="1670" secondAttribute="bottom" id="I4C-qC-8Br"/>
                                 <constraint firstItem="882" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="Leh-MI-ibv"/>
                                 <constraint firstItem="882" firstAttribute="top" secondItem="3687" secondAttribute="top" id="Oot-hr-0xe"/>
@@ -165,12 +193,12 @@
                                 <constraint firstAttribute="bottom" secondItem="2313" secondAttribute="bottom" id="Ycn-yd-nIY"/>
                                 <constraint firstAttribute="bottom" secondItem="JrR-ah-AEs" secondAttribute="bottom" id="flF-Ly-vIS"/>
                                 <constraint firstAttribute="trailing" secondItem="2313" secondAttribute="trailing" id="gl7-BT-wsp"/>
+                                <constraint firstItem="2313" firstAttribute="leading" secondItem="02t-5t-fLm" secondAttribute="leading" id="noe-oR-ZNm"/>
                                 <constraint firstItem="fup-dp-pgP" firstAttribute="leading" secondItem="3687" secondAttribute="leading" id="uJ0-3i-fQE"/>
                                 <constraint firstItem="fup-dp-pgP" firstAttribute="top" secondItem="3687" secondAttribute="top" id="wP7-nM-Ido"/>
                             </constraints>
                         </view>
                     </subviews>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <constraints>
                         <constraint firstAttribute="trailing" secondItem="3687" secondAttribute="trailing" id="Xbx-3a-Iwi"/>
                         <constraint firstItem="3687" firstAttribute="leading" secondItem="0BW-om-Vsj" secondAttribute="leading" id="Zg1-nc-20S"/>
@@ -178,20 +206,29 @@
                         <constraint firstAttribute="bottom" secondItem="3687" secondAttribute="bottom" id="qCS-2M-hf0"/>
                     </constraints>
                 </view>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Fa1-th-FG9">
+                    <rect key="frame" x="0.0" y="432" width="375" height="242"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="242" id="CFb-la-hMt"/>
+                    </constraints>
+                </tableView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KtL-wy-5qa">
                     <rect key="frame" x="0.0" y="778" width="375" height="34"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
             </subviews>
             <viewLayoutGuide key="safeArea" id="NOh-Zt-4h4"/>
-            <color key="backgroundColor" red="0.13333333333333333" green="0.17647058823529413" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="tintColor" systemColor="systemMintColor"/>
             <constraints>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="top" secondItem="NOh-Zt-4h4" secondAttribute="bottom" id="1sS-Qk-Pc1"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="9rE-dh-OpY"/>
                 <constraint firstItem="175" firstAttribute="top" secondItem="1" secondAttribute="top" id="OBO-Qg-MoO"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="0BW-om-Vsj" secondAttribute="bottom" id="P0O-tp-Fs7"/>
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="top" secondItem="175" secondAttribute="bottom" id="Tql-je-bnA"/>
+                <constraint firstAttribute="trailing" secondItem="Fa1-th-FG9" secondAttribute="trailing" id="WNc-az-8ZS"/>
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="cYK-8w-CnP"/>
+                <constraint firstItem="Fa1-th-FG9" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="lcG-Oq-CQt"/>
+                <constraint firstItem="Fa1-th-FG9" firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="ldY-wp-dQ9"/>
                 <constraint firstAttribute="bottom" secondItem="KtL-wy-5qa" secondAttribute="bottom" id="uGI-Wh-lgf"/>
                 <constraint firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="uab-qN-vGf"/>
                 <constraint firstItem="175" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="wRR-VV-sYN"/>
@@ -207,5 +244,25 @@
         <image name="ChatTypePrivate" width="15.333333015441895" height="15"/>
         <image name="ChatTypeTeam" width="15.333333015441895" height="15"/>
         <image name="Send" width="20" height="15.666666984558105"/>
+        <image name="arrow.up.circle.fill" catalog="system" width="128" height="123"/>
+        <image name="person.2.fill" catalog="system" width="128" height="81"/>
+        <image name="person.3.fill" catalog="system" width="128" height="61"/>
+        <image name="person.fill" catalog="system" width="128" height="120"/>
+        <image name="slash.circle" catalog="system" width="128" height="123"/>
+        <systemColor name="labelColor">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemMintColor">
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemTealColor">
+            <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="tertiarySystemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>

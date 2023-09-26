@@ -6,6 +6,8 @@ using Android.OS;
 using Android.Runtime;
 using Android.Util;
 
+using AndroidX.Core.OS;
+
 using Java.Interop;
 
 using JKChat.Core;
@@ -20,8 +22,7 @@ namespace JKChat.Android.Controls {
 		private const string bundleSavedState = nameof(TabsBottomNavigationView) + nameof(bundleSavedState);
 
 		private TabsViewPager viewPager;
-		public TabsViewPager ViewPager
-		{
+		public TabsViewPager ViewPager {
 			get => viewPager;
 			set {
 				if (viewPager != null)
@@ -135,11 +136,11 @@ namespace JKChat.Android.Controls {
 
 		protected override void OnRestoreInstanceState(IParcelable state) {
 			var bundle = state as Bundle;
-			var parcelable = bundle != null ? (bundle.GetParcelable(bundleSavedState) as IParcelable) : state;
+			var parcelable = bundle != null ? (BundleCompat.GetParcelable(bundle, bundleSavedState, Class) as IParcelable) : state;
 			base.OnRestoreInstanceState(parcelable);
 
 			if (bundle != null) {
-				var pagesParcelable = bundle.GetParcelableArray(bundlePages);
+				var pagesParcelable = BundleCompat.GetParcelableArray(bundle, bundlePages, Class);
 
 				if (pagesParcelable == null)
 					return;

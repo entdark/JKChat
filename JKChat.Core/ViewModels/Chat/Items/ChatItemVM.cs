@@ -2,17 +2,9 @@
 
 using JKChat.Core.ViewModels.Base.Items;
 
-using MvvmCross.ViewModels;
-
 namespace JKChat.Core.ViewModels.Chat.Items {
-	public abstract class ChatItemVM : MvxNotifyPropertyChanged, ISelectableItemVM {
+	public abstract class ChatItemVM : SelectableItemVM {
 		public string Time { get; init; } = DateTime.Now.ToString("t");
-
-		private bool isSelected;
-		public bool IsSelected {
-			get => isSelected;
-			set => SetProperty(ref isSelected, value);
-		}
 
 		public Type ThisVMType => this.GetType();
 

@@ -14,5 +14,8 @@
         android:id="@+id/tabs_navigationview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0"/>
+        android:layout_weight="0"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
+        app:paddingBottomFitsWindowInsets="true"/>
 </LinearLayout>

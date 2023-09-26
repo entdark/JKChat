@@ -21,13 +21,12 @@ namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
 		private static readonly Color ShadowColor = new Color(38, 38, 38);
 
-		public ISpannable Convert(string value, ColourTextParameter parameter = null) {
-			return Convert(value, typeof(ISpannable), parameter, null) as ISpannable;
-		}
-
-		protected override ISpannable Convert(string value, Type targetType, object parameter, CultureInfo culture) {
+		public static ISpannable Convert(string value, object parameter = null) {
 			if (string.IsNullOrEmpty(value)) {
-				return new SpannableString(string.Empty);
+				if (value == null)
+					return null;
+				else
+					return new SpannableString(string.Empty);
 			}
 			bool parseUri = false, parseShadow = false;
 			if (parameter is bool b) {
@@ -68,6 +67,10 @@ namespace JKChat.Android.ValueConverters {
 			return spannable;
 		}
 
+		protected override ISpannable Convert(string value, Type targetType, object parameter, CultureInfo culture) {
+			return Convert(value, parameter);
+		}
+
 		protected override string ConvertBack(ISpannable value, Type targetType, object parameter, CultureInfo culture) {
 			if (value == null) {
 				return null;
@@ -88,27 +91,16 @@ namespace JKChat.Android.ValueConverters {
 		}
 
 		private static Color GetColor(int code) {
-			switch (code) {
-			case 0:
-			case 8:
-				return new Color(0, 0, 0);
-			case 1:
-			case 9:
-				return new Color(255, 0, 0);
-			case 2:
-				return new Color(0, 255, 0);
-			case 3:
-				return new Color(255, 255, 0);
-			case 4:
-				return new Color(0, 0, 255);
-			case 5:
-				return new Color(0, 255, 255);
-			case 6:
-				return new Color(255, 0, 255);
-			default:
-			case 7:
-				return new Color(255, 255, 255);
-			}
+			return code switch {
+				0 or 8 => new Color(0, 0, 0),
+				1 or 9 => new Color(255, 0, 0),
+				2 => new Color(0, 255, 0),
+				3 => new Color(255, 255, 0),
+				4 => new Color(0, 0, 255),
+				5 => new Color(0, 255, 255),
+				6 => new Color(255, 0, 255),
+				_ => new Color(255, 255, 255),
+			};
 		}
 
 		public class ForegroundColorCodeSpan : ForegroundColorSpan {

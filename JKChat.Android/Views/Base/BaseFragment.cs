@@ -7,8 +7,9 @@ using Android.Views.Animations;
 
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
-using AndroidX.Core.Content;
 using AndroidX.Core.View;
+
+using Google.Android.Material.Color;
 
 using JKChat.Android.Callbacks;
 using JKChat.Android.Controls.Toolbar;
@@ -17,6 +18,7 @@ using JKChat.Core.Navigation;
 using JKChat.Core.ViewModels.Base;
 
 using MvvmCross;
+using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.Platforms.Android.Views.Fragments;
@@ -91,8 +93,8 @@ namespace JKChat.Android.Views.Base {
 					Toolbar.NavigationClick += BackNavigationClick;
 				}
 				BackArrow = new BackDrawable() {
-					Color = new Color(ContextCompat.GetColor(Context, Resource.Color.toolbar_menu)),
-					RotatedColor = new Color(ContextCompat.GetColor(Context, Resource.Color.toolbar_menu)),
+					Color = new Color(MaterialColors.GetColor(Context, Resource.Attribute.colorOnSurface, Color.Transparent)),
+					RotatedColor = new Color(MaterialColors.GetColor(Context, Resource.Attribute.colorOnSurface, Color.Transparent)),
 					StrokeWidth = 2.0f
 				};
 			}
@@ -107,15 +109,14 @@ namespace JKChat.Android.Views.Base {
 
 			CreateOptionsMenu();
 
-			if (RegisterBackPressedCallback)
-			{
+			if (RegisterBackPressedCallback) {
 				onBackPressedCallback?.Remove();
 				onBackPressedCallback = new OnBackPressedCallback(OnBackPressedCallback);
 				Activity.OnBackPressedDispatcher.AddCallback(this, onBackPressedCallback);
 			}
 
 			using var set = this.CreateBindingSet();
-			set.Bind(this).For(v => v.Title).To(vm => vm.Title);
+			BindTitle(set);
 		}
 
 		public override void OnDestroyView() {
@@ -179,6 +180,10 @@ namespace JKChat.Android.Views.Base {
 
 		public virtual bool OnBackPressed() {
 			return false;
+		}
+
+		protected virtual void BindTitle(MvxFluentBindingDescriptionSet<IMvxFragmentView<TViewModel>, TViewModel> set) {
+			set.Bind(this).For(v => v.Title).To(vm => vm.Title);
 		}
 
 		protected virtual void OnBackPressedCallback() {
@@ -266,8 +271,8 @@ namespace JKChat.Android.Views.Base {
 		protected void ShowKeyboard(View view = null) {
 			Context.ShowKeyboard(view);
 		}
-		protected void HideKeyboard(View view = null) {
-			Context.HideKeyboard(view);
+		protected void HideKeyboard(View view = null, bool clearFocus = false) {
+			Context.HideKeyboard(view, clearFocus);
 		}
 
 		private void SetTitle() {
@@ -282,12 +287,6 @@ namespace JKChat.Android.Views.Base {
 			public NullAnimation() {
 				Duration = 0L;
 			}
-		}
-	}
-
-	public class BasePushFragment<TViewModel> : BaseFragment<TViewModel> where TViewModel : class, IBaseViewModel {
-		public BasePushFragment(int layoutId, int menuId = int.MinValue) : base(layoutId, menuId) {
-			RegisterBackPressedCallback = true;
 		}
 	}
 }

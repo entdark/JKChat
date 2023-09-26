@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="View">
+    <attr name="paddingLeftFitsWindowInsets" format="boolean"/>
+    <attr name="paddingRightFitsWindowInsets" format="boolean"/>
+    <attr name="paddingTopFitsWindowInsets" format="boolean"/>
+    <attr name="paddingBottomFitsWindowInsets" format="boolean"/>
+
+    <attr name="paddingLeftFitsWindowInsetsButExpanded" format="boolean"/>
+    <attr name="paddingRightFitsWindowInsetsButExpanded" format="boolean"/>
+    <attr name="paddingTopFitsWindowInsetsButExpanded" format="boolean"/>
+    <attr name="paddingBottomFitsWindowInsetsButExpanded" format="boolean"/>
+
+    <attr name="marginLeftFitsWindowInsets" format="boolean"/>
+    <attr name="marginRightFitsWindowInsets" format="boolean"/>
+    <attr name="marginTopFitsWindowInsets" format="boolean"/>
+    <attr name="marginBottomFitsWindowInsets" format="boolean"/>
+  </declare-styleable>
+</resources>

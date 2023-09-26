@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.google.android.material.materialswitch.MaterialSwitch
+        style="@style/OnSurfaceText.BodyLarge"
+        tools:text="Not entirely empty"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="24dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
+        app:paddingRightFitsWindowInsets="true"
+        app:MvxBind="Text Title; Checked IsChecked"/>
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

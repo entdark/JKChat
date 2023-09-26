@@ -6,6 +6,8 @@ using Android.App;
 using Android.OS;
 using Android.Runtime;
 
+using AndroidX.AppCompat.App;
+
 using JKChat.Android.Views.Main;
 using JKChat.Core;
 
@@ -24,7 +26,7 @@ namespace JKChat.Android {
 		Icon = "@mipmap/ic_launcher",
 		RoundIcon = "@mipmap/ic_launcher_round",
 		Label = "@string/app_name",
-		Theme = "@style/AppTheme",
+		Theme = "@style/AppThemeMaterial3",
 		ResizeableActivity = true
 	)]
 	public class Application : MvxAndroidApplication<Setup, App> {
@@ -38,6 +40,8 @@ namespace JKChat.Android {
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 			AppCenter.Start(Core.ApiKeys.AppCenter.Android, typeof(Crashes));
+
+			AppCompatDelegate.DefaultNightMode = AppCompatDelegate.ModeNightYes;
 
 			base.OnCreate();
 

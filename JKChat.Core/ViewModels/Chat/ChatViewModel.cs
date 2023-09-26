@@ -2,40 +2,48 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
+using JKChat.Core.Navigation.Parameters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
-using JKChat.Core.ViewModels.ServerList.Items;
-
-using MvvmCross;
-using MvvmCross.Commands;
-using MvvmCross.Plugin.Messenger;
-using MvvmCross.ViewModels;
 
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 
+using MvvmCross;
+using MvvmCross.Commands;
+using MvvmCross.ViewModels;
+
 namespace JKChat.Core.ViewModels.Chat {
-	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerListItemVM> {
+	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerInfoParameter> {
+		private static readonly string []commonCommands = new []{ "/rcon", "/callvote" };
+		private static readonly string []baseEnhancedCommands = new []{ "/whois", "/rules", "/mappool", "/ctfstats", "/toptimes", "/topaim", "/pugstats" };
+		private readonly HashSet<string> commands = commonCommands.ToHashSet();
+
 		private GameClient gameClient;
-		private MvxSubscriptionToken serverInfoMessageToken;
 		private bool restored = false;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand CopyCommand { get; init; }
 		public IMvxCommand SendMessageCommand { get; init; }
+		public IMvxCommand StartCommandCommand { get; init; }
 		public IMvxCommand ChatTypeCommand { get; init; }
 		public IMvxCommand CommonChatTypeCommand { get; init; }
 		public IMvxCommand TeamChatTypeCommand { get; init; }
 		public IMvxCommand PrivateChatTypeCommand { get; init; }
+		public IMvxCommand CommandItemClickCommand { get; init; }
+		public IMvxCommand ServerInfoCommand { get; init; }
+		public IMvxCommand FavouriteCommand { get; init; }
+		public IMvxCommand DisconnectCommand { get; init; }
+		public IMvxCommand ShareCommand { get; init; }
+		public IMvxCommand ServerReportCommand { get; init; }
 
 		protected override string ReportTitle => "Report message";
 		protected override string ReportMessage => "Do you want to report this message?";
@@ -45,22 +53,30 @@ namespace JKChat.Core.ViewModels.Chat {
 		private ConnectionStatus status;
 		public ConnectionStatus Status {
 			get => status;
-			set {
-				if (SetProperty(ref status, value)) {
-					SendMessageCommand.RaiseCanExecuteChanged();
-					IsLoading = value == ConnectionStatus.Connecting;
-				}
-			}
+			set => SetProperty(ref status, value, () => {
+				IsLoading = value == ConnectionStatus.Connecting;
+				SendMessageCommand.RaiseCanExecuteChanged();
+				StartCommandCommand.RaiseCanExecuteChanged();
+			});
 		}
 
 		private string message;
 		public string Message {
 			get => message;
-			set {
-				if (SetProperty(ref message, value)) {
-					SendMessageCommand.RaiseCanExecuteChanged();
+			set => SetProperty(ref message, value, () => {
+				SendMessageCommand.RaiseCanExecuteChanged();
+				StartCommandCommand.RaiseCanExecuteChanged();
+				int oldCount = CommandItems.Count;
+				if (message?.StartsWith('/') ?? false) {
+					var matchingCommands = commands.Where(c => c.Contains(message) && string.Compare(c, message, StringComparison.OrdinalIgnoreCase) != 0);
+					CommandItems.ReplaceWith(matchingCommands);
+				} else if (CommandItems.Count > 0) {
+					CommandItems.Clear();
 				}
-			}
+				if (CommandItems.Count != oldCount) {
+					RaisePropertyChanged(nameof(CommandItems) + "." + nameof(CommandItems.Count));
+				}
+			});
 		}
 
 		private ChatType chatType;
@@ -75,29 +91,81 @@ namespace JKChat.Core.ViewModels.Chat {
 			set => SetProperty(ref selectingChatType, value);
 		}
 
+		private MvxObservableCollection<string> commandItems;
+		public MvxObservableCollection<string> CommandItems {
+			get => commandItems;
+			set => SetProperty(ref commandItems, value);
+		}
+
+		private bool isFavourite;
+		public bool IsFavourite {
+			get => isFavourite;
+			set => SetProperty(ref isFavourite, value);
+		}
+
+		private bool commandSetAutomatically;
+		public bool CommandSetAutomatically {
+			get => commandSetAutomatically;
+			set => SetProperty(ref commandSetAutomatically, value);
+		}
+
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
 
 		public ChatViewModel() {
 			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
 			CopyCommand = new MvxAsyncCommand<ChatItemVM>(CopyExecute);
 			SendMessageCommand = new MvxAsyncCommand(SendMessageExecute, SendMessageCanExecute);
+			StartCommandCommand = new MvxCommand(StartCommandExecute, StartCommandCanExecute);
 			ChatTypeCommand = new MvxCommand(ChatTypeExecute);
 			CommonChatTypeCommand = new MvxCommand(CommonChatTypeExecute);
 			TeamChatTypeCommand = new MvxCommand(TeamChatTypeExecute);
 			PrivateChatTypeCommand = new MvxCommand(PrivateChatTypeExecute);
+			CommandItemClickCommand = new MvxCommand<string>(CommandItemClickExecute);
+			ServerInfoCommand = new MvxAsyncCommand(ServerInfoExecute);
+			FavouriteCommand = new MvxCommand(FavouriteExecute);
+			DisconnectCommand = new MvxAsyncCommand(DisconnectExecute);
+			ShareCommand = new MvxAsyncCommand(ShareExecute);
+			ServerReportCommand = new MvxAsyncCommand(ReportServerExecute);
 
 			ChatType = ChatType.Common;
 			SelectingChatType = false;
-			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			CommandItems = new();
 		}
 
-		private void OnServerInfoMessage(ServerInfoMessage message) {
+		protected override void OnServerInfoMessage(ServerInfoMessage message) {
+			base.OnServerInfoMessage(message);
 			if (gameClient?.ServerInfo.Address == message.ServerInfo.Address) {
+				AddCommands();
 				Status = message.Status;
 				Title = message.ServerInfo.HostName;
 /*				if (gameClient.ViewModel == null && Status == ConnectionStatus.Disconnected) {
 					Task.Run(ShowDisconnected);
 				}*/
+			}
+		}
+
+		protected override void OnFavouriteMessage(FavouriteMessage message) {
+			base.OnFavouriteMessage(message);
+			if (gameClient?.ServerInfo.Address == message.ServerInfo.Address) {
+				IsFavourite = message.IsFavourite;
+			}
+		}
+
+		private void AddCommands() {
+			if (ServerInfo == null)
+				return;
+			string gamename = ServerInfo.GameName ?? string.Empty;
+			//TODO: add mod handlers
+			if (gamename.Contains("Szlakiem Jedi RPE")
+				|| gamename.Contains("Open Jedi Project")
+				|| gamename.Contains("OJP Enhanced")
+				|| gamename.Contains("OJP Basic")
+				|| gamename.Contains("OJRP")) {
+			} else if (gamename.Contains("Movie Battles II")) {
+			} else if (gamename.Contains("base_enhanced")
+				|| gamename.Contains("base_entranced")) {
+				commands.UnionWith(baseEnhancedCommands);
+			} else {
 			}
 		}
 
@@ -112,39 +180,29 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 			var uriAttributes = new List<AttributeData<Uri>>();
 			text.CleanString(uriAttributes: uriAttributes);
-			Uri uri;
+			Uri uri = null;
 			if (uriAttributes.Count > 1) {
-				var dialogList = new DialogListViewModel();
-				for (int i = 0; i < uriAttributes.Count; i++) {
-					dialogList.Items.Add(new DialogItemVM() {
-						Id = i,
-						Name = uriAttributes[i].Value.ToString()
-					});
-				}
-				int id = -1;
+				var dialogList = new DialogListViewModel(uriAttributes.Select(ua => new DialogItemVM() {
+					Name = ua.Value.ToString()
+				}), DialogSelectionType.NoSelection);
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Select Link",
-					LeftButton = "Cancel",
-					RightButton = "OK",
-					RightClick = (input) => {
-						if (input is DialogItemVM dialogItem) {
-							id = dialogItem.Id;
+					CancelText = "Cancel",
+					OkAction = config => {
+						if (config?.List?.SelectedIndex is int id && id >= 0) {
+							uri = uriAttributes[id].Value;
+							Task.Run(openUri);
 						}
 					},
-					ListViewModel = dialogList,
-					Type = JKDialogType.Title | JKDialogType.List
+					List = dialogList
 				});
-				if (id == -1) {
-					return;
-				}
-				uri = uriAttributes[id].Value;
 			} else if (uriAttributes.Count <= 0) {
 				return;
 			} else {
 				uri = uriAttributes[0].Value;
+				await openUri();
 			}
-//			foreach (var uriAttribute in uriAttributes) {
-//				uri = uriAttribute.Value;
+			async Task openUri() {
 				try {
 					if (string.Compare(uri.Scheme, "http", StringComparison.OrdinalIgnoreCase) != 0
 					|| string.Compare(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase) != 0
@@ -156,31 +214,29 @@ namespace JKChat.Core.ViewModels.Chat {
 					Debug.WriteLine(exception);
 					await Launcher.TryOpenAsync(uri);
 				}
-//			}
+			}
 		}
 
-		protected override async Task<bool> ReportExecute(ChatItemVM item) {
-			bool report = await base.ReportExecute(item);
-//			if (report) {
-//				gameClient.RemoveItem(item);
-//			}
-			if (report && item is ChatMessageItemVM) {
-				bool block = false;
-				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Block user",
-					Message = "Would you like to block the user and hide all their messages?",
-					LeftButton = "No",
-					RightButton = "Yes",
-					RightClick = (_) => {
-						block = true;
-					},
-					Type = JKDialogType.Title | JKDialogType.Message
-				});
-				if (block) {
-					gameClient.HideAllMessages(item);
+		protected override async Task ReportExecute(ChatItemVM item, Action<bool> reported = null) {
+			await base.ReportExecute(item, report => {
+//				if (report) {
+//					gameClient.RemoveItem(item);
+//				}
+				if (report && item is ChatMessageItemVM messageItem) {
+					Task.Run(async () => await reportExecuteBlock(messageItem));
 				}
+			});
+			async Task reportExecuteBlock(ChatMessageItemVM item) {
+				await DialogService.ShowAsync(new JKDialogConfig() {
+					Title = "Block User",
+					Message = "Would you like to block the user and hide all their messages?",
+					CancelText = "No",
+					OkText = "Yes",
+					OkAction = _ => {
+						gameClient.HideAllMessages(item);
+					}
+				});
 			}
-			return report;
 		}
 
 		protected override void SelectExecute(ChatItemVM item) {
@@ -206,18 +262,17 @@ namespace JKChat.Core.ViewModels.Chat {
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Message is Copied",
 //				Message = "To copy message with color codes click \"With Colors\"",
-				LeftButton = "With Colors",
-				LeftClick = (_) => {
+				CancelText = "With Colors",
+				CancelAction = _ => {
 					Clipboard.SetTextAsync(text);
 				},
-				RightButton = "OK",
-				Type = JKDialogType.Title// | JKDialogType.Message
+				OkText = "OK"
 			});
 		}
 
 		private async Task SendMessageExecute() {
 			if (Message.StartsWith("/")) {
-				gameClient.ExecuteCommand(Message.Substring(1));
+				gameClient.ExecuteCommand(Message[1..], false);
 				Message = string.Empty;
 				Messenger.Publish(new SentMessageMessage(this));
 				return;
@@ -232,43 +287,42 @@ namespace JKChat.Core.ViewModels.Chat {
 				command = $"say_team \"{Message}\"\n";
 				break;
 			case ChatType.Private:
-				var dialogList = new DialogListViewModel();
-				if (gameClient.ClientInfo != null) {
-					dialogList.Items.AddRange(gameClient.ClientInfo.Where(ci => ci.InfoValid).Select(SetupItem));
-				}
-				int id = -1;
+				var dialogList = new DialogListViewModel(gameClient.ClientInfo?.Where(ci => ci.InfoValid).Select(ci => new DialogItemVM() {
+					Id = ci.ClientNum,
+					Name = ci.Name
+				}), DialogSelectionType.NoSelection);
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Private Message",
-					LeftButton = "Cancel",
-					RightButton = "OK",
-					RightClick = (input) => {
-						if (input is DialogItemVM dialogItem) {
-							id = dialogItem.Id;
+					CancelText = "Cancel",
+					OkAction = config => {
+						if (config?.List?.SelectedIndex is int id && id >= 0) {
+							command = $"tell {id} \"{Message}\"\n";
+							executeCommand();
 						}
 					},
-					ListViewModel = dialogList,
-					Type = JKDialogType.Title | JKDialogType.List
+					List = dialogList
 				});
-				if (id == -1) {
-					return;
-				}
-				command = $"tell {id} \"{Message}\"\n";
-				break;
+				return;
 			}
-			gameClient.ExecuteCommand(command);
-			Message = string.Empty;
-			Messenger.Publish(new SentMessageMessage(this));
+			executeCommand();
+			void executeCommand() {
+				gameClient.ExecuteCommand(command);
+				Message = string.Empty;
+				Messenger.Publish(new SentMessageMessage(this));
+			}
 		}
 
 		private bool SendMessageCanExecute() {
 			return !string.IsNullOrEmpty(Message) && Status == ConnectionStatus.Connected;
 		}
 
-		private DialogItemVM SetupItem(JKClient.ClientInfo clientInfo) {
-			return new DialogItemVM() {
-				Id = clientInfo.ClientNum,
-				Name = clientInfo.Name
-			};
+		private void StartCommandExecute() {
+			CommandSetAutomatically = true;
+			Message = "/";
+		}
+
+		private bool StartCommandCanExecute() {
+			return string.IsNullOrEmpty(Message) && Status == ConnectionStatus.Connected;
 		}
 
 		private void ChatTypeExecute() {
@@ -290,25 +344,45 @@ namespace JKChat.Core.ViewModels.Chat {
 			SelectingChatType = false;
 		}
 
-		public async Task<bool> OfferDisconnect() {
+		private void CommandItemClickExecute(string command) {
+			CommandSetAutomatically = true;
+			Message = command;
+		}
+
+		private async Task ServerInfoExecute() {
+			await NavigationService.Navigate<ServerInfoViewModel, ServerInfoParameter>(new(ServerInfo) { IsFavourite = IsFavourite, Status = Status, LoadInfo = false });
+		}
+
+		private async Task DisconnectExecute() {
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Disconnect",
 				Message = "Disconnect from this server?",
-				LeftButton = "No",
-				RightButton = "Yes",
-				RightClick = (input) => {
+				CancelText = "No",
+				OkText = "Yes",
+				OkAction = _ => {
 					gameClient.Disconnect();
-				},
-				Type = JKDialogType.Title | JKDialogType.Message,
-				ImmediateResult = false
-			}, () => {
-				NavigationService.Close(this);
+					NavigationService.Close(this);
+				}
 			});
-			return true;
 		}
 
-		public override void Prepare(ServerListItemVM parameter) {
+		private void FavouriteExecute() {
+			Messenger.Publish(new FavouriteMessage(this, ServerInfo, !IsFavourite));
+		}
+
+		private async Task ShareExecute() {
+			if (ServerInfo == null)
+				return;
+			await Share.RequestAsync($"{ColourTextHelper.CleanString(ServerInfo.HostName)}\n/connect {ServerInfo.Address}", $"Connect to {ServerInfo.Version.ToDisplayString()} server");
+		}
+
+		private async Task ReportServerExecute() {
+			//TODO: copy paste from ServerListViewModel
+		}
+
+		public override void Prepare(ServerInfoParameter parameter) {
 			Prepare(parameter.ServerInfo);
+			IsFavourite = parameter.IsFavourite;
 		}
 
 		protected override Task BackgroundInitialize() {
@@ -317,17 +391,10 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		public override void ViewCreated() {
 			base.ViewCreated();
-			if (serverInfoMessageToken == null) {
-				serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
-			}
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
-				if (serverInfoMessageToken != null) {
-					Messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
-					serverInfoMessageToken = null;
-				}
 				gameClient.MakeAllPending();
 			}
 			base.ViewDestroy(viewFinishing);
@@ -353,30 +420,6 @@ namespace JKChat.Core.ViewModels.Chat {
 			base.ViewDisappearing();
 		}
 
-		protected override void SaveStateToBundle(IMvxBundle bundle) {
-			base.SaveStateToBundle(bundle);
-			//TODO or NOTTODO: serialize into JSON
-			bundle.Data["Address"] = gameClient.ServerInfo.Address.ToString();
-			bundle.Data["Protocol"] = gameClient.ServerInfo.Protocol.ToString();
-			bundle.Data["NeedPassword"] = gameClient.ServerInfo.NeedPassword.ToString();
-			bundle.Data["HostName"] = gameClient.ServerInfo.HostName;
-		}
-
-		protected override void ReloadFromBundle(IMvxBundle state) {
-			base.ReloadFromBundle(state);
-			var serverInfo = new JKClient.ServerInfo();
-			if (state.Data.TryGetValue("Address", out string address) && !string.IsNullOrEmpty(address))
-				serverInfo.Address = JKClient.NetAddress.FromString(address);
-			if (state.Data.TryGetValue("Protocol", out string protocolStr) && Enum.TryParse(protocolStr, out JKClient.ProtocolVersion protocol))
-				serverInfo.Protocol = protocol;
-			if (state.Data.TryGetValue("NeedPassword", out string needPasswordStr) && bool.TryParse(needPasswordStr, out bool needPassword))
-				serverInfo.NeedPassword = needPassword;
-			if (state.Data.TryGetValue("HostName", out string hostName) && !string.IsNullOrEmpty(hostName))
-				serverInfo.HostName = hostName;
-			restored = true;
-			Prepare(serverInfo, true);
-		}
-
 		private void Prepare(JKClient.ServerInfo serverInfo, bool setViewModel = false) {
 			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(serverInfo);
 			if (setViewModel) {
@@ -385,11 +428,13 @@ namespace JKChat.Core.ViewModels.Chat {
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
+			AddCommands();
 		}
 
 		private async Task Connect() {
 			bool ignoreDialog = restored;
 			restored = false;
+			await Mvx.IoCProvider.Resolve<ICacheService>().SaveRecentServer(ServerInfo);
 			await gameClient.Connect(ignoreDialog);
 		}
 	}

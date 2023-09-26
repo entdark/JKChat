@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 using CoreGraphics;
 
@@ -27,7 +24,6 @@ namespace JKChat.iOS.Views.Base {
 		public virtual CGRect BeginKeyboardFrame { get; protected set; }
 
 		public bool HandleKeyboard { get; set; } = false;
-		public bool SetUpBackButton { get; set; } = true;
 
 		public override string Title {
 			get => base.Title;
@@ -35,8 +31,6 @@ namespace JKChat.iOS.Views.Base {
 		}
 
 		protected CGRect NavigationBarFrame => NavigationController?.NavigationBar?.Frame ?? new CGRect(0.0f, 0.0f, View.Frame.Width, 44.0f);
-
-		protected virtual Task<bool> BackButtonClick => Task.FromResult(false);
 
 		protected BaseViewController() {}
 		protected BaseViewController(NativeHandle handle) : base(handle) { }
@@ -52,7 +46,7 @@ namespace JKChat.iOS.Views.Base {
 //			this.View.BackgroundColor = Theme.Color.Background;
 
 			var loadingView = new UIView() {
-				BackgroundColor = Theme.Color.LoadingBackground
+//				BackgroundColor = Theme.Color.LoadingBackground
 			};
 			View.AddSubview(loadingView);
 			loadingView.LeadingAnchor.ConstraintEqualTo(this.View.LeadingAnchor, 0.0f).Active = true;
@@ -81,28 +75,6 @@ namespace JKChat.iOS.Views.Base {
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
 			NavigationController.NavigationBarHidden = false;
-
-			if (SetUpBackButton || NavigationController.ViewControllers.Length > 1) {
-				var backImage = UIImage.FromBundle("Back");
-				var barButtonItem = new UIBarButtonItem(backImage, UIBarButtonItemStyle.Plain, async (sender, ev) => {
-					bool handled = await BackButtonClick;
-					if (!handled && !NavigationController.IsMovingToParentViewController) {
-						NavigationController.PopViewController(true);
-					}
-				}) {
-					ImageInsets = new UIEdgeInsets(0.0f, 3.0f, 0.0f, 0.0f)
-				};
-
-				NavigationItem.LeftBarButtonItem = barButtonItem;
-				if (NavigationController != null) {
-					NavigationController.InteractivePopGestureRecognizer.Delegate = new UIGestureRecognizerDelegate();
-					Debug.WriteLine(NavigationController.ParentViewController);
-					//foreach (var navigationController in (NavigationController.ParentViewController as UISplitViewController).ViewControllers.OfType<UINavigationController>())
-					if (NavigationController.ParentViewController is UINavigationController navigationController) {
-						navigationController.InteractivePopGestureRecognizer.Delegate = new UIGestureRecognizerDelegate();
-					}
-				}
-			}
 			SubscribeForKeyboardNotifications();
 		}
 

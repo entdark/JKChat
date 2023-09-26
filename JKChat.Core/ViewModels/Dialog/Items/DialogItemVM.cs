@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MvvmCross.ViewModels;
+﻿using JKChat.Core.ViewModels.Base.Items;
 
 namespace JKChat.Core.ViewModels.Dialog.Items {
-	public class DialogItemVM : MvxViewModel {
-		public string Name { get; set; }
-
-		public int Id { get; set; }
-
-		private bool isSelected;
-		public bool IsSelected {
-			get => isSelected;
-			set => SetProperty(ref isSelected, value);
-		}
+	public class DialogItemVM : SelectableItemVM {
+		public string Name { get; init; }
+		public object Id { get; init; }
 	}
 }

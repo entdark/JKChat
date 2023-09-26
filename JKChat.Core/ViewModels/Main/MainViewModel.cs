@@ -2,6 +2,7 @@
 
 using JKChat.Core.ViewModels.AdminPanel;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Favourites;
 using JKChat.Core.ViewModels.ServerList;
 using JKChat.Core.ViewModels.Settings;
 
@@ -17,6 +18,7 @@ namespace JKChat.Core.ViewModels.Main {
 			initialNavigationDone = true;
 			await Task.WhenAll(
 				NavigationService.Navigate<ServerListViewModel>(),
+				NavigationService.Navigate<FavouritesViewModel>(),
 //				NavigationService.Navigate<AdminPanelViewModel>(),
 				NavigationService.Navigate<SettingsViewModel>()
 			);

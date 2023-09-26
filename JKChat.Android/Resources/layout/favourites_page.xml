@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground">
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
+        app:paddingTopFitsWindowInsets="true">
+        <include layout="@layout/toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingRightFitsWindowInsetsButExpanded="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <MvvmCross.DroidX.MvxSwipeRefreshLayout
+            android:id="@+id/mvxswiperefreshlayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:MvxBind="Refreshing IsRefreshing; RefreshCommand RefreshCommand">
+            <mvvmcross.droidx.recyclerview.MvxRecyclerView
+                android:id="@+id/mvxrecyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingVertical="8dp"
+                android:clipToPadding="false"
+                app:MvxItemTemplate="@layout/server_list_item"
+                app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand; ItemLongClick SelectCommand"/>
+        </MvvmCross.DroidX.MvxSwipeRefreshLayout>
+        <include layout="@layout/loading"/>
+    </FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

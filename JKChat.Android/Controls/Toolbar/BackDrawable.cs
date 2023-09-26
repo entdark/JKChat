@@ -44,7 +44,6 @@ namespace JKChat.Android.Controls.Toolbar {
 			set => paint.StrokeWidth = value.DpToPxF();
 		}
 
-
 		public float AnimationTime { get; set; } = DefaultAnimationTime;
 
 		public bool Rotated { get; set; } = true;

@@ -22,9 +22,8 @@
 	</style>
 
 	<style name="ToolbarTitle">
-		<item name="android:textColor">@color/toolbar_title</item>
-		<item name="android:textSize">14sp</item>
-		<item name="android:fontFamily">@font/anewhope_regular</item>
+		<item name="titleTextAppearance">?attr/textAppearanceTitleLarge</item>
+		<item name="titleTextColor">?attr/colorOnSurface</item>
 	</style>
 	<style name="ToolbarSubtitle">
 		<item name="android:textColor">@color/toolbar_subtitle</item>
@@ -36,6 +35,19 @@
 		<item name="android:layout_height">48dp</item>
 		<item name="android:scaleType">center</item>
 		<item name="android:background">?android:attr/actionBarItemBackground</item>
+		<item name="android:tint">?attr/colorOnSurfaceVariant</item>
+	</style>
+	<style name="ToolbarMenuOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+		<item name="android:tint">?attr/colorOnSurfaceVariant</item>
+	</style>
+	<style name="ToolbarMenuListItem" parent="@style/Widget.Material3.PopupMenu.Overflow">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+	<style name="Widget.Material3.Button.IconButton.Fixed" parent="@style/Widget.Material3.Button.IconButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.IconButton.Fixed</item>
+    </style>
+	<style name="ThemeOverlay.Material3.Button.IconButton.Fixed" parent="ThemeOverlay.Material3.Button.TextButton">
+		<item name="colorOnContainer">?attr/colorOnSurfaceVariant</item>
 	</style>
 
 	<style name="BottomNavigationView" parent="Widget.Design.BottomNavigationView">
@@ -57,6 +69,41 @@
 
 	<style name="FloatingActionButton" parent="@style/Widget.Design.FloatingActionButton">
 		<item name="backgroundTint">@color/primary</item>
+	</style>
+	
+	<style name="OnSurfaceText">
+		<item name="android:textColor">?attr/colorOnSurface</item>
+	</style>
+	<style name="OnSurfaceText.HeadlineSmall">
+		<item name="android:textAppearance">?attr/textAppearanceHeadlineSmall</item>
+	</style>
+	<style name="OnSurfaceText.TitleLarge">
+		<item name="android:textAppearance">?attr/textAppearanceTitleLarge</item>
+	</style>
+	<style name="OnSurfaceText.TitleMedium">
+		<item name="android:textAppearance">?attr/textAppearanceTitleMedium</item>
+	</style>
+	<style name="OnSurfaceText.BodyLarge">
+		<item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+	</style>
+	<style name="OnSurfaceText.BodyMedium">
+		<item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
+	</style>
+	<style name="OnSurfaceText.LabelLarge">
+		<item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+	</style>
+	<style name="OnSurfaceText.LabelMedium">
+		<item name="android:textAppearance">?attr/textAppearanceLabelMedium</item>
+	</style>
+	<style name="OnSurfaceText.LabelSmall">
+		<item name="android:textAppearance">?attr/textAppearanceLabelSmall</item>
+	</style>
+
+	<style name="OnSurfaceVariantText">
+		<item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+	</style>
+	<style name="OnSurfaceVariantText.BodyMedium">
+		<item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
 	</style>
 
 	<style name="RegularText">

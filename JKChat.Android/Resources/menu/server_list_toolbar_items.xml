@@ -11,4 +11,9 @@
 		android:icon="@drawable/ic_search"
 		app:showAsAction="ifRoom"
 		app:actionLayout="@layout/search_menu_item"/>
+	<item
+		android:id="@+id/filter_item"
+		android:icon="@drawable/ic_tune"
+		app:showAsAction="ifRoom"
+		app:actionLayout="@layout/filter_menu_item"/>
 </menu>

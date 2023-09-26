@@ -1,100 +1,98 @@
-﻿// WARNING
+// WARNING
 //
-// This file has been generated automatically by Visual Studio from the outlets and
-// actions declared in your storyboard file.
-// Manual changes to this file will not be maintained.
+// This file has been generated automatically by Visual Studio to store outlets and
+// actions made in the UI designer. If it is removed, they will be lost.
+// Manual changes to this file may not be handled correctly.
 //
 using Foundation;
-using System;
 using System.CodeDom.Compiler;
 
 namespace JKChat.iOS.Views.ServerList.Cells
 {
-    [Register ("ServerListViewCell")]
-    partial class ServerListViewCell
-    {
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIView ContainerView { get; set; }
+	[Register ("ServerListViewCell")]
+	partial class ServerListViewCell
+	{
+		[Outlet]
+		UIKit.UIButton ConnectButton { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel GameTypeLabel { get; set; }
+		[Outlet]
+		UIKit.UIButton FavouriteButton { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel MapNameLabel { get; set; }
+		[Outlet]
+		UIKit.UILabel GameLabel { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIImageView PasswordImageView { get; set; }
+		[Outlet]
+		UIKit.UILabel MapNameLabel { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel PingLabel { get; set; }
+		[Outlet]
+		UIKit.UILabel PlayersLabel { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel PlayersLabel { get; set; }
+		[Outlet]
+		UIKit.UIImageView PreviewImageView { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel ServerNameLabel { get; set; }
+		[Outlet]
+		UIKit.UIView PreviewView { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UILabel StatusLabel { get; set; }
+		[Outlet]
+		UIKit.UILabel ServerNameLabel { get; set; }
 
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        UIKit.UIView StatusView { get; set; }
+		[Outlet]
+		UIKit.UIImageView StatusImageView { get; set; }
 
-        void ReleaseDesignerOutlets ()
-        {
-            if (ContainerView != null) {
-                ContainerView.Dispose ();
-                ContainerView = null;
-            }
+		[Outlet]
+		UIKit.UILabel StatusLabel { get; set; }
+		
+		void ReleaseDesignerOutlets ()
+		{
+			if (ConnectButton != null) {
+				ConnectButton.Dispose ();
+				ConnectButton = null;
+			}
 
-            if (GameTypeLabel != null) {
-                GameTypeLabel.Dispose ();
-                GameTypeLabel = null;
-            }
+			if (FavouriteButton != null) {
+				FavouriteButton.Dispose ();
+				FavouriteButton = null;
+			}
 
-            if (MapNameLabel != null) {
-                MapNameLabel.Dispose ();
-                MapNameLabel = null;
-            }
+			if (GameLabel != null) {
+				GameLabel.Dispose ();
+				GameLabel = null;
+			}
 
-            if (PasswordImageView != null) {
-                PasswordImageView.Dispose ();
-                PasswordImageView = null;
-            }
+			if (MapNameLabel != null) {
+				MapNameLabel.Dispose ();
+				MapNameLabel = null;
+			}
 
-            if (PingLabel != null) {
-                PingLabel.Dispose ();
-                PingLabel = null;
-            }
+			if (PlayersLabel != null) {
+				PlayersLabel.Dispose ();
+				PlayersLabel = null;
+			}
 
-            if (PlayersLabel != null) {
-                PlayersLabel.Dispose ();
-                PlayersLabel = null;
-            }
+			if (ServerNameLabel != null) {
+				ServerNameLabel.Dispose ();
+				ServerNameLabel = null;
+			}
 
-            if (ServerNameLabel != null) {
-                ServerNameLabel.Dispose ();
-                ServerNameLabel = null;
-            }
+			if (StatusImageView != null) {
+				StatusImageView.Dispose ();
+				StatusImageView = null;
+			}
 
-            if (StatusLabel != null) {
-                StatusLabel.Dispose ();
-                StatusLabel = null;
-            }
+			if (StatusLabel != null) {
+				StatusLabel.Dispose ();
+				StatusLabel = null;
+			}
 
-            if (StatusView != null) {
-                StatusView.Dispose ();
-                StatusView = null;
-            }
-        }
-    }
+			if (PreviewImageView != null) {
+				PreviewImageView.Dispose ();
+				PreviewImageView = null;
+			}
+
+			if (PreviewView != null) {
+				PreviewView.Dispose ();
+				PreviewView = null;
+			}
+		}
+	}
 }

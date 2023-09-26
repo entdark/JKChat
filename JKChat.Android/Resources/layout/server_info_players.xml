@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_weight="0"
+        android:paddingLeft="16dp"
+        android:paddingRight="24dp"
+        android:gravity="center_vertical"
+        android:background="?android:attr/colorBackground">
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/OnSurfaceText.LabelMedium"
+            android:text="Player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:lines="1"
+            android:ellipsize="end"
+            android:gravity="start"/>
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/OnSurfaceText.LabelMedium"
+            android:text="Score/Death"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:lines="1"
+            android:ellipsize="none"
+            android:gravity="end"/>
+    </LinearLayout>
+    <MvvmCross.DroidX.RecyclerView.MvxRecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        app:paddingBottomFitsWindowInsets="true"
+        app:MvxItemTemplate="@layout/server_info_item"
+        app:MvxBind="ItemsSource Items"/>
+</LinearLayout>
