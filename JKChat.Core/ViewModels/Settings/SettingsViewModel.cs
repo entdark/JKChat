@@ -137,7 +137,4 @@ namespace JKChat.Core.ViewModels.Settings {
 			base.ViewDestroy(viewFinishing);
 		}
 	}
-	public class SettingsViewModel2 : SettingsViewModel {
-		public SettingsViewModel2(IJKClientService jkclientService) : base(jkclientService) {}
-	}
 }

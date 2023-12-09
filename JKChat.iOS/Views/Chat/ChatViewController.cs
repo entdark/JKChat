@@ -31,7 +31,6 @@ namespace JKChat.iOS.Views.Chat {
 		private UILabel statusLabel, titleLabel;
 		private UIStackView titleStackView;
 		private readonly InputAccessoryView inputAccessoryView;
-		private bool appeared = false;
 		private readonly Stopwatch itemTappedStopwatch = new Stopwatch();
 		private readonly Timer itemTappedTimer = new Timer(500.0) {
 			AutoReset = false
@@ -55,7 +54,6 @@ namespace JKChat.iOS.Views.Chat {
 					AnimateButton(CommandsButton, string.IsNullOrEmpty(value));
 				}
 				message = value;
-//				ResizeInputAccessoryView();
 			}
 		}
 
@@ -64,7 +62,6 @@ namespace JKChat.iOS.Views.Chat {
 			get => selectingChatType;
 			set {
 				selectingChatType = value;
-//				ResizeInputAccessoryView();
 			}
 		}
 
@@ -107,8 +104,8 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		public override bool CanBecomeFirstResponder => !DeviceInfo.IsRunningOnMacOS;//appeared;
-		public override UIView InputAccessoryView => inputAccessoryView;//MessageView;
+		public override bool CanBecomeFirstResponder => !DeviceInfo.IsRunningOnMacOS;
+		public override UIView InputAccessoryView => inputAccessoryView;
 
 		public ChatViewController() : base("ChatViewController", null) {
 			HandleKeyboard = true;
@@ -246,10 +243,6 @@ namespace JKChat.iOS.Views.Chat {
 			return true;
 		}
 
-		private void MessageTextViewChanged(object sender, EventArgs ev) {
-			ResizeInputAccessoryView();
-		}
-
 		private void UpdateMoreButtonItem() {
 			if (moreButtonItem == null)
 				return;
@@ -313,7 +306,6 @@ namespace JKChat.iOS.Views.Chat {
 
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
-			ResizeInputAccessoryView();
 			RespaceTitleView();
 
 			var appearance = new UINavigationBarAppearance();
@@ -399,19 +391,9 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		private void ResizeInputAccessoryView() {
-			ResizeInputAccessoryView(DeviceInfo.ScreenBounds.Size);
-		}
-
-		private void ResizeInputAccessoryView(CGSize newSize) {
-			float height = 44.0f;
-//			inputAccessoryView.SetSize(new CGSize(newSize.Width, height));
-		}
-
 		private void RespaceTitleView() {
 			NavigationItem.TitleView = null;
 			NavigationItem.TitleView = titleStackView;
-//			titleStackView.Spacing = DeviceInfo.IsPortrait ? 2.0f : 0.0f;
 		}
 
 		private void RecountAllCellHeights(CGSize newSize) {
@@ -426,7 +408,6 @@ namespace JKChat.iOS.Views.Chat {
 			completionContext => {
 				RecountAllCellHeights(toSize);
 			});
-			ResizeInputAccessoryView(toSize);
 			RespaceTitleView();
 		}
 

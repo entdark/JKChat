@@ -1,34 +1,7 @@
 <resources>
-	<style name="AppTheme" parent="AppTheme.Base">
-	</style>
-	<style name="AppTheme.Base" parent="Theme.AppCompat.NoActionBar">
-		<item name="colorPrimary">@color/primary</item>
-		<item name="colorPrimaryDark">@color/primary_dark</item>
-		<item name="colorAccent">@color/accent</item>
-		<item name="bottomNavigationStyle">@style/BottomNavigationView</item>
-		<item name="floatingActionButtonStyle">@style/FloatingActionButton</item>
-	</style>
-
-	<style name="Dialog" parent="@android:style/Theme.Dialog">
-		<item name="android:windowNoTitle">true</item>
-		<item name="android:windowBackground">@color/dialog_window_background</item>
-		<item name="android:windowAnimationStyle">@style/DialogAnimation</item>
-		<item name="android:colorControlActivated">@color/accent</item>
-		<item name="android:textColorHighlight">@color/accent_translucent</item>
-	</style>
-	<style name="DialogAnimation">
-		<item name="android:windowEnterAnimation">@anim/dialog_fade_in</item>
-		<item name="android:windowExitAnimation">@anim/dialog_fade_out</item>
-	</style>
-
 	<style name="ToolbarTitle">
 		<item name="titleTextAppearance">?attr/textAppearanceTitleLarge</item>
 		<item name="titleTextColor">?attr/colorOnSurface</item>
-	</style>
-	<style name="ToolbarSubtitle">
-		<item name="android:textColor">@color/toolbar_subtitle</item>
-		<item name="android:textSize">12sp</item>
-		<item name="android:fontFamily">@font/ergoe_bold</item>
 	</style>
 	<style name="ToolbarMenu">
 		<item name="android:layout_width">48dp</item>
@@ -48,27 +21,6 @@
     </style>
 	<style name="ThemeOverlay.Material3.Button.IconButton.Fixed" parent="ThemeOverlay.Material3.Button.TextButton">
 		<item name="colorOnContainer">?attr/colorOnSurfaceVariant</item>
-	</style>
-
-	<style name="BottomNavigationView" parent="Widget.Design.BottomNavigationView">
-		<item name="android:background">@color/navbar</item>
-		<item name="itemIconTint">@drawable/navbar_menu_states</item>
-		<item name="itemTextAppearanceInactive">@style/BottomNavigationViewText.Inactive</item>
-		<item name="itemTextAppearanceActive">@style/BottomNavigationViewText.Active</item>
-	</style>
-	<style name="BottomNavigationViewText">
-		<item name="android:textSize">12sp</item>
-		<item name="android:fontFamily">@font/ergoe_bold</item>
-	</style>
-	<style name="BottomNavigationViewText.Inactive">
-		<item name="android:textColor">@color/navbar_menu</item>
-	</style>
-	<style name="BottomNavigationViewText.Active">
-		<item name="android:textColor">@color/navbar_menu_selected</item>
-	</style>
-
-	<style name="FloatingActionButton" parent="@style/Widget.Design.FloatingActionButton">
-		<item name="backgroundTint">@color/primary</item>
 	</style>
 	
 	<style name="OnSurfaceText">
@@ -105,116 +57,4 @@
 	<style name="OnSurfaceVariantText.BodyMedium">
 		<item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
 	</style>
-
-	<style name="RegularText">
-		<item name="android:textColor">@color/regular_text</item>
-	</style>
-	<style name="RegularText.15">
-		<item name="android:textSize">15sp</item>
-	</style>
-	<style name="RegularText.15.Regular">
-		<item name="android:fontFamily">@font/ergoe_regular</item>
-	</style>
-	<style name="RegularText.15.Medium">
-		<item name="android:fontFamily">@font/ergoe_medium</item>
-	</style>
-	<style name="RegularText.15.Bold">
-		<item name="android:fontFamily">@font/ergoe_bold</item>
-	</style>
-	<style name="RegularText.18">
-		<item name="android:textSize">18sp</item>
-	</style>
-	<style name="RegularText.18.Bold">
-		<item name="android:fontFamily">@font/ergoe_bold</item>
-	</style>
-
-	<style name="ChatText">
-		<item name="android:textColor">@color/chat_text</item>
-		<item name="android:textSize">13sp</item>
-		<item name="android:fontFamily">@font/ocrastd_regular</item>
-	</style>
-
-	<style name="ChatInfoText" parent="ChatText">
-		<item name="android:textSize">12sp</item>
-	</style>
-
-	<style name="ChatTimeText">
-		<item name="android:textColor">@color/chat_time_text</item>
-		<item name="android:textSize">10sp</item>
-		<item name="android:fontFamily">@font/ocrastd_regular</item>
-	</style>
-
-	<style name="MessageText">
-		<item name="android:textColor">@color/message_text</item>
-		<item name="android:textColorHint">@color/message_placeholder_text</item>
-		<item name="android:background">@null</item>
-		<item name="android:inputType">textMultiLine</item>
-	</style>
-	<style name="MessageText.15">
-		<item name="android:textSize">15sp</item>
-	</style>
-	<style name="MessageText.15.Regular">
-		<item name="android:fontFamily">@font/arial_regular</item>
-	</style>
-
-	<style name="ChatTypeText">
-		<item name="android:textColor">@color/message_text</item>
-	</style>
-	<style name="ChatTypeText.12">
-		<item name="android:textSize">12sp</item>
-	</style>
-	<style name="ChatTypeText.12.Regular">
-		<item name="android:fontFamily">@font/arial_regular</item>
-	</style>
-
-	<style name="DialogTitle">
-		<item name="android:textColor">@color/dialog_title</item>
-		<item name="android:textSize">14sp</item>
-		<item name="android:fontFamily">@font/anewhope_regular</item>
-	</style>
-	<style name="DialogButton">
-		<item name="android:textColor">@color/dialog_button</item>
-		<item name="android:textSize">12sp</item>
-		<item name="android:fontFamily">@font/anewhope_regular</item>
-		<item name="android:layout_width">wrap_content</item>
-		<item name="android:layout_height">48dp</item>
-		<item name="android:minWidth">80dp</item>
-		<item name="android:paddingLeft">6dp</item>
-		<item name="android:paddingRight">6dp</item>
-		<item name="android:background">@null</item>
-	</style>
-	<style name="DialogInput">
-		<item name="android:textColor">@color/dialog_input</item>
-		<item name="android:textSize">15sp</item>
-		<item name="android:fontFamily">@font/ergoe_medium</item>
-		<item name="android:inputType">text</item>
-		<item name="android:background">@null</item>
-	</style>
-	<style name="DialogText">
-		<item name="android:textColor">@color/dialog_text</item>
-		<item name="android:textSize">15sp</item>
-		<item name="android:fontFamily">@font/ergoe_medium</item>
-	</style>
-
-	<style name="ScrollView">
-		<item name="android:scrollbars">vertical</item>
-		<item name="android:scrollbarSize">4dp</item>
-		<item name="android:scrollbarStyle">outsideOverlay</item>
-		<item name="android:scrollbarThumbVertical">@drawable/scrollbar_thumb</item>
-	</style>
-
-	<style name="RecyclerView" parent="ScrollView">
-	</style>
-
-	<style name="SettingsText">
-		<item name="android:textColor">@color/settings_text</item>
-		<item name="android:textSize">15sp</item>
-		<item name="android:fontFamily">@font/ergoe_medium</item>
-	</style>
-	<style name="SettingsHeaderText">
-		<item name="android:textColor">@color/settings_header_text</item>
-		<item name="android:textSize">12sp</item>
-		<item name="android:fontFamily">@font/ergoe_bold</item>
-	</style>
-	
 </resources>

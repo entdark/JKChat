@@ -1,45 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="primary">#323544</color>
-	<color name="primary_dark">#323544</color>
-	<color name="accent">#94ECE9</color>
-	<color name="accent_translucent">#7F94ECE9</color>
-	<color name="menu">#C8C8C8</color>
-	<color name="toolbar">@color/primary</color>
-	<color name="toolbar_title">@color/accent</color>
-	<color name="toolbar_subtitle">#828282</color>
-	<color name="toolbar_menu">@color/menu</color>
-	<color name="navbar">@color/primary</color>
-	<color name="navbar_menu">@color/menu</color>
-	<color name="navbar_menu_selected">@color/accent</color>
-	<color name="background">#222D66</color>
-	<color name="item_background">#26C4C4C4</color>
-	<color name="item_selection">#64547BC8</color>
-	<color name="regular_text">#AAD8DD</color>
 	<color name="connected">#09DD84</color>
 	<color name="connecting">#DDAE09</color>
 	<color name="disconnected">#14EADDFF</color>
-	<color name="chat_text">#FFFFFF</color>
-	<color name="chat_time_text">#7F00FFFF</color>
 	<color name="chat_info_start_background">#381E72</color>
 	<color name="chat_info_end_background">#4DD9E4</color>
-	<color name="chat_type_circle">#4F4F4F</color>
 	<color name="chat_type_common">#00FF00</color>
 	<color name="chat_type_team">#00FFFF</color>
 	<color name="chat_type_private">#FF00FF</color>
-	<color name="message_block">@color/primary</color>
-	<color name="message_text">#C8C8C8</color>
-	<color name="message_placeholder_text">#828282</color>
-	<color name="dialog_window_background">#7F181818</color>
-	<color name="dialog_background">#495076</color>
-	<color name="dialog_title_background">#3A4374</color>
-	<color name="dialog_title">@color/accent</color>
-	<color name="dialog_button">#FFAD00</color>
-	<color name="dialog_input">#E5E5E5</color>
-	<color name="dialog_text">#E5E5E5</color>
-	<color name="dialog_selection">#8CFFAD00</color>
-	<color name="settings_text">#E5E5E5</color>
-	<color name="settings_header_text">@color/accent</color>
 
 	<color name="seed">#00E2F3</color>
 	<color name="md_theme_light_primary">#006971</color>
