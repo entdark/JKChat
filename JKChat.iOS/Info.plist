@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>JKChat.iOS</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2</string>
+	<string>1.3</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIDeviceFamily</key>
@@ -49,7 +49,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.vlbor.JKChat</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>7</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
