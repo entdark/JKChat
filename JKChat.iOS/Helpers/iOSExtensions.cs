@@ -1,4 +1,7 @@
-﻿using CoreGraphics;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using CoreGraphics;
 
 using Foundation;
 
@@ -13,21 +16,20 @@ namespace JKChat.iOS.Helpers {
 			UIViewAnimationCurve curve = (UIViewAnimationCurve)(int)((userInfo?.ObjectForKey(UIKeyboard.AnimationCurveUserInfoKey) as NSNumber)?.NIntValue ?? 0);
 			endKeyboardFrame = (userInfo?.ObjectForKey(UIKeyboard.FrameEndUserInfoKey) as NSValue)?.CGRectValue ?? CGRect.Empty;
 			beginKeyboardFrame = (userInfo?.ObjectForKey(UIKeyboard.FrameBeginUserInfoKey) as NSValue)?.CGRectValue ?? CGRect.Empty;
-			switch (curve) {
-			case UIViewAnimationCurve.Linear:
-				animationOptions = UIViewAnimationOptions.CurveLinear;
-				break;
-			case UIViewAnimationCurve.EaseIn:
-				animationOptions = UIViewAnimationOptions.CurveEaseIn;
-				break;
-			case UIViewAnimationCurve.EaseInOut:
-				animationOptions = UIViewAnimationOptions.CurveEaseInOut;
-				break;
-			default:
-			case UIViewAnimationCurve.EaseOut:
-				animationOptions = UIViewAnimationOptions.CurveEaseOut;
-				break;
-			}
+			animationOptions = curve switch {
+				UIViewAnimationCurve.Linear => UIViewAnimationOptions.CurveLinear,
+				UIViewAnimationCurve.EaseIn => UIViewAnimationOptions.CurveEaseIn,
+				UIViewAnimationCurve.EaseInOut => UIViewAnimationOptions.CurveEaseInOut,
+				_ => UIViewAnimationOptions.CurveEaseOut,
+			};
+		}
+
+		public static NSDictionary<NSString, NSString> ToNSDictionary(this IDictionary<string, string> dictionary) {
+			return new NSDictionary<NSString, NSString>(dictionary.Keys.Select(k => new NSString(k)).ToArray(), dictionary.Values.Select(v => new NSString(v)).ToArray());
+		}
+
+		public static IDictionary<string, string> ToDictionary(this NSDictionary dictionary) {
+			return dictionary.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value.ToString());
 		}
 	}
 }

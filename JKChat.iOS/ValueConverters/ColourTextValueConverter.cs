@@ -4,6 +4,7 @@ using System.Globalization;
 
 using Foundation;
 
+using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.ValueCombiners;
 
@@ -31,10 +32,7 @@ namespace JKChat.iOS.ValueConverters {
 				parseShadow = ct.ParseShadow;
 			}
 			var colorAttributes = new List<AttributeData<int>>();
-			List<AttributeData<Uri>> uriAttributes = null;
-			if (parseUri) {
-				uriAttributes = new List<AttributeData<Uri>>();
-			}
+			List<AttributeData<Uri>> uriAttributes = parseUri ? new() : null;
 
 			string cleanStr = value.CleanString(colorAttributes, uriAttributes);
 			var attributedString = new NSMutableAttributedString(cleanStr);
@@ -61,6 +59,8 @@ namespace JKChat.iOS.ValueConverters {
 
 		private static UIColor GetColor(int code) {
 			return code switch {
+				8 when AppSettings.OpenJKColours => UIColor.FromRGB(255, 127, 0),
+				9 when AppSettings.OpenJKColours => UIColor.FromRGB(127, 127, 127),
 				0 or 8 => UIColor.FromRGB(0, 0, 0),
 				1 or 9 => UIColor.FromRGB(255, 0, 0),
 				2 => UIColor.FromRGB(0, 255, 0),

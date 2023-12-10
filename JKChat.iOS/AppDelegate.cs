@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 using CoreLocation;
@@ -7,7 +8,10 @@ using CoreLocation;
 using Foundation;
 
 using JKChat.Core;
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
+using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 using JKChat.iOS.Helpers;
 
@@ -27,9 +31,13 @@ namespace JKChat.iOS {
 	// User Interface of the application, as well as listening (and optionally responding) to application events from iOS.
 	[Register("AppDelegate")]
 	public class AppDelegate : MvxApplicationDelegate<Setup, App>, IUNUserNotificationCenterDelegate {
+		private const string BackgroundNotificationRequestId = "JKChatNotificationBackground";
+		private const string ServerInfoNotificationRequestId = "JKChatNotificationServerInfo";
+
 		private CLLocationManager locationManager;
+		private NSUrl delayedOpenUrl;
 		private int lastActiveCount, lastMessages;
-		private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken;
+		private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken, widgetFavouritesMessageToken;
 
 		private CLAuthorizationStatus AuthorizationStatus {
 			get {
@@ -55,19 +63,27 @@ namespace JKChat.iOS {
 #if !__MACCATALYST__
 			AppCenter.Start(Core.ApiKeys.AppCenter.iOS, typeof(Crashes));
 #endif
-
-			bool finishedLaunching = base.FinishedLaunching(application, launchOptions);
+			bool finishedLaunching = base.FinishedLaunching(application, null);
 			Window.TintColor = Theme.Color.Accent;
+			Mvx.IoCProvider.Resolve<IAppService>().AppTheme = AppSettings.AppTheme;
 
-			UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert, (approved, error) => {
-				Debug.WriteLine("UserNotifications approved: " + approved);
+			UNUserNotificationCenter.Current.RequestAuthorization(UNAuthorizationOptions.Alert | UNAuthorizationOptions.Badge | UNAuthorizationOptions.Sound/* | UNAuthorizationOptions.Provisional*/, (granted, error) => {
+				Debug.WriteLine("UserNotifications granted: " + granted);
+				var options = AppSettings.NotificationOptions;
+				if (granted)
+					options |= NotificationOptions.Enabled;
+				else
+					options &= ~NotificationOptions.Enabled;
+				AppSettings.NotificationOptions = options;
 			});
 			UNUserNotificationCenter.Current.Delegate = this;
 			InitLocationManager();
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
 			IsActive = true;
-			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
-			locationUpdateMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
+			var messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
+			serverInfoMessageToken = messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			locationUpdateMessageToken = messenger.Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
+			widgetFavouritesMessageToken = messenger.Subscribe<WidgetFavouritesMessage>(OnWidgetFavouritesMessage);
 			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidBecomeMainNotification"), (notification) => {
 				base.WillEnterForeground(application);
 				IsActive = true;
@@ -76,6 +92,9 @@ namespace JKChat.iOS {
 				IsActive = false;
 				base.DidEnterBackground(application);
 			});
+			SetCommonFavourites();
+			OpenUrl(delayedOpenUrl);
+			delayedOpenUrl = null;
 			return finishedLaunching;
 		}
 
@@ -111,13 +130,57 @@ namespace JKChat.iOS {
 			// If the application was previously in the background, optionally refresh the user interface.
 		}
 
+		public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options) {
+			OpenUrl(url);
+			return true;
+		}
+
+		private void OpenUrl(NSUrl url) {
+			if (!IsActive) {
+				delayedOpenUrl = url;
+				return;
+			}
+			var widgetLink = AppSettings.WidgetLink;
+			if (widgetLink == WidgetLink.Application)
+				return;
+			if (url == null || url.Scheme != "jkchat" || url.Host != "widget")
+				return;
+			var queryItems = new NSUrlComponents(url, true).QueryItems;
+			if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address }) || address.Length == 0)
+				return;
+			string path = widgetLink switch {
+				WidgetLink.ServerInfo => "info",
+				WidgetLink.Chat => "chat",
+				_ => string.Empty
+			};
+			var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
+			var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address}", address);
+			navigationService.Navigate(parameters);
+		}
+
 		[Export("userNotificationCenter:willPresentNotification:withCompletionHandler:")]
 		public void WillPresentNotification(UNUserNotificationCenter center, UNNotification notification, Action<UNNotificationPresentationOptions> completionHandler) {
-			if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
-				completionHandler(UNNotificationPresentationOptions.List);
+			var options = UNNotificationPresentationOptions.None;
+			if (notification.Request.Identifier == BackgroundNotificationRequestId || notification.Request.Identifier == ServerInfoNotificationRequestId) {
+				if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
+					options = UNNotificationPresentationOptions.List;
+				}
 			} else {
-				completionHandler(UNNotificationPresentationOptions.None);
+				options = UNNotificationPresentationOptions.Sound | UNNotificationPresentationOptions.Badge;
+				if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
+					options |= UNNotificationPresentationOptions.List | UNNotificationPresentationOptions.Banner;
+				} else {
+					options |= UNNotificationPresentationOptions.Alert;
+				}
 			}
+			completionHandler(options);
+		}
+
+		[Export("userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:")]
+		public void DidReceiveNotificationResponse(UNUserNotificationCenter center, UNNotificationResponse response, Action completionHandler) {
+			var userInfo = response.Notification.Request?.Content?.UserInfo;
+			var parameters = userInfo?.ToDictionary();
+			Mvx.IoCProvider.Resolve<INavigationService>().Navigate(parameters);
 		}
 
 		public override void WillTerminate(UIApplication application) {
@@ -129,13 +192,18 @@ namespace JKChat.iOS {
 				}
 				locationManager = null;
 			}
+			var messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 			if (serverInfoMessageToken != null) {
-				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
+				messenger.Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 				serverInfoMessageToken = null;
 			}
 			if (locationUpdateMessageToken != null) {
-				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<LocationUpdateMessage>(locationUpdateMessageToken);
+				messenger.Unsubscribe<LocationUpdateMessage>(locationUpdateMessageToken);
 				locationUpdateMessageToken = null;
+			}
+			if (widgetFavouritesMessageToken != null) {
+				messenger.Unsubscribe<WidgetFavouritesMessage>(widgetFavouritesMessageToken);
+				widgetFavouritesMessageToken = null;
 			}
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();
@@ -177,14 +245,13 @@ namespace JKChat.iOS {
 
 		private void ShowNotification(int time) {
 			InvokeOnMainThread(() => {
-				var content = new UNMutableNotificationContent {
+				var content = new UNMutableNotificationContent() {
 					Title = "JKChat is minimized",
 //					Subtitle = "Notification Subtitle",
 					Body = $"You have {time} seconds until it pauses the connection"
 				};
 				var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
-				string requestID = "JKChatNotificationBackground";
-				var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
+				var request = UNNotificationRequest.FromIdentifier(BackgroundNotificationRequestId, content, trigger);
 				UNUserNotificationCenter.Current.AddNotificationRequest(request, (error) => {
 					if (error != null) {
 						Debug.WriteLine(error);
@@ -225,15 +292,14 @@ namespace JKChat.iOS {
 						lastActiveCount = count;
 					}
 					lastMessages = messages;
-					var content = new UNMutableNotificationContent {
+					var content = new UNMutableNotificationContent() {
 						Title = $"You are connected to {count} server" + (count > 1 ? "s" : string.Empty)
 					};
 					if (messages > 0) {
 						content.Body = $"You have {messages} unread message" + (messages > 1 ? "s" : string.Empty);
 					}
 					var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
-					string requestID = "JKChatNotificationServerInfo";
-					var request = UNNotificationRequest.FromIdentifier(requestID, content, trigger);
+					var request = UNNotificationRequest.FromIdentifier(ServerInfoNotificationRequestId, content, trigger);
 					UNUserNotificationCenter.Current.AddNotificationRequest(request, (error) => {
 						if (error != null) {
 							Debug.WriteLine(error);
@@ -244,6 +310,25 @@ namespace JKChat.iOS {
 					UNUserNotificationCenter.Current.RemoveAllDeliveredNotifications();
 				}
 			});
+		}
+
+		private void OnWidgetFavouritesMessage(WidgetFavouritesMessage message) {
+			SetCommonFavourites();
+		}
+
+		private void SetCommonFavourites() {
+			Task.Run(add);
+			async Task add() {
+				var servers = await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers();
+				var jsonString = servers.Select(s => new {
+					address = s.Address.Split(':')[0],
+					port = ushort.TryParse(s.Address.Split(':')[1], out ushort port) ? port : 0,
+					serverName = s.CleanServerName
+				}).ToArray().Serialize();
+				var userDefaults = new NSUserDefaults("group.com.vlbor.JKChat", NSUserDefaultsType.SuiteName);
+				userDefaults.SetString(jsonString, "FavouritesServers");
+				Debug.WriteLine(userDefaults.ValueForKey(new("FavouritesServers")));
+			}
 		}
 
 		private void OnLocationUpdateMessage(LocationUpdateMessage message) {

@@ -8,8 +8,8 @@ namespace JKChat.Core.ViewModels.Base {
 		private MvxSubscriptionToken serverInfoMessageToken, favouriteMessageToken;
 
 		public BaseServerViewModel() {
-			serverInfoMessageToken ??= Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
-			favouriteMessageToken ??= Messenger.Subscribe<FavouriteMessage>(OnFavouriteMessage);
+			serverInfoMessageToken = Messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			favouriteMessageToken = Messenger.Subscribe<FavouriteMessage>(OnFavouriteMessage);
 		}
 
 		protected virtual void OnServerInfoMessage(ServerInfoMessage message) {}

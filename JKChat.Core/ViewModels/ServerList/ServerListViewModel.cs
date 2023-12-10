@@ -49,6 +49,12 @@ namespace JKChat.Core.ViewModels.ServerList {
 			set => SetProperty(ref searchText, value, ApplyFilter);
 		}
 
+		private bool filterApplied;
+		public bool FilterApplied {
+			get => filterApplied;
+			set => SetProperty(ref filterApplied, value);
+		}
+
 		public ServerListViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
 			Title = "Server list";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
@@ -57,6 +63,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			FilterCommand = new MvxAsyncCommand(FilterExecute);
 			items = new MvxObservableCollection<ServerListItemVM>();
 			filter = AppSettings.Filter ?? new();
+			FilterApplied = !filter.IsReset;
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
@@ -64,6 +71,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private void FilterPropertyChanged(object sender, PropertyChangedEventArgs ev) {
 			ApplyFilter();
+			FilterApplied = !filter.IsReset;
 		}
 
 		private void ApplyFilter() {
@@ -76,8 +84,11 @@ namespace JKChat.Core.ViewModels.ServerList {
 				replace = true;
 			}
 
-			if (replace)
-				Items.ReplaceWith(filteredItems);
+			if (replace) {
+				lock (Items) {
+					Items.ReplaceWith(filteredItems);
+				}
+			}
 		}
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
@@ -99,7 +110,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task FilterExecute() {
-			await NavigationService.NavigateFromRoot<FilterViewModel, Filter>(filter, viewModel => viewModel is not FilterViewModel);
+			await NavigationService.NavigateFromRoot<FilterViewModel, Filter>(filter);
 		}
 
 		private async Task AddServerExecute() {
@@ -200,7 +211,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				if (newItems != null) {
 					var reportedServer = await cacheService.LoadReportedServers();
 					await UpdateFavourites(newItems);
-					filter.AddGameMods(newItems);
+					filter.AddGameMods(newItems.Select(item => item.ServerInfo.GameName));
 					SetItems(newItems.Except(reportedServer));
 				}
 			} catch (Exception exception) {
@@ -214,14 +225,10 @@ namespace JKChat.Core.ViewModels.ServerList {
 				return;
 			}
 			if (item.Status != Models.ConnectionStatus.Disconnected) {
-				await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(item), viewModel => {
-					return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
-				});
+				await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(item), item.ServerInfo);
 				MoveItem(item, 0);
 			} else {
-				await NavigationService.NavigateFromRoot<ServerInfoViewModel, ServerInfoParameter>(new(item) { LoadInfo = true }, viewModel => {
-					return (viewModel as ServerInfoViewModel)?.ServerInfo != item.ServerInfo;
-				});
+				await NavigationService.NavigateFromRoot<ServerInfoViewModel, ServerInfoParameter>(new(item) { LoadInfo = true }, item.ServerInfo);
 			}
 		}
 
@@ -284,7 +291,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				if (newItems != null) {
 					var reportedServers = await cacheService.LoadReportedServers();
 					await UpdateFavourites(newItems);
-					filter.AddGameMods(newItems);
+					filter.AddGameMods(newItems.Select(item => item.ServerInfo.GameName));
 					SetItems(newItems.Except(reportedServers));
 				}
 			} catch (Exception exception) {
@@ -295,26 +302,34 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private void SetItems(IEnumerable<ServerListItemVM> items) {
 			this.items.ReplaceWith(items);
-			this.Items.ReplaceWith(filter.Apply(this.items));
+			lock (Items) {
+				this.Items.ReplaceWith(filter.Apply(this.items));
+			}
 		}
 
 		private void MoveItem(ServerListItemVM item, int newIndex) {
 			int oldIndex = items.IndexOf(item);
 			if (oldIndex >= 0)
 				items.Move(oldIndex, newIndex);
-			oldIndex = Items.IndexOf(item);
-			if (oldIndex >= 0)
-				Items.Move(oldIndex, newIndex);
+			lock (Items) {
+				oldIndex = Items.IndexOf(item);
+				if (oldIndex >= 0)
+					Items.Move(oldIndex, newIndex);
+			}
 		}
 
 		private void InsertItem(int index, ServerListItemVM item) {
 			items.Insert(index, item);
-			Items.Insert(index, item);
+			lock (Items) {
+				Items.Insert(index, item);
+			}
 		}
 
 		private void RemoveItem(ServerListItemVM item) {
 			items.Remove(item);
-			Items.Remove(item);
+			lock (Items) {
+				Items.Remove(item);
+			}
 		}
 
 		private static void AddRecentServers(ObservableCollection<ServerListItemVM> items, IEnumerable<ServerListItemVM> recentServers) {

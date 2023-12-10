@@ -1,12 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Android.App;
 using Android.Content;
 using Android.Graphics.Drawables;
 using Android.InputMethodServices;
+using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
+
+using AndroidX.Core.Content;
+
+using Google.Android.Material.Button;
 
 using JKChat.Android.Controls.Listeners;
 using JKChat.Android.Controls.Toolbar;
@@ -42,7 +49,7 @@ namespace JKChat.Android.Helpers {
 		}
 
 		public static void SetClickAction(this IMenuItem item, Action action) {
-			if (item?.ActionView is FadingImageView imageView) {
+			if (item?.ActionView is FadingImageView imageView || (imageView = item?.ActionView?.FindViewById<FadingImageView>(Resource.Id.toolbar_menu_item)) != null) {
 				imageView.Action = action;
 			} else {
 				item?.SetOnMenuItemClickListener(new MenuItemClickListener() {
@@ -61,12 +68,22 @@ namespace JKChat.Android.Helpers {
 			if (visible || !animated) {
 				item?.SetVisible(visible);
 			}
-			if (item?.ActionView is FadingImageView imageView) {
+			if (item?.ActionView is FadingImageView imageView || (imageView = item?.ActionView?.FindViewById<FadingImageView>(Resource.Id.toolbar_menu_item)) != null) {
 				imageView.HideShow(visible, animated, () => {
 					if (!visible && animated) {
 						item?.SetVisible(visible);
 					}
 				});
+			} 
+		}
+		public static void ToggleIconButton(this MaterialButton button, int iconId, bool show) {
+			var context = button.Context;
+			if (show && button.Icon == null) {
+				button.Icon = ContextCompat.GetDrawable(context, iconId);
+				button.SetPadding(context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_left), button.PaddingTop, context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_right), button.PaddingBottom);
+			} else if (!show && button.Icon != null) {
+				button.Icon = null;
+				button.SetPadding(context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_left), button.PaddingTop, context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_right), button.PaddingBottom);
 			}
 		}
 		public static void ShowKeyboard(this Context context, View view = null) {
@@ -86,6 +103,9 @@ namespace JKChat.Android.Helpers {
 		}
 		public static void HideKeyboard(this Context context, bool clearFocus) {
 			context.HideKeyboard(null, clearFocus);
+		}
+		public static IDictionary<string, string> ToDictionary(this Bundle bundle) {
+			return bundle?.IsEmpty ?? true ? new Dictionary<string, string>() : bundle.KeySet().ToDictionary(key => key, bundle.GetString);
 		}
 	}
 }

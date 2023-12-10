@@ -24,6 +24,7 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -43,10 +44,8 @@
 		<string>Fonts/ergoe_regular.ttf</string>
 		<string>Fonts/ocrastd_regular.otf</string>
 	</array>
-	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleLightContent</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
+	<true/>
 	<key>CFBundleIdentifier</key>
 	<string>com.vlbor.JKChat</string>
 	<key>CFBundleVersion</key>
@@ -63,7 +62,18 @@
 	<string>We need to access your location to keep the connection to game servers</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need to access your location to keep the connection to game servers</string>
-	<key>UIUserInterfaceStyle</key>
-	<string>Dark</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>jkchat</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>jkchat</string>
+	</array>
 </dict>
 </plist>

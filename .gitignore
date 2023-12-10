@@ -367,3 +367,19 @@ FodyWeavers.xsd
 
 # Photoshop
 *.psd
+
+
+## XCode
+
+## User settings
+xcuserdata/
+
+## Xcode 8 and earlier
+*.xcscmblueprint
+*.xccheckout
+
+
+## Custom
+
+JKChat.iOS.Widget.Native/build
+JKChat.iOS.Widget.Native/DerivedData

@@ -73,8 +73,11 @@ namespace JKChat.Core.Models {
 			&& GameType == GameTypeDefault
 			&& (GameMod.Count <= 0 || GameMod.All(gm => gm.Value));
 
-		public void AddGameMods(IEnumerable<ServerListItemVM> items) {
-			var uniqueGameMods = items.Where(item => !string.IsNullOrEmpty(item.ServerInfo.GameName)).Select(item => item.ServerInfo.GameName).Distinct(StringComparer.InvariantCultureIgnoreCase).Except(GameMod.Keys, StringComparer.InvariantCultureIgnoreCase);
+		public void AddGameMods(IEnumerable<string> gameMods) {
+			var uniqueGameMods = gameMods
+				.Where(item => !string.IsNullOrEmpty(item))
+				.Distinct(StringComparer.InvariantCultureIgnoreCase)
+				.Except(GameMod.Keys, StringComparer.InvariantCultureIgnoreCase);
 			foreach (var uniqueGameMod in uniqueGameMods) {
 				GameMod.TryAdd(uniqueGameMod, true);
 			}
@@ -90,7 +93,7 @@ namespace JKChat.Core.Models {
 			RaisePropertyChanged(nameof(GameMod));
 		}
 
-		public void ResetGameMod(bool silently = false) {
+		public void ResetGameMod(bool silently) {
 			foreach (var gameMod in GameMod) {
 				if (GameMod.TryGetValue(gameMod.Key, out bool value) && !value) {
 					GameMod[gameMod.Key] = true;

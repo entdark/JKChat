@@ -16,25 +16,31 @@ using MvvmCross;
 using MvvmCross.Plugin.Messenger;
 
 using Microsoft.Maui.ApplicationModel;
+using Android.Content.PM;
 
 namespace JKChat.Android.Services {
-	[Service(Enabled = true)]
+	[Service(Enabled = true, ForegroundServiceType = ForegroundService.TypeNone)]
 	public class ForegroundGameClientsService : Service {
 		private const string NotificationChannelID = "JKChat Foreground Service";
-		private const int NotificationID = 1337;
+		private const int NotificationID = 2;
 
 		private MvxSubscriptionToken serverInfoMessageToken;
 
+		internal static bool IsRunning = false;
+
 		public override void OnCreate() {
+			IsRunning = true;
 			base.OnCreate();
 			CreateNotificationChannel();
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}
 			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			HandleForeground(true);
 		}
 
 		public override void OnDestroy() {
+			IsRunning = false;
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 				serverInfoMessageToken = null;
@@ -51,16 +57,11 @@ namespace JKChat.Android.Services {
 			return StartCommandResult.Sticky;
 		}
 
-		public void Stop() {
-			StopForeground(true);
-			StopSelf();
-		}
-
 		private void OnServerInfoMessage(ServerInfoMessage message) {
-			HandleForeground();
+			HandleForeground(false);
 		}
 
-		private void HandleForeground(bool start = false) {
+		private void HandleForeground(bool start) {
 			FreeMemory();
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			int clientsCount = gameClientsService.ActiveClients;
@@ -74,8 +75,16 @@ namespace JKChat.Android.Services {
 					notificationManager.Notify(NotificationID, notification);
 				}
 			} else {
-				StopForeground(true);
+				StopForeground();
 				StopSelf();
+			}
+		}
+
+		private void StopForeground() {
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.N) {
+				StopForeground(StopForegroundFlags.Remove);
+			} else {
+				StopForeground(true);
 			}
 		}
 
@@ -91,6 +100,7 @@ namespace JKChat.Android.Services {
 				.SetSmallIcon(Resource.Mipmap.ic_launcher)
 				.SetContentIntent(pendingIntent)
 				.SetPriority(NotificationCompat.PriorityLow)
+				.SetOngoing(true)
 				.AddAction(new NotificationCompat.Action(0, count > 1 ? "Disconnect from all" : "Disconnect", closePendingIntent));
 			if (messages > 0) {
 				notification.SetContentText($"You have {messages} unread message" + (messages > 1 ? "s" : string.Empty));
@@ -101,7 +111,8 @@ namespace JKChat.Android.Services {
 		private void CreateNotificationChannel() {
 			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
 				var channel = new NotificationChannel(NotificationChannelID, NotificationChannelID, NotificationImportance.Low);
-				var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
+				channel.SetShowBadge(false);
+				var notificationManager = NotificationManagerCompat.From(this);
 				notificationManager.CreateNotificationChannel(channel);
 			}
 		}

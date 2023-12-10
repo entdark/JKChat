@@ -21,7 +21,7 @@ namespace JKChat.Core.Services {
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol71))
 			};
 			foreach (var serverBrowser in serverBrowsers) {
-				serverBrowser.Start(Helpers.Common.ExceptionCallback);
+				serverBrowser.Start(Helpers.Common.ExceptionCallback, true);
 			}
 		}
 
@@ -46,8 +46,8 @@ namespace JKChat.Core.Services {
 
 		public async Task<IEnumerable<ServerInfo>> RefreshList(IEnumerable<ServerInfo> serverInfos) {
 			var getServerInfoTasks = serverInfos.Select(GetServerInfo);
-			this.servers = (await Task.WhenAll(getServerInfoTasks)).Select(t => t).Distinct(new ServerInfoComparer());
-			return this.servers;
+			var servers = (await Task.WhenAll(getServerInfoTasks)).Where(s => s != null).Distinct(new ServerInfoComparer());
+			return servers;
 		}
 
 		public async Task<ServerInfo> GetServerInfo(string address, ushort port, ProtocolVersion protocol) {

@@ -1,19 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-ios</TargetFramework>
+    <TargetFramework>net8.0-ios17</TargetFramework>
     <OutputType>Exe</OutputType>
     <LangVersion>latest</LangVersion>
-    <UseMauiEssentials>true</UseMauiEssentials>
+    <CreatePackage>false</CreatePackage>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net7.0-ios')) ">
-    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net8.0-ios')) ">
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net7.0-maccatalyst')) ">
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('net8.0-maccatalyst')) ">
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <CodesignProvision>Automatic</CodesignProvision>
+    <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <UseSystemResourceKeys>false</UseSystemResourceKeys>
+    <CodesignProvision>Automatic</CodesignProvision>
+    <CodesignKey>iPhone Distribution</CodesignKey>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\JKChat.Core\JKChat.Core.csproj" />
@@ -50,5 +56,13 @@
     <PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.4" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalAppExtensions Include="$(MSBuildProjectDirectory)/../JKChat.iOS.Widget.Native">
+      <Name>WidgetExtension</Name>
+      <BuildOutput Condition="!$(RuntimeIdentifier.Contains('simulator'))">build/$(Configuration)-iphoneos</BuildOutput>
+      <BuildOutput Condition="$(RuntimeIdentifier.Contains('simulator'))">build/$(Configuration)-iphonesimulator</BuildOutput>
+    </AdditionalAppExtensions>
   </ItemGroup>
 </Project>

@@ -6,10 +6,9 @@ using Android.App;
 using Android.OS;
 using Android.Runtime;
 
-using AndroidX.AppCompat.App;
-
 using JKChat.Android.Views.Main;
 using JKChat.Core;
+using JKChat.Core.Services;
 
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Crashes;
@@ -41,9 +40,9 @@ namespace JKChat.Android {
 
 			AppCenter.Start(Core.ApiKeys.AppCenter.Android, typeof(Crashes));
 
-			AppCompatDelegate.DefaultNightMode = AppCompatDelegate.ModeNightYes;
-
 			base.OnCreate();
+
+			Mvx.IoCProvider.Resolve<IAppService>().AppTheme = AppSettings.AppTheme;
 
 			RegisterActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
 		}
@@ -89,13 +88,9 @@ namespace JKChat.Android {
 			public void InitializationComplete() {
 				if (!isResumed)
 					return;
-				Task.Run(async () => await RunAppStartAsync(bundle));
-			}
-
-			protected virtual async Task RunAppStartAsync(Bundle bundle) {
 				if (Mvx.IoCProvider.TryResolve(out IMvxAppStart startup)) {
 					if (!startup.IsStarted) {
-						await startup.StartAsync(bundle);
+						Task.Run(async () => await startup.StartAsync(bundle));
 					}
 				}
 			}
@@ -119,7 +114,7 @@ namespace JKChat.Android {
 				}
 			}
 
-			private bool IsMainActivity(Activity activity) => activity is MainActivity;
+			private static bool IsMainActivity(Activity activity) => activity is MainActivity;
 		}
 	}
 }

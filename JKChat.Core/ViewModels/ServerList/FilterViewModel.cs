@@ -106,8 +106,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 			await DialogService.ShowAsync(new DialogListViewModel(ClientVersionExtensions.Versions.Select(version => new DialogItemVM() {
 				Id = version.ToBitField(),
 				Name = version.ToDisplayString(),
-				IsSelected = Filter.Game.HasField(version)
-			}), DialogSelectionType.MultiSelection), config => {
+				IsSelected = Filter.Game != ClientVersionExtensions.ClientVersionAll && Filter.Game.HasField(version)
+			}).OrderByDescending(item => item.IsSelected), DialogSelectionType.MultiSelection), config => {
 				int version = config.List.SelectedItems.Aggregate(0, (game, item) => game | (int)item.Id);
 				Filter.Game = version == 0 ? ClientVersionExtensions.ClientVersionAll : version;
 			}, "Choose Game");
@@ -117,9 +117,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 			await DialogService.ShowAsync(new DialogListViewModel(GameTypeExtensions.GameTypes.Select(gameType => new DialogItemVM() {
 				Id = gameType.ToBitField(),
 				Name = gameType.ToDisplayString(Filter.Game),
-				IsSelected = Filter.GameType.HasField(gameType)
-			}), DialogSelectionType.MultiSelection), config => {
-				int gameType = config.List.SelectedItems.Aggregate(0, (game, item) => game | (int)item.Id);
+				IsSelected = Filter.GameType != GameTypeExtensions.GameTypeAll && Filter.GameType.HasField(gameType)
+			}).OrderByDescending(item => item.IsSelected), DialogSelectionType.MultiSelection), config => {
+				int gameType = config.List.SelectedItems.Aggregate(0, (type, item) => type | (int)item.Id);
 				Filter.GameType = gameType == 0 ? GameTypeExtensions.GameTypeAll : gameType;
 			}, "Choose Game Type");
 		}
@@ -127,14 +127,15 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private async Task GameModExecute(TableValueItemVM item) {
 			if (Filter.GameMod.Count <= 0)
 				return;
+			bool allGameModsSelected = Filter.GameMod.All(gameMod => gameMod.Value);
 			await DialogService.ShowAsync(new DialogListViewModel(Filter.GameMod.Select(gameMod => new DialogItemVM() {
 				Id = gameMod.Key,
 				Name = HandleEmptyGameMod(gameMod.Key),
-				IsSelected = gameMod.Value
-			}), DialogSelectionType.MultiSelection), config => {
+				IsSelected = !allGameModsSelected && gameMod.Value
+			}).OrderByDescending(item => item.IsSelected), DialogSelectionType.MultiSelection), config => {
 				var selectedItems = config.List.Items.ToDictionary(item => item.Id as string, item => item.IsSelected);
 				if (!selectedItems.Any(item => item.Value)) {
-					Filter.ResetGameMod();
+					Filter.ResetGameMod(false);
 				} else {
 					Filter.SetGameMods(selectedItems);
 				}

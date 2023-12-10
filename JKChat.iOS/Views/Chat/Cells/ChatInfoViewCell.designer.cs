@@ -16,6 +16,9 @@ namespace JKChat.iOS.Views.Chat.Cells
 		UIKit.UIView BackgroundView { get; set; }
 
 		[Outlet]
+		UIKit.UIView FadingGradientView { get; set; }
+
+		[Outlet]
 		UIKit.UILabel TextLabel { get; set; }
 
 		[Outlet]
@@ -36,14 +39,19 @@ namespace JKChat.iOS.Views.Chat.Cells
 				TextLabel = null;
 			}
 
+			if (TextScrollView != null) {
+				TextScrollView.Dispose ();
+				TextScrollView = null;
+			}
+
 			if (TimeLabel != null) {
 				TimeLabel.Dispose ();
 				TimeLabel = null;
 			}
 
-			if (TextScrollView != null) {
-				TextScrollView.Dispose ();
-				TextScrollView = null;
+			if (FadingGradientView != null) {
+				FadingGradientView.Dispose ();
+				FadingGradientView = null;
 			}
 		}
 	}

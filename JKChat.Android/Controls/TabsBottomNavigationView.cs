@@ -118,8 +118,7 @@ namespace JKChat.Android.Controls {
 
 			foreach (var page in pages) {
 				var menuItem = Menu.GetItem(page.Value.Item1);
-				var pageParcelable = new TabsBottomNavigationViewPageParcelable()
-				{
+				var pageParcelable = new TabsBottomNavigationViewPageParcelable() {
 					Type = page.Key,
 					MenuId = menuItem.ItemId,
 					MenuTitle = (menuItem.TitleFormatted as Java.Lang.String)?.ToString() ?? string.Empty,

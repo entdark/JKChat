@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using JKChat.Core.Services;
 
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Devices;
 
 using MvvmCross;
 
@@ -38,12 +40,20 @@ namespace JKChat.Core.Helpers {
 			} else {
 				realException = exception;
 			}
-			return realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? ("\n\n" + realException.StackTrace) : string.Empty);
+			return realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? (Environment.NewLine + Environment.NewLine + realException.StackTrace) : string.Empty);
 		}
 
 		public static async Task<bool> ExceptionalTaskRun(Action action) {
+			return await ExceptionalTaskRun(Task.Run(action));
+		}
+
+		public static async Task<bool> ExceptionalTaskRun(Func<Task> func) {
+			return await ExceptionalTaskRun(Task.Run(func));
+		}
+
+		public static async Task<bool> ExceptionalTaskRun(Task task) {
 			bool result = true;
-			await Task.Run(action)
+			await task
 				.ContinueWith(async t => {
 					Debug.WriteLine("t: " + t.Status);
 					if (t.IsFaulted) {
@@ -63,6 +73,29 @@ namespace JKChat.Core.Helpers {
 				tasklist.Remove(task);
 			}
 			return null;
+		}
+
+		public static bool IsApple(this DevicePlatform platform) =>
+			platform == DevicePlatform.iOS
+			|| platform == DevicePlatform.MacCatalyst
+			|| platform == DevicePlatform.macOS;
+
+		public static string Serialize(this object value, Func<string> defaultValueAction = null) {
+			try {
+				return JsonSerializer.Serialize(value);
+			} catch (Exception exception) {
+				Debug.WriteLine(exception);
+			}
+			return defaultValueAction?.Invoke();
+		}
+
+		public static T Deserialize<T>(this string json, T defaultValue = default) {
+			try {
+				return JsonSerializer.Deserialize<T>(json);
+			} catch (Exception exception) {
+				Debug.WriteLine(exception);
+			}
+			return defaultValue;
 		}
 	}
 }

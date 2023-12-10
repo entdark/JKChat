@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
+using JKChat.Core.Services;
 
 using Microsoft.Maui.Storage;
 
@@ -22,7 +24,6 @@ namespace JKChat.Core {
 				}
 				return firstLaunch;
 			}
-			set => Set(value);
 		}
 		public static string PlayerName {
 			get => Get(DefaultName);
@@ -33,7 +34,7 @@ namespace JKChat.Core {
 				if (string.IsNullOrEmpty(value)) {
 					value = AppSettings.DefaultName;
 				} else if (value.Length > 31) {
-					value = value.Substring(0, 31);
+					value = value[..31];
 				}
 				Set(value);
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new PlayerNameMessage(value));
@@ -62,24 +63,39 @@ namespace JKChat.Core {
 			}
 		}
 		public static Filter Filter {
-			get {
-				string filter = Get(null);
-				if (filter == null)
-					return null;
-				try {
-					return JsonSerializer.Deserialize<Filter>(filter);
-				} catch (Exception exception) {
-					Debug.WriteLine(exception);
-				}
-				return null;
-			}
+			get => GetDeserialized<Filter>(null);
+			set => SetSerialized(value);
+		}
+		private static CachedValue<bool> openJKColours;
+		public static bool OpenJKColours {
+			get => GetCached(false, ref openJKColours, Get);
+			set => SetCached(value, ref openJKColours, Set);
+		}
+		public static AppTheme AppTheme {
+			get => (AppTheme)Get((int)AppTheme.Dark);
 			set {
-				try {
-					Set(JsonSerializer.Serialize(value));
-				} catch (Exception exception) {
-					Debug.WriteLine(exception);
-				}
+				Set((int)value);
+				Mvx.IoCProvider.Resolve<IAppService>().AppTheme = value;
 			}
+		}
+		private static CachedValue<int> notificationOptions;
+		public static NotificationOptions NotificationOptions {
+			get => (NotificationOptions)GetCached((int)NotificationOptions.Default, ref notificationOptions, Get);
+			set => SetCached((int)value, ref notificationOptions, Set);
+		}
+		private static CachedValue<string[]> notificationKeywords;
+		public static string []NotificationKeywords {
+			get => GetCached(null, ref notificationKeywords, GetDeserialized);
+			set => SetCached(value, ref notificationKeywords, SetSerialized);
+		}
+
+		public static Dictionary<int, string> ServerMonitorServers {
+			get => GetDeserialized(new Dictionary<int, string>());
+			set => SetSerialized(value);
+		}
+		public static WidgetLink WidgetLink {
+			get => (WidgetLink)Get((int)WidgetLink.ServerInfo);
+			set => Set((int)value);
 		}
 
 		private static bool Get(bool defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
@@ -91,6 +107,37 @@ namespace JKChat.Core {
 		private static int Get(int defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
 		private static void Set(int value, [CallerMemberName] string key = "") => Preferences.Set(key, value);
 
+		private static T GetCached<T>(T defaultValue, ref CachedValue<T> storage, Func<T, string, T> getter, [CallerMemberName] string key = "") {
+			if (!storage.Cached) {
+				storage.Cached = true;
+				storage.Value = getter(defaultValue, key);
+			}
+			return storage.Value;
+		}
+		private static void SetCached<T>(T value, ref CachedValue<T> storage, Action<T, string> setter, [CallerMemberName] string key = "") {
+			setter(value, key);
+			storage.Cached = true;
+			storage.Value = value;
+		}
+
+		private static T GetDeserialized<T>(T defaultValue, [CallerMemberName] string key = "") {
+			string json = Get(null, key);
+			if (json == null)
+				return defaultValue;
+			return json.Deserialize(defaultValue);
+		}
+		private static void SetSerialized<T>(T value, [CallerMemberName] string key = "") {
+			string json = value.Serialize();
+			if (json != null)
+				Set(json, key);
+		}
+
 		private static bool Exists([CallerMemberName] string key = "") => Preferences.ContainsKey(key);
+
+		//cached value is accessed a lot
+		private struct CachedValue<T> {
+			public bool Cached { get; set; }
+			public T Value { get; set; }
+		}
 	}
 }

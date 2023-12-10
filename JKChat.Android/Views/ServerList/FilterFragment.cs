@@ -1,6 +1,9 @@
 ﻿using Android.OS;
 using Android.Views;
 using Android.Widget;
+using AndroidX.RecyclerView.Widget;
+
+using Google.Android.Material.Divider;
 
 using JKChat.Android.Adapters;
 using JKChat.Android.Presenter.Attributes;
@@ -24,6 +27,7 @@ namespace JKChat.Android.Views.ServerList {
 				recyclerView.Adapter = new TableGroupedRecyclerViewAdapter((IMvxAndroidBindingContext)BindingContext);
 			if (recyclerView.ItemTemplateSelector is not TableGroupedItemTemplateSelector)
 				recyclerView.ItemTemplateSelector = new TableGroupedItemTemplateSelector(true);
+			recyclerView.AddItemDecoration(new MaterialDividerItemDecoration(Context, LinearLayoutManager.Vertical));
 		}
 
 		protected override void CreateOptionsMenu() {

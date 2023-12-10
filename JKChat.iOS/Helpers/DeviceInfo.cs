@@ -1,4 +1,6 @@
-﻿using CoreGraphics;
+﻿using System.Linq;
+
+using CoreGraphics;
 
 using Foundation;
 
@@ -10,14 +12,17 @@ using UIKit;
 
 namespace JKChat.iOS.Helpers {
 	public static class DeviceInfo {
-		public static CGRect ScreenBounds => UIApplication.SharedApplication.Windows?[0]?.Bounds ?? UIScreen.MainScreen.Bounds;
+		public static UIWindow KeyWindow => UIDevice.CurrentDevice.CheckSystemVersion(13, 0)
+			? UIApplication.SharedApplication.ConnectedScenes?.OfType<UIWindowScene>().FirstOrDefault(s => s.KeyWindow != null)?.KeyWindow
+			: UIApplication.SharedApplication.KeyWindow;
+		public static UIWindow []Windows => UIDevice.CurrentDevice.CheckSystemVersion(13, 0)
+			? UIApplication.SharedApplication.ConnectedScenes?.OfType<UIWindowScene>().SelectMany(s => s.Windows).ToArray()
+			: UIApplication.SharedApplication.Windows;
+		public static CGRect ScreenBounds => KeyWindow?.Bounds ?? UIScreen.MainScreen.Bounds;
 		public static UIEdgeInsets SafeAreaInsets => UIDevice.CurrentDevice.CheckSystemVersion(11, 0)
-			&& UIApplication.SharedApplication.Windows?[0]?.SafeAreaInsets is UIEdgeInsets safeAreaInsets
+			&& KeyWindow?.SafeAreaInsets is UIEdgeInsets safeAreaInsets
 			? safeAreaInsets
 			: UIEdgeInsets.Zero;
-		public static bool IsPortrait => UIDevice.CurrentDevice.Orientation == UIDeviceOrientation.Portrait || UIDevice.CurrentDevice.Orientation == UIDeviceOrientation.PortraitUpsideDown;
-		public static bool iPhoneX => UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Phone
-			&& SafeAreaInsets.Top > 24.0f;
 		public static bool IsCollapsed => Mvx.IoCProvider.Resolve<IViewPresenter>().IsCollapsed;
 		public static bool IsRunningOnMacOS => (UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && NSProcessInfo.ProcessInfo.IsiOSApplicationOnMac) || NSProcessInfo.ProcessInfo.IsMacCatalystApplication;
 	}

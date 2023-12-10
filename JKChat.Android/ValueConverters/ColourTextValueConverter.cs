@@ -10,6 +10,7 @@ using Android.Text.Style;
 using Android.Views;
 
 using JKChat.Android.Helpers;
+using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.ValueCombiners;
 
@@ -19,7 +20,7 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
-		private static readonly Color ShadowColor = new Color(38, 38, 38);
+		private static readonly Color ShadowColor = new(38, 38, 38);
 
 		public static ISpannable Convert(string value, object parameter = null) {
 			if (string.IsNullOrEmpty(value)) {
@@ -36,10 +37,7 @@ namespace JKChat.Android.ValueConverters {
 				parseShadow = ct.ParseShadow;
 			}
 			var colorAttributes = new List<AttributeData<int>>();
-			List<AttributeData<Uri>> uriAttributes = null;
-			if (parseUri) {
-				uriAttributes = new List<AttributeData<Uri>>();
-			}
+			List<AttributeData<Uri>> uriAttributes = parseUri ? new() : null;
 
 			string cleanStr = value.CleanString(colorAttributes, uriAttributes);
 			var spannable = new SpannableString(cleanStr);
@@ -92,6 +90,8 @@ namespace JKChat.Android.ValueConverters {
 
 		private static Color GetColor(int code) {
 			return code switch {
+				8 when AppSettings.OpenJKColours => new(255, 127, 0),
+				9 when AppSettings.OpenJKColours => new(127, 127, 127),
 				0 or 8 => new Color(0, 0, 0),
 				1 or 9 => new Color(255, 0, 0),
 				2 => new Color(0, 255, 0),
@@ -118,8 +118,8 @@ namespace JKChat.Android.ValueConverters {
 			public override void OnClick(View widget) {
 				try {
 					if (string.Compare(uri.Scheme, "http", StringComparison.OrdinalIgnoreCase) != 0
-						|| string.Compare(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase) != 0
-						|| string.Compare(uri.Scheme, "ftp", StringComparison.OrdinalIgnoreCase) != 0) {
+						&& string.Compare(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase) != 0
+						&& string.Compare(uri.Scheme, "ftp", StringComparison.OrdinalIgnoreCase) != 0) {
 						throw new Exception();
 					}
 					Browser.OpenAsync(uri, BrowserLaunchMode.SystemPreferred);

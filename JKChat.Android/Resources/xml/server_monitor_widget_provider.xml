@@ -1,0 +1,13 @@
+﻿<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="150dp"
+    android:minHeight="40dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:minResizeWidth="150dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="800dp"
+    android:maxResizeHeight="40dp"
+    android:resizeMode="horizontal"
+    android:updatePeriodMillis="30000"
+    android:initialLayout="@layout/server_monitor_empty_widget"
+/>

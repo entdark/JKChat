@@ -29,14 +29,7 @@ namespace JKChat.Android.Views.Favourites {
 					AdjustHolderOnBind = (viewHolder, position) => {
 						if (viewHolder is IMvxRecyclerViewHolder { DataContext: ServerListItemVM item }) {
 							var connectButton = viewHolder.ItemView.FindViewById<MaterialButton>(Resource.Id.connect_button);
-							bool needIcon = item.NeedPassword;
-							if (needIcon && connectButton.Icon == null) {
-								connectButton.Icon = ContextCompat.GetDrawable(viewHolder.ItemView.Context, Resource.Drawable.ic_lock);
-								connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_right), connectButton.PaddingBottom);
-							} else if (!needIcon && connectButton.Icon != null) {
-								connectButton.Icon = null;
-								connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_right), connectButton.PaddingBottom);
-							}
+							connectButton.ToggleIconButton(Resource.Drawable.ic_lock, item.NeedPassword);
 						}
 					}
 				};

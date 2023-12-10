@@ -10,6 +10,7 @@ using JKChat.Android.Controls;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Core.Navigation.Hints;
+using JKChat.Core.ViewModels.Base;
 
 using Microsoft.Extensions.Logging;
 
@@ -113,7 +114,7 @@ namespace JKChat.Android.Presenter {
 
 		protected void CloseFragments(bool animated) {
 			if (CurrentFragmentManager.Fragments?.FirstOrDefault() is ITabsView tabsFragment) {
-				tabsFragment.CloseFragments(animated);
+//				tabsFragment.CloseFragments(animated);
 			}
 
 			if (!animated)
@@ -157,7 +158,8 @@ namespace JKChat.Android.Presenter {
 					if (attribute is MvxFragmentPresentationAttribute fragmentAttribute) {
 						while (CurrentFragmentManager.BackStackEntryCount > 0) {
 							var fragment = CurrentFragmentManager?.Fragments?.LastOrDefault();
-							if ((fragment as IMvxFragmentView)?.ViewModel is IMvxViewModel viewModel && (popToRootHint.Condition?.Invoke(viewModel) ?? true)) {
+							if (fragment is IMvxFragmentView { ViewModel: IMvxViewModel viewModel } && (viewModel.GetType() != popToRootHint.ViewModelType
+									|| (viewModel is IFromRootNavigatingViewModel fromRootViewModel && fromRootViewModel.ShouldLetOtherNavigateFromRoot(popToRootHint.Data)))) {
 								await Close(viewModel);
 							} else {
 								popToRootHint.PoppedToRoot = false;

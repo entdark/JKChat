@@ -88,14 +88,10 @@ namespace JKChat.Core.ViewModels.Favourites {
 
 		private async Task ItemClickExecute(ServerListItemVM item) {
 			if (item.Status != Models.ConnectionStatus.Disconnected) {
-				await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(item), viewModel => {
-					return (viewModel as ChatViewModel)?.ServerInfo != item.ServerInfo;
-				});
+				await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(item), item.ServerInfo);
 				Items.Move(Items.IndexOf(item), 0);
 			} else {
-				await NavigationService.NavigateFromRoot<ServerInfoViewModel, ServerInfoParameter>(new(item) { LoadInfo = true }, viewModel => {
-					return (viewModel as ServerInfoViewModel)?.ServerInfo != item.ServerInfo;
-				});
+				await NavigationService.NavigateFromRoot<ServerInfoViewModel, ServerInfoParameter>(new(item) { LoadInfo = true }, item.ServerInfo);
 			}
 		}
 

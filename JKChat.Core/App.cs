@@ -1,4 +1,6 @@
-﻿using JKChat.Core.Services;
+﻿using System.Threading.Tasks;
+
+using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Main;
 
 using MvvmCross;
@@ -26,6 +28,12 @@ namespace JKChat.Core {
 
 		private class AppStart : MvxAppStart<MainViewModel> {
 			public AppStart(IMvxApplication application, IMvxNavigationService navigationService) : base(application, navigationService) {
+			}
+
+			protected override Task NavigateToFirstViewModel(object hint = null) {
+				if (hint != null)
+					return Task.CompletedTask;
+				return base.NavigateToFirstViewModel(hint);
 			}
 
 			public override void ResetStart() {

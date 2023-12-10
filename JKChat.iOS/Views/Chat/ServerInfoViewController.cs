@@ -18,7 +18,7 @@ using UIKit;
 
 namespace JKChat.iOS.Views.Chat;
 
-[MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
+[MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = false)]
 public partial class ServerInfoViewController : BaseViewController<ServerInfoViewModel> {
 	private UIBarButtonItem shareButtonItem, favouriteButtonItem;
 
@@ -32,7 +32,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		get => needPassword;
 		set {
 			needPassword = value;
-			ConnectButton.SetImage(needPassword ? UIImage.GetSystemImage("lock", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Medium)) : null, UIControlState.Normal);
+			ConnectButton.SetImage(needPassword ? Theme.Image.Lock_Medium : null, UIControlState.Normal);
 		}
 	}
 
@@ -45,7 +45,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		}
 	}
 
-	public ServerInfoViewController() : base (nameof (ServerInfoViewController), null) {
+	public ServerInfoViewController() : base(nameof(ServerInfoViewController), null) {
 	}
 
 	public override void ViewDidLoad() {
@@ -79,9 +79,9 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		set.Bind(this).For(v => v.NeedPassword).To(vm => vm.NeedPassword);
 		set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
 		set.Bind(PreviewImageView).For(v => v.Image).To(vm => vm.Game).WithDictionaryConversion(new Dictionary<Game, UIImage>() {
-			[Game.JediAcademy] = UIImage.FromBundle("JAPreviewBackground"),
-			[Game.JediOutcast] = UIImage.FromBundle("JOPreviewBackground"),
-			[Game.Quake3] = UIImage.FromBundle("Q3PreviewBackground")
+			[Game.JediAcademy] = Theme.Image.JAPreviewBackground,
+			[Game.JediOutcast] = Theme.Image.JOPreviewBackground,
+			[Game.Quake3] = Theme.Image.Q3PreviewBackground
 		}, null);
 		set.Bind(PreviewView).For("Visibility").To("EnumBool(Game, 'Unknown')").WithConversion("InvertedVisibility");
 	}
@@ -96,10 +96,10 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 	}
 
 	private void UpdateButtonItems() {
-		shareButtonItem = new UIBarButtonItem(UIImage.GetSystemImage("square.and.arrow.up"), UIBarButtonItemStyle.Plain, (ev, sender) => {
+		shareButtonItem = new UIBarButtonItem(Theme.Image.SquareAndArrowUp, UIBarButtonItemStyle.Plain, (ev, sender) => {
 			ViewModel.ShareCommand?.Execute();
 		});
-		favouriteButtonItem = new UIBarButtonItem(IsFavourite ? UIImage.GetSystemImage("star.fill") : UIImage.GetSystemImage("star"), UIBarButtonItemStyle.Plain, (ev, sender) => {
+		favouriteButtonItem = new UIBarButtonItem(IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, UIBarButtonItemStyle.Plain, (ev, sender) => {
 			ViewModel.FavouriteCommand?.Execute();
 		});
 		NavigationItem.SetRightBarButtonItems(new []{ shareButtonItem, favouriteButtonItem }, true);
@@ -164,8 +164,8 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			var segmentsView = new UIView();
 			segmentsView.HeightAnchor.ConstraintEqualTo(60.0f).Active = true;
 			segmentsView.AddSubview(segmentedControl);
-			segmentsView.LeadingAnchor.ConstraintEqualTo(segmentedControl.LeadingAnchor, -16.0f).Active = true;
-			segmentsView.TrailingAnchor.ConstraintEqualTo(segmentedControl.TrailingAnchor, 16.0f).Active = true;
+			segmentsView.SafeAreaLayoutGuide.LeadingAnchor.ConstraintEqualTo(segmentedControl.LeadingAnchor, -16.0f).Active = true;
+			segmentsView.SafeAreaLayoutGuide.TrailingAnchor.ConstraintEqualTo(segmentedControl.TrailingAnchor, 16.0f).Active = true;
 			segmentsView.CenterYAnchor.ConstraintEqualTo(segmentedControl.CenterYAnchor, 0.0f).Active = true;
 			scoreboardView = new UIView() {
 				Hidden = SelectedSegment != 0
@@ -187,9 +187,9 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			scoreboardView.HeightAnchor.ConstraintEqualTo(23.0f).Active = true;
 			scoreboardView.AddSubview(playerLabel);
 			scoreboardView.AddSubview(scoreLabel);
-			scoreboardView.LeadingAnchor.ConstraintEqualTo(playerLabel.LeadingAnchor, -16.0f).Active = true;
+			scoreboardView.SafeAreaLayoutGuide.LeadingAnchor.ConstraintEqualTo(playerLabel.LeadingAnchor, -16.0f).Active = true;
 			scoreboardView.TopAnchor.ConstraintEqualTo(playerLabel.TopAnchor, 0.0f).Active = true;
-			scoreboardView.TrailingAnchor.ConstraintEqualTo(scoreLabel.TrailingAnchor, 16.0f).Active = true;
+			scoreboardView.SafeAreaLayoutGuide.TrailingAnchor.ConstraintEqualTo(scoreLabel.TrailingAnchor, 16.0f).Active = true;
 			scoreboardView.TopAnchor.ConstraintEqualTo(scoreLabel.TopAnchor, 0.0f).Active = true;
 			playerLabel.TrailingAnchor.ConstraintEqualTo(scoreLabel.LeadingAnchor, 16.0f).Active = true;
 			var headerStackView = new UIStackView(new []{ segmentsView, scoreboardView }) {
@@ -222,7 +222,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 				}
 			}
 		}
-		protected bool TryDoAnimatedChange(NotifyCollectionChangedEventArgs args) {
+		protected new bool TryDoAnimatedChange(NotifyCollectionChangedEventArgs args) {
 			if (args == null) {
 				return false;
 			}

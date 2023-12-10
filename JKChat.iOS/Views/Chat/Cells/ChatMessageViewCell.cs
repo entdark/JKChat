@@ -45,7 +45,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 			PlayerNameLabel.Font = UIFont.GetMonospacedSystemFont(17.0f, UIFontWeight.Regular);
 			MessageTextView.Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular);
-			TimeLabel.Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular);
+			TimeLabel.Font = UIFont.GetMonospacedSystemFont(12.0f, UIFontWeight.Regular);
 		}
 	}
 }

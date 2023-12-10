@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,22 +10,27 @@ using JKChat.Core.Navigation.Parameters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
-
+using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.ServerList.Items;
 using JKClient;
 
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 using MvvmCross.Commands;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 
+[assembly: MvxNavigation(typeof(ServerInfoViewModel), @"jkchat://info\?address=(?<address>.*)")]
 namespace JKChat.Core.ViewModels.Chat {
-	public class ServerInfoViewModel : BaseServerViewModel<ServerInfoParameter> {
-		private readonly ICacheService cacheService;
+	public class ServerInfoViewModel : BaseServerViewModel<ServerInfoParameter>, IFromRootNavigatingViewModel {
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
 		private readonly object serverInfoLocker = new();
-
+		
+		private string address;
+		private GameClient gameClient;
 		private bool loadData;
+		private bool hasDeaths;
 
 		private ServerInfo serverInfo;
 		internal ServerInfo ServerInfo {
@@ -76,14 +82,13 @@ namespace JKChat.Core.ViewModels.Chat {
 			set => SetProperty(ref isFavourite, value);
 		}
 
-		public List<KeyValueItemVM> PrimaryInfoItems { get; init; }
-		public LimitedObservableCollection<KeyValueItemVM> FullInfoItems { get; init; }
-		public LimitedObservableCollection<KeyValueItemVM> PlayerItems { get; init; }
-		public TabItems []AllSecondaryItems { get; init; }
-		public LimitedObservableCollection<KeyValueItemVM> AllItems { get; init; }
+		public List<KeyValueItemVM> PrimaryInfoItems { get; init; } //first 4 items
+		public MvxObservableCollection<KeyValueItemVM> PlayerItems { get; init; } //first tab items
+		public MvxObservableCollection<KeyValueItemVM> FullInfoItems { get; init; } //second tab items
+		public TabItems []AllSecondaryItems { get; init; } //array of 2 collections of first and second tab items
+		public MvxObservableCollection<KeyValueItemVM> AllItems { get; init; } //first 4 items + either first tab items or second tab items
 
-		public ServerInfoViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
-			this.cacheService = cacheService;
+		public ServerInfoViewModel(IGameClientsService gameClientsService, IServerListService serverListService) {
 			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
 			ConnectCommand = new MvxAsyncCommand(ConnectExecute);
@@ -96,32 +101,57 @@ namespace JKChat.Core.ViewModels.Chat {
 				new() { Key = "Players online" },
 				new() { Key = "Game type" }
 			});
-			FullInfoItems = new(512);
-			PlayerItems = new(512);
+			FullInfoItems = new();
+			PlayerItems = new();
 			AllSecondaryItems = new TabItems[] {
-				new(0, PlayerItems),
-				new(1, FullInfoItems)
+				new(0, "Scoreboard", PlayerItems),
+				new(1, "Server info", FullInfoItems)
 			};
-			AllItems = new(512);
-			AllItems.ReplaceWith(PrimaryInfoItems);
+			AllItems = new(PrimaryInfoItems);
 		}
 
 		public override void Prepare(ServerInfoParameter parameter) {
-			ServerInfo = parameter.ServerInfo;
-			Status = parameter.Status;
-			IsFavourite = parameter.IsFavourite;
 			loadData = parameter.LoadInfo;
+//			address = parameter.ServerInfo.Address.ToString();
+			Prepare(parameter.ServerInfo, parameter.IsFavourite, parameter.Status, parameter.LoadInfo);
 		}
 
-		protected override async Task BackgroundInitialize() {
-			if (loadData) {
-				await LoadData();
+		private void Prepare(ServerInfo serverInfo, bool isFavourite, JKChat.Core.Models.ConnectionStatus status, bool loadData) {
+			ServerInfo = serverInfo;
+			Status = status;
+			IsFavourite = isFavourite;
+			if (!loadData) {
+				gameClient = gameClientsService.GetOrStartClient(ServerInfo);
+				hasDeaths = gameClient.Modification == GameModification.JAPlus;
 			}
+		}
+
+		public void Init(string address) {
+			if (string.IsNullOrEmpty(this.address))
+				this.address = address;
+		}
+
+		protected override void SaveStateToBundle(IMvxBundle bundle) {
+			base.SaveStateToBundle(bundle);
+			bundle.Data[nameof(address)] = ServerInfo?.Address?.ToString() ?? string.Empty;
+			bundle.Data[nameof(loadData)] = loadData.ToString();
+		}
+
+		protected override void ReloadFromBundle(IMvxBundle state) {
+			base.ReloadFromBundle(state);
+			if (state.Data.TryGetValue(nameof(this.address), out string address))
+				this.address = address;
+			if (state.Data.TryGetValue(nameof(this.address), out string loadData))
+				_ = bool.TryParse(loadData, out this.loadData);
+		}
+
+		protected override Task BackgroundInitialize() {
+			return LoadData();
 		}
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
-			if (ServerInfo.Address == message.ServerInfo.Address) {
+			if (ServerInfo == message.ServerInfo) {
 				Status = message.Status;
 				ServerInfo = message.ServerInfo;
 			}
@@ -129,16 +159,62 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		protected override void OnFavouriteMessage(FavouriteMessage message) {
 			base.OnFavouriteMessage(message);
-			if (ServerInfo.Address == message.ServerInfo.Address) {
+			if (ServerInfo == message.ServerInfo) {
 				IsFavourite = message.IsFavourite;
 			}
 		}
 
+		public bool ShouldLetOtherNavigateFromRoot(object data) {
+			if (data is ServerInfo serverInfo)
+				return this.ServerInfo != serverInfo;
+			else if (data is string s && NetAddress.FromString(s) is { } address)
+				return this.ServerInfo.Address != address;
+			return true;
+		}
+
 		private async Task LoadData() {
+			if (!loadData && ServerInfo != null)
+				return;
 			IsLoading = true;
-			var serverInfo = await this.serverListService.GetServerInfo(ServerInfo);
-			ServerInfo = serverInfo ?? ServerInfo;
-			IsLoading = false;
+			try {
+				if (ServerInfo == null) {
+					if (!string.IsNullOrEmpty(this.address)) {
+						var server = await ServerListItemVM.FindExistingOrLoad(this.address);
+						if (server == null) {
+							await DialogService.ShowAsync(new JKDialogConfig() {
+								Title = "Failed to Load",
+								Message = $"There is no server with address \"{address}\" {server}",
+								OkText = "OK",
+								OkAction = _ => {
+									Task.Run(close);
+								}
+							});
+							return;
+						}
+						Prepare(server.ServerInfo, server.IsFavourite, server.Status, loadData);
+					} else {
+						await DialogService.ShowAsync(new JKDialogConfig() {
+							Title = "Failed to Load",
+							Message = $"Server address is empty",
+							OkText = "OK",
+							OkAction = _ => {
+								Task.Run(close);
+							}
+						});
+						return;
+					}
+				}
+				var serverInfo = await this.serverListService.GetServerInfo(ServerInfo);
+				ServerInfo = serverInfo ?? ServerInfo;
+			} catch (Exception exception) {
+				await ExceptionCallback(exception);
+			} finally {
+				IsLoading = false;
+			}
+
+			async Task close() {
+				await NavigationService.Close(this);
+			}
 		}
 
 		private void UpdateServerInfo(bool tabChanged = false) {
@@ -151,7 +227,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				PrimaryInfoItems[2].Value = $"{ServerInfo.Clients}/{ServerInfo.MaxClients}";
 				PrimaryInfoItems[3].Value = ServerInfo.GameType.ToDisplayString(ServerInfo.Version);
 				if (ServerInfo.RawInfo != null) {
-					FullInfoItems.ReplaceWith<int>(ServerInfo.RawInfo?.Select(kv => new KeyValueItemVM() { Key = kv.Key, Value = kv.Value }), (oldItem, newItem) => {
+					FullInfoItems.MergeWith(ServerInfo.RawInfo?.Select(kv => new KeyValueItemVM() { Key = kv.Key, Value = kv.Value }), (oldItem, newItem) => {
 						bool theSame = oldItem.Key == newItem.Key;
 						if (theSame) {
 							oldItem.Value = newItem.Value;
@@ -160,7 +236,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					});
 				}
 				if (ServerInfo.Players != null) {
-					PlayerItems.ReplaceWith(ServerInfo.Players.Select(player => new KeyValueItemVM() { Key = player.Name, Value = player.Score.ToString(), Data = player }), (oldItem, newItem) => {
+					PlayerItems.MergeWith(ServerInfo.Players.Select(player => new KeyValueItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Data = player }), (oldItem, newItem) => {
 						bool theSame = oldItem.Data is ServerInfo.PlayerInfo oldPlayer
 							&& newItem.Data is ServerInfo.PlayerInfo newPlayer
 							&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
@@ -179,7 +255,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					if (tabChanged) {
 						AllItems.ReplaceWith(PrimaryInfoItems.Concat(PlayerItems));
 					} else {
-						AllItems.ReplaceWith(PrimaryInfoItems.Concat(PlayerItems), (oldItem, newItem) => {
+						AllItems.MergeWith(PrimaryInfoItems.Concat(PlayerItems), (oldItem, newItem) => {
 							if (PrimaryInfoItems.Contains(oldItem) || PrimaryInfoItems.Contains(newItem)) {
 								return oldItem == newItem;
 							} else {
@@ -204,7 +280,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					if (tabChanged) {
 						AllItems.ReplaceWith(PrimaryInfoItems.Concat(FullInfoItems));
 					} else {
-						AllItems.ReplaceWith<int>(PrimaryInfoItems.Concat(FullInfoItems), (oldItem, newItem) => {
+						AllItems.MergeWith(PrimaryInfoItems.Concat(FullInfoItems), (oldItem, newItem) => {
 							if (PrimaryInfoItems.Contains(oldItem) || PrimaryInfoItems.Contains(newItem)) {
 								return oldItem == newItem;
 							} else {
@@ -223,8 +299,8 @@ namespace JKChat.Core.ViewModels.Chat {
 		private async Task ConnectExecute() {
 			if (Status == Models.ConnectionStatus.Disconnected) {
 				await NavigationService.Close(this);
-				if (loadData)
-					await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(ServerInfo) { IsFavourite = IsFavourite, Status = Status });
+				if (loadData || !string.IsNullOrEmpty(this.address))
+					await NavigationService.NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(ServerInfo) { IsFavourite = IsFavourite, Status = Status }, ServerInfo);
 			} else {
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Disconnect",
@@ -232,7 +308,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					CancelText = "No",
 					OkText = "Yes",
 					OkAction = _ => {
-						gameClientsService.GetOrStartClient(ServerInfo).Disconnect();
+						gameClient?.Disconnect();
 						NavigationService.Close(this);
 					}
 				});
@@ -254,10 +330,12 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public class TabItems {
-			public int Tab { get; init; }
+			public int TabIndex { get; init; }
+			public string TabTitle { get; init; }
 			public MvxObservableCollection<KeyValueItemVM> Items { get; init; }
-			public TabItems(int tab, MvxObservableCollection<KeyValueItemVM> items) {
-				Tab = tab;
+			public TabItems(int tab, string tabTitle, MvxObservableCollection<KeyValueItemVM> items) {
+				TabIndex = tab;
+				TabTitle = tabTitle;
 				Items = items;
 			}
 		}

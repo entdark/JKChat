@@ -16,6 +16,15 @@ namespace JKChat.iOS.Views.ServerList {
 	public partial class ServerListViewController : BaseViewController<ServerListViewModel> {
 		private UISearchBar searchBar;
 
+		private bool filterApplied;
+		public bool FilterApplied {
+			get => filterApplied;
+			set {
+				filterApplied = value;
+				UpdateButtonItems();
+			}
+		}
+
 		public ServerListViewController() : base("ServerListViewController", null) {}
 
 		public override void LoadView() {
@@ -53,6 +62,7 @@ namespace JKChat.iOS.Views.ServerList {
 			set.Bind(refreshControl).For(r => r.IsRefreshing).To(vm => vm.IsRefreshing);
 			set.Bind(refreshControl).For(r => r.RefreshCommand).To(vm => vm.RefreshCommand);
 			set.Bind(searchBar).To(vm => vm.SearchText);
+			set.Bind(this).For(v => v.FilterApplied).To(vm => vm.FilterApplied);
 		}
 
 		private void CancelButtonClicked(object sender, EventArgs ev) {
@@ -66,19 +76,24 @@ namespace JKChat.iOS.Views.ServerList {
 		public override void ViewWillAppear(bool animated) {
 			base.ViewWillAppear(animated);
 
-			var addButtomItem = new UIBarButtonItem(UIBarButtonSystemItem.Add, (sender, ev) => {
-				ViewModel.AddServerCommand?.Execute();
-			});
-			var filterButtomItem = new UIBarButtonItem(UIImage.GetSystemImage("line.3.horizontal.decrease.circle"), UIBarButtonItemStyle.Plain, (sender, ev) => {
-				ViewModel.FilterCommand?.Execute();
-			});
-
-			NavigationItem.RightBarButtonItems = new []{ addButtomItem, filterButtomItem };
+			UpdateButtonItems();
+			
 			NavigationItem.LargeTitleDisplayMode = UINavigationItemLargeTitleDisplayMode.Always;
 			NavigationController.NavigationBar.PrefersLargeTitles = true;
 		}
 
 		#endregion
+
+		private void UpdateButtonItems() {
+			var addButtomItem = new UIBarButtonItem(Theme.Image.PlusCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+				ViewModel.AddServerCommand?.Execute();
+			});
+			var filterButtomItem = new UIBarButtonItem(FilterApplied ? Theme.Image.Line3HorizontalDecreaseCircleFill : Theme.Image.Line3HorizontalDecreaseCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+				ViewModel.FilterCommand?.Execute();
+			});
+
+			NavigationItem.SetRightBarButtonItems(new []{ addButtomItem, filterButtomItem }, true);
+		}
 
 		public override MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {
 			return null;

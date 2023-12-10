@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using JKChat.Core.Navigation.Hints;
+using JKChat.Core.ViewModels.Base;
 using JKChat.iOS.Views.Main;
 
 using MvvmCross.Platforms.Ios.Presenters;
@@ -44,7 +45,8 @@ namespace JKChat.iOS.Presenter {
 		public override async Task<bool> ChangePresentation(MvxPresentationHint hint) {
 			if (hint is PopToRootPresentationHint popToRootHint) {
 				var splitViewController = SplitViewController as MvxSplitViewController;
-				if (popToRootHint.ViewModelType != null && splitViewController?.ViewControllers?.Length >= 2) {
+				int splitViewViewControllersMinCount = IsCollapsed ? 1 : 2;
+				if (popToRootHint.ViewModelType != null && splitViewController?.ViewControllers?.Length >= splitViewViewControllersMinCount) {
 					var request = new MvxViewModelInstanceRequest(popToRootHint.ViewModelType);
 					var attributeAction = GetPresentationAttributeAction(request, out var attribute);
 					if (attribute is MvxSplitViewPresentationAttribute splitViewAttribute && splitViewAttribute.Position == MasterDetailPosition.Detail)
@@ -57,7 +59,10 @@ namespace JKChat.iOS.Presenter {
 //							while (navigationController.ViewControllers?.Length > 1)
 							{
 								var closeViewController = navigationController.ViewControllers.LastOrDefault();
-								if (closeViewController is IMvxIosView { ViewModel: IMvxViewModel viewModel } && (popToRootHint.Condition?.Invoke(viewModel) ?? true)) {
+								if (closeViewController is MvxNavigationController navigationController2)
+									closeViewController = navigationController2.ViewControllers?.LastOrDefault();
+								if (closeViewController is IMvxIosView { ViewModel: IMvxViewModel viewModel } && (viewModel.GetType() != popToRootHint.ViewModelType
+									|| (viewModel is IFromRootNavigatingViewModel fromRootViewModel && fromRootViewModel.ShouldLetOtherNavigateFromRoot(popToRootHint.Data)))) {
 									await Close(viewModel);
 								} else {
 									popToRootHint.PoppedToRoot = false;

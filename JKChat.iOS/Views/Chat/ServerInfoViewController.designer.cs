@@ -40,6 +40,16 @@ namespace JKChat.iOS.Views.Chat
 				ConnectButton = null;
 			}
 
+			if (PreviewImageView != null) {
+				PreviewImageView.Dispose ();
+				PreviewImageView = null;
+			}
+
+			if (PreviewView != null) {
+				PreviewView.Dispose ();
+				PreviewView = null;
+			}
+
 			if (ServerInfoTableView != null) {
 				ServerInfoTableView.Dispose ();
 				ServerInfoTableView = null;
@@ -58,16 +68,6 @@ namespace JKChat.iOS.Views.Chat
 			if (TitleLabel != null) {
 				TitleLabel.Dispose ();
 				TitleLabel = null;
-			}
-
-			if (PreviewImageView != null) {
-				PreviewImageView.Dispose ();
-				PreviewImageView = null;
-			}
-
-			if (PreviewView != null) {
-				PreviewView.Dispose ();
-				PreviewView = null;
 			}
 		}
 	}

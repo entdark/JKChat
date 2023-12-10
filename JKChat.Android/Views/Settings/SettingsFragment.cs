@@ -1,6 +1,10 @@
 ﻿using Android.OS;
 using Android.Views;
 
+using AndroidX.RecyclerView.Widget;
+
+using Google.Android.Material.Divider;
+
 using JKChat.Android.Adapters;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.TemplateSelectors;
@@ -23,6 +27,7 @@ namespace JKChat.Android.Views.Settings {
 				recyclerView.Adapter = new TableGroupedRecyclerViewAdapter((IMvxAndroidBindingContext)BindingContext);
 			if (recyclerView.ItemTemplateSelector is not TableGroupedItemTemplateSelector)
 				recyclerView.ItemTemplateSelector = new TableGroupedItemTemplateSelector(false);
+			recyclerView.AddItemDecoration(new MaterialDividerItemDecoration(Context, LinearLayoutManager.Vertical));
 
 			SetUpNavigation(false);
 		}

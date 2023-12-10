@@ -8,15 +8,18 @@ using Microsoft.Maui.ApplicationModel;
 namespace JKChat.iOS.Services {
 	public class DialogService : IDialogService {
 		public async Task ShowAsync(JKDialogConfig config) {
-			await MainThread.InvokeOnMainThreadAsync(showAsync);
-			async Task showAsync() {
+			await MainThread.InvokeOnMainThreadAsync(() => Show(config));
+		}
+
+		public static void Show(JKDialogConfig config) {
+			MainThread.BeginInvokeOnMainThread(() => {
 				var dialog = new JKDialogViewController(config);
 				var viewController = Platform.GetCurrentUIViewController();
 				if (viewController is JKDialogViewController && viewController.PresentingViewController != null) {
 					viewController = viewController.PresentingViewController;
 				}
-				await viewController.PresentViewControllerAsync(dialog, true);
-			}
+				viewController.PresentViewController(dialog, true, null);
+			});
 		}
 	}
 }

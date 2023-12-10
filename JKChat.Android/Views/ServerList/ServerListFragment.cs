@@ -3,10 +3,10 @@
 using Android.OS;
 using Android.Views;
 using Android.Widget;
-using AndroidX.Core.Content;
 using AndroidX.Core.Widget;
 using AndroidX.RecyclerView.Widget;
 
+using Google.Android.Material.Badge;
 using Google.Android.Material.Button;
 using Google.Android.Material.FloatingActionButton;
 
@@ -25,10 +25,20 @@ namespace JKChat.Android.Views.ServerList {
 	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
 		//private IMenuItem copyItem;
 		private IMenuItem searchItem, filterItem;
+		private BadgeDrawable filterBadgeDrawable;
 		private MvxRecyclerView recyclerView;
 		private FloatingActionButton addButton;
 		private EditText searchView;
 		private bool searching = false;
+
+		private bool filterApplied;
+		public bool FilterApplied {
+			get => filterApplied;
+			set {
+				filterApplied = value;
+				filterBadgeDrawable.SetVisible(value);
+			}
+		}
 
 		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_items) {}
 
@@ -43,14 +53,7 @@ namespace JKChat.Android.Views.ServerList {
 					AdjustHolderOnBind = (viewHolder, position) => {
 						if (viewHolder is IMvxRecyclerViewHolder { DataContext : ServerListItemVM item }) {
 							var connectButton = viewHolder.ItemView.FindViewById<MaterialButton>(Resource.Id.connect_button);
-							bool needIcon = item.NeedPassword;
-							if (needIcon && connectButton.Icon == null) {
-								connectButton.Icon = ContextCompat.GetDrawable(viewHolder.ItemView.Context, Resource.Drawable.ic_lock);
-								connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_right), connectButton.PaddingBottom);
-							} else if (!needIcon && connectButton.Icon != null) {
-								connectButton.Icon = null;
-								connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_right), connectButton.PaddingBottom);
-							}
+							connectButton.ToggleIconButton(Resource.Drawable.ic_lock, item.NeedPassword);
 						}
 					}
 				};
@@ -70,10 +73,14 @@ namespace JKChat.Android.Views.ServerList {
 			searchView = this.BindingInflate(Resource.Layout.search_title, null, false) as EditText;
 			TextViewCompat.SetTextAppearance(searchView, Resource.Style.OnSurfaceText_BodyLarge);
 			searchView.EditorAction += Searched;
-			var lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
-			lp.RightMargin = 48.0f.DpToPx();
+			var lp = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
+				RightMargin = 48.0f.DpToPx()
+			};
 			searchView.LayoutParameters = lp;
 			SetCustomTitleView(searchView);
+
+			using var set = this.CreateBindingSet();
+			set.Bind(this).For(v => v.FilterApplied).To(vm => vm.FilterApplied);
 		}
 
 		private void Searched(object sender, TextView.EditorActionEventArgs ev) {
@@ -92,13 +99,14 @@ namespace JKChat.Android.Views.ServerList {
 			base.OnDestroyView();
 		}
 
-		public override void OnResume() {
-			base.OnResume();
-		}
-
 		public override void OnPause() {
 			base.OnPause();
 			HideKeyboard();
+		}
+
+		public override void OnResume() {
+			base.OnResume();
+			filterBadgeDrawable.SetVisible(FilterApplied);
 		}
 
 		protected override void CreateOptionsMenu() {
@@ -113,6 +121,11 @@ namespace JKChat.Android.Views.ServerList {
 				ViewModel?.FilterCommand?.Execute();
 			});
 			filterItem?.SetVisible(false, false);
+			filterBadgeDrawable = BadgeDrawable.Create(Context);
+			filterBadgeDrawable.BadgeGravity = BadgeDrawable.TopStart;
+			filterBadgeDrawable.HorizontalOffset = 36.DpToPx();
+			filterBadgeDrawable.VerticalOffset = 18.DpToPx();
+			BadgeUtils.AttachBadgeDrawable(filterBadgeDrawable, (filterItem.ActionView as ViewGroup).FindViewById(Resource.Id.toolbar_menu_item), filterItem.ActionView as FrameLayout);
 		}
 
 		protected override void ActivityExit() {

@@ -46,6 +46,8 @@ namespace JKChat.iOS {
 
 		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
+			iocProvider.RegisterSingleton<IAppService>(() => new AppService());
+			iocProvider.RegisterSingleton<INotificationsService>(() => new NotificationsService());
 			base.InitializeFirstChance(iocProvider);
 		}
 

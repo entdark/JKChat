@@ -49,4 +49,8 @@ namespace JKChat.Core.ViewModels.Base {
 	public abstract class BaseViewModel<TParameter> : BaseViewModel, IMvxViewModel<TParameter> {
 		public abstract void Prepare(TParameter parameter);
 	}
+
+	public interface IFromRootNavigatingViewModel : IMvxViewModel {
+		bool ShouldLetOtherNavigateFromRoot(object data);
+	}
 }

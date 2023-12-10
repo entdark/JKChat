@@ -16,5 +16,7 @@ namespace JKChat.Core.Services {
 		Task<IEnumerable<ServerListItemVM>> LoadReportedServers();
 		Task AddFavouriteServer(ServerListItemVM server);
 		Task<IEnumerable<ServerListItemVM>> LoadFavouriteServers();
+		Task<ServerListItemVM> GetCachedServer(ServerInfo serverInfo);
+		Task<ServerListItemVM> GetCachedServer(NetAddress address);
 	}
 }

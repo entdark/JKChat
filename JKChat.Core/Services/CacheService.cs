@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using JKChat.Core.ViewModels.ServerList.Items;
@@ -43,6 +44,7 @@ namespace JKChat.Core.Services {
 				cachedServer ??= new CachedServer(message.ServerInfo);
 				cachedServer.IsFavourite = message.IsFavourite;
 				await connection.InsertOrReplaceAsync(cachedServer);
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new WidgetFavouritesMessage(this));
 			}
 		}
 
@@ -79,7 +81,7 @@ namespace JKChat.Core.Services {
 		}
 
 		public async Task<IEnumerable<ServerListItemVM>> LoadRecentServers() {
-			return await LoadCachedServers(server => server.IsRecent);
+			return await LoadCachedServers(server => server.LastConnected != default);
 		}
 
 		public async Task AddReportedServer(ServerListItemVM server) {
@@ -103,10 +105,24 @@ namespace JKChat.Core.Services {
 		public async Task<IEnumerable<ServerListItemVM>> LoadFavouriteServers() {
 			return await LoadCachedServers(server => server.IsFavourite);
 		}
+		public async Task<ServerListItemVM> GetCachedServer(ServerInfo serverInfo) {
+			return await GetCachedServer(serverInfo.Address);
+		}
+		public async Task<ServerListItemVM> GetCachedServer(NetAddress address) {
+			return (await GetCachedServerAsync(address))?.ToServerVM();
+		}
 
-		private async Task<IEnumerable<ServerListItemVM>> LoadCachedServers(Func<CachedServer, bool> predicate) {
-			return (await connection.Table<CachedServer>().ToArrayAsync()).Where(predicate)
+		private async Task<IEnumerable<ServerListItemVM>> LoadCachedServers(Expression<Func<CachedServer, bool>> predicate) {
+			return (await connection.Table<CachedServer>().Where(predicate).ToArrayAsync())
 				.Select(recentServer => recentServer.ToServerVM());
+		}
+
+		private async Task<CachedServer> GetCachedServerAsync(ServerInfo serverInfo) {
+			return await GetCachedServerAsync(serverInfo.Address);
+		}
+
+		private async Task<CachedServer> GetCachedServerAsync(NetAddress address) {
+			return await GetAsync<CachedServer>(address.ToString());
 		}
 
 		private async Task<T> GetAsync<T>(object pk) where T : new() {
@@ -116,10 +132,6 @@ namespace JKChat.Core.Services {
 				Debug.WriteLine(exception);
 			}
 			return default;
-		}
-
-		private async Task<CachedServer> GetCachedServerAsync(ServerInfo serverInfo) {
-			return await GetAsync<CachedServer>(serverInfo.Address.ToString());
 		}
 
 		private class CachedServer {
@@ -132,6 +144,7 @@ namespace JKChat.Core.Services {
 			public bool NeedPassword { get; set; }
 			public ProtocolVersion Protocol { get; set; }
 			public ClientVersion Version { get; set; }
+			public GameType GameType { get; set; }
 			public string Modification { get; set; }
 			public DateTime LastConnected { get; set; }
 			public bool IsReported { get; set; }
@@ -162,6 +175,7 @@ namespace JKChat.Core.Services {
 				NeedPassword = serverInfo.NeedPassword;
 				Protocol = serverInfo.Protocol;
 				Version = serverInfo.Version;
+				GameType = serverInfo.GameType;
 				Modification = serverInfo.GameName;
 			}
 
@@ -174,7 +188,8 @@ namespace JKChat.Core.Services {
 					NeedPassword = this.NeedPassword,
 					Protocol = this.Protocol,
 					Version = this.Version,
-					GameName = this.Modification
+					GameName = this.Modification,
+					GameType = this.GameType
 				});
 				server.SetFavourite(this.IsFavourite);
 				return server;

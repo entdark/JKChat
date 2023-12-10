@@ -43,7 +43,7 @@ namespace JKChat.iOS.ViewSources {
 			if (dragging && ViewControllerWithKeyboard.EndKeyboardFrame.Height > (ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Frame.Height) {
 				if ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame.Y > initialKeyboardFrame.Y) {
 					if (dinsetY == nfloat.MinValue) {
-						dinsetY = chatTableView.ContentOffset.Y + chatTableView.ContentInset.Bottom + chatTableView.ExtraContentInset.Bottom;
+						dinsetY = chatTableView.ContentOffset.Y + chatTableView.ContentInset.Bottom;
 						if (UIDevice.CurrentDevice.CheckSystemVersion(15, 0)) {
 							dinsetY += ((ViewControllerWithKeyboard as UIViewController)?.NavigationController?.NavigationBar?.Frame.Height ?? 44.0f) + DeviceInfo.SafeAreaInsets.Top;
 						}
@@ -99,7 +99,7 @@ namespace JKChat.iOS.ViewSources {
 		}
 
 		private bool ScrolledToBottom(ChatTableView chatTableView) {
-			bool scrolledToBottom = (chatTableView.ContentOffset.Y + ChatTableView.SpecialOffset + chatTableView.ExtraContentInset.Bottom - DeviceInfo.SafeAreaInsets.Bottom) <= 0;
+			bool scrolledToBottom = (chatTableView.ContentOffset.Y + ChatTableView.SpecialOffset - DeviceInfo.SafeAreaInsets.Bottom) <= 0;
 //			this.UseAnimations = scrolledToBottom;
 			return scrolledToBottom;
 		}

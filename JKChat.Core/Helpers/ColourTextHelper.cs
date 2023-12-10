@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace JKChat.Core.Helpers {
 	public static partial class ColourTextHelper {
-		public static string CleanString(this string value, List<AttributeData<int>> colorAttributes = null, List<AttributeData<Uri>> uriAttributes = null, bool shadow = false) {
+		public static string CleanString(this string value, in List<AttributeData<int>> colorAttributes = null, in List<AttributeData<Uri>> uriAttributes = null, in bool shadow = false) {
 			if (string.IsNullOrEmpty(value)) {
 				return string.Empty;
 			}

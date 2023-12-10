@@ -12,12 +12,11 @@ namespace JKChat.iOS.Views.ServerList;
 public partial class FilterViewController : BaseViewController<FilterViewModel> {
 	private UIBarButtonItem resetButtonItem;
 
-	public FilterViewController() : base (nameof (FilterViewController), null) {}
+	public FilterViewController() : base(nameof(FilterViewController), null) {}
 
 	public override void LoadView() {
 		base.LoadView();
 
-		FilterTableView.ContentInset = new UIEdgeInsets(18.0f, 0.0f, 18.0f, 0.0f);
 		resetButtonItem = new UIBarButtonItem("Reset", UIBarButtonItemStyle.Plain, (sender, ev) => {});
 	}
 

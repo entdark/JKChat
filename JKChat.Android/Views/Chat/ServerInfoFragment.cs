@@ -49,7 +49,9 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		public ServerInfoFragment() : base(Resource.Layout.server_info_page, Resource.Menu.server_info_toolbar_items) {}
+		public ServerInfoFragment() : base(Resource.Layout.server_info_page, Resource.Menu.server_info_toolbar_items) {
+			PostponeTransition = true;
+		}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
@@ -61,8 +63,6 @@ namespace JKChat.Android.Views.Chat {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
-			PostponeEnterTransition(2, TimeUnit.Milliseconds);
-
 			connectButton = view.FindViewById<MaterialButton>(Resource.Id.connect_button);
 
 			var tabLayout = view.FindViewById<TabLayout>(Resource.Id.tablayout);
@@ -73,11 +73,7 @@ namespace JKChat.Android.Views.Chat {
 				};
 			viewPager.OffscreenPageLimit = 2;
 			var mediator = new TabLayoutMediator(tabLayout, viewPager, new TabConfigurationStrategy((tab, position) => {
-				string tabText = position switch {
-					0 => "Scoreboard",
-					1 => "Server info",
-					_ => string.Empty
-				};
+				string tabText = ViewModel.AllSecondaryItems[position].TabTitle;
 				tab.SetText(tabText);
 			}));
 			mediator.Attach();
@@ -117,17 +113,7 @@ namespace JKChat.Android.Views.Chat {
 		}
 
 		private void UpdateConnectButton() {
-			if (connectButton == null)
-				return;
-
-			bool needIcon = NeedPassword;
-			if (needIcon && connectButton.Icon == null) {
-				connectButton.Icon = ContextCompat.GetDrawable(Context, Resource.Drawable.ic_lock);
-				connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_icon_btn_padding_right), connectButton.PaddingBottom);
-			} else if (!needIcon && connectButton.Icon != null) {
-				connectButton.Icon = null;
-				connectButton.SetPadding(Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_left), connectButton.PaddingTop, Context.GetDimensionInPx(Resource.Dimension.m3_btn_padding_right), connectButton.PaddingBottom);
-			}
+			connectButton?.ToggleIconButton(Resource.Drawable.ic_lock, NeedPassword);
 		}
 
 		private class TabConfigurationStrategy : Java.Lang.Object, TabLayoutMediator.ITabConfigurationStrategy {
@@ -155,7 +141,7 @@ namespace JKChat.Android.Views.Chat {
 			}
 
 			protected override int SelectItemViewType(TabItems forItemObject) {
-				return forItemObject.Tab switch {
+				return forItemObject.TabIndex switch {
 					0 => PlayersViewType,
 					1 => FullInfoViewType,
 					_ => throw new Exception("Item for view type is invalid")

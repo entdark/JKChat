@@ -212,7 +212,7 @@ namespace JKChat.iOS.Views.Chat {
 				Font = UIFont.FromDescriptor(UIFontDescriptor.GetPreferredDescriptorForTextStyle(UIFontTextStyle.Body).CreateWithTraits(UIFontDescriptorSymbolicTraits.Bold), 0.0f),
 			};
 
-			statusImageView = new UIImageView(UIImage.GetSystemImage("circle.fill", UIImageSymbolConfiguration.Create(UIFontTextStyle.Caption1, UIImageSymbolScale.Small)));
+			statusImageView = new UIImageView(Theme.Image.CircleFill_Caption1Small);
 
 			statusLabel = new UILabel() {
 				TextColor = UIColor.SecondaryLabel,
@@ -246,18 +246,18 @@ namespace JKChat.iOS.Views.Chat {
 		private void UpdateMoreButtonItem() {
 			if (moreButtonItem == null)
 				return;
-			var disconnectAction = UIAction.Create("Disconnect & exit", UIImage.GetSystemImage("door.left.hand.open"), null, action => {
+			var disconnectAction = UIAction.Create("Disconnect & exit", Theme.Image.DoorLeftHandOpen, null, action => {
 				ViewModel.DisconnectCommand?.Execute();
 			});
 			disconnectAction.Attributes = UIMenuElementAttributes.Destructive;
 			var menu = UIMenu.Create(new UIMenuElement []{
-				UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? UIImage.GetSystemImage("star.fill") : UIImage.GetSystemImage("star"), null, action => {
+				UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, null, action => {
 					ViewModel.FavouriteCommand?.Execute();
 				}),
-				UIAction.Create("Share", UIImage.GetSystemImage("square.and.arrow.up"), null, action => {
+				UIAction.Create("Share", Theme.Image.SquareAndArrowUp, null, action => {
 					ViewModel.ShareCommand?.Execute();
 				}),
-				UIAction.Create("Info", UIImage.GetSystemImage("info.circle"), null, action => {
+				UIAction.Create("Info", Theme.Image.InfoCircle, null, action => {
 					ViewModel.ServerInfoCommand?.Execute();
 				}),
 				disconnectAction
@@ -322,7 +322,7 @@ namespace JKChat.iOS.Views.Chat {
 			//HACK: to blur NavigationBar since it starts blurring after scrolling
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset-1.0f), false);
 
-			moreButtonItem = new UIBarButtonItem(UIImage.GetSystemImage("ellipsis.circle"), null);
+			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);
 			UpdateMoreButtonItem();
 
 			NavigationItem.RightBarButtonItem = moreButtonItem;
@@ -365,15 +365,15 @@ namespace JKChat.iOS.Views.Chat {
 			switch (ChatType) {
 			default:
 			case ChatType.Common:
-				image = UIImage.GetSystemImage("person.3.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				image = Theme.Image.Person3Fill_Small;
 				tintColor = UIColor.FromRGB(0, 255, 0);
 				break;
 			case ChatType.Team:
-				image = UIImage.GetSystemImage("person.2.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				image = Theme.Image.Person2Fill_Small;
 				tintColor = UIColor.FromRGB(0, 255, 255);
 				break;
 			case ChatType.Private:
-				image = UIImage.GetSystemImage("person.fill", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Small));
+				image = Theme.Image.PersonFill_Small;
 				tintColor = UIColor.FromRGB(255, 0, 255);
 				break;
 			}

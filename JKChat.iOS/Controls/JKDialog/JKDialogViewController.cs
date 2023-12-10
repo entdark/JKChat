@@ -45,7 +45,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 
 			TitleLabel.Text = config.Title;
 
-			string message = (config.HasInput && config.Input.HintAsColourText) ? config.Input.Text : config.Message;
+			string message = (config.HasInput && config.Input.HintAsColourText) ? config.Input.Hint : config.Message;
 			SetMessageText(message);
 
 			if (config.HasCancel) {
@@ -78,7 +78,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 					ItemsSource = list.Items,
 					SelectionChangedCommand = new MvxCommand<DialogItemVM>(item => {
 						switch (list.SelectionType) {
-							case DialogSelectionType.NoSelection:
+							case DialogSelectionType.InstantSelection:
 								item.IsSelected = true;
 								ButtonTouchUpInside(config.OkAction);
 								break;
@@ -173,6 +173,9 @@ namespace JKChat.iOS.Controls.JKDialog {
 					DialogView.Transform = CGAffineTransform.MakeScale(1.0f, 1.0f);
 					DialogView.Alpha = 1.0f;
 				});
+			}
+			if (config.HasInput) {
+				InputTextField.BecomeFirstResponder();
 			}
 		}
 

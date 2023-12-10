@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
@@ -11,7 +13,8 @@ using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 
 using Microsoft.Maui.ApplicationModel;
-
+using Microsoft.Maui.Devices;
+using MvvmCross;
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
 
@@ -34,23 +37,20 @@ namespace JKChat.Core.ViewModels.Settings {
 			Items = new() {
 				new() {
 					Items = new() {
-						new TableToggleItemVM() {
-							Title = "Notifications",
-							IsChecked = true
-						}
-					}
-				},
-				new() {
-					Items = new() {
 						(playerNameItem = new() {
 							Title = "Player Name",
 							Value = AppSettings.PlayerName,
 							OnClick = PlayerNameExecute
-						})
-					}
-				},
-				new() {
-					Items = new() {
+						}),
+						new TableToggleItemVM() {
+							Title = "OpenJK Colours",
+							IsChecked = AppSettings.OpenJKColours,
+							Toggled = item => {
+								AppSettings.OpenJKColours = item.IsChecked;
+								playerNameItem.Value = string.Empty;
+								playerNameItem.Value = AppSettings.PlayerName;
+							}
+						},
 						new TableValueItemVM() {
 							Title = "Encoding",
 							Value = jkclientService.Encoding.EncodingName,
@@ -60,19 +60,43 @@ namespace JKChat.Core.ViewModels.Settings {
 				},
 				new() {
 					Items = new() {
+						new TableNavigationItemVM() {
+							Title = "Notifications",
+							OnClick = NotificationsExecute
+						},
+						new TableValueItemVM() {
+							Title = "Widget Navigation",
+							Value = AppSettings.WidgetLink.ToDisplayString(),
+							OnClick = WidgetLinkExecute
+						},
+						new TableValueItemVM() {
+							Title = "Theme",
+							Value = AppSettings.AppTheme.ToString(),
+							OnClick = AppThemeExecute
+						}
+					}
+				}
+			};
+			if (DeviceInfo.Platform.IsApple()) {
+				Items.Add(new() {
+					Items = new() {
 						new TableToggleItemVM() {
 							Title = "Location Updates",
 							IsChecked = AppSettings.LocationUpdate,
 							Toggled = item => AppSettings.LocationUpdate = item.IsChecked
 						}
 					}
-				}
-			};
+				});
+			}
 			playerNameMessageToken ??= Messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 		}
 
 		private async Task ItemClickExecute(TableItemVM item) {
 			await item.ClickCommand.ExecuteAsync();
+		}
+
+		private async Task NotificationsExecute(TableNavigationItemVM item) {
+			await NavigationService.NavigateFromRoot<NotificationsViewModel>();
 		}
 
 		private async Task PlayerNameExecute(TableValueItemVM item) {
@@ -106,6 +130,52 @@ namespace JKChat.Core.ViewModels.Settings {
 						jkclientService.SetEncodingById(id);
 						item.Value = jkclientService.Encoding.EncodingName;
 						AppSettings.EncodingId = id;
+					}
+				},
+				List = dialogList
+			});
+		}
+
+		private async Task WidgetLinkExecute(TableValueItemVM item) {
+			var dialogList = new DialogListViewModel(Enum.GetValues<WidgetLink>().Select(widgetLink => {
+				return new DialogItemVM() {
+					Id = widgetLink,
+					Name = widgetLink.ToDisplayString(),
+					IsSelected = widgetLink == AppSettings.WidgetLink
+				};
+			}), DialogSelectionType.SingleSelection);
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Widget Navigation",
+				CancelText = "Cancel",
+				OkText = "OK",
+				OkAction = config => {
+					if (config?.List?.SelectedItem is { } selectedItem) {
+						var widgetLink = (WidgetLink)selectedItem.Id;
+						AppSettings.WidgetLink = widgetLink;
+						item.Value = widgetLink.ToDisplayString();
+					}
+				},
+				List = dialogList
+			});
+		}
+
+		private async Task AppThemeExecute(TableValueItemVM item) {
+			var dialogList = new DialogListViewModel(Enum.GetValues<Models.AppTheme>().Select(theme => {
+				return new DialogItemVM() {
+					Id = theme,
+					Name = theme.ToString(),
+					IsSelected = theme == AppSettings.AppTheme
+				};
+			}), DialogSelectionType.SingleSelection);
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Select Theme",
+				CancelText = "Cancel",
+				OkText = "OK",
+				OkAction = config => {
+					if (config?.List?.SelectedItem is { } selectedItem) {
+						var theme = (Models.AppTheme)selectedItem.Id;
+						AppSettings.AppTheme = theme;
+						item.Value = theme.ToString();
 					}
 				},
 				List = dialogList

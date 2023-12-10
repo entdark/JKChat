@@ -15,7 +15,6 @@ using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
 
 using Java.Lang;
-using Java.Util.Concurrent;
 
 using JKChat.Android.Adapters;
 using JKChat.Android.Controls;
@@ -84,7 +83,9 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		public ChatFragment() : base(Resource.Layout.chat_page, Resource.Menu.chat_toolbar_items) {}
+		public ChatFragment() : base(Resource.Layout.chat_page, Resource.Menu.chat_toolbar_items) {
+			PostponeTransition = true;
+		}
 
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 			var view = base.OnCreateView(inflater, container, savedInstanceState);
@@ -97,8 +98,6 @@ namespace JKChat.Android.Views.Chat {
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
-
-			PostponeEnterTransition(2, TimeUnit.Milliseconds);
 
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
@@ -193,6 +192,7 @@ namespace JKChat.Android.Views.Chat {
 			copyItem = Menu.FindItem(Resource.Id.copy_item);
 			copyItem.SetClickAction(() => {
 				ViewModel?.CopyCommand?.Execute(SelectedItem);
+				CloseSelection();
 			});
 		}
 
@@ -222,13 +222,13 @@ namespace JKChat.Android.Views.Chat {
 
 		private static void ScaleButton(View view, bool show, bool animated = true) {
 			float scale = show ? 1.0f : 0.0f;
-			if (scale == 1.0f)
+			if (show)
 				view.Visibility = ViewStates.Visible;
 			if (!animated) {
 				view.ScaleX = scale;
 				view.ScaleY = scale;
 				view.Alpha = scale;
-				if (scale == 0.0f)
+				if (!show)
 					view.Visibility = ViewStates.Gone;
 				return;
 			}
@@ -239,7 +239,7 @@ namespace JKChat.Android.Views.Chat {
 				.SetDuration(200)
 				.SetInterpolator(new DecelerateInterpolator())
 				.WithEndAction(new Runnable(() => {
-					if (scale == 0.0f)
+					if (!show)
 						view.Visibility = ViewStates.Gone;
 				}))
 				.Start();
@@ -349,14 +349,14 @@ namespace JKChat.Android.Views.Chat {
 
 		public class LongClickLinkMovementMethod : LinkMovementMethod {
 			private static readonly int LongClickTime = ViewConfiguration.LongPressTimeout;
-			private Handler longClickHandler;
+			private readonly Handler longClickHandler = new Handler(Looper.MainLooper);
 			private bool isLongPressed = false;
 
 			public override bool OnTouchEvent(TextView widget, ISpannable buffer, MotionEvent ev) {
 				var action = ev.Action;
 
 				if (action == MotionEventActions.Cancel) {
-					longClickHandler?.RemoveCallbacksAndMessages(null);
+					longClickHandler.RemoveCallbacksAndMessages(null);
 				}
 
 				if (action == MotionEventActions.Up || action == MotionEventActions.Down) {
@@ -376,7 +376,7 @@ namespace JKChat.Android.Views.Chat {
 					var link = buffer.GetSpans(offset, offset, Java.Lang.Class.FromType(typeof(LinkClickableSpan)));
 
 					if (action == MotionEventActions.Up) {
-						longClickHandler?.RemoveCallbacksAndMessages(null);
+						longClickHandler.RemoveCallbacksAndMessages(null);
 						if (link.Length != 0 && !isLongPressed) {
 							(link[0] as LinkClickableSpan).OnClick(widget);
 						}
@@ -406,7 +406,6 @@ namespace JKChat.Android.Views.Chat {
 				get {
 					if (instance == null) {
 						instance = new LongClickLinkMovementMethod();
-						instance.longClickHandler = new Handler(Looper.MainLooper);
 					}
 					return instance;
 				}

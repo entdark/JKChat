@@ -16,20 +16,12 @@ namespace JKChat.iOS.Controls {
 		public static float SpecialOffset => !DeviceInfo.IsRunningOnMacOS ? 1337.0f : 0.0f;
 		public IKeyboardViewController KeyboardViewController { get; set; }
 		public override UIEdgeInsets ContentInset {
-			get => new UIEdgeInsets(base.ContentInset.Bottom - ExtraContentInset.Bottom, base.ContentInset.Left - ExtraContentInset.Left, base.ContentInset.Top - ExtraContentInset.Top, base.ContentInset.Right - ExtraContentInset.Right);
-			set => base.ContentInset = new UIEdgeInsets(value.Bottom + ExtraContentInset.Bottom, value.Left + ExtraContentInset.Left, value.Top + ExtraContentInset.Top, value.Right + ExtraContentInset.Right);
+			get => new(base.ContentInset.Bottom, base.ContentInset.Left, base.ContentInset.Top, base.ContentInset.Right);
+			set => base.ContentInset = new(value.Bottom, value.Left, value.Top, value.Right);
 		}
-		public override UIEdgeInsets ScrollIndicatorInsets {
-			get => new UIEdgeInsets(base.ScrollIndicatorInsets.Bottom, base.ScrollIndicatorInsets.Left, base.ScrollIndicatorInsets.Top, base.ScrollIndicatorInsets.Right);
-			set => base.ScrollIndicatorInsets = new UIEdgeInsets(value.Bottom, value.Left, value.Top, value.Right);
-		}
-		private UIEdgeInsets extraContentInset = UIEdgeInsets.Zero;
-		public UIEdgeInsets ExtraContentInset {
-			get => extraContentInset;
-			set {
-				extraContentInset = value;
-				base.ContentInset = new UIEdgeInsets(base.ContentInset.Bottom + value.Bottom, base.ContentInset.Left + value.Left, base.ContentInset.Top + value.Top, base.ContentInset.Right + value.Right);
-			}
+		public override UIEdgeInsets VerticalScrollIndicatorInsets {
+			get => new(base.VerticalScrollIndicatorInsets.Bottom, base.VerticalScrollIndicatorInsets.Left, base.VerticalScrollIndicatorInsets.Top, base.VerticalScrollIndicatorInsets.Right);
+			set => base.VerticalScrollIndicatorInsets = new(value.Bottom, value.Left, value.Top, value.Right);
 		}
 		private bool scrolledToBottom = true;
 		public bool ScrolledToBottom {

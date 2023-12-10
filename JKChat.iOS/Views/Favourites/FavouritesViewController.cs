@@ -13,7 +13,7 @@ namespace JKChat.iOS.Views.Favourites;
 
 [MvxTabPresentation(WrapInNavigationController = true, TabName = "Favourites", TabIconName = "star.fill")]
 public partial class FavouritesViewController : BaseViewController<FavouritesViewModel> {
-	public FavouritesViewController () : base (nameof (FavouritesViewController), null) {
+	public FavouritesViewController() : base(nameof(FavouritesViewController), null) {
 	}
 
 	public override void LoadView() {

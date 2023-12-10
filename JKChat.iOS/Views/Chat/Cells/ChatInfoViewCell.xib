@@ -56,16 +56,25 @@
                             <constraint firstItem="okn-zb-46m" firstAttribute="height" secondItem="rW6-JP-mWU" secondAttribute="height" id="opi-OO-iL5"/>
                         </constraints>
                     </scrollView>
+                    <view userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tpy-3f-2ul">
+                        <rect key="frame" x="188" y="0.0" width="85" height="76"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="85" id="dmZ-fp-V9m"/>
+                        </constraints>
+                    </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="4WJ-xY-VH1" secondAttribute="bottom" id="7On-ff-za6"/>
                     <constraint firstItem="rW6-JP-mWU" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" id="AeO-ou-fr9"/>
+                    <constraint firstItem="KqL-1f-M7E" firstAttribute="leading" secondItem="tpy-3f-2ul" secondAttribute="trailing" id="F1N-va-DlX"/>
                     <constraint firstItem="KqL-1f-M7E" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" constant="10" id="Oia-Nj-pbr"/>
+                    <constraint firstAttribute="bottom" secondItem="tpy-3f-2ul" secondAttribute="bottom" id="TMy-gO-DKK"/>
                     <constraint firstItem="rW6-JP-mWU" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" constant="8" id="TR6-JQ-L22"/>
                     <constraint firstAttribute="bottom" secondItem="rW6-JP-mWU" secondAttribute="bottom" constant="8" id="WxO-dh-Wgz"/>
                     <constraint firstItem="KqL-1f-M7E" firstAttribute="leading" secondItem="4WJ-xY-VH1" secondAttribute="trailing" constant="10" id="ZDv-ol-Qay"/>
                     <constraint firstItem="KqL-1f-M7E" firstAttribute="leading" secondItem="rW6-JP-mWU" secondAttribute="trailing" constant="16" id="c8Z-sN-LlL"/>
+                    <constraint firstItem="tpy-3f-2ul" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" id="vWL-Qy-fgq"/>
                     <constraint firstItem="4WJ-xY-VH1" firstAttribute="leading" secondItem="YTl-1W-gDM" secondAttribute="leading" id="xsc-St-QdV"/>
                     <constraint firstItem="4WJ-xY-VH1" firstAttribute="top" secondItem="YTl-1W-gDM" secondAttribute="top" id="yX1-jp-PY5"/>
                 </constraints>
@@ -77,6 +86,7 @@
             </constraints>
             <connections>
                 <outlet property="BackgroundView" destination="4WJ-xY-VH1" id="cI4-y0-eAr"/>
+                <outlet property="FadingGradientView" destination="tpy-3f-2ul" id="70A-of-BEY"/>
                 <outlet property="TextLabel" destination="QYo-jb-atZ" id="Jqb-uR-hZ9"/>
                 <outlet property="TextScrollView" destination="rW6-JP-mWU" id="adK-pJ-DhW"/>
                 <outlet property="TimeLabel" destination="KqL-1f-M7E" id="lhP-hr-z1Q"/>

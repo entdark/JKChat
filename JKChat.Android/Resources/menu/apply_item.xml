@@ -4,5 +4,5 @@
 	<item
 		android:id="@+id/apply_item"
 		android:icon="@drawable/ic_apply"
-		app:showAsAction="ifRoom"/>
+		app:showAsAction="always"/>
 </menu>

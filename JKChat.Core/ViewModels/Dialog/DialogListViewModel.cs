@@ -12,6 +12,7 @@ namespace JKChat.Core.ViewModels.Dialog {
 		public DialogSelectionType SelectionType { get; init; } = DialogSelectionType.SingleSelection;
 		public bool HasItems => Items.Count > 0;
 		public int SelectedIndex => Items.FindIndex(item => item.IsSelected);
+		public DialogItemVM SelectedItem => Items.FirstOrDefault(item => item.IsSelected);
 		public IEnumerable<DialogItemVM> SelectedItems => Items.Where(item => item.IsSelected);
 
 		public DialogListViewModel() {
@@ -33,6 +34,7 @@ namespace JKChat.Core.ViewModels.Dialog {
 	}
 	public enum DialogSelectionType {
 		NoSelection,
+		InstantSelection,
 		SingleSelection,
 		MultiSelection
 	}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina5_9" orientation="portrait" appearance="dark"/>
+    <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21679"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -46,10 +46,10 @@
                         <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KQU-8H-RAQ">
                             <rect key="frame" x="0.0" y="0.0" width="270" height="272.66666666666669"/>
                             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="D7r-rF-8uq">
-                                <rect key="frame" x="0.0" y="0.0" width="270" height="272.66666666666669"/>
+                                <rect key="frame" x="0.0" y="0.0" width="270" height="272"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             </view>
-                            <blurEffect style="regular"/>
+                            <blurEffect style="systemMaterial"/>
                         </visualEffectView>
                         <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="261">
                             <rect key="frame" x="0.0" y="0.0" width="270" height="272.66666666666669"/>
@@ -222,7 +222,7 @@
                     </userDefinedRuntimeAttributes>
                 </view>
             </subviews>
-            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.40218962585034018" colorSpace="custom" customColorSpace="sRGB"/>
             <color key="tintColor" systemColor="systemMintColor"/>
             <constraints>
                 <constraint firstAttribute="centerY" secondItem="258" secondAttribute="centerY" id="259"/>

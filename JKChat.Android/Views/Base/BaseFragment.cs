@@ -11,6 +11,8 @@ using AndroidX.Core.View;
 
 using Google.Android.Material.Color;
 
+using Java.Util.Concurrent;
+
 using JKChat.Android.Callbacks;
 using JKChat.Android.Controls.Toolbar;
 using JKChat.Android.Helpers;
@@ -45,6 +47,7 @@ namespace JKChat.Android.Views.Base {
 
 		public int Order { get; set; }
 		public bool RegisterBackPressedCallback { get; set; }
+		public bool PostponeTransition { get; set; }
 
 		private BackDrawable backArrow;
 		protected BackDrawable BackArrow {
@@ -82,7 +85,11 @@ namespace JKChat.Android.Views.Base {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
-			ViewCompat.SetTranslationZ(view, Order*0.1f);
+//			ViewCompat.SetTranslationZ(view, Order*0.1f);
+
+			if (PostponeTransition) {
+				PostponeEnterTransition(2, TimeUnit.Milliseconds);
+			}
 
 			if (ActivityToolbar != null) {
 				Toolbar = ActivityToolbar;

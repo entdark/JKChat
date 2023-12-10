@@ -10,25 +10,33 @@ using JKChat.Core.Models;
 using JKChat.Core.Navigation.Parameters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
+using JKChat.Core.ViewModels.ServerList.Items;
 
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 using MvvmCross;
 using MvvmCross.Commands;
+using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 
+[assembly: MvxNavigation(typeof(ChatViewModel), @"jkchat://chat\?address=(?<address>.*)")]
 namespace JKChat.Core.ViewModels.Chat {
-	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerInfoParameter> {
+	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerInfoParameter>, IFromRootNavigatingViewModel {
 		private static readonly string []commonCommands = new []{ "/rcon", "/callvote" };
 		private static readonly string []baseEnhancedCommands = new []{ "/whois", "/rules", "/mappool", "/ctfstats", "/toptimes", "/topaim", "/pugstats" };
+		private static readonly string []jaPlusCommands = new []{ "/aminfo", "/amsay" };
 		private readonly HashSet<string> commands = commonCommands.ToHashSet();
+		
+		private readonly ICacheService cacheService;
+		private readonly IGameClientsService gameClientsService;
 
+		private string address;
 		private GameClient gameClient;
-		private bool restored = false;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand CopyCommand { get; init; }
@@ -111,7 +119,9 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
 
-		public ChatViewModel() {
+		public ChatViewModel(ICacheService cacheService, IGameClientsService gameClientsService) {
+			this.cacheService = cacheService;
+			this.gameClientsService = gameClientsService;
 			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
 			CopyCommand = new MvxAsyncCommand<ChatItemVM>(CopyExecute);
 			SendMessageCommand = new MvxAsyncCommand(SendMessageExecute, SendMessageCanExecute);
@@ -134,7 +144,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
-			if (gameClient?.ServerInfo.Address == message.ServerInfo.Address) {
+			if (gameClient?.ServerInfo == message.ServerInfo) {
 				AddCommands();
 				Status = message.Status;
 				Title = message.ServerInfo.HostName;
@@ -146,26 +156,21 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		protected override void OnFavouriteMessage(FavouriteMessage message) {
 			base.OnFavouriteMessage(message);
-			if (gameClient?.ServerInfo.Address == message.ServerInfo.Address) {
+			if (gameClient?.ServerInfo == message.ServerInfo) {
 				IsFavourite = message.IsFavourite;
 			}
 		}
 
 		private void AddCommands() {
-			if (ServerInfo == null)
-				return;
-			string gamename = ServerInfo.GameName ?? string.Empty;
-			//TODO: add mod handlers
-			if (gamename.Contains("Szlakiem Jedi RPE")
-				|| gamename.Contains("Open Jedi Project")
-				|| gamename.Contains("OJP Enhanced")
-				|| gamename.Contains("OJP Basic")
-				|| gamename.Contains("OJRP")) {
-			} else if (gamename.Contains("Movie Battles II")) {
-			} else if (gamename.Contains("base_enhanced")
-				|| gamename.Contains("base_entranced")) {
+			var mod = gameClient.Modification;
+			switch (mod) {
+			case JKClient.GameModification.BaseEnhanced:
+			case JKClient.GameModification.BaseEntranced:
 				commands.UnionWith(baseEnhancedCommands);
-			} else {
+				break;
+			case JKClient.GameModification.JAPlus:
+				commands.UnionWith(jaPlusCommands);
+				break;
 			}
 		}
 
@@ -184,7 +189,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			if (uriAttributes.Count > 1) {
 				var dialogList = new DialogListViewModel(uriAttributes.Select(ua => new DialogItemVM() {
 					Name = ua.Value.ToString()
-				}), DialogSelectionType.NoSelection);
+				}), DialogSelectionType.InstantSelection);
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Select Link",
 					CancelText = "Cancel",
@@ -272,7 +277,9 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		private async Task SendMessageExecute() {
 			if (Message.StartsWith("/")) {
-				gameClient.ExecuteCommand(Message[1..], false);
+				if (Message.Length > 1) {
+					gameClient.ExecuteCommand(Message[1..], true);
+				}
 				Message = string.Empty;
 				Messenger.Publish(new SentMessageMessage(this));
 				return;
@@ -290,12 +297,12 @@ namespace JKChat.Core.ViewModels.Chat {
 				var dialogList = new DialogListViewModel(gameClient.ClientInfo?.Where(ci => ci.InfoValid).Select(ci => new DialogItemVM() {
 					Id = ci.ClientNum,
 					Name = ci.Name
-				}), DialogSelectionType.NoSelection);
+				}), DialogSelectionType.InstantSelection);
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Private Message",
 					CancelText = "Cancel",
 					OkAction = config => {
-						if (config?.List?.SelectedIndex is int id && id >= 0) {
+						if (config?.List?.SelectedItem?.Id is int id && id >= 0) {
 							command = $"tell {id} \"{Message}\"\n";
 							executeCommand();
 						}
@@ -360,7 +367,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				CancelText = "No",
 				OkText = "Yes",
 				OkAction = _ => {
-					gameClient.Disconnect();
+					gameClient?.Disconnect();
 					NavigationService.Close(this);
 				}
 			});
@@ -381,8 +388,23 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public override void Prepare(ServerInfoParameter parameter) {
-			Prepare(parameter.ServerInfo);
-			IsFavourite = parameter.IsFavourite;
+			Prepare(parameter.ServerInfo, parameter.IsFavourite);
+		}
+
+		public void Init(string address) {
+			if (string.IsNullOrEmpty(this.address))
+				this.address = address;
+		}
+
+		protected override void SaveStateToBundle(IMvxBundle bundle) {
+			base.SaveStateToBundle(bundle);
+			bundle.Data[nameof(address)] = ServerInfo?.Address?.ToString() ?? string.Empty;
+		}
+
+		protected override void ReloadFromBundle(IMvxBundle state) {
+			base.ReloadFromBundle(state);
+			if (state.Data.TryGetValue(nameof(this.address), out string address))
+				this.address = address;
 		}
 
 		protected override Task BackgroundInitialize() {
@@ -395,13 +417,16 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
-				gameClient.MakeAllPending();
+				gameClient?.MakeAllPending();
 			}
 			base.ViewDestroy(viewFinishing);
 		}
 
 		public override void ViewAppeared() {
 			base.ViewAppeared();
+			if (gameClient == null) {
+				return;
+			}
 			if (gameClient.ViewModel != null) {
 				return;
 			}
@@ -416,26 +441,68 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public override void ViewDisappearing() {
-			gameClient.ViewModel = null;
+			if (gameClient != null) {
+				gameClient.ViewModel = null;
+			}
 			base.ViewDisappearing();
 		}
 
-		private void Prepare(JKClient.ServerInfo serverInfo, bool setViewModel = false) {
-			gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(serverInfo);
-			if (setViewModel) {
-				gameClient.ViewModel = this;
-			}
+		private void Prepare(JKClient.ServerInfo serverInfo, bool isFavourite) {
+			gameClient = gameClientsService.GetOrStartClient(serverInfo);
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
+			IsFavourite = isFavourite;
 			AddCommands();
 		}
 
 		private async Task Connect() {
-			bool ignoreDialog = restored;
-			restored = false;
-			await Mvx.IoCProvider.Resolve<ICacheService>().SaveRecentServer(ServerInfo);
-			await gameClient.Connect(ignoreDialog);
+			if (gameClient == null) {
+				if (!string.IsNullOrEmpty(this.address)) {
+					IsLoading = true;
+					var server = await ServerListItemVM.FindExistingOrLoad(this.address);
+					if (server == null) {
+						IsLoading = false;
+						await DialogService.ShowAsync(new JKDialogConfig() {
+							Title = "Failed to Connect",
+							Message = $"There is no server with address \"{address}\"",
+							OkText = "OK",
+							OkAction = _ => {
+								Task.Run(close);
+							}
+						});
+						return;
+					}
+					Prepare(server.ServerInfo, server.IsFavourite);
+				} else {
+					await DialogService.ShowAsync(new JKDialogConfig() {
+						Title = "Failed to Connect",
+						Message = $"Server address is empty",
+						OkText = "OK",
+						OkAction = _ => {
+							Task.Run(close);
+						}
+					});
+					return;
+				}
+			}
+			//should never happen
+			if (gameClient == null)
+				return;
+			await cacheService.SaveRecentServer(ServerInfo);
+			await gameClient.Connect(false);
+
+			async Task close() {
+				await NavigationService.Close(this);
+			}
+		}
+
+		public bool ShouldLetOtherNavigateFromRoot(object data) {
+			if (data is JKClient.ServerInfo serverInfo)
+				return this.ServerInfo != serverInfo;
+			else if (data is string s && JKClient.NetAddress.FromString(s) is { } address)
+				return this.ServerInfo.Address != address;
+			return true;
 		}
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 
+using Android;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -8,12 +10,21 @@ using Android.OS;
 using Android.Views;
 using Android.Views.Animations;
 
+using AndroidX.Activity.Result;
+using AndroidX.Activity.Result.Contract;
+using AndroidX.Core.Content;
+
 using Google.Android.Material.Internal;
 
+using JKChat.Android.Callbacks;
 using JKChat.Android.Helpers;
 using JKChat.Android.Services;
 using JKChat.Android.Views.Base;
+using JKChat.Android.Widgets;
+using JKChat.Core;
 using JKChat.Core.Messages;
+using JKChat.Core.Models;
+using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 
 using Microsoft.Maui.ApplicationModel;
@@ -34,8 +45,10 @@ namespace JKChat.Android.Views.Main {
 	)]
 	[MvxActivityPresentation]
 	public class MainActivity : BaseActivity<MainActivityViewModel> {
+		private ActivityResultLauncher notificationsPermissionActivityResultLauncher;
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private View contentMasterView, contentDetailView;
+		private Intent pendingIntent;
 
 		public MainActivity() : base(Resource.Layout.activity_main) {}
 
@@ -50,6 +63,24 @@ namespace JKChat.Android.Views.Main {
 
 			contentMasterView = FindViewById(Resource.Id.content_master);
 			contentDetailView = FindViewById(Resource.Id.content_detail);
+			pendingIntent = Intent;
+
+			notificationsPermissionActivityResultLauncher = RegisterForActivityResult(
+				new ActivityResultContracts.RequestPermission(),
+				new ActivityResultCallback<Java.Lang.Boolean>(jgranted => {
+					bool granted = jgranted.BooleanValue();
+					var options = AppSettings.NotificationOptions;
+					if (granted)
+						options |= NotificationOptions.Enabled;
+					else
+						options &= ~NotificationOptions.Enabled;
+					AppSettings.NotificationOptions = options;
+				}
+			));
+			CheckNotificationsPermission();
+			var intent = new Intent(this, typeof(ServerMonitorAppWidget));
+			intent.SetAction(ServerMonitorAppWidget.UpdateAction);
+			SendBroadcast(intent);
 		}
 
 		protected override void OnDestroy() {
@@ -60,6 +91,35 @@ namespace JKChat.Android.Views.Main {
 /*			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();*/
 			base.OnDestroy();
+		}
+
+		protected override void OnNewIntent(Intent intent) {
+			base.OnNewIntent(intent);
+			pendingIntent = intent;
+		}
+
+		protected override void OnResume() {
+			base.OnResume();
+			if (pendingIntent is { Extras: { IsEmpty: false } extras, Action: {} action }) {
+				var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
+				if (action == NotificationsService.NotificationAction) {
+					var parameters = extras?.ToDictionary();
+					navigationService.Navigate(parameters);
+				} else if (action == ServerMonitorAppWidget.WidgetLinkAction
+					&& extras.GetString(ServerMonitorAppWidget.ServerAddressExtraKey, null) is string serverAddress) {
+					var widgetLink = AppSettings.WidgetLink;
+					if (widgetLink != WidgetLink.Application) {
+						string path = widgetLink switch {
+							WidgetLink.ServerInfo => "info",
+							WidgetLink.Chat => "chat",
+							_ => string.Empty
+						};
+						var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={serverAddress}", serverAddress);
+						navigationService.Navigate(parameters);
+					}
+				}
+				pendingIntent = null;
+			}
 		}
 
 		protected override void ConfigurationChanged(Configuration configuration) {
@@ -96,7 +156,7 @@ namespace JKChat.Android.Views.Main {
 			int activeClients = gameClientsService.ActiveClients;
 			if (activeClients > 0 && !IsServiceRunning(typeof(ForegroundGameClientsService))) {
 				var intent = new Intent(this, typeof(ForegroundGameClientsService));
-				StartService(intent);
+				ContextCompat.StartForegroundService(this, intent);
 			}
 		}
 		private bool IsServiceRunning(Type serviceClass) {
@@ -108,7 +168,20 @@ namespace JKChat.Android.Views.Main {
 					return true;
 				}
 			}
-			return false;
+			return ForegroundGameClientsService.IsRunning;
+		}
+
+		private void CheckNotificationsPermission() {
+			if (Build.VERSION.SdkInt < BuildVersionCodes.Tiramisu)
+				return;
+			var permission = ContextCompat.CheckSelfPermission(this, Manifest.Permission.PostNotifications);
+			if (permission == Permission.Granted) {
+				//we are good
+			} else if (ShouldShowRequestPermissionRationale(Manifest.Permission.PostNotifications)) {
+				//don't bother
+			} else {
+				notificationsPermissionActivityResultLauncher.Launch(new Java.Lang.String(Manifest.Permission.PostNotifications));
+			}
 		}
 	}
 

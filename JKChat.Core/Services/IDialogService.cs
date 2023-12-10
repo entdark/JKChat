@@ -26,8 +26,8 @@ namespace JKChat.Core.Services {
 		public Action<JKDialogConfig> CancelAction { get; init; }
 		public bool HasTitle => !string.IsNullOrEmpty(Title);
 		public bool HasMessage => !string.IsNullOrEmpty(Message);
-		public bool HasOk => !string.IsNullOrEmpty(OkText) || OkAction != null || !HasCancel;
-		public bool HasCancel => !string.IsNullOrEmpty(CancelText) || CancelAction != null;
+		public bool HasOk => !string.IsNullOrEmpty(OkText) || !HasCancel;
+		public bool HasCancel => !string.IsNullOrEmpty(CancelText);
 		public bool HasList => List?.HasItems ?? false;
 		public bool HasInput => Input != null;
 		public bool IsDestructive { get; init; }
@@ -46,8 +46,9 @@ namespace JKChat.Core.Services {
 		}
 		public JKDialogConfig(DialogListViewModel list, Action<JKDialogConfig> okAction, string title = null) {
 			List = list;
-			CancelText = "Cancel";
 			if (list.SelectionType != DialogSelectionType.NoSelection)
+				CancelText = "Cancel";
+			if (list.SelectionType != DialogSelectionType.InstantSelection)
 				OkText = "OK";
 			OkAction = okAction;
 			Title = title;

@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
+using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Chat.Items;
@@ -23,6 +25,8 @@ using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
+using Common = JKClient.Common;
+
 namespace JKChat.Core.Models {
 	public class GameClient {
 		private const int MaxChatMessages = 512;
@@ -30,6 +34,7 @@ namespace JKChat.Core.Models {
 		private readonly IMvxMainThreadAsyncDispatcher mainThread;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
+		private readonly INotificationsService notificationsService;
 		private readonly IMvxMessenger messenger;
 		private readonly IMvxLifetime lifetime;
 		private MvxSubscriptionToken playerNameMessageToken;
@@ -43,6 +48,7 @@ namespace JKChat.Core.Models {
 			set {
 				viewModel = value;
 				if (value != null) {
+					RemoveNotifications();
 					addingPending = true;
 					unreadMessages = 0;
 					messenger.Publish(new ServerInfoMessage(this, ServerInfo, Status));
@@ -89,9 +95,7 @@ namespace JKChat.Core.Models {
 								}
 								addingPending = false;
 							});
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS
-								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
-								|| DeviceInfo.Platform == DevicePlatform.macOS) {
+						} else if (DeviceInfo.Platform.IsApple()) {
 							mainThread.ExecuteOnMainThreadAsync(() => {
 								lock (Items) {
 									Items.InsertRange(0, pendingItemsCopy);
@@ -125,16 +129,17 @@ namespace JKChat.Core.Models {
 		}
 		internal LimitedObservableCollection<ChatItemVM> Items { get; init; }
 		internal ServerInfo ServerInfo { get; private set; }
+		internal NetAddress Address => ServerInfo.Address;
 		internal ClientInfo[] ClientInfo => Client?.ClientInfo;
+		internal GameModification Modification => Client?.Modification ?? GameModification.Unknown;
 
 		internal GameClient(ServerInfo serverInfo) {
 			mainThread = Mvx.IoCProvider.Resolve<IMvxMainThreadAsyncDispatcher>();
 			navigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
 			dialogService = Mvx.IoCProvider.Resolve<IDialogService>();
+			notificationsService = Mvx.IoCProvider.Resolve<INotificationsService>();
 			messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 			lifetime = Mvx.IoCProvider.Resolve<IMvxLifetime>();
-			lifetime.LifetimeChanged += LifetimeChanged;
-			playerNameMessageToken = messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 			pendingItems = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
 			blockedPlayers = new HashSet<string>();
 			ServerInfo = serverInfo;
@@ -169,6 +174,8 @@ namespace JKChat.Core.Models {
 				Client.ServerInfoChanged += ServerInfoChanged;
 				Client.FrameExecuted += FrameExecuted;
 				Client.Start(ExceptionCallback);
+				lifetime.LifetimeChanged += LifetimeChanged;
+				playerNameMessageToken = messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 			});
 		}
 
@@ -266,6 +273,7 @@ namespace JKChat.Core.Models {
 				Client.ServerInfoChanged -= ServerInfoChanged;
 				Client.FrameExecuted -= FrameExecuted;
 				Client.Dispose();
+				Client = null;
 			}
 			lifetime.LifetimeChanged -= LifetimeChanged;
 			if (playerNameMessageToken != null) {
@@ -289,6 +297,7 @@ namespace JKChat.Core.Models {
 				if (ViewModel != null) {
 					unreadMessages = 0;
 					messenger.Publish(new ServerInfoMessage(this, ServerInfo, Status));
+					RemoveNotifications();
 				}
 				break;
 			case MvxLifetimeEvent.Deactivated:
@@ -303,7 +312,8 @@ namespace JKChat.Core.Models {
 			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
 				await AddToChat(command);
-			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
+			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0
+				|| string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
 				await AddToLocationChat(command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
@@ -359,11 +369,14 @@ namespace JKChat.Core.Models {
 				return;
 			}
 			separator += 3;
-			string name = fullMessage.Substring(0, separator);
+			string name = fullMessage[..separator];
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
+			if (blockedPlayers.Contains(escapedPlayerName))
+				return;
 			string message = fullMessage[separator..].Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
+			ProcessItemForNotifications(chatItem, command);
 			await AddItem(chatItem);
 		}
 
@@ -378,6 +391,8 @@ namespace JKChat.Core.Models {
 
 			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
+			if (blockedPlayers.Contains(escapedPlayerName))
+				return;
 
 			var stringBuilder = new StringBuilder();
 			stringBuilder
@@ -389,6 +404,7 @@ namespace JKChat.Core.Models {
 			string fullMessage = stringBuilder.ToString().Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
 
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
+			ProcessItemForNotifications(chatItem, command);
 			await AddItem(chatItem);
 		}
 
@@ -412,16 +428,54 @@ namespace JKChat.Core.Models {
 			return playerName[startIndex..endIndex];
 		}
 
+		private static bool IsPrivateMessage(string message) => message?.Contains(Common.EscapeCharacter+"]"+Common.EscapeCharacter+": ", StringComparison.Ordinal) ?? false;
+
 		private async Task AddToPrint(Command command) {
 			string text = command[1].TrimEnd('\n');
 			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02);
+			ProcessItemForNotifications(chatItem, command);
 			await AddItem(chatItem);
 		}
 
-		private async Task AddItem(ChatItemVM item) {
-			if (item is ChatMessageItemVM messageItem && blockedPlayers.Contains(messageItem.EscapedPlayerName)) {
-				return;
+		private void ProcessItemForNotifications(ChatMessageItemVM messageItem, Command command) {
+			var options = AppSettings.NotificationOptions;
+			bool show = false;
+			if (options.HasFlag(NotificationOptions.PrivateMessages) && IsPrivateMessage(command[1])) {
+				show = true;
+			} else if (AppSettings.NotificationKeywords is { Length: > 0 } keywords) {
+				var words = messageItem.Message.CleanString().Split(new []{' ', ',', '.', ';', ':', '(', ')', '[', ']', '{', '}', '!', '?', '+', '-', '='}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+				foreach (var word in words) {
+					foreach (var keyword in keywords) {
+						if (string.Compare(word, keyword, StringComparison.OrdinalIgnoreCase) == 0) {
+							show = true;
+							break;
+						}
+					}
+					if (show)
+						break;
+				}
 			}
+			if (show) {
+				ShowNotification(messageItem.PlayerName + messageItem.Message);
+			}
+		}
+
+		private void ProcessItemForNotifications(ChatInfoItemVM infoItem, Command command) {
+			var options = AppSettings.NotificationOptions;
+			string text = infoItem.Text;
+			if (options.HasFlag(NotificationOptions.PlayerConnects)) {
+				if (text.Contains("@@@PLCONNECT", StringComparison.OrdinalIgnoreCase) is bool stringEd && stringEd
+					|| (Client?.Version == ClientVersion.Q3_v1_32 && text.Contains(" connected", StringComparison.OrdinalIgnoreCase))) {
+					string notification = text;
+					if (stringEd) {
+						notification = notification.Replace("@@@PLCONNECT", "connected", StringComparison.OrdinalIgnoreCase);
+					};
+					ShowNotification(notification.TrimEnd('\n'));
+				}
+			}
+		}
+
+		private async Task AddItem(ChatItemVM item) {
 			while (addingPending);
 			bool pending = false;
 			lock (pendingItems) {
@@ -431,10 +485,8 @@ namespace JKChat.Core.Models {
 					if (items.Count > 0) {
 						ChatItemVM prevItem = null;
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							prevItem = items[items.Count - 1];
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS
-								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
-								|| DeviceInfo.Platform == DevicePlatform.macOS) {
+							prevItem = items[^1];
+						} else if (DeviceInfo.Platform.IsApple()) {
 							prevItem = items[0];
 						}
 						prevItem.BottomVMType = item.ThisVMType;
@@ -450,9 +502,7 @@ namespace JKChat.Core.Models {
 					lock (Items) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
 							Items.Add(item);
-						} else if (DeviceInfo.Platform == DevicePlatform.iOS
-								|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
-								|| DeviceInfo.Platform == DevicePlatform.macOS) {
+						} else if (DeviceInfo.Platform.IsApple()) {
 							Items.Insert(0, item);
 						}
 					}
@@ -476,9 +526,7 @@ namespace JKChat.Core.Models {
 						if (nextIndex < Items.Count) {
 							nextItem = Items[nextIndex];
 						}
-					} else if (DeviceInfo.Platform == DevicePlatform.iOS
-							|| DeviceInfo.Platform == DevicePlatform.MacCatalyst
-							|| DeviceInfo.Platform == DevicePlatform.macOS) {
+					} else if (DeviceInfo.Platform.IsApple()) {
 						int prevIndex = removeIndex;
 						int nextIndex = removeIndex - 1;
 						if (prevIndex < Items.Count) {
@@ -554,6 +602,29 @@ namespace JKChat.Core.Models {
 			if (ViewModel != null) {
 				await navigationService.Close(ViewModel);
 			}
+		}
+
+		private void ShowNotification(string message, bool cleanMessage = true) {
+			if (!AppSettings.NotificationOptions.HasFlag(NotificationOptions.Enabled))
+				return;
+			if (ViewModel != null && !minimized)
+				return;
+			string title = JKChat.Core.Helpers.ColourTextHelper.CleanString(ServerInfo.HostName);
+			if (cleanMessage) {
+				message = JKChat.Core.Helpers.ColourTextHelper.CleanString(message);
+			}
+			notificationsService.ShowNotification(
+				title,
+				message,
+				Mvx.IoCProvider.Resolve<INavigationService>().MakeNavigationParameters($"jkchat://chat?address={Address}", Address.ToString()),
+				Address.ToString()
+			);
+		}
+
+		private void RemoveNotifications() {
+			if (!AppSettings.NotificationOptions.HasFlag(NotificationOptions.Enabled))
+				return;
+			notificationsService.CancelNotifications(Address.ToString());
 		}
 	}
 }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
@@ -17,8 +19,9 @@ using MvvmCross.Plugin.Messenger;
 
 namespace JKChat.Core.ViewModels.ServerList.Items {
 	public class ServerListItemVM : SelectableItemVM, IEquatable<ServerListItemVM> {
-		internal JKClient.ServerInfo ServerInfo { get; init; }
 		public IMvxCommand ConnectCommand { get; init; }
+
+		internal JKClient.ServerInfo ServerInfo { get; private set; }
 
 		private bool needPassword;
 		public bool NeedPassword {
@@ -72,6 +75,12 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			set => SetProperty(ref modification, value);
 		}
 
+		private string ping;
+		public string Ping {
+			get => ping;
+			set => SetProperty(ref ping, value);
+		}
+
 		private bool isFavourite;
 		public bool IsFavourite {
 			get => isFavourite;
@@ -79,6 +88,10 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new FavouriteMessage(this, ServerInfo, value));
 			});
 		}
+
+		public string Address => ServerInfo.Address.ToString();
+
+		public string []PlayersList => ServerInfo.Players?.Select(p => p.Name).ToArray();
 
 		public ServerListItemVM() {
 			ConnectCommand = new MvxAsyncCommand(ConnectExecute);
@@ -97,11 +110,13 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 		}
 
 		internal void Set(JKClient.ServerInfo serverInfo) {
+			ServerInfo = serverInfo;
 			NeedPassword = serverInfo.NeedPassword;
 			ServerName = serverInfo.HostName;
 			MapName = serverInfo.MapName;
 			Players = $"{serverInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{serverInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
 			Modification = serverInfo.GameName;
+			Ping = serverInfo.Ping.ToString();
 		}
 
 		public void SetFavourite(bool isFavourite, bool silently = true) {
@@ -110,20 +125,60 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 
 		private async Task ConnectExecute() {
 			if (Status == ConnectionStatus.Disconnected) {
-				await Mvx.IoCProvider.Resolve<INavigationService>().NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(this), viewModel => {
-					return (viewModel as ChatViewModel)?.ServerInfo != this.ServerInfo;
-				});
+				await Mvx.IoCProvider.Resolve<INavigationService>().NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(this), this.ServerInfo);
 			} else {
 				Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(ServerInfo).Disconnect();
 			}
 		}
 
 		public bool Equals(ServerListItemVM other) {
-			return this.ServerInfo.Address == other.ServerInfo.Address;
+			if (other is null)
+				return false;
+			return this.ServerInfo == other.ServerInfo;
+		}
+
+		public override bool Equals(object obj) {
+			return Equals(obj as ServerListItemVM);
 		}
 
 		public override int GetHashCode() {
-			return this.ServerInfo.Address.GetHashCode();
+			return this.ServerInfo.GetHashCode();
+		}
+
+		public async Task<bool> Refresh() {
+			try {
+				var serverInfo = await Mvx.IoCProvider.Resolve<IServerListService>().GetServerInfo(ServerInfo);
+				if (serverInfo != null) {
+					Set(serverInfo);
+					await Mvx.IoCProvider.Resolve<ICacheService>().UpdateServer(this);
+					return true;
+				}
+			} catch (Exception exception) {
+				Debug.WriteLine(exception);
+			}
+			return false;
+		}
+
+		public static async Task<ServerListItemVM> FindExistingOrLoad(string address, bool silently = false, bool load = true) {
+			ServerListItemVM server = null;
+			bool success = silently ? await task() : await Common.ExceptionalTaskRun(task);
+			return server;
+			async Task<bool> task() {
+				var netAddress = JKClient.NetAddress.FromString(address);
+				server = await Mvx.IoCProvider.Resolve<ICacheService>().GetCachedServer(netAddress);
+				if (server != null)
+					return false;
+				var gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetClient(netAddress);
+				if (gameClient != null) {
+					server = new ServerListItemVM(gameClient.ServerInfo);
+				} else if (load) {
+					var serverInfo = await Mvx.IoCProvider.Resolve<IServerListService>().GetServerInfo(netAddress);
+					if (serverInfo != null) {
+						server = new ServerListItemVM(serverInfo);
+					}
+				}
+				return true;
+			}
 		}
 	}
 }

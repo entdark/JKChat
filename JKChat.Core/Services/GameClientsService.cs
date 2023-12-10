@@ -21,6 +21,14 @@ namespace JKChat.Core.Services {
 			}
 		}
 
+		public GameClient GetClient(JKClient.NetAddress address) {
+			if (clients.TryGetValue(address, out var client)) {
+				return client;
+			} else {
+				return null;
+			}
+		}
+
 		public IEnumerable<JKClient.NetAddress> AddressesWithStatus(ConnectionStatus status, bool without = false) {
 			if (clients.Count <= 0) {
 				return null;

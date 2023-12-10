@@ -26,8 +26,6 @@ namespace JKChat.Core.ViewModels.Base.Items {
 		protected virtual async Task ClickExecute() {
 			if (OnClick != null)
 				await OnClick.Invoke(this);
-			else
-				await Task.CompletedTask;
 		}
 	}
 
@@ -68,6 +66,15 @@ namespace JKChat.Core.ViewModels.Base.Items {
 		}
 	}
 
+	public class TableNavigationItemVM : TableItemVM {
+		public override TableItemType Type => TableItemType.Navigation;
+
+		public new Func<TableNavigationItemVM, Task> OnClick {
+			get => base.OnClick;
+			set => base.OnClick = value != null ? (item) => value.Invoke((TableNavigationItemVM)item) : null;
+		}
+	}
+
 	public class TableGroupedItemVM {
 		public string Header { get; set; }
 		public List<TableItemVM> Items { get; init; }
@@ -83,6 +90,7 @@ namespace JKChat.Core.ViewModels.Base.Items {
 
 	public enum TableItemType {
 		Value,
-		Toggle
+		Toggle,
+		Navigation
 	}
 }

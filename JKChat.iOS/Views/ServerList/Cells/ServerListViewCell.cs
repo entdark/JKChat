@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 using Foundation;
+
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.ServerList.Items;
 
@@ -21,7 +22,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 			get => needPassword;
 			set {
 				needPassword = value;
-				ConnectButton.SetImage(needPassword ? UIImage.GetSystemImage("lock", UIImageSymbolConfiguration.Create(UIImageSymbolScale.Medium)) : null, UIControlState.Normal);
+				ConnectButton.SetImage(needPassword ? Theme.Image.Lock_Medium : null, UIControlState.Normal);
 			}
 		}
 
@@ -56,9 +57,9 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 			set.Bind(ConnectButton).For("Title").To("If(EnumBool(Status, 'Disconnected'), 'Connect', 'Disconnect')");
 			set.Bind(this).For(v => v.NeedPassword).To(vm => vm.NeedPassword);
 			set.Bind(PreviewImageView).For(v => v.Image).To(vm => vm.Game).WithDictionaryConversion(new Dictionary<Game, UIImage>() {
-				[Game.JediAcademy] = UIImage.FromBundle("JAPreviewBackground"),
-				[Game.JediOutcast] = UIImage.FromBundle("JOPreviewBackground"),
-				[Game.Quake3] = UIImage.FromBundle("Q3PreviewBackground")
+				[Game.JediAcademy] = Theme.Image.JAPreviewBackground,
+				[Game.JediOutcast] = Theme.Image.JOPreviewBackground,
+				[Game.Quake3] = Theme.Image.Q3PreviewBackground
 			}, null);
 			set.Bind(PreviewView).For("Visibility").To("EnumBool(Game, 'Unknown')").WithConversion("InvertedVisibility");
 		}

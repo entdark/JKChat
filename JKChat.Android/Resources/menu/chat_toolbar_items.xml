@@ -5,12 +5,12 @@
 		android:id="@+id/copy_item"
 		android:icon="@drawable/ic_copy"
 		android:iconTint="?attr/colorOnSurfaceVariant"
-		app:showAsAction="ifRoom"
+		app:showAsAction="always"
 		app:actionLayout="@layout/copy_menu_item"/>
 	<item
 		android:id="@+id/report_item"
-		android:icon="@drawable/ic_report"
-		app:showAsAction="ifRoom"
+		android:icon="@drawable/ic_report_problem"
+		app:showAsAction="always"
 		app:actionLayout="@layout/report_menu_item"/>
 	<item
 		android:id="@+id/favourite_item"

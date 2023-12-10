@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<JKChat.Android.Controls.Toolbar.FadingImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/ToolbarMenu"
-    android:src="@drawable/ic_tune"/>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar_menu_item_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clipChildren="false">
+    <JKChat.Android.Controls.Toolbar.FadingImageView
+        android:id="@+id/toolbar_menu_item"
+        style="@style/ToolbarMenu"
+        android:src="@drawable/ic_tune"/>
+</FrameLayout>

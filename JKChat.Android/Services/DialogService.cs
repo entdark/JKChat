@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Android.Content;
+using Android.OS;
 using Android.Text;
 using Android.Views;
 using Android.Views.InputMethods;
@@ -47,6 +48,10 @@ namespace JKChat.Android.Services {
 				switch (list.SelectionType) {
 					case DialogSelectionType.NoSelection:
 						builder
+							.SetItems(items, (IDialogInterfaceOnClickListener)null);
+						break;
+					case DialogSelectionType.InstantSelection:
+						builder
 							.SetItems(items, (sender, ev) => {
 								list.Items[ev.Which].IsSelected = true;
 								config.OkAction?.Invoke(config);
@@ -69,7 +74,10 @@ namespace JKChat.Android.Services {
 			if (config.HasCancel) {
 				builder
 					.SetCancelable(true)
-					.SetNegativeButton(config.CancelText, (sender, ev) => config.CancelAction?.Invoke(config));
+					.SetNegativeButton(config.CancelText, (sender, ev) => config.CancelAction?.Invoke(config))
+					.SetOnCancelListener(new OnCancelListener(_ => {
+						config.CancelAction?.Invoke(config);
+					}));
 			} else {
 				builder
 					.SetCancelable(false);
@@ -98,6 +106,11 @@ namespace JKChat.Android.Services {
 					.SetOnDismissListener(new OnDismissListener(_ => {
 						context.HideKeyboard(textInputEditText, true);
 					}));
+				var handler = new Handler(Looper.MainLooper);
+				handler.PostDelayed(() => {
+					context.ShowKeyboard(textInputEditText);
+					textInputEditText.SetSelection(input.Text?.Length ?? 0);
+				}, 200);
 			}
 			alert = builder
 				.Create();
@@ -142,6 +155,17 @@ namespace JKChat.Android.Services {
 
 			public bool OnEditorAction(TextView tv, ImeAction actionId, KeyEvent ev) {
 				return onEditorAction?.Invoke(actionId) ?? true;
+			}
+		}
+
+		private class OnCancelListener : Java.Lang.Object, IDialogInterfaceOnCancelListener {
+			private readonly Action<IDialogInterface> onCancelAction;
+
+			public OnCancelListener(Action<IDialogInterface> onCancelAction) {
+				this.onCancelAction = onCancelAction;
+			}
+			public void OnCancel(IDialogInterface dialog) {
+				onCancelAction?.Invoke(dialog);
 			}
 		}
 	}

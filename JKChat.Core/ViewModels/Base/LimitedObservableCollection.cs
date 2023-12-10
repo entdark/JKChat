@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 
 using MvvmCross.ViewModels;
 
@@ -55,58 +53,6 @@ namespace JKChat.Core.ViewModels.Base {
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, items, 0));
 			} else {
 				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, Items));
-			}
-		}
-
-//not the best way to handle multi diff but fine for small data
-//compares 2 collections: removes non-existing items, adds missing items, sorts and moves items if necessarily
-		public void ReplaceWith<TKey>(IEnumerable<T> items, Func<T, T, bool> areItemsTheSame, Func<T, TKey> keySelector = null) {
-			var newItems = items?.ToArray() ?? Array.Empty<T>();
-			var toRemoveIndicies = new List<int>(Count);
-			var toNotInsertIndicies = new HashSet<int>();
-			for (int i = 0; i < Count; i++) {
-				var oldItem = this[i];
-				bool deleteItem = true;
-				int j = 0;
-				foreach (var newItem in newItems) {
-					if (areItemsTheSame(oldItem, newItem)) {
-						toNotInsertIndicies.Add(j);
-						deleteItem = false;
-						break;
-					}
-					j++;
-				}
-				if (deleteItem) {
-					toRemoveIndicies.Add(i);
-				}
-			}
-/*			bool removeALot = toRemoveIndicies.Count > 1;
-			bool removeOne = toRemoveIndicies.Count == 1;
-			int toAddCount = Math.Abs(toNotInsertIndicies.Count-newItems.Length);
-			bool addALot = toAddCount > 1;
-			bool addOne = toAddCount == 1;
-			if (removeALot || addALot || (removeOne && addOne)) {
-				ReplaceWith(items);
-				return;
-			}*/
-			for (int i = toRemoveIndicies.Count-1; i >= 0 ; i--) {
-				RemoveAt(toRemoveIndicies[i]);
-			}
-			int k = 0;
-			foreach (var newItem in newItems) {
-				if (!toNotInsertIndicies.Contains(k)) {
-					Add(newItem);
-				}
-				k++;
-			}
-			if (keySelector != null) {
-				var sortedItems = this.OrderByDescending(keySelector).ToArray();
-				for (int i = 0; i < sortedItems.Length; i++) {
-					int oldIndex = IndexOf(sortedItems[i]);
-					int newIndex = i;
-					if (oldIndex != newIndex)
-						Move(oldIndex, newIndex);
-				}
 			}
 		}
 	}

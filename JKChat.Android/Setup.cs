@@ -54,6 +54,8 @@ namespace JKChat.Android {
 
 		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
 			iocProvider.RegisterSingleton<IDialogService>(() => new DialogService());
+			iocProvider.RegisterSingleton<IAppService>(() => new AppService());
+			iocProvider.RegisterSingleton<INotificationsService>(() => new NotificationsService());
 			base.InitializeFirstChance(iocProvider);
 		}
 
@@ -103,24 +105,26 @@ namespace JKChat.Android {
 							var attributeId = typedArray.GetIndex(i);
 
 							bool attributeValue = typedArray.GetBoolean(attributeId, false);
-							flags |= attributeId switch {
-								Resource.Styleable.View_paddingLeftFitsWindowInsets when attributeValue => WindowInsetsFlags.PaddingLeft,
-								Resource.Styleable.View_paddingRightFitsWindowInsets when attributeValue => WindowInsetsFlags.PaddingRight,
-								Resource.Styleable.View_paddingTopFitsWindowInsets when attributeValue => WindowInsetsFlags.PaddingTop,
-								Resource.Styleable.View_paddingBottomFitsWindowInsets when attributeValue => WindowInsetsFlags.PaddingBottom,
+							if (attributeValue) {
+								flags |= attributeId switch {
+									Resource.Styleable.View_paddingLeftFitsWindowInsets => WindowInsetsFlags.PaddingLeft,
+									Resource.Styleable.View_paddingRightFitsWindowInsets => WindowInsetsFlags.PaddingRight,
+									Resource.Styleable.View_paddingTopFitsWindowInsets => WindowInsetsFlags.PaddingTop,
+									Resource.Styleable.View_paddingBottomFitsWindowInsets => WindowInsetsFlags.PaddingBottom,
 
-								Resource.Styleable.View_paddingLeftFitsWindowInsetsButExpanded when attributeValue => WindowInsetsFlags.PaddingLeftButExpanded,
-								Resource.Styleable.View_paddingRightFitsWindowInsetsButExpanded when attributeValue => WindowInsetsFlags.PaddingRightButExpanded,
-								Resource.Styleable.View_paddingTopFitsWindowInsetsButExpanded when attributeValue => WindowInsetsFlags.PaddingTopButExpanded,
-								Resource.Styleable.View_paddingBottomFitsWindowInsetsButExpanded when attributeValue => WindowInsetsFlags.PaddingBottomButExpanded,
+									Resource.Styleable.View_paddingLeftFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingLeftButExpanded,
+									Resource.Styleable.View_paddingRightFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingRightButExpanded,
+									Resource.Styleable.View_paddingTopFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingTopButExpanded,
+									Resource.Styleable.View_paddingBottomFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingBottomButExpanded,
 
-								Resource.Styleable.View_marginLeftFitsWindowInsets when attributeValue => WindowInsetsFlags.MarginLeft,
-								Resource.Styleable.View_marginRightFitsWindowInsets when attributeValue => WindowInsetsFlags.MarginRight,
-								Resource.Styleable.View_marginTopFitsWindowInsets when attributeValue => WindowInsetsFlags.MarginTop,
-								Resource.Styleable.View_marginBottomFitsWindowInsets when attributeValue => WindowInsetsFlags.MarginBottom,
+									Resource.Styleable.View_marginLeftFitsWindowInsets => WindowInsetsFlags.MarginLeft,
+									Resource.Styleable.View_marginRightFitsWindowInsets => WindowInsetsFlags.MarginRight,
+									Resource.Styleable.View_marginTopFitsWindowInsets => WindowInsetsFlags.MarginTop,
+									Resource.Styleable.View_marginBottomFitsWindowInsets => WindowInsetsFlags.MarginBottom,
 
-								_ => WindowInsetsFlags.None
-							};
+									_ => WindowInsetsFlags.None
+								};
+							}
 						}
 						if (flags != WindowInsetsFlags.None)
 							ViewUtils.DoOnApplyWindowInsets(view, new OnApplyWindowInsetsListener(view, flags));
