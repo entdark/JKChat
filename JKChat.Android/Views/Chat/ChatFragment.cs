@@ -291,18 +291,6 @@ namespace JKChat.Android.Views.Chat {
 				int position = RecyclerView.ItemsSource.Count()-1;
 				if (ScrolledToBottom && position >= 0) {
 					RecyclerView.ScrollToPosition(position);
-					return;
-					int visiblePosition;
-					if (RecyclerView.GetLayoutManager() is LinearLayoutManager linearLayoutManager) {
-						visiblePosition = linearLayoutManager.FindLastVisibleItemPosition();
-					} else {
-						visiblePosition = -1;
-					}
-					if (visiblePosition == -1 || (position - visiblePosition) > 5) {
-						RecyclerView.ScrollToPosition(position);
-					} else {
-						RecyclerView.SmoothScrollToPosition(position);
-					}
 				}
 			}
 
