@@ -19,18 +19,29 @@
 		E77FEEB12B1D237F00AAB05B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEAF2B1D237F00AAB05B /* Main.storyboard */; };
 		E77FEEB32B1D238000AAB05B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEB22B1D238000AAB05B /* Assets.xcassets */; };
 		E77FEEB62B1D238000AAB05B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEB42B1D238000AAB05B /* LaunchScreen.storyboard */; };
-		E77FEEBE2B1D274400AAB05B /* WidgetExtension.appex in CopyFiles */ = {isa = PBXBuildFile; fileRef = E707006D2B191F6400BE82DA /* WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E7E49A882B2BBE83003B157A /* WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E707006D2B191F6400BE82DA /* WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E7BC62DE2B2BC022000D112C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E707004A2B191DD000BE82DA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E707006C2B191F6400BE82DA;
+			remoteInfo = WidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
-		E77FEEBD2B1D272000AAB05B /* CopyFiles */ = {
+		E7E49A832B2BBE6D003B157A /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				E77FEEBE2B1D274400AAB05B /* WidgetExtension.appex in CopyFiles */,
+				E7E49A882B2BBE83003B157A /* WidgetExtension.appex in Embed Foundation Extensions */,
 			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -159,11 +170,12 @@
 				E77FEEA32B1D237F00AAB05B /* Sources */,
 				E77FEEA42B1D237F00AAB05B /* Frameworks */,
 				E77FEEA52B1D237F00AAB05B /* Resources */,
-				E77FEEBD2B1D272000AAB05B /* CopyFiles */,
+				E7E49A832B2BBE6D003B157A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E7BC62DF2B2BC022000D112C /* PBXTargetDependency */,
 			);
 			name = JKChat.iOS.Widget.Native;
 			productName = JKChat.iOS.Widget.Native;
@@ -250,6 +262,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E7BC62DF2B2BC022000D112C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E707006C2B191F6400BE82DA /* WidgetExtension */;
+			targetProxy = E7BC62DE2B2BC022000D112C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		E77FEEAF2B1D237F00AAB05B /* Main.storyboard */ = {
@@ -467,6 +487,7 @@
 		E77FEEB92B1D238000AAB05B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = JKChat.iOS.Widget.Native/JKChat.iOS.Widget.Native.entitlements;
@@ -505,6 +526,7 @@
 		E77FEEBA2B1D238000AAB05B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = JKChat.iOS.Widget.Native/JKChat.iOS.Widget.Native.entitlements;

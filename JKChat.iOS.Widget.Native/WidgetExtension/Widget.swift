@@ -249,17 +249,18 @@ struct WidgetLargeView : View {
 struct WidgetMediumView : View {
     let entry: ServerMonitorEntry
     var body: some View {
-        let maxDisplayPlayers = entry.family == .systemMedium ? 4 : 11
+        let maxDisplayPlayers = entry.family == .systemMedium ? 5 : 14
         HStack(spacing: 4.0) {
             WidgetSmallView(entry: entry)
             if (entry.players.count > 0) {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 0.0) {
                     ForEach(entry.players.prefix(maxDisplayPlayers)) { player in
                         Text(convertToColourText(value: player.name))
                             .font(.caption)
                             .fontWeight(.regular)
                             .multilineTextAlignment(.leading)
                             .lineLimit(1)
+                            .frame(height: 22.0)
                         Divider()
                     }
                     if (entry.players.count > maxDisplayPlayers) {
@@ -279,8 +280,9 @@ struct WidgetMediumView : View {
 @available(iOS 17.0, *)
 struct WidgetSmallView : View {
     let entry: ServerMonitorEntry
+    var df: DateFormatter
     var body: some View {
-        VStack(alignment: .leading, spacing: 4.0) {
+        VStack(alignment: .leading, spacing: 0.0) {
             Text(convertToColourText(value: entry.serverName))
                 .font(/*@START_MENU_TOKEN@*/.title2/*@END_MENU_TOKEN@*/)
                 .fontWeight(.regular)
@@ -291,16 +293,31 @@ struct WidgetSmallView : View {
                 .fontWeight(.regular)
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
+                .padding(.top, 4.0)
             Text(convertToColourText(value: entry.mapName))
                 .font(.subheadline)
                 .fontWeight(.regular)
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
+                .padding(.top, 4.0)
             Spacer()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Button("Refresh", intent: RefreshIntent())
-                .tint(.mint)
+            VStack(alignment: .leading, spacing: 0.0) {
+                Text(df.string(from: entry.date))
+                    .font(.caption2)
+                    .fontWeight(.regular)
+                    .foregroundColor(Color.gray)
+                Button("Refresh", intent: RefreshIntent())
+                    .tint(.mint)
+                    .padding(.top, 4.0)
+            }
         }
+    }
+    init(entry: ServerMonitorEntry) {
+        self.entry = entry
+        df = DateFormatter()
+        df.locale = Locale.current
+        df.dateFormat = DateFormatter.dateFormat(fromTemplate:  "yyyyMMddjmm", options: 0, locale: Locale.current)
     }
 }
 
@@ -344,5 +361,5 @@ struct ServerMonitorWidget: Widget {
 #Preview(as: .systemMedium) {
     ServerMonitorWidget()
 } timeline: {
-    ServerMonitorEntry(date: .now, configuration: ConfigurationAppIntent(), serverName: "Refresh2-PUG Refresh2-PUG", players: [ServerMonitorPlayer(name: "^3test ^3test^3test ^3test^3test ^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test")], maxPlayers: 32, mapName: "MPA/FFA 2", family: .systemMedium)
+    ServerMonitorEntry(date: .now, configuration: ConfigurationAppIntent(), serverName: "Refresh2-PUGRefresh2-PUG", players: [ServerMonitorPlayer(name: "^3test ^3test^3test ^3test^3test ^3test^3test^3test ^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test")], maxPlayers: 32, mapName: "MPA/FFA 2", family: .systemMedium)
 }

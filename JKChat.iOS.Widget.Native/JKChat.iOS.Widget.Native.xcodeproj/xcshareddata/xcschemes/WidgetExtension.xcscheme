@@ -93,6 +93,10 @@
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>
+      <LocationScenarioReference
+         identifier = "com.apple.dt.IDEFoundation.CurrentLocationScenarioIdentifier"
+         referenceType = "1">
+      </LocationScenarioReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -102,16 +106,17 @@
       debugDocumentVersioning = "YES"
       askForAppToLaunch = "Yes"
       launchAutomaticallySubstyle = "2">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <RemoteRunnable
+         runnableDebuggingMode = "2"
+         BundleIdentifier = "com.apple.springboard">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "E77FEEA62B1D237F00AAB05B"
-            BuildableName = "JKChat.iOS.Widget.Native.app"
-            BlueprintName = "JKChat.iOS.Widget.Native"
+            BlueprintIdentifier = "E707006C2B191F6400BE82DA"
+            BuildableName = "WidgetExtension.appex"
+            BlueprintName = "WidgetExtension"
             ReferencedContainer = "container:JKChat.iOS.Widget.Native.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </RemoteRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
