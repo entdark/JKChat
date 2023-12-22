@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="12dp">
+        android:layout_marginVertical="16dp">
         <TextView
             style="@style/OnSurfaceText.TitleMedium"
             android:id="@+id/server_name_textview"
@@ -27,7 +27,7 @@
             tools:text="27/32 players"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:lines="1"
             android:ellipsize="end"/>
         <TextView
@@ -37,7 +37,7 @@
             tools:text="MPA/FFA 2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="2dp"
             android:lines="1"
             android:ellipsize="end"/>
     </LinearLayout>
@@ -48,7 +48,6 @@
         android:textAllCaps="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:paddingHorizontal="16dp"/>
@@ -59,10 +58,19 @@
         android:textAllCaps="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:paddingHorizontal="16dp"/>
+    <TextView
+        style="@style/OnSurfaceVariantText.LabelSmall"
+        android:id="@+id/datetime_textview"
+        tools:text="2023.12.17 23:12"
+        android:textSize="10sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
     <ProgressBar
         android:id="@+id/loading_progressbar"
         android:visibility="gone"

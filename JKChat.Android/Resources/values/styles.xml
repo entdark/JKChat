@@ -57,4 +57,7 @@
 	<style name="OnSurfaceVariantText.BodyMedium">
 		<item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
 	</style>
+	<style name="OnSurfaceVariantText.LabelSmall">
+		<item name="android:textAppearance">?attr/textAppearanceLabelSmall</item>
+	</style>
 </resources>

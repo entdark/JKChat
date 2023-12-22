@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Android.App;
@@ -147,6 +148,7 @@ namespace JKChat.Android.Widgets {
 			}
 			views.SetTextViewText(Resource.Id.server_name_textview, ColourTextValueConverter.Convert(server.ServerName));
 			views.SetTextViewText(Resource.Id.map_textview, server.MapName);
+			views.SetTextViewText(Resource.Id.datetime_textview, $"{DateTime.Now:g}");
 			//to be safe
 			views.SetViewVisibility(Resource.Id.loading_progressbar, ViewStates.Gone);
 			appWidgetManager.UpdateAppWidget(appWidgetId, views);
