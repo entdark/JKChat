@@ -63,7 +63,9 @@ namespace JKChat.Android.Views.Main {
 
 			contentMasterView = FindViewById(Resource.Id.content_master);
 			contentDetailView = FindViewById(Resource.Id.content_detail);
-			pendingIntent = Intent;
+			if (savedInstanceState == null) {
+				pendingIntent = Intent;
+			}
 
 			notificationsPermissionActivityResultLauncher = RegisterForActivityResult(
 				new ActivityResultContracts.RequestPermission(),
@@ -100,7 +102,8 @@ namespace JKChat.Android.Views.Main {
 
 		protected override void OnResume() {
 			base.OnResume();
-			if (pendingIntent is { Extras: { IsEmpty: false } extras, Action: {} action }) {
+			System.Diagnostics.Debug.WriteLine($"flags: {pendingIntent?.Flags}");
+			if (pendingIntent is { Flags: var flags, Extras: { IsEmpty: false } extras, Action: var action } && !flags.HasFlag(ActivityFlags.LaunchedFromHistory)) {
 				var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
 				if (action == NotificationsService.NotificationAction) {
 					var parameters = extras?.ToDictionary();
@@ -118,8 +121,8 @@ namespace JKChat.Android.Views.Main {
 						navigationService.Navigate(parameters);
 					}
 				}
-				pendingIntent = null;
 			}
+			pendingIntent = null;
 		}
 
 		protected override void ConfigurationChanged(Configuration configuration) {
@@ -160,7 +163,7 @@ namespace JKChat.Android.Views.Main {
 			}
 		}
 		private bool IsServiceRunning(Type serviceClass) {
-			ActivityManager manager = (ActivityManager)GetSystemService(Context.ActivityService);
+			var manager = (ActivityManager)GetSystemService(Context.ActivityService);
 			foreach (var service in manager.GetRunningServices(int.MaxValue)) {
 				string className = service.Service.ClassName;
 				if (className.Equals(serviceClass.Name, StringComparison.OrdinalIgnoreCase)
