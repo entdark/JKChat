@@ -130,7 +130,7 @@ namespace JKChat.Android.Widgets {
 
 			var playersIntent = new Intent(context, typeof(ServerMonitorDialogActivity));
 			playersIntent.SetAction(PlayersAction);
-			playersIntent.PutExtra(PlayersExtraKey, server.PlayersList);
+			playersIntent.PutExtra(PlayersExtraKey, server.PlayersList ?? Array.Empty<string>());
 			var playersPendingIntent = PendingIntent.GetActivity(context, appWidgetId, playersIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 			views.SetOnClickPendingIntent(Resource.Id.players_button, playersPendingIntent);
 			
