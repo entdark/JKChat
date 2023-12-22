@@ -64,53 +64,50 @@ namespace JKChat.Android.Widgets {
 			}
 		}
 
-		public override void OnAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+		public override async void OnAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
 			base.OnAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
 			var serverAddresses = AppSettings.ServerMonitorServers;
 			if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
-				Task.Run(update);
-				async Task update() {
-					var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, false);
-					if (server != null) {
-						await MainThread.InvokeOnMainThreadAsync(() => {
-							SetView(context, appWidgetManager, appWidgetId, newOptions, server);
-						});
-					}
-				}
-			}
-		}
-
-		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress) {
-			Task.Run(update);
-			async Task update() {
-				await setLoading(true);
-				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true);
+				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, false).ConfigureAwait(false);
 				if (server != null) {
-					await setView();
-				}
-				bool refreshed = await server?.Refresh();
-				await setLoading(false);
-				if (refreshed) {
-					await setView();
-				}
-
-				async Task setLoading(bool loading) {
-					await MainThread.InvokeOnMainThreadAsync(() => {
-						var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
-						views.SetViewVisibility(Resource.Id.loading_progressbar, loading ? ViewStates.Visible : ViewStates.Gone);
-						appWidgetManager.UpdateAppWidget(appWidgetId, views);
-					});
-				}
-				async Task setView() {
-					await MainThread.InvokeOnMainThreadAsync(() => {
-						var options = appWidgetManager.GetAppWidgetOptions(appWidgetId) ?? new();
-						SetView(context, appWidgetManager, appWidgetId, options, server);
-					});
+					SetView(context, appWidgetManager, appWidgetId, newOptions, server);
 				}
 			}
 		}
 
-		private void SetView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions, ServerListItemVM server) {
+		public override void OnDeleted(Context context, int []appWidgetIds) {
+			var serverAddresses = AppSettings.ServerMonitorServers;
+			foreach (var appWidgetId in appWidgetIds) {
+				serverAddresses.Remove(appWidgetId);
+			}
+			AppSettings.ServerMonitorServers = serverAddresses;
+			base.OnDeleted(context, appWidgetIds);
+		}
+
+		private static async void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress) {
+			setLoading(true);
+			var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true).ConfigureAwait(false);
+			if (server != null) {
+				setView();
+			}
+			bool refreshed = await server?.Refresh();
+			setLoading(false);
+			if (refreshed) {
+				setView();
+			}
+
+			void setLoading(bool loading) {
+				var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
+				views.SetViewVisibility(Resource.Id.loading_progressbar, loading ? ViewStates.Visible : ViewStates.Gone);
+				appWidgetManager.UpdateAppWidget(appWidgetId, views);
+			}
+			void setView() {
+				var options = appWidgetManager.GetAppWidgetOptions(appWidgetId) ?? new();
+				SetView(context, appWidgetManager, appWidgetId, options, server);
+			}
+		}
+
+		private static void SetView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions, ServerListItemVM server) {
 			string serverAddress = server.Address;
 
 			var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
@@ -150,11 +147,11 @@ namespace JKChat.Android.Widgets {
 			views.SetTextViewText(Resource.Id.map_textview, server.MapName);
 			views.SetTextViewText(Resource.Id.datetime_textview, $"{DateTime.Now:g}");
 			//to be safe
-			views.SetViewVisibility(Resource.Id.loading_progressbar, ViewStates.Gone);
+//			views.SetViewVisibility(Resource.Id.loading_progressbar, ViewStates.Gone);
 			appWidgetManager.UpdateAppWidget(appWidgetId, views);
 		}
 
-		private void UpdateEmpty(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+		private static void UpdateEmpty(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 			var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_empty_widget);
 
 			var addIntent = new Intent(context, typeof(ServerMonitorDialogActivity));
@@ -164,16 +161,6 @@ namespace JKChat.Android.Widgets {
 			views.SetOnClickPendingIntent(Resource.Id.add_textview, addPendingIntent);
 
 			appWidgetManager.UpdateAppWidget(appWidgetId, views);
-		}
-
-		public override void OnDeleted(Context context, int []appWidgetIds)
-		{
-			var serverAddresses = AppSettings.ServerMonitorServers;
-			foreach (var appWidgetId in appWidgetIds) {
-				serverAddresses.Remove(appWidgetId);
-			}
-			AppSettings.ServerMonitorServers = serverAddresses;
-			base.OnDeleted(context, appWidgetIds);
 		}
 	}
 
@@ -212,7 +199,6 @@ namespace JKChat.Android.Widgets {
 							DialogService.Show(new() {
 								Title = "Add Server",
 								List = new DialogListViewModel(servers.Select(s => new DialogItemVM() { Name = s.ServerName, Id = s.Address }), DialogSelectionType.InstantSelection),
-								OkText = "OK",
 								OkAction = config => {
 									string serverAddress = config.List.SelectedItem?.Id as string;
 									var serversAddresses = AppSettings.ServerMonitorServers;
