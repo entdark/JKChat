@@ -10,6 +10,7 @@ using JKChat.Core.Models;
 using JKChat.Core.Navigation.Parameters;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Base.Result;
 using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.ServerList.Items;
@@ -17,15 +18,16 @@ using JKChat.Core.ViewModels.ServerList.Items;
 using JKClient;
 
 using MvvmCross.Commands;
+using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
-	public class ServerListViewModel : ReportViewModel<ServerListItemVM> {
+	public class ServerListViewModel : ReportViewModel<ServerListItemVM>, IResultAwaitingViewModel<Filter> { //or ResultAwaitingViewModel<Filter> that will automatically subscribe and unsubscribe for us
 		private readonly MvxObservableCollection<ServerListItemVM> items;
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
-		private readonly Filter filter;
+		private Filter filter;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
@@ -110,7 +112,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task FilterExecute() {
-			await NavigationService.NavigateFromRoot<FilterViewModel, Filter>(filter);
+			await NavigationService.NavigateSubscribingToResult<FilterViewModel, Filter, Filter>(this, filter);
 		}
 
 		private async Task AddServerExecute() {
@@ -379,8 +381,24 @@ namespace JKChat.Core.ViewModels.ServerList {
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
 				filter.PropertyChanged -= FilterPropertyChanged;
+				(this as IResultAwaitingViewModel<Filter>).UnsubscribeToResult(); //not needed if ResultAwaitingViewModel<Filter> is used
 			}
 			base.ViewDestroy(viewFinishing);
+		}
+
+		public override void Prepare() {
+			base.Prepare();
+			(this as IResultAwaitingViewModel<Filter>).SubscribeToResult(); //not needed if ResultAwaitingViewModel<Filter> is used
+		}
+
+		MvxSubscriptionToken IResultAwaitingViewModel<Filter>.ResultAwaitingToken { get; set; } //not needed if ResultAwaitingViewModel<Filter> is used
+
+		public bool ResultSet(IResultSettingViewModel<Filter> sender, Filter result) {
+			if (sender is FilterViewModel) {
+				filter = result;
+				return true; //handled - let the system automatically unsubscribe to result for us
+			}
+			return false;
 		}
 	}
 }

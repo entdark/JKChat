@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using JKChat.Core.Navigation.Hints;
+using JKChat.Core.ViewModels.Base.Result;
 
 using MvvmCross.IoC;
 using MvvmCross.Navigation;
@@ -88,6 +89,27 @@ namespace JKChat.Core.Navigation {
 				[DataKey] = data,
 				[FromRootKey] = fromRoot.ToString()
 			};
+		}
+
+		public async Task NavigateSubscribingToResult<TViewModel, TResult>(IResultAwaitingViewModel<TResult> fromViewModel)
+			where TViewModel : IResultSettingViewModel<TResult> {
+			bool navigated = await Navigate<TViewModel>();
+			if (navigated)
+				fromViewModel.SubscribeToResult();
+		}
+
+		public async Task NavigateSubscribingToResult<TViewModel, TParameter, TResult>(IResultAwaitingViewModel<TResult> fromViewModel, TParameter parameter)
+			where TViewModel : IResultSettingViewModel<TResult>, IMvxViewModel<TParameter> {
+			bool navigated = await Navigate<TViewModel, TParameter>(parameter);
+			if (navigated)
+				fromViewModel.SubscribeToResult();
+		}
+
+		public async Task CloseSettingResult<TViewModel, TResult>(TViewModel viewModel, TResult result)
+			where TViewModel : IResultSettingViewModel<TResult> {
+			bool closed = await Close(viewModel);
+			if (closed)
+				viewModel.SetResult(result);
 		}
 	}
 }

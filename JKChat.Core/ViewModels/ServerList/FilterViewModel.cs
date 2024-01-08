@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
 using JKChat.Core.Models;
-using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
+using JKChat.Core.ViewModels.Base.Result;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
 
 using MvvmCross.Commands;
 
 namespace JKChat.Core.ViewModels.ServerList {
-	public class FilterViewModel : BaseViewModel<Filter> {
+	public class FilterViewModel : ResultSettingViewModel<Filter, Filter> {
 		private readonly TableToggleItemVM showEmptyItem, showFullItem;
 		private readonly TableValueItemVM gameItem, gameTypeItem, gameModItem;
 
@@ -92,6 +92,10 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private void ResetExecute() {
 			Filter.Reset();
+		}
+
+		private async Task ApplyFilter() {
+			await NavigationService.CloseSettingResult(this, Filter);
 		}
 
 		private async Task ItemClickExecute(TableItemVM item) {

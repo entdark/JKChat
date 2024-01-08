@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using JKChat.Core.ViewModels.Base.Result;
+
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 
@@ -15,5 +17,11 @@ namespace JKChat.Core.Navigation {
 		Task<bool> NavigateFromRoot(string path, object data = null);
 		Task<bool> Navigate(IDictionary<string, string> parameters);
 		IDictionary<string, string> MakeNavigationParameters(string path, string data = null, bool fromRoot = true);
+		Task NavigateSubscribingToResult<TToViewModel, TResult>(IResultAwaitingViewModel<TResult> fromViewModel)
+			where TToViewModel : IResultSettingViewModel<TResult>;
+		Task NavigateSubscribingToResult<TToViewModel, TParameter, TResult>(IResultAwaitingViewModel<TResult> fromViewModel, TParameter parameter)
+			where TToViewModel : IResultSettingViewModel<TResult>, IMvxViewModel<TParameter>;
+		Task CloseSettingResult<TViewModel, TResult>(TViewModel viewModel, TResult result)
+			where TViewModel : IResultSettingViewModel<TResult>;
 	}
 }
