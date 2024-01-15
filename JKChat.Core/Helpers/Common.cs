@@ -48,7 +48,7 @@ namespace JKChat.Core.Helpers {
 		}
 
 		public static async Task<bool> ExceptionalTaskRun(Func<Task> func) {
-			return await ExceptionalTaskRun(Task.Run(func));
+			return await ExceptionalTaskRun(func());
 		}
 
 		public static async Task<bool> ExceptionalTaskRun(Task task) {
