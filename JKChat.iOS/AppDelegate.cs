@@ -31,8 +31,8 @@ namespace JKChat.iOS {
 	// User Interface of the application, as well as listening (and optionally responding) to application events from iOS.
 	[Register("AppDelegate")]
 	public class AppDelegate : MvxApplicationDelegate<Setup, App>, IUNUserNotificationCenterDelegate {
-		private const string BackgroundNotificationRequestId = "JKChatNotificationBackground";
-		private const string ServerInfoNotificationRequestId = "JKChatNotificationServerInfo";
+		public const string BackgroundNotificationRequestId = "JKChatNotificationBackground";
+		public const string ServerInfoNotificationRequestId = "JKChatNotificationServerInfo";
 
 		private CLLocationManager locationManager;
 		private NSUrl delayedOpenUrl;
