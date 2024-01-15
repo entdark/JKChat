@@ -292,7 +292,7 @@ namespace JKChat.Core.Models {
 		internal async void ExecuteCommand(string cmd, bool addToChat = false) {
 			if (addToChat && Client != null) {
 				string cmd2 = cmd.StartsWith("/", StringComparison.Ordinal) ? cmd : ("/" + cmd);
-				await AddItem(new ChatMessageItemVM(Client.Name, Client.Name+":", cmd2, Client.Version == ClientVersion.JO_v1_02));
+				await AddItem(new ChatMessageItemVM(Client.Name, Client.Name+"^7:", cmd2, Client.Version == ClientVersion.JO_v1_02));
 			}
 			Client?.ExecuteCommand(cmd);
 		}
