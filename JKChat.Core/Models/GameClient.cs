@@ -31,6 +31,7 @@ namespace JKChat.Core.Models {
 	public class GameClient {
 		private const int MaxChatMessages = 512;
 		private JKClient.JKClient Client;
+		private Dictionary<string, string> pendingUserInfo;
 		private readonly IMvxMainThreadAsyncDispatcher mainThread;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
@@ -140,10 +141,10 @@ namespace JKChat.Core.Models {
 			notificationsService = Mvx.IoCProvider.Resolve<INotificationsService>();
 			messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 			lifetime = Mvx.IoCProvider.Resolve<IMvxLifetime>();
-			pendingItems = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
-			blockedPlayers = new HashSet<string>();
+			pendingItems = new(MaxChatMessages);
+			blockedPlayers = new();
 			ServerInfo = serverInfo;
-			Items = new LimitedObservableCollection<ChatItemVM>(MaxChatMessages);
+			Items = new(MaxChatMessages);
 			Status = ConnectionStatus.Disconnected;
 		}
 
@@ -174,6 +175,12 @@ namespace JKChat.Core.Models {
 				Client.ServerInfoChanged += ServerInfoChanged;
 				Client.FrameExecuted += FrameExecuted;
 				Client.Start(ExceptionCallback);
+				if (!pendingUserInfo.IsNullOrEmpty()) {
+					foreach (var keyValuePair in pendingUserInfo) {
+						Client.SetUserInfoKeyValue(keyValuePair.Key, keyValuePair.Value);
+					}
+					pendingUserInfo = null;
+				}
 				lifetime.LifetimeChanged += LifetimeChanged;
 				playerNameMessageToken = messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);
 			});
@@ -288,6 +295,15 @@ namespace JKChat.Core.Models {
 				await AddItem(new ChatMessageItemVM(Client.Name, Client.Name+":", cmd2, Client.Version == ClientVersion.JO_v1_02));
 			}
 			Client?.ExecuteCommand(cmd);
+		}
+
+		internal void SetUserInfoKeyValue(string key, string value) {
+			if (Client != null) {
+				Client.SetUserInfoKeyValue(key, value);
+			} else {
+				pendingUserInfo ??= new();
+				pendingUserInfo[key] = value;
+			}
 		}
 
 		private void LifetimeChanged(object sender, MvxLifetimeEventArgs ev) {

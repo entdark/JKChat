@@ -167,7 +167,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		public bool ShouldLetOtherNavigateFromRoot(object data) {
 			if (data is ServerInfo serverInfo)
 				return this.ServerInfo != serverInfo;
-			else if (data is string s && NetAddress.FromString(s) is { } address)
+			else if (data is string s && NetAddress.FromString(s) is var address)
 				return this.ServerInfo.Address != address;
 			return true;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -145,7 +146,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
 			if (gameClient?.ServerInfo == message.ServerInfo) {
-				AddCommands();
+				PrepareForModification();
 				Status = message.Status;
 				Title = message.ServerInfo.HostName;
 /*				if (gameClient.ViewModel == null && Status == ConnectionStatus.Disconnected) {
@@ -161,8 +162,15 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 		}
 
-		private void AddCommands() {
+		private void PrepareForModification() {
 			var mod = gameClient.Modification;
+			if (ServerInfo.Version == JKClient.ClientVersion.Q3_v1_32 && mod == JKClient.GameModification.Unknown) {
+				if (ServerInfo.GameName.Contains("cpma", StringComparison.InvariantCultureIgnoreCase)) {
+					mod = JKClient.GameModification.CPMA;
+				} else if (ServerInfo.GameName.Contains("osp", StringComparison.InvariantCultureIgnoreCase)) {
+					mod = JKClient.GameModification.OSP;
+				}
+			}
 			switch (mod) {
 			case JKClient.GameModification.BaseEnhanced:
 			case JKClient.GameModification.BaseEntranced:
@@ -170,6 +178,12 @@ namespace JKChat.Core.ViewModels.Chat {
 				break;
 			case JKClient.GameModification.JAPlus:
 				commands.UnionWith(jaPlusCommands);
+				break;
+			case JKClient.GameModification.CPMA:
+			case JKClient.GameModification.OSP:
+				if (DateTime.TryParseExact(ServerInfo["gamedate"], "MMM dd yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTime)) {
+					gameClient.SetUserInfoKeyValue("osp_client", dateTime.ToString("yyyyMMdd", CultureInfo.InvariantCulture));
+				}
 				break;
 			}
 		}
@@ -453,7 +467,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
 			IsFavourite = isFavourite;
-			AddCommands();
+			PrepareForModification();
 		}
 
 		private async Task Connect() {
@@ -500,7 +514,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		public bool ShouldLetOtherNavigateFromRoot(object data) {
 			if (data is JKClient.ServerInfo serverInfo)
 				return this.ServerInfo != serverInfo;
-			else if (data is string s && JKClient.NetAddress.FromString(s) is { } address)
+			else if (data is string s && JKClient.NetAddress.FromString(s) is var address)
 				return this.ServerInfo.Address != address;
 			return true;
 		}
