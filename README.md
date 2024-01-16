@@ -17,7 +17,7 @@ The application is based on .NET Android and .NET iOS workloads and uses MvvmCro
 
 ## Beta testing downloads:
 ### iOS:
-Install TestFlight: https://apps.apple.com/app/testflight/id899247664
+Install TestFlight: https://apps.apple.com/app/testflight/id899247664  
 Then open that link on your iOS device: https://testflight.apple.com/join/5HSqhVHw
 ### Android:
 Install from APK: https://www.dropbox.com/s/ptx301a1pas39n9/com.vlbor.jkchat.apk?dl=1
