@@ -49,7 +49,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.vlbor.JKChat</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
