@@ -227,7 +227,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				PrimaryInfoItems[2].Value = $"{ServerInfo.Clients}/{ServerInfo.MaxClients}";
 				PrimaryInfoItems[3].Value = ServerInfo.GameType.ToDisplayString(ServerInfo.Version);
 				if (ServerInfo.RawInfo != null) {
-					FullInfoItems.MergeWith(ServerInfo.RawInfo?.Select(kv => new KeyValueItemVM() { Key = kv.Key, Value = kv.Value }), (oldItem, newItem) => {
+					FullInfoItems.MergeWith(ServerInfo.RawInfo.Select(kv => new KeyValueItemVM() { Key = kv.Key, Value = kv.Value }), (oldItem, newItem) => {
 						bool theSame = oldItem.Key == newItem.Key;
 						if (theSame) {
 							oldItem.Value = newItem.Value;
