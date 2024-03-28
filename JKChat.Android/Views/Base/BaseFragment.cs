@@ -85,6 +85,9 @@ namespace JKChat.Android.Views.Base {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
+			if (savedInstanceState != null)
+				OnRestoreInstanceState(savedInstanceState);
+
 //			ViewCompat.SetTranslationZ(view, Order*0.1f);
 
 			if (PostponeTransition) {
@@ -170,8 +173,6 @@ namespace JKChat.Android.Views.Base {
 
 		public override void OnViewStateRestored(Bundle savedInstanceState) {
 			base.OnViewStateRestored(savedInstanceState);
-			if (savedInstanceState != null)
-				OnRestoreInstanceState(savedInstanceState);
 		}
 
 		public virtual void OnRestoreInstanceState(Bundle savedInstanceState) {
