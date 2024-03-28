@@ -30,8 +30,6 @@ namespace JKChat.iOS.Views.Base {
 			set => base.Title = value;
 		}
 
-		protected CGRect NavigationBarFrame => NavigationController?.NavigationBar?.Frame ?? new CGRect(0.0f, 0.0f, View.Frame.Width, 44.0f);
-
 		protected BaseViewController() {}
 		protected BaseViewController(NativeHandle handle) : base(handle) { }
 		protected BaseViewController(string nibName, NSBundle bundle) : base(nibName, bundle) { }
@@ -46,6 +44,7 @@ namespace JKChat.iOS.Views.Base {
 //			this.View.BackgroundColor = Theme.Color.Background;
 
 			var loadingView = new UIView() {
+				UserInteractionEnabled = false,
 //				BackgroundColor = Theme.Color.LoadingBackground
 			};
 			View.AddSubview(loadingView);

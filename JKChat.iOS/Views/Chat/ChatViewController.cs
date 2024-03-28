@@ -160,13 +160,16 @@ namespace JKChat.iOS.Views.Chat {
 					long dt = itemTappedStopwatch.ElapsedMilliseconds - lastTappedTime;
 					var currentPoint = this.NavigationController?.View != null ? gr.LocationInView(this.NavigationController.View) : CGPoint.Empty;
 					nfloat dx = NMath.Abs(lastTappedPoint.X - currentPoint.X), dy = NMath.Abs(lastTappedPoint.Y - currentPoint.Y);
-					if (lastTappedItem != null && lastTappedTime != 0L && !ChatTableView.StartedDragging
-						&& lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty && dx < deltaTappedPos && dy < deltaTappedPos) {
-						if (dt >= 500L) {
-//							ViewModel.LongPressCommand?.Execute(lastTappedItem);
-						} else {
-							ViewModel.ItemClickCommand?.Execute(lastTappedItem);
+					if (!ChatTableView.StartedDragging && dx < deltaTappedPos && dy < deltaTappedPos
+						&& lastTappedTime != 0L && lastTappedPoint != CGPoint.Empty && currentPoint != CGPoint.Empty) {
+						if (lastTappedItem != null) {
+							if (dt >= 500L) {
+//								ViewModel.LongPressCommand?.Execute(lastTappedItem);
+							} else {
+								ViewModel.ItemClickCommand?.Execute(lastTappedItem);
+							}
 						}
+						MessageTextView.ResignFirstResponder();
 					}
 					goto case UIGestureRecognizerState.Cancelled;
 				case UIGestureRecognizerState.Cancelled:
