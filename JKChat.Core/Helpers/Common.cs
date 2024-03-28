@@ -80,22 +80,22 @@ namespace JKChat.Core.Helpers {
 			|| platform == DevicePlatform.MacCatalyst
 			|| platform == DevicePlatform.macOS;
 
-		public static string Serialize(this object value, Func<string> defaultValueAction = null) {
+		public static string Serialize(this object value, Func<string> defaultValueFunc = null) {
 			try {
 				return JsonSerializer.Serialize(value);
 			} catch (Exception exception) {
 				Debug.WriteLine(exception);
 			}
-			return defaultValueAction?.Invoke();
+			return defaultValueFunc?.Invoke();
 		}
 
-		public static T Deserialize<T>(this string json, T defaultValue = default) {
+		public static T Deserialize<T>(this string json, Func<T> defaultValueFunc = default) {
 			try {
 				return JsonSerializer.Deserialize<T>(json);
 			} catch (Exception exception) {
 				Debug.WriteLine(exception);
 			}
-			return defaultValue;
+			return defaultValueFunc != null ? defaultValueFunc() : default;
 		}
 	}
 }

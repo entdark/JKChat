@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
+using JKChat.Core.Messages;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
@@ -13,7 +14,7 @@ using JKChat.Core.ViewModels.Dialog.Items;
 using MvvmCross.Commands;
 
 namespace JKChat.Core.ViewModels.ServerList {
-	public class FilterViewModel : BaseViewModel<Filter> {
+	public class FilterViewModel : BaseViewModel {
 		private readonly TableToggleItemVM showEmptyItem, showFullItem;
 		private readonly TableValueItemVM gameItem, gameTypeItem, gameModItem;
 
@@ -58,23 +59,19 @@ namespace JKChat.Core.ViewModels.ServerList {
 					}
 				}
 			};
-		}
-
-		public override void Prepare(Filter parameter) {
-			Filter = parameter;
+			Filter = AppSettings.Filter;
 			SetFilterProperties();
 		}
 
 		private void FilterPropertyChanged(object sender, PropertyChangedEventArgs ev) {
+			AppSettings.Filter = Filter;
 			SetFilterProperties();
 			ResetCommand.RaiseCanExecuteChanged();
 		}
 
 		private void SetFilterProperties() {
-			int gameCount = Filter.Game.CountVersions();
-			string game = gameCount != ClientVersionExtensions.Versions.Length ? gameCount.ToString() : Filter.Game.ToDisplayString();
-			int gameTypeCount = Filter.GameType.CountGameTypes();
-			string gameType = gameTypeCount != GameTypeExtensions.GameTypes.Length ? gameTypeCount.ToString() : Filter.GameType.ToDisplayString(Filter.Game);
+			string game = Filter.Game.ToDisplayString(true);
+			string gameType = Filter.GameType.ToDisplayString(Filter.Game, true);
 			var selectedGameMods = Filter.GameMod.Where(gm => gm.Value).Select(gm => HandleEmptyGameMod(gm.Key));
 			int selectedGameModsCount = selectedGameMods.Count();
 			string gameMod = selectedGameModsCount switch {
@@ -125,16 +122,19 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task GameModExecute(TableValueItemVM item) {
-			if (Filter.GameMod.Count <= 0)
+			//game mods can be set externally so access directly
+			var filter = AppSettings.Filter;
+			if (filter.GameMod.Count <= 0)
 				return;
-			bool allGameModsSelected = Filter.GameMod.All(gameMod => gameMod.Value);
-			await DialogService.ShowAsync(new DialogListViewModel(Filter.GameMod.Select(gameMod => new DialogItemVM() {
+			bool allGameModsSelected = filter.GameMod.All(gameMod => gameMod.Value);
+			await DialogService.ShowAsync(new DialogListViewModel(filter.GameMod.Select(gameMod => new DialogItemVM() {
 				Id = gameMod.Key,
 				Name = HandleEmptyGameMod(gameMod.Key),
 				IsSelected = !allGameModsSelected && gameMod.Value
 			}).OrderByDescending(item => item.IsSelected), DialogSelectionType.MultiSelection), config => {
 				var selectedItems = config.List.Items.ToDictionary(item => item.Id as string, item => item.IsSelected);
 				if (!selectedItems.Any(item => item.Value)) {
+					Filter.SetGameMods(filter.GameMod, true);
 					Filter.ResetGameMod(false);
 				} else {
 					Filter.SetGameMods(selectedItems);

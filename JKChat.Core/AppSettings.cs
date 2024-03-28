@@ -63,8 +63,11 @@ namespace JKChat.Core {
 			}
 		}
 		public static Filter Filter {
-			get => GetDeserialized<Filter>(null);
-			set => SetSerialized(value);
+			get => GetDeserialized(() => new Filter());
+			set {
+				SetSerialized(value);
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new FilterMessage(value));
+			}
 		}
 		private static CachedValue<bool> openJKColours;
 		public static bool OpenJKColours {
@@ -90,7 +93,7 @@ namespace JKChat.Core {
 		}
 
 		public static Dictionary<int, string> ServerMonitorServers {
-			get => GetDeserialized(new Dictionary<int, string>());
+			get => GetDeserialized(() => new Dictionary<int, string>());
 			set => SetSerialized(value);
 		}
 		public static WidgetLink WidgetLink {
@@ -121,10 +124,13 @@ namespace JKChat.Core {
 		}
 
 		private static T GetDeserialized<T>(T defaultValue, [CallerMemberName] string key = "") {
+			return GetDeserialized(() => defaultValue, key);
+		}
+		private static T GetDeserialized<T>(Func<T> defaultValueFunc, [CallerMemberName] string key = "") {
 			string json = Get(null, key);
 			if (json == null)
-				return defaultValue;
-			return json.Deserialize(defaultValue);
+				return defaultValueFunc != null ? defaultValueFunc() : default;
+			return json.Deserialize(defaultValueFunc);
 		}
 		private static void SetSerialized<T>(T value, [CallerMemberName] string key = "") {
 			string json = value.Serialize();

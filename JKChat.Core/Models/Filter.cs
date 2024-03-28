@@ -50,11 +50,6 @@ namespace JKChat.Core.Models {
 				[string.Empty] = true
 			};
 			Reset();
-			PropertyChanged += FilterPropertyChanged;
-		}
-
-		private void FilterPropertyChanged(object sender, PropertyChangedEventArgs ev) {
-			AppSettings.Filter = this;
 		}
 
 		public void Reset() {
@@ -73,24 +68,28 @@ namespace JKChat.Core.Models {
 			&& GameType == GameTypeDefault
 			&& (GameMod.Count <= 0 || GameMod.All(gm => gm.Value));
 
-		public void AddGameMods(IEnumerable<string> gameMods) {
+		public bool AddGameMods(IEnumerable<string> gameMods) {
 			var uniqueGameMods = gameMods
 				.Where(item => !string.IsNullOrEmpty(item))
 				.Distinct(StringComparer.InvariantCultureIgnoreCase)
 				.Except(GameMod.Keys, StringComparer.InvariantCultureIgnoreCase);
+			bool added = false;
 			foreach (var uniqueGameMod in uniqueGameMods) {
-				GameMod.TryAdd(uniqueGameMod, true);
+				added |= GameMod.TryAdd(uniqueGameMod, true);
 			}
 			RaisePropertyChanged(nameof(GameMod));
+			return added;
 		}
 
-		public void SetGameMods(IEnumerable<KeyValuePair<string, bool>> gameMods) {
+		public void SetGameMods(IEnumerable<KeyValuePair<string, bool>> gameMods, bool silently = false) {
 			foreach (var gameMod in gameMods) {
 				if (GameMod.TryGetValue(gameMod.Key, out bool value) && value != gameMod.Value) {
 					GameMod[gameMod.Key] = gameMod.Value;
 				}
 			}
-			RaisePropertyChanged(nameof(GameMod));
+			if (!silently) {
+				RaisePropertyChanged(nameof(GameMod));
+			}
 		}
 
 		public void ResetGameMod(bool silently) {

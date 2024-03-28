@@ -17,6 +17,7 @@ using JKChat.Core.ViewModels.ServerList.Items;
 using JKClient;
 
 using MvvmCross.Commands;
+using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.ServerList {
@@ -25,7 +26,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
-		private readonly Filter filter;
+		private Filter filter;
+		private MvxSubscriptionToken filterMessageToken;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
@@ -62,30 +64,35 @@ namespace JKChat.Core.ViewModels.ServerList {
 			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
 			FilterCommand = new MvxAsyncCommand(FilterExecute);
 			items = new MvxObservableCollection<ServerListItemVM>();
-			filter = AppSettings.Filter ?? new();
+			filter = AppSettings.Filter;
 			FilterApplied = !filter.IsReset;
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
+			filterMessageToken = Messenger.Subscribe<FilterMessage>(OnFilterMessage);
 		}
 
-		private void FilterPropertyChanged(object sender, PropertyChangedEventArgs ev) {
+		private void OnFilterMessage(FilterMessage message) {
+			filter = AppSettings.Filter;
 			ApplyFilter();
 			FilterApplied = !filter.IsReset;
 		}
 
 		private void ApplyFilter() {
-			IEnumerable<ServerListItemVM> filteredItems = items;
-			bool replace = !filter.IsReset || Items.Count != items.Count;
-			filteredItems = filter.Apply(filteredItems);
-			if (!string.IsNullOrEmpty(SearchText)) {
-				filteredItems = filteredItems.Where(item => item.CleanServerName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
-					|| item.MapName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase));
-				replace = true;
-			}
+			lock (items) lock (Items) {
+				IEnumerable<ServerListItemVM> filteredItems = items;
+				bool replace = !filter.IsReset || Items.Count != items.Count;
+				filteredItems = filter.Apply(filteredItems);
+				if (!string.IsNullOrEmpty(SearchText)) {
+					filteredItems = filteredItems
+							.Where(item =>
+								item.CleanServerName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
+								|| item.MapName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
+							);
+					replace = true;
+				}
 
-			if (replace) {
-				lock (Items) {
+				if (replace) {
 					Items.ReplaceWith(filteredItems);
 				}
 			}
@@ -110,7 +117,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private async Task FilterExecute() {
-			await NavigationService.NavigateFromRoot<FilterViewModel, Filter>(filter);
+			await NavigationService.NavigateFromRoot<FilterViewModel>();
 		}
 
 		private async Task AddServerExecute() {
