@@ -61,7 +61,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 				[Game.JediOutcast] = Theme.Image.JOPreviewBackground,
 				[Game.Quake3] = Theme.Image.Q3PreviewBackground
 			}, null);
-			set.Bind(PreviewView).For("Visibility").To("EnumBool(Game, 'Unknown')").WithConversion("InvertedVisibility");
+			set.Bind(PreviewView).For("Visibility").To("EnumInvertedVisibility(Game, 'Unknown')");
 		}
 	}
 }
