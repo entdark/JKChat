@@ -17,7 +17,9 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 namespace JKChat.Android.Views.ServerList {
 	[PushFragmentPresentation]
 	public class FilterFragment : BaseFragment<FilterViewModel> {
-		public FilterFragment() : base(Resource.Layout.filter_page, Resource.Menu.reset_item) {}
+		public FilterFragment() : base(Resource.Layout.filter_page, Resource.Menu.reset_item) {
+			PostponeTransition = true;
+		}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
