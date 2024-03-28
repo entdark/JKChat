@@ -91,7 +91,7 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 
 		public string Address => ServerInfo.Address.ToString();
 
-		public string []PlayersList => ServerInfo.Players?.Select(p => p.Name).ToArray();
+		public string []PlayersList => ServerInfo.PlayersInfo?.Select(p => p.Name).ToArray();
 
 		public ServerListItemVM() {
 			ConnectCommand = new MvxAsyncCommand(ConnectExecute);

@@ -235,8 +235,8 @@ namespace JKChat.Core.ViewModels.Chat {
 						return theSame;
 					});
 				}
-				if (ServerInfo.Players != null) {
-					PlayerItems.MergeWith(ServerInfo.Players.Select(player => new KeyValueItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Data = player }), (oldItem, newItem) => {
+				if (ServerInfo.PlayersInfo != null) {
+					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new KeyValueItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Data = player }), (oldItem, newItem) => {
 						bool theSame = oldItem.Data is ServerInfo.PlayerInfo oldPlayer
 							&& newItem.Data is ServerInfo.PlayerInfo newPlayer
 							&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
