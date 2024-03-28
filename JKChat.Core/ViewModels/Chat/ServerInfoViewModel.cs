@@ -141,7 +141,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			base.ReloadFromBundle(state);
 			if (state.Data.TryGetValue(nameof(this.address), out string address))
 				this.address = address;
-			if (state.Data.TryGetValue(nameof(this.address), out string loadData))
+			if (state.Data.TryGetValue(nameof(this.loadData), out string loadData))
 				_ = bool.TryParse(loadData, out this.loadData);
 		}
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+
 using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
@@ -14,7 +14,7 @@ using JKChat.Core.ViewModels.Dialog.Items;
 
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
-using MvvmCross;
+
 using MvvmCross.Commands;
 using MvvmCross.Plugin.Messenger;
 
@@ -200,7 +200,7 @@ namespace JKChat.Core.ViewModels.Settings {
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
 				if (playerNameMessageToken != null) {
-					Messenger.Unsubscribe<ServerInfoMessage>(playerNameMessageToken);
+					Messenger.Unsubscribe<PlayerNameMessage>(playerNameMessageToken);
 					playerNameMessageToken = null;
 				}
 			}
