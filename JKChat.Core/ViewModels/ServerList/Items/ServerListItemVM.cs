@@ -131,6 +131,14 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			}
 		}
 
+		public static bool operator ==(ServerListItemVM server1, ServerListItemVM server2) {
+			return server1?.ServerInfo == server2?.ServerInfo;
+		}
+
+		public static bool operator !=(ServerListItemVM server1, ServerListItemVM server2) {
+			return (server1 == server2) != true;
+		}
+
 		public bool Equals(ServerListItemVM other) {
 			if (other is null)
 				return false;

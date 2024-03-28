@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -201,29 +200,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				return;
 			}
 			IsRefreshing = true;
-			try {
-				IEnumerable<ServerListItemVM> newItems = null;
-				var recentServers = await cacheService.LoadRecentServers();
-				var servers = await serverListService.RefreshList();
-				if (!servers.IsNullOrEmpty()) {
-					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem).ToList();
-					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
-					AddRecentServers(newCollection, recentServers);
-					UpdateServersStatuses(newCollection);
-					newItems = newCollection;
-				} else if (recentServers.Any()) {
-					UpdateServersStatuses(recentServers);
-					newItems = recentServers.Reverse();
-				}
-				if (newItems != null) {
-					var reportedServer = await cacheService.LoadReportedServers();
-					await UpdateFavourites(newItems);
-					filter.AddGameMods(newItems.Select(item => item.ServerInfo.GameName));
-					SetItems(newItems.Except(reportedServer));
-				}
-			} catch (Exception exception) {
-				await ExceptionCallback(exception);
-			}
+			await LoadServerList(serverListService.RefreshList);
 			IsRefreshing = false;
 		}
 
@@ -263,7 +240,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 			if (AppSettings.FirstLaunch) {
 				await RequestPlayerName();
 			}
-			await LoadServerList();
+			IsLoading = true;
+			await LoadServerList(serverListService.GetCurrentList);
+			IsLoading = false;
 		}
 
 		private async Task RequestPlayerName() {
@@ -279,46 +258,62 @@ namespace JKChat.Core.ViewModels.ServerList {
 			});
 		}
 
-		private async Task LoadServerList() {
-			IsLoading = true;
+		private async Task LoadServerList(Func<Task<IEnumerable<ServerInfo>>> loadingFunc) {
 			try {
+				var addressesWithStatuses = Enum.GetValues(typeof(Models.ConnectionStatus))
+					.Cast<Models.ConnectionStatus>()
+					.SelectMany(status => (gameClientsService.AddressesWithStatus(status) ?? Enumerable.Empty<NetAddress>()).Select(address => new { Status = status, Address = address }))
+					.Where(addressWithStatus => addressWithStatus != null)
+					.ToDictionary(addressWithStatus => addressWithStatus.Address, addressWithStatus => addressWithStatus.Status);
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
-				var servers = await serverListService.GetCurrentList();
+				var servers = await loadingFunc();
 				if (!servers.IsNullOrEmpty()) {
-					var serverItems = servers.Where(server => server.Ping != 0).OrderByDescending(server => server.Clients).Select(SetupItem);
-					var newCollection = new ObservableCollection<ServerListItemVM>(serverItems);
-					AddRecentServers(newCollection, recentServers);
-					UpdateServersStatuses(newCollection);
-					newItems = newCollection;
+					var serverItems = recentServers
+						.Where(recentServer => !servers.Any(server => server == recentServer.ServerInfo))
+						.Reverse()
+						.Concat(servers
+							.Where(server => server.Ping != 0)
+							.OrderByDescending(server => server.Clients)
+							.Select(server => new ServerListItemVM(server) {
+								Status = addressesWithStatuses.TryGetValue(server.Address, out var status) ? status : default
+							})
+						);
+					newItems = serverItems;
 				} else if (recentServers.Any()) {
-					UpdateServersStatuses(recentServers);
-					newItems = recentServers.Reverse();
+					newItems = recentServers
+						.UpdateStatuses(addressesWithStatuses)
+						.Reverse();
 				}
 				if (newItems != null) {
 					var reportedServers = await cacheService.LoadReportedServers();
-					await UpdateFavourites(newItems);
-					filter.AddGameMods(newItems.Select(item => item.ServerInfo.GameName));
-					SetItems(newItems.Except(reportedServers));
+					var favouriteServers = await cacheService.LoadFavouriteServers();
+					newItems = newItems
+						.UpdateFavourites(favouriteServers)
+						.Except(reportedServers);
+					SetItems(newItems);
+					if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName)))
+						AppSettings.Filter = filter;
+					else
+						ApplyFilter();
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
 			}
-			IsLoading = false;
 		}
 
 		private void SetItems(IEnumerable<ServerListItemVM> items) {
-			this.items.ReplaceWith(items);
-			lock (Items) {
-				this.Items.ReplaceWith(filter.Apply(this.items));
+			lock (this.items) lock (this.Items) {
+				this.items.ReplaceWith(items);
+				this.Items.ReplaceWith(this.items);
 			}
 		}
 
 		private void MoveItem(ServerListItemVM item, int newIndex) {
-			int oldIndex = items.IndexOf(item);
-			if (oldIndex >= 0)
-				items.Move(oldIndex, newIndex);
-			lock (Items) {
+			lock (items) lock (Items) {
+				int oldIndex = items.IndexOf(item);
+				if (oldIndex >= 0)
+					items.Move(oldIndex, newIndex);
 				oldIndex = Items.IndexOf(item);
 				if (oldIndex >= 0)
 					Items.Move(oldIndex, newIndex);
@@ -326,68 +321,49 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		private void InsertItem(int index, ServerListItemVM item) {
-			items.Insert(index, item);
-			lock (Items) {
+			lock (items) lock (Items) {
+				items.Insert(index, item);
 				Items.Insert(index, item);
 			}
 		}
 
 		private void RemoveItem(ServerListItemVM item) {
-			items.Remove(item);
-			lock (Items) {
+			lock (items) lock (Items) {
+				items.Remove(item);
 				Items.Remove(item);
 			}
 		}
 
-		private static void AddRecentServers(ObservableCollection<ServerListItemVM> items, IEnumerable<ServerListItemVM> recentServers) {
-			foreach (var recentServer in recentServers) {
-				var exitingItem = items.FirstOrDefault(item => item.ServerInfo.Address == recentServer.ServerInfo.Address);
-				if (exitingItem != null) {
-					items.Move(items.IndexOf(exitingItem), 0);
-				} else {
-					items.Insert(0, recentServer);
-				}
-			}
-		}
-
-		private void UpdateServersStatuses(IEnumerable<ServerListItemVM> items) {
-			foreach (Models.ConnectionStatus status in Enum.GetValues(typeof(Models.ConnectionStatus))) {
-				var addresses = gameClientsService.AddressesWithStatus(status);
-				if (addresses == null) {
-					continue;
-				}
-				foreach (var address in addresses) {
-					var existingItem = items.FirstOrDefault(item => item.ServerInfo.Address == address);
-					if (existingItem != null) {
-						existingItem.Status = status;
-					}
-				}
-			}
-		}
-
-		private async Task UpdateFavourites(IEnumerable<ServerListItemVM> items) {
-			var favouriteItems = await cacheService.LoadFavouriteServers();
-			foreach (var favouriteItem in favouriteItems) {
-				var existingItem = items.FirstOrDefault(item => item.ServerInfo == favouriteItem.ServerInfo);
-				existingItem?.SetFavourite(true);
-			}
-		}
-
-		private ServerListItemVM SetupItem(ServerInfo server) {
-			return new ServerListItemVM(server);
-		}
-
 		public override void ViewCreated() {
 			base.ViewCreated();
-			filter.PropertyChanged -= FilterPropertyChanged;
-			filter.PropertyChanged += FilterPropertyChanged;
+			filterMessageToken ??= Messenger.Subscribe<FilterMessage>(OnFilterMessage);
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {
 			if (viewFinishing) {
-				filter.PropertyChanged -= FilterPropertyChanged;
+				if (filterMessageToken != null) {
+					Messenger.Unsubscribe<FilterMessage>(filterMessageToken);
+					filterMessageToken = null;
+				}
 			}
 			base.ViewDestroy(viewFinishing);
+		}
+	}
+
+	public static class ServerListViewModelExtensions {
+		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<NetAddress, Models.ConnectionStatus> addressesWithStatuses) {
+			foreach (var server in servers) {
+				server.Status = addressesWithStatuses.TryGetValue(server.ServerInfo.Address, out var status) ? status : default;
+				yield return server;
+			}
+		}
+
+		public static IEnumerable<ServerListItemVM> UpdateFavourites(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerListItemVM> favouriteServers) {
+			foreach (var server in servers) {
+				bool isFavourite = favouriteServers.Any(favouriteItem => favouriteItem == server);
+				server.SetFavourite(isFavourite);
+				yield return server;
+			}
 		}
 	}
 }

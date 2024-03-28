@@ -15,7 +15,6 @@ using MvvmCross.ViewModels;
 namespace JKChat.Core.ViewModels.Favourites {
 	public class FavouritesViewModel : BaseServerViewModel {
 		private readonly ICacheService cacheService;
-		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
 
 		public IMvxCommand ItemClickCommand { get; init; }
@@ -30,14 +29,12 @@ namespace JKChat.Core.ViewModels.Favourites {
 			set => SetProperty(ref isRefreshing, value);
 		}
 
-		public FavouritesViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IServerListService serverListService) {
+		public FavouritesViewModel(ICacheService cacheService, IServerListService serverListService) {
 			Title = "Favourites";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
-//			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
 			Items = new();
 			this.cacheService = cacheService;
-			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
 		}
 
