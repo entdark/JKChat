@@ -316,13 +316,39 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		private class KeyValueSecondaryViewCell : MvxTableViewCell {
 			public static readonly NSString Key = new(nameof(KeyValueSecondaryViewCell));
 
+			private string title;
+			public string Title {
+				get => title;
+				set {
+					title = value;
+					SetValues();
+				}
+			}
+			
+			private string detail;
+			public string Detail {
+				get => detail;
+				set {
+					detail = value;
+					SetValues();
+				}
+			}
+
 			public KeyValueSecondaryViewCell() : base(string.Empty, UITableViewCellStyle.Value1, Key) {
 				BackgroundColor = UIColor.TertiarySystemBackground;
 				this.DelayBind(() => {
 					using var set = this.CreateBindingSet<KeyValueSecondaryViewCell, KeyValueItemVM>();
-					set.Bind(TextLabel).For(v => v.AttributedText).To(vm => vm.Key).WithConversion("ColourText");
-					set.Bind(DetailTextLabel).For(v => v.AttributedText).To(vm => vm.Value).WithConversion("ColourText");
+					set.Bind(this).For(v => v.Title).To(vm => vm.Key);
+					set.Bind(this).For(v => v.Detail).To(vm => vm.Value);
 				});
+			}
+
+			private void SetValues() {
+				var config = UIListContentConfiguration.ValueCellConfiguration;
+				config.AttributedText = ColourTextValueConverter.Convert(title);
+				config.SecondaryAttributedText = ColourTextValueConverter.Convert(detail);
+				ContentConfiguration = config;
+				LayoutSubviews();
 			}
 		}
 	}
