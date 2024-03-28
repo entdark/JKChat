@@ -4,13 +4,10 @@ using Android.OS;
 using Android.Views;
 
 using AndroidX.AppCompat.View.Menu;
-using AndroidX.Core.Content;
 using AndroidX.ViewPager2.Widget;
 
 using Google.Android.Material.Button;
 using Google.Android.Material.Tabs;
-
-using Java.Util.Concurrent;
 
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;

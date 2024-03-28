@@ -7,11 +7,11 @@ using Android.Content;
 using Android.Graphics.Drawables;
 using Android.InputMethodServices;
 using Android.OS;
-using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
 
 using AndroidX.Core.Content;
+using AndroidX.Core.Util;
 
 using Google.Android.Material.Button;
 
@@ -21,19 +21,19 @@ using JKChat.Android.Controls.Toolbar;
 namespace JKChat.Android.Helpers {
 	public static class AndroidExtensions {
 		public static int DpToPx(this int dp) {
-			return (int)Math.Ceiling(TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics));
+			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics));
 		}
 		public static int DpToPx(this float dp) {
-			return (int)Math.Ceiling(TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics));
+			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics));
 		}
 		public static float DpToPxF(this float dp) {
-			return TypedValue.ApplyDimension(ComplexUnitType.Dip, dp, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics);
 		}
 		public static float PxToDp(this int px) {
-			return TypedValue.ApplyDimension(ComplexUnitType.Px, px, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.PxToDp(px, Application.Context.Resources.DisplayMetrics);
 		}
 		public static float PxToDp(this float px) {
-			return TypedValue.ApplyDimension(ComplexUnitType.Px, px, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.PxToDp(px, Application.Context.Resources.DisplayMetrics);
 		}
 
 		public static int GetDimensionInPx(this Context context, int id) {

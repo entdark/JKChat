@@ -92,14 +92,14 @@ namespace JKChat.Android.ValueConverters {
 			return code switch {
 				8 when AppSettings.OpenJKColours => new(255, 127, 0),
 				9 when AppSettings.OpenJKColours => new(127, 127, 127),
-				0 or 8 => new Color(0, 0, 0),
-				1 or 9 => new Color(255, 0, 0),
-				2 => new Color(0, 255, 0),
-				3 => new Color(255, 255, 0),
-				4 => new Color(0, 0, 255),
-				5 => new Color(0, 255, 255),
-				6 => new Color(255, 0, 255),
-				_ => new Color(255, 255, 255),
+				0 or 8 => new(0, 0, 0),
+				1 or 9 => new(255, 0, 0),
+				2 => new(0, 255, 0),
+				3 => new(255, 255, 0),
+				4 => new(0, 0, 255),
+				5 => new(0, 255, 255),
+				6 => new(255, 0, 255),
+				_ => new(255, 255, 255),
 			};
 		}
 

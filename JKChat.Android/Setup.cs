@@ -19,12 +19,16 @@ using Microsoft.Extensions.Logging;
 
 using MvvmCross;
 using MvvmCross.Binding;
+using MvvmCross.Binding.BindingContext;
+using MvvmCross.Binding.Bindings.Target.Construction;
 using MvvmCross.Binding.Combiners;
+using MvvmCross.Converters;
 using MvvmCross.IoC;
 using MvvmCross.Navigation;
 using MvvmCross.Platforms.Android;
 using MvvmCross.Platforms.Android.Binding;
 using MvvmCross.Platforms.Android.Binding.Binders;
+using MvvmCross.Platforms.Android.Binding.Binders.ViewTypeResolvers;
 using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Platforms.Android.Presenters;
 using MvvmCross.Plugin;
@@ -49,7 +53,7 @@ namespace JKChat.Android {
 		}
 
 		protected override MvxBindingBuilder CreateBindingBuilder() {
-			return new InsetsAndroidBindingBuilder();
+			return new InsetsAndroidBindingBuilder(FillValueConverters, FillValueCombiners, FillTargetFactories, FillBindingNames, FillViewTypes, FillAxmlViewTypeResolver, FillNamespaceListViewTypeResolver);
 		}
 
 		protected override void InitializeFirstChance(IMvxIoCProvider iocProvider) {
@@ -84,6 +88,10 @@ namespace JKChat.Android {
 		}
 
 		private class InsetsAndroidBindingBuilder : MvxAndroidBindingBuilder {
+			public InsetsAndroidBindingBuilder(Action<IMvxValueConverterRegistry> fillValueConverters, Action<IMvxValueCombinerRegistry> fillValueCombiners, Action<IMvxTargetBindingFactoryRegistry> fillTargetFactories, Action<IMvxBindingNameRegistry> fillBindingNames, Action<IMvxTypeCache<View>> fillViewTypes, Action<IMvxAxmlNameViewTypeResolver> fillAxmlViewTypeResolver, Action<IMvxNamespaceListViewTypeResolver> fillNamespaceListViewTypeResolver)
+				: base(fillValueConverters, fillValueCombiners, fillTargetFactories, fillBindingNames, fillViewTypes, fillAxmlViewTypeResolver, fillNamespaceListViewTypeResolver) {
+			}
+
 			protected override IMvxLayoutInflaterHolderFactoryFactory CreateLayoutInflaterFactoryFactory() {
 				return new InsetsLayoutInflaterFactoryFactory();
 			}
@@ -144,7 +152,7 @@ namespace JKChat.Android {
 					this.flags = flags;
 				}
 
-				public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insets, ViewUtils.RelativePadding initialPadding) {
+				public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insetsCompat, ViewUtils.RelativePadding initialPadding) {
 					bool isExpanded = (Mvx.IoCProvider.Resolve<IMvxAndroidCurrentTopActivity>().Activity as IBaseActivity)?.ExpandedWindow ?? false;
 					bool paddingTop = flags.HasFlag(WindowInsetsFlags.PaddingTop) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingTopButExpanded));
 					bool paddingBottom = flags.HasFlag(WindowInsetsFlags.PaddingBottom) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingBottomButExpanded));
@@ -152,10 +160,11 @@ namespace JKChat.Android {
 					bool paddingRight = flags.HasFlag(WindowInsetsFlags.PaddingRight) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingRightButExpanded));
 
 					bool isRtl = ViewCompat.GetLayoutDirection(view) == ViewCompat.LayoutDirectionRtl;
-					int insetTop = insets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Top;
-					int insetBottom = insets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Bottom;
-					int insetLeft = insets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Left;
-					int insetRight = insets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Right;
+					var insets = insetsCompat.GetInsets(WindowInsetsCompat.Type.SystemBars());
+					int insetTop = insets.Top;
+					int insetBottom = insets.Bottom;
+					int insetLeft = insets.Left;
+					int insetRight = insets.Right;
 
 					initialPadding.Top += paddingTop ? insetTop : 0;
 					initialPadding.Bottom += paddingBottom ? insetBottom : 0;
@@ -185,7 +194,7 @@ namespace JKChat.Android {
 						}
 					}
 
-					return insets;
+					return insetsCompat;
 				}
 			}
 

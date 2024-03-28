@@ -19,7 +19,7 @@ using Microsoft.Maui.ApplicationModel;
 using Android.Content.PM;
 
 namespace JKChat.Android.Services {
-	[Service(Enabled = true, ForegroundServiceType = ForegroundService.TypeNone)]
+	[Service(Name = "com.vlbor.jkchat.ForegroundGameClientsService", Enabled = true, ForegroundServiceType = ForegroundService.TypeSpecialUse)]
 	public class ForegroundGameClientsService : Service {
 		private const string NotificationChannelID = "JKChat Foreground Service";
 		private const int NotificationID = 2;
@@ -69,7 +69,7 @@ namespace JKChat.Android.Services {
 			if (clientsCount > 0/* || unreadMessages > 0*/) {
 				var notification = CreateNotification(clientsCount, unreadMessages);
 				if (start) {
-					StartForeground(NotificationID, notification);
+					ServiceCompat.StartForeground(this, NotificationID, notification, (int)ForegroundService.TypeSpecialUse);
 				} else {
 					var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
 					notificationManager.Notify(NotificationID, notification);

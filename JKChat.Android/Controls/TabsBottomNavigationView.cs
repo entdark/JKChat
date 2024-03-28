@@ -135,11 +135,11 @@ namespace JKChat.Android.Controls {
 
 		protected override void OnRestoreInstanceState(IParcelable state) {
 			var bundle = state as Bundle;
-			var parcelable = bundle != null ? (BundleCompat.GetParcelable(bundle, bundleSavedState, Class) as IParcelable) : state;
+			var parcelable = bundle != null ? (BundleCompat.GetParcelable(bundle, bundleSavedState, Java.Lang.Class.FromType(typeof(Bundle))) as IParcelable) : state;
 			base.OnRestoreInstanceState(parcelable);
 
 			if (bundle != null) {
-				var pagesParcelable = BundleCompat.GetParcelableArray(bundle, bundlePages, Class);
+				var pagesParcelable = BundleCompat.GetParcelableArray(bundle, bundlePages, Java.Lang.Class.FromType(typeof(TabsBottomNavigationViewPageParcelable)));
 
 				if (pagesParcelable == null)
 					return;

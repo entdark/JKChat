@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <UseMauiEssentials>true</UseMauiEssentials>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Resources\Fonts\**" />
@@ -10,10 +9,11 @@
     <None Remove="Resources\Fonts\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MvvmCross" Version="9.1.1" />
-    <PackageReference Include="MvvmCross.Plugin.Messenger" Version="9.1.1" />
+    <PackageReference Include="MvvmCross" Version="9.2.0" />
+    <PackageReference Include="MvvmCross.Plugin.Messenger" Version="9.2.0" />
+    <PackageReference Include="MvvmCross.Plugin.Visibility" Version="9.2.0" />
     <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
-    <PackageReference Include="MvvmCross.Plugin.Visibility" Version="9.1.1" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JKClient\JKClient\JKClient.csproj" />

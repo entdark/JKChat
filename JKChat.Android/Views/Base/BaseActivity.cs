@@ -83,10 +83,8 @@ namespace JKChat.Android.Views.Base {
 			const float maxWidth = 960.0f, maxHeight = 480.0f;
 #endif
 			var metrics = AndroidX.Window.Layout.WindowMetricsCalculator.Companion.OrCreate.ComputeCurrentWindowMetrics(this);
-			//PxToDp doesn't work properly here for some reason
-			float density = Resources?.DisplayMetrics?.Density ?? 1.0f,
-				width = metrics.Bounds.Width().PxToDp() / density,
-				height = metrics.Bounds.Height() / density;
+			float width = metrics.Bounds.Width().PxToDp(),
+				height = metrics.Bounds.Height().PxToDp();
 			ExpandedWindow = width > maxWidth && height > maxHeight;
 		}
 

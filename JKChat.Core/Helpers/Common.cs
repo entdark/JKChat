@@ -43,12 +43,12 @@ namespace JKChat.Core.Helpers {
 			return realException.Message + (!string.IsNullOrEmpty(realException.StackTrace) ? (Environment.NewLine + Environment.NewLine + realException.StackTrace) : string.Empty);
 		}
 
-		public static async Task<bool> ExceptionalTaskRun(Action action) {
-			return await ExceptionalTaskRun(Task.Run(action));
+		public static Task<bool> ExceptionalTaskRun(Action action) {
+			return ExceptionalTaskRun(Task.Run(action));
 		}
 
-		public static async Task<bool> ExceptionalTaskRun(Func<Task> func) {
-			return await ExceptionalTaskRun(func());
+		public static Task<bool> ExceptionalTaskRun(Func<Task> func) {
+			return ExceptionalTaskRun(func());
 		}
 
 		public static async Task<bool> ExceptionalTaskRun(Task task) {

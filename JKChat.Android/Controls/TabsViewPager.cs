@@ -136,7 +136,7 @@ namespace JKChat.Android.Controls {
 				if (bundle == null)
 					return;
 				
-				var fragmentInfoParcelables = BundleCompat.GetParcelableArray(bundle, bundleFragmentsInfoKey, Class);
+				var fragmentInfoParcelables = BundleCompat.GetParcelableArray(bundle, bundleFragmentsInfoKey, Class.FromType(typeof(ViewPagerFragmentInfoParcelable)));
 
 				if (fragmentInfoParcelables == null)
 					return;
