@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -79,18 +78,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private void ApplyFilter() {
 			lock (items) lock (Items) {
-				IEnumerable<ServerListItemVM> filteredItems = items;
-				bool replace = !filter.IsReset || Items.Count != items.Count;
-				filteredItems = filter.Apply(filteredItems);
-				if (!string.IsNullOrEmpty(SearchText)) {
-					filteredItems = filteredItems
-							.Where(item =>
-								item.CleanServerName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
-								|| item.MapName.Contains(SearchText, StringComparison.InvariantCultureIgnoreCase)
-							);
-					replace = true;
-				}
-
+				var filteredItems = items.ApplyFilter(filter, SearchText);
+				bool replace = !filter.IsReset || Items.Count != items.Count || !string.IsNullOrEmpty(SearchText);
 				if (replace) {
 					Items.ReplaceWith(filteredItems);
 				}
@@ -290,12 +279,11 @@ namespace JKChat.Core.ViewModels.ServerList {
 					var favouriteServers = await cacheService.LoadFavouriteServers();
 					newItems = newItems
 						.UpdateFavourites(favouriteServers)
-						.Except(reportedServers);
+						.Except(reportedServers)
+						.ApplyFilter(filter, SearchText);
 					SetItems(newItems);
 					if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName)))
 						AppSettings.Filter = filter;
-					else
-						ApplyFilter();
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
@@ -364,6 +352,18 @@ namespace JKChat.Core.ViewModels.ServerList {
 				server.SetFavourite(isFavourite);
 				yield return server;
 			}
+		}
+
+        public static IEnumerable<ServerListItemVM> ApplyFilter(this IEnumerable<ServerListItemVM> servers, Filter filter, string searchText) {
+			var filteredItems = filter.Apply(servers);
+			if (!string.IsNullOrEmpty(searchText)) {
+				filteredItems = filteredItems
+					.Where(item =>
+						item.CleanServerName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
+						|| item.MapName.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)
+					);
+			}
+			return filteredItems;
 		}
 	}
 }
