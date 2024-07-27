@@ -12,6 +12,7 @@ using JKChat.Core.Services;
 
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross;
 using MvvmCross.Core;
@@ -39,6 +40,7 @@ namespace JKChat.Android {
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 			AppCenter.Start(Core.ApiKeys.AppCenter.Android, typeof(Crashes));
+			Platform.Init(this);
 
 			base.OnCreate();
 

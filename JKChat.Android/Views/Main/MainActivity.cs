@@ -27,8 +27,6 @@ using JKChat.Core.Models;
 using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 
-using Microsoft.Maui.ApplicationModel;
-
 using MvvmCross;
 using MvvmCross.Platforms.Android.Presenters.Attributes;
 using MvvmCross.Plugin.Messenger;
@@ -55,7 +53,6 @@ namespace JKChat.Android.Views.Main {
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
 			EdgeToEdgeUtils.ApplyEdgeToEdge(this.Window, true);
-			Platform.Init(this, savedInstanceState);
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}

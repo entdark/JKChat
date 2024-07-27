@@ -175,7 +175,6 @@ namespace JKChat.Android.Widgets {
 	public class ServerMonitorDialogActivity : AppCompatActivity {
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
-			Platform.Init(this, savedInstanceState);
 			if (Intent.Action == ServerMonitorAppWidget.PlayersAction && Intent.Extras.GetStringArray(ServerMonitorAppWidget.PlayersExtraKey) is string[] players) {
 				if (players.Length > 0) {
 					DialogService.Show(new(new DialogListViewModel(players.Select(p => new DialogItemVM() { Name = p }), DialogSelectionType.NoSelection), _ => {
