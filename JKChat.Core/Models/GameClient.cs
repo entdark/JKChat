@@ -620,15 +620,12 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private void ShowNotification(string message, bool cleanMessage = true) {
+		private void ShowNotification(string message) {
 			if (!AppSettings.NotificationOptions.HasFlag(NotificationOptions.Enabled))
 				return;
 			if (ViewModel != null && !minimized)
 				return;
-			string title = JKChat.Core.Helpers.ColourTextHelper.CleanString(ServerInfo.HostName);
-			if (cleanMessage) {
-				message = JKChat.Core.Helpers.ColourTextHelper.CleanString(message);
-			}
+			string title = ServerInfo.HostName;
 			notificationsService.ShowNotification(
 				title,
 				message,

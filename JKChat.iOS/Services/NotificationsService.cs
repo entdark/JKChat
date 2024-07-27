@@ -40,8 +40,8 @@ namespace JKChat.iOS.Services {
 
 		public void ShowNotification(string title, string message, IDictionary<string, string> data, string tag = null) {
 			var content = new UNMutableNotificationContent() {
-				Title = title,
-				Body = message,
+				Title = title.CleanString(),
+				Body = message.CleanString(),
 				UserInfo = data.ToNSDictionary(),
 				Sound = UNNotificationSound.Default
 			};
