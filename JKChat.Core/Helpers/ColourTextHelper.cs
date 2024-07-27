@@ -34,12 +34,12 @@ namespace JKChat.Core.Helpers {
 			}
 			int colorLength = 0;
 			var stringBuilder = new StringBuilder();
-			var uriStringBuilder = new StringBuilder();
+			var uriStringBuilder = uriAttributes != null ? new StringBuilder() : null;
 			bool escaped = false;
 			for (int i = 0; i < value.Length; i++) {
 				if (value[i] == JKClient.Common.EscapeCharacter[0]) {
 					escaped = true;
-					uriStringBuilder.Clear();
+					uriStringBuilder?.Clear();
 					continue;
 				}
 				if (!escaped) {
@@ -51,7 +51,7 @@ namespace JKChat.Core.Helpers {
 							Value = value[i+1] - '0'
 						});
 						i++;
-						uriStringBuilder.Clear();
+						uriStringBuilder?.Clear();
 						continue;
 					}
 					if (colorAttributes?.Count >= 1) {
