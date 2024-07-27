@@ -16,6 +16,7 @@ using JKChat.Android.Services;
 using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Main;
 using JKChat.Core;
+using JKChat.Core.Helpers;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Dialog;
 using JKChat.Core.ViewModels.Dialog.Items;
@@ -39,11 +40,13 @@ namespace JKChat.Android.Widgets {
 		public const string WidgetIdExtraKey = nameof(ServerMonitorAppWidget)+nameof(WidgetIdExtraKey);
 		public const string PlayersExtraKey = nameof(ServerMonitorAppWidget)+nameof(PlayersExtraKey);
 
+		private readonly TasksQueue tasksQueue = new();
+
 		public override void OnUpdate(Context context, AppWidgetManager appWidgetManager, int []appWidgetIds) {
 			var serverAddresses = AppSettings.ServerMonitorServers;
 			foreach (var appWidgetId in appWidgetIds) {
 				if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
-					Update(context, appWidgetManager, appWidgetId, serverAddress);
+					Update(context, appWidgetManager, appWidgetId, serverAddress, false);
 				} else {
 					UpdateEmpty(context, appWidgetManager, appWidgetId);
 				}
@@ -56,22 +59,30 @@ namespace JKChat.Android.Widgets {
 			var componentName = new ComponentName(context, Java.Lang.Class.FromType(typeof(ServerMonitorAppWidget)));
 			if (intent.Action == UpdateAction) {
 				var appWidgetIds = appWidgetManager.GetAppWidgetIds(componentName);
+				//remove saved servers associated with widgets if OnDeleted failed to get called and do the job
+				var serversAddresses = AppSettings.ServerMonitorServers;
+				serversAddresses = serversAddresses.Where(kvp => appWidgetIds.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+				AppSettings.ServerMonitorServers = serversAddresses;
 				OnUpdate(context, appWidgetManager, appWidgetIds);
 			} else if (intent.Action == RefreshAction
 				&& intent.Extras.GetString(ServerAddressExtraKey, null) is string serverAddress
 				&& intent.Extras.GetInt(WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
-				Update(context, appWidgetManager, appWidgetId, serverAddress);
+				Update(context, appWidgetManager, appWidgetId, serverAddress, true);
 			}
 		}
 
-		public override async void OnAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
+		public override void OnAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
 			base.OnAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
 			var serverAddresses = AppSettings.ServerMonitorServers;
 			if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
-				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, false).ConfigureAwait(false);
-				if (server != null) {
-					SetView(context, appWidgetManager, appWidgetId, newOptions, server);
-				}
+                tasksQueue.Enqueue(async () => {
+					var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, false);
+					if (server != null) {
+						await MainThread.InvokeOnMainThreadAsync(() => {
+							SetView(context, appWidgetManager, appWidgetId, newOptions, server);
+						});
+					}
+				});
 			}
 		}
 
@@ -84,30 +95,37 @@ namespace JKChat.Android.Widgets {
 			base.OnDeleted(context, appWidgetIds);
 		}
 
-		private static async void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress) {
-			setLoading(true);
-			var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true).ConfigureAwait(false);
-			if (server != null) {
-				setView();
-			}
-			bool refreshed = await server?.Refresh();
-			setLoading(false);
-			if (refreshed) {
-				setView();
-			}
+		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading) {
+            tasksQueue.Enqueue(async () => {
+				await setLoading(true);
+				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true);
+				await Task.Delay(500);
+				if (server != null) {
+					await server.Refresh();
+					await setView(server);
+				} else {
+					await setLoading(false);
+				}
+			});
 
-			void setLoading(bool loading) {
-				var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
-				views.SetViewVisibility(Resource.Id.loading_progressbar, loading ? ViewStates.Visible : ViewStates.Gone);
-				appWidgetManager.UpdateAppWidget(appWidgetId, views);
+			async Task setView(ServerListItemVM server) {
+				await MainThread.InvokeOnMainThreadAsync(() => {
+					var options = appWidgetManager.GetAppWidgetOptions(appWidgetId) ?? new();
+					SetView(context, appWidgetManager, appWidgetId, options, server);
+				});
 			}
-			void setView() {
-				var options = appWidgetManager.GetAppWidgetOptions(appWidgetId) ?? new();
-				SetView(context, appWidgetManager, appWidgetId, options, server);
+			async Task setLoading(bool loading) {
+				if (!showLoading)
+					return;
+				await MainThread.InvokeOnMainThreadAsync(() => {
+					var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
+					views.SetViewVisibility(Resource.Id.loading_progressbar, loading ? ViewStates.Visible : ViewStates.Gone);
+					appWidgetManager.UpdateAppWidget(appWidgetId, views);
+				});
 			}
 		}
 
-		private static void SetView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions, ServerListItemVM server) {
+		private static void SetView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions, ServerListItemVM server, bool resetLoading = true) {
 			string serverAddress = server.Address;
 
 			var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
@@ -147,7 +165,9 @@ namespace JKChat.Android.Widgets {
 			views.SetTextViewText(Resource.Id.map_textview, server.MapName);
 			views.SetTextViewText(Resource.Id.datetime_textview, $"{DateTime.Now:g}");
 			//to be safe
-//			views.SetViewVisibility(Resource.Id.loading_progressbar, ViewStates.Gone);
+			if (resetLoading) {
+				views.SetViewVisibility(Resource.Id.loading_progressbar, ViewStates.Gone);
+			}
 			appWidgetManager.UpdateAppWidget(appWidgetId, views);
 		}
 
