@@ -11,11 +11,12 @@ namespace JKChat.Core.Helpers {
 			}
 			if (shadow) {
 				var shadowStringBuilder = new StringBuilder();
-				for (int i = 0; i < value.Length-1; i++) {
+				for (int i = 0; i < value.Length; i++) {
 					if (value[i] == '\0') {
 						break;
 					} else if (value[i] == '^') {
 						if ((i < 1 || value[i-1] != '^')
+							&& (i+1 < value.Length)
 							&& (value[i+1] != '\0' || value[i+1] != '^')) {
 							i += 2;
 						}
