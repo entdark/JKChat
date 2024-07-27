@@ -45,19 +45,17 @@ namespace JKChat.Core.Helpers {
 				if (!escaped) {
 					if (value[i] == '^' && i+1 < value.Length && char.IsDigit(value[i+1])) {
 						colorLength = 0;
-						if (colorAttributes != null) {
-							colorAttributes.Add(new AttributeData<int>() {
-								Start = stringBuilder.Length,
-								Length = 0,
-								Value = value[i+1] - '0'
-							});
-						}
+						colorAttributes?.Add(new AttributeData<int>() {
+							Start = stringBuilder.Length,
+							Length = 0,
+							Value = value[i+1] - '0'
+						});
 						i++;
 						uriStringBuilder.Clear();
 						continue;
 					}
-					if (colorAttributes != null && colorAttributes.Count >= 1) {
-						colorAttributes[colorAttributes.Count-1].Length = ++colorLength;
+					if (colorAttributes?.Count >= 1) {
+						colorAttributes[^1].Length = ++colorLength;
 					}
 				}
 				stringBuilder.Append(value[i]);
