@@ -247,6 +247,8 @@ namespace JKChat.Core.Models {
 			if (Client != null && Client.Started) {
 				Client.Disconnect();
 				Client.Stop();
+				//to make sure disconnect command is sent to the server
+				Client.WaitFrames(3);
 			}
 			if (showDisconnected) {
 				showDisconnected = Status != ConnectionStatus.Disconnected;
