@@ -12,6 +12,7 @@ using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
 using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.ServerList.Items;
+
 using JKClient;
 
 using Microsoft.Maui.ApplicationModel.DataTransfer;
@@ -177,9 +178,11 @@ namespace JKChat.Core.ViewModels.Chat {
 				return;
 			IsLoading = true;
 			try {
+				int delay = 500;
 				if (ServerInfo == null) {
 					if (!string.IsNullOrEmpty(this.address)) {
-						var server = await ServerListItemVM.FindExistingOrLoad(this.address);
+						var server = await ServerListItemVM.FindExistingOrLoad(this.address).ExecuteWithin(delay);
+						delay = 0;
 						if (server == null) {
 							await DialogService.ShowAsync(new JKDialogConfig() {
 								Title = "Failed to Load",
@@ -204,7 +207,7 @@ namespace JKChat.Core.ViewModels.Chat {
 						return;
 					}
 				}
-				var serverInfo = await this.serverListService.GetServerInfo(ServerInfo);
+				var serverInfo = await this.serverListService.GetServerInfo(ServerInfo).ExecuteWithin(delay);
 				ServerInfo = serverInfo ?? ServerInfo;
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);

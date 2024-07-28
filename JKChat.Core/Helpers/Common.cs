@@ -75,6 +75,14 @@ namespace JKChat.Core.Helpers {
 			return null;
 		}
 
+		public static async Task<TResult> ExecuteWithin<TResult>(this Task<TResult> task, int withinMilliseconds) {
+			if (withinMilliseconds <= 0)
+				return await task;
+			var delayTask = Task.Delay(withinMilliseconds);
+			await Task.WhenAll(task, delayTask);
+			return task.Result;
+		}
+
 		public static bool IsApple(this DevicePlatform platform) =>
 			platform == DevicePlatform.iOS
 			|| platform == DevicePlatform.MacCatalyst
