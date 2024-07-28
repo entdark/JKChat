@@ -29,6 +29,7 @@ using Common = JKClient.Common;
 
 namespace JKChat.Core.Models {
 	public class GameClient {
+		private const string EC = Common.EscapeCharacter;
 		private const int MaxChatMessages = 512;
 		private JKClient.JKClient Client;
 		private Dictionary<string, string> pendingUserInfo;
@@ -382,17 +383,17 @@ namespace JKChat.Core.Models {
 
 		private async Task AddToChat(Command command) {
 			string fullMessage = command[1];
-			int separator = fullMessage.IndexOf(Common.EscapeCharacter + ": ", StringComparison.Ordinal);
+			int separator = fullMessage.IndexOf(EC + ": ", StringComparison.Ordinal);
 			if (separator < 0) {
 				return;
 			}
 			separator += 3;
 			string name = fullMessage[..separator];
-			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
+			string playerName = name.Replace(EC, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
 			if (blockedPlayers.Contains(escapedPlayerName))
 				return;
-			string message = fullMessage[separator..].Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
+			string message = fullMessage[separator..].Replace(EC, string.Empty, StringComparison.Ordinal);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			ProcessItemForNotifications(chatItem, command);
 			await AddItem(chatItem);
@@ -407,7 +408,7 @@ namespace JKChat.Core.Models {
 			string colour = command[3];
 			string message = command[4];
 
-			string playerName = name.Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
+			string playerName = name.Replace(EC, string.Empty, StringComparison.Ordinal);
 			string escapedPlayerName = GetEscapedPlayerName(name);
 			if (blockedPlayers.Contains(escapedPlayerName))
 				return;
@@ -419,7 +420,7 @@ namespace JKChat.Core.Models {
 				.Append("> ^")
 				.Append(colour)
 				.Append(message);
-			string fullMessage = stringBuilder.ToString().Replace(Common.EscapeCharacter, string.Empty, StringComparison.Ordinal);
+			string fullMessage = stringBuilder.ToString().Replace(EC, string.Empty, StringComparison.Ordinal);
 
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
 			ProcessItemForNotifications(chatItem, command);
@@ -427,11 +428,11 @@ namespace JKChat.Core.Models {
 		}
 
 		private static string GetEscapedPlayerName(string playerName) {
-			const string escapeColon = Common.EscapeCharacter + ": ";
-			const string escapeStartTeam = Common.EscapeCharacter + "(";
-			const string escapeEndTeam = Common.EscapeCharacter + ")";
-			const string escapeStartPrivate = Common.EscapeCharacter + "[";
-			const string escapeEndPrivate = Common.EscapeCharacter + "]";
+			const string escapeColon = EC + ": ";
+			const string escapeStartTeam = EC + "(";
+			const string escapeEndTeam = EC + ")";
+			const string escapeStartPrivate = EC + "[";
+			const string escapeEndPrivate = EC + "]";
 
 			int endIndex = playerName.IndexOf(escapeEndTeam, StringComparison.Ordinal);
 			if (endIndex < 0) endIndex = playerName.IndexOf(escapeEndPrivate, StringComparison.Ordinal);
@@ -446,7 +447,10 @@ namespace JKChat.Core.Models {
 			return playerName[startIndex..endIndex];
 		}
 
-		private static bool IsPrivateMessage(string message) => message?.Contains(Common.EscapeCharacter+"]"+Common.EscapeCharacter+": ", StringComparison.Ordinal) ?? false;
+		private static bool IsPrivateMessage(string message) {
+			const string escapePrivate = EC + "]" + EC + ": ";
+			return message?.Contains(escapePrivate, StringComparison.Ordinal) ?? false;
+		}
 
 		private async Task AddToPrint(Command command) {
 			string text = command[1].TrimEnd('\n');
