@@ -75,7 +75,7 @@ namespace JKChat.Android.Widgets {
 			base.OnAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
 			var serverAddresses = AppSettings.ServerMonitorServers;
 			if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
-                tasksQueue.Enqueue(async () => {
+				tasksQueue.Enqueue(async () => {
 					var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, false);
 					if (server != null) {
 						await MainThread.InvokeOnMainThreadAsync(() => {
@@ -96,7 +96,7 @@ namespace JKChat.Android.Widgets {
 		}
 
 		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading) {
-            tasksQueue.Enqueue(async () => {
+			tasksQueue.Enqueue(async () => {
 				await setLoading(true);
 				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true);
 				await Task.Delay(500);

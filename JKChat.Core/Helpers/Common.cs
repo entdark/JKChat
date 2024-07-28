@@ -97,7 +97,7 @@ namespace JKChat.Core.Helpers {
 			return defaultValueFunc?.Invoke();
 		}
 
-		public static T Deserialize<T>(this string json, Func<T> defaultValueFunc = default) {
+		public static T Deserialize<T>(this string json, Func<T> defaultValueFunc = null) {
 			try {
 				return JsonSerializer.Deserialize<T>(json);
 			} catch (Exception exception) {

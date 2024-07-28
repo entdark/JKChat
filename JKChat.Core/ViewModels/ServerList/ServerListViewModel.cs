@@ -354,7 +354,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			}
 		}
 
-        public static IEnumerable<ServerListItemVM> ApplyFilter(this IEnumerable<ServerListItemVM> servers, Filter filter, string searchText) {
+		public static IEnumerable<ServerListItemVM> ApplyFilter(this IEnumerable<ServerListItemVM> servers, Filter filter, string searchText) {
 			var filteredItems = filter.Apply(servers);
 			if (!string.IsNullOrEmpty(searchText)) {
 				filteredItems = filteredItems
