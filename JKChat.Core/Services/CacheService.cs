@@ -6,8 +6,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-using JKChat.Core.ViewModels.ServerList.Items;
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
+using JKChat.Core.ViewModels.ServerList.Items;
 
 using JKClient;
 
@@ -22,6 +23,7 @@ namespace JKChat.Core.Services {
 	internal class CacheService : ICacheService {
 		private readonly SQLiteAsyncConnection connection;
 		private readonly MvxSubscriptionToken serverInfoMessageToken, favouriteMessageToken;
+		private readonly TasksQueue tasksQueue = new();
 
 		public CacheService() {
 			var path = Path.Combine(FileSystem.AppDataDirectory, "jkchat.db3");
@@ -33,12 +35,12 @@ namespace JKChat.Core.Services {
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
-			Task.Run(updateServerInfoTask);
+			tasksQueue.Enqueue(updateServerInfoTask);
 			Task updateServerInfoTask() => UpdateServer(message.ServerInfo);
 		}
 
 		private void OnFavouriteMessage(FavouriteMessage message) {
-			Task.Run(updateFavouriteTask);
+			tasksQueue.Enqueue(updateFavouriteTask);
 			async Task updateFavouriteTask() {
 				var cachedServer = await GetCachedServerAsync(message.ServerInfo);
 				cachedServer ??= new CachedServer(message.ServerInfo);
