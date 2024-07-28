@@ -5,7 +5,7 @@ using System.Linq;
 using JKChat.Core.Models;
 
 namespace JKChat.Core.Services {
-	public class GameClientsService : IGameClientsService {
+	internal class GameClientsService : IGameClientsService {
 		private readonly Dictionary<JKClient.NetAddress, GameClient> clients = new(new JKClient.NetAddressComparer());
 
 		public int ActiveClients => clients.Count(kv => kv.Value.Status != ConnectionStatus.Disconnected);

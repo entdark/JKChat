@@ -3,7 +3,7 @@
 using JKClient;
 
 namespace JKChat.Core.Services {
-	public class JKClientService : IJKClientService {
+	internal class JKClientService : IJKClientService {
 		private readonly Encoding []availableEncodings = new Encoding[3] {
 			Encoding.UTF8,
 			Encoding.GetEncoding(1252),

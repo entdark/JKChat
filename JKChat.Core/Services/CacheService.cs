@@ -19,7 +19,7 @@ using MvvmCross.Plugin.Messenger;
 using SQLite;
 
 namespace JKChat.Core.Services {
-	public class CacheService : ICacheService {
+	internal class CacheService : ICacheService {
 		private readonly SQLiteAsyncConnection connection;
 		private readonly MvxSubscriptionToken serverInfoMessageToken, favouriteMessageToken;
 
