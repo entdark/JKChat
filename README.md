@@ -1,6 +1,7 @@
 # JKChat
 A mobile application for Android and iOS to chat in and remote control Jedi Knight: Jedi Academy, Jedi Knight II: Jedi Outcast and Quake III Arena games.
-The application is based on .NET Android and .NET iOS workloads and uses MvvmCross framework to share a lot of code and build the fastest .NET mobile applications.
+
+The application is based on .NET Android and .NET iOS workloads and uses MvvmCross framework to share a lot of code and build the fastest .NET mobile applications. Also it is based on Material Design 3 and Apple HIG to deliver the best, native and modern look of the apps on each platform.
 
 ## Download
 [![Google play][2]][1] [![App Store][4]][3]
@@ -10,7 +11,25 @@ The application is based on .NET Android and .NET iOS workloads and uses MvvmCro
   [3]: https://apps.apple.com/app/jkchat/id1545850673
   [4]: http://i.imgur.com/VhwhbFa.png (App Store)
 
-# Screenshots
+## Features
+1. Server list
+   - load and refresh
+   - filter by game, game type, mod, emptiness, and fullness
+   - add to favourites
+   - add a server manually
+2. Chat
+   - connect to multiple servers simultaneously
+   - chat or execute game commands
+   - detailed server info
+   - scoreboard
+   - share the server to connect
+   - links in chat are highlighted and clickable
+3. Widgets for home screens
+   - monitor multiple servers without opening the app
+   - refresh server info without opening the app
+   - open the app and connect to a server
+
+## Screenshots
 | iOS | Android |
 | --- | --- |
 | <img src="https://jkhub.org/uploads/monthly_2023_09/IMG_1730.png.de10248d003eb2b63a4e1c08f7d810a2.png" height="720"/> | <img src="https://jkhub.org/uploads/monthly_2023_09/Screenshot_20230922-042858_JKChatAndroid.png.6680683cf879fab798987deaf5d2fa6d.png" height="720"/> |
