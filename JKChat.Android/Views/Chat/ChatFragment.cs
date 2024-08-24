@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
-
+using Android.Animation;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
@@ -105,6 +105,7 @@ namespace JKChat.Android.Views.Chat {
 					AdjustHolderOnBind = (viewHolder, position) => {
 						var textView = viewHolder.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
+						(textView.Parent as ViewGroup).LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
 					}
 				};
 			}

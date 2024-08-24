@@ -108,7 +108,13 @@ namespace JKChat.iOS.ViewSources {
 			if (item is ChatMessageItemVM) {
 				return tableView.DequeueReusableCell(ChatMessageViewCell.Key);
 			} else if (item is ChatInfoItemVM) {
-				return tableView.DequeueReusableCell(ChatInfoViewCell.Key);
+				var cell = (ChatInfoViewCell)tableView.DequeueReusableCell(ChatInfoViewCell.Key);
+				cell.RequestResize = () => {
+					TableView.BeginUpdates();
+					CountHeightForRow(indexPath.Row, DeviceInfo.ScreenBounds.Size, true);
+					TableView.EndUpdates();
+				};
+				return cell;
 			}
 			return base.GetOrCreateCellFor(tableView, indexPath, item);
 		}
@@ -215,11 +221,11 @@ namespace JKChat.iOS.ViewSources {
 					ParseShadow = messageItem.Shadow
 				});
 				messageLabel.SizeToFit();
-				height += 8.0f;//messageItem.TopVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+				height += 8.0f;
 				height += nameLabel.Frame.Height;
 				height += 0.0f;
 				height += messageLabel.Frame.Height;
-				height += 8.0f;//messageItem.BottomVMType == typeof(ChatMessageItemVM) ? 7.5f : 15.0f;
+				height += 8.0f;
 			} else if (item is ChatInfoItemVM infoItem) {
 				textLabel.Frame = new CGRect(0.0f, 0.0f, 0.0f, 0.0f);
 				textLabel.AttributedText = ColourTextValueConverter.Convert(infoItem.Text, new ColourTextParameter() {

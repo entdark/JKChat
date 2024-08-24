@@ -426,17 +426,6 @@ namespace JKChat.Core.ViewModels.Chat {
 			return Connect();
 		}
 
-		public override void ViewCreated() {
-			base.ViewCreated();
-		}
-
-		public override void ViewDestroy(bool viewFinishing = true) {
-			if (viewFinishing) {
-				gameClient?.MakeAllPending();
-			}
-			base.ViewDestroy(viewFinishing);
-		}
-
 		public override void ViewAppeared() {
 			base.ViewAppeared();
 			if (gameClient == null) {

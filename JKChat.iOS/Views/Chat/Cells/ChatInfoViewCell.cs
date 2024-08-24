@@ -37,6 +37,19 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			}
 		}
 
+		public string text;
+		public string Text {
+			get => text;
+			set {
+				if (text != value) {
+					text = value;
+					RequestResize?.Invoke();
+				}
+			}
+		}
+
+		public Action RequestResize { get; set; }
+
 		static ChatInfoViewCell() {
 			Nib = UINib.FromName("ChatInfoViewCell", NSBundle.MainBundle);
 		}
@@ -48,6 +61,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 				using var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
 				set.Bind(TextLabel).For(v => v.AttributedText).To("ColourText(Text, ColourTextParameter(true, Shadow))");
+				set.Bind(this).For(v => v.Text).To(vm => vm.Text);
 			});
 		}
 

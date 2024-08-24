@@ -44,6 +44,7 @@ namespace JKChat.Core.Models {
 		private readonly LimitedObservableCollection<ChatItemVM> pendingItems;
 		private bool addingPending = false;
 		private readonly HashSet<string> blockedPlayers;
+		private readonly TasksQueue chatQueue = new();
 		private IMvxViewModel viewModel;
 		private bool dialogOffsersReconnect = false;
 		internal IMvxViewModel ViewModel {
@@ -62,39 +63,9 @@ namespace JKChat.Core.Models {
 					}
 					if (pendingItemsCopy.Length > 0) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							Task.Run(async () => {
-								int count = 0;
+							mainThread.ExecuteOnMainThreadAsync(() => {
 								lock (Items) {
-									count = Items.Count;
-								}
-								if (true||count > 0) {
-									await mainThread.ExecuteOnMainThreadAsync(() => {
-										lock (Items) {
-											Items.AddRange(pendingItemsCopy);
-										}
-									});
-								} else {
-									//await Task.Delay(200);
-									await mainThread.ExecuteOnMainThreadAsync(() => {
-										lock (Items) {
-											Items.ReplaceWith(pendingItemsCopy);
-										}
-									});
-									//const int maxSingleInsertion = 20;
-									//foreach (var item in pendingItemsCopy.Reverse().Take(maxSingleInsertion)) {
-									//	await mainThread.ExecuteOnMainThreadAsync(() => {
-									//		lock (Items) {
-									//			Items.Insert(0, item);
-									//		}
-									//	});
-									//}
-									//if (pendingItemsCopy.Length > maxSingleInsertion) {
-									//	await mainThread.ExecuteOnMainThreadAsync(() => {
-									//		lock (Items) {
-									//			Items.InsertRange(0, pendingItemsCopy.Reverse().Skip(maxSingleInsertion), true);
-									//		}
-									//	});
-									//}
+									Items.AddRange(pendingItemsCopy);
 								}
 								addingPending = false;
 							});
@@ -297,10 +268,10 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		internal async void ExecuteCommand(string cmd, bool addToChat = false) {
+		internal void ExecuteCommand(string cmd, bool addToChat = false) {
 			if (addToChat && Client != null) {
 				string cmd2 = cmd.StartsWith("/", StringComparison.Ordinal) ? cmd : ("/" + cmd);
-				await AddItem(new ChatMessageItemVM(Client.Name, Client.Name+"^7:", cmd2, Client.Version == ClientVersion.JO_v1_02));
+				AddItem(new ChatMessageItemVM(Client.Name, Client.Name+"^7:", cmd2, Client.Version == ClientVersion.JO_v1_02));
 			}
 			Client?.ExecuteCommand(cmd);
 		}
@@ -330,15 +301,15 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private async void ServerCommandExecuted(CommandEventArgs commandEventArgs) {
+		private void ServerCommandExecuted(CommandEventArgs commandEventArgs) {
 			var command = commandEventArgs.Command;
 			string cmd = command[0];
 			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				await AddToChat(command);
+				AddToChat(command);
 			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0
 				|| string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
-				await AddToLocationChat(command);
+				AddToLocationChat(command);
 			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
 				string title;
 				if (string.Compare(command[1], 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
@@ -348,7 +319,7 @@ namespace JKChat.Core.Models {
 					|| string.Compare(command[1], 0, "Server is full.", 0, 15, StringComparison.OrdinalIgnoreCase) == 0) {
 					title = "Server is Full";
 				} else {
-					await AddToPrint(command);
+					AddToPrint(command);
 					return;
 				}
 				Disconnect();
@@ -391,7 +362,7 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private async Task AddToChat(Command command) {
+		private void AddToChat(Command command) {
 			string fullMessage = command[1];
 			int separator = fullMessage.IndexOf(EC + ": ", StringComparison.Ordinal);
 			if (separator < 0) {
@@ -406,10 +377,10 @@ namespace JKChat.Core.Models {
 			string message = fullMessage[separator..].Replace(EC, string.Empty, StringComparison.Ordinal);
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, message, Client?.Version == ClientVersion.JO_v1_02);
 			ProcessItemForNotifications(chatItem, command);
-			await AddItem(chatItem);
+			AddItem(chatItem);
 		}
 
-		private async Task AddToLocationChat(Command command) {
+		private void AddToLocationChat(Command command) {
 			if (command.Length < 4) {
 				return;
 			}
@@ -434,7 +405,7 @@ namespace JKChat.Core.Models {
 
 			var chatItem = new ChatMessageItemVM(escapedPlayerName, playerName, fullMessage, Client?.Version == ClientVersion.JO_v1_02);
 			ProcessItemForNotifications(chatItem, command);
-			await AddItem(chatItem);
+			AddItem(chatItem);
 		}
 
 		private static string GetEscapedPlayerName(string playerName) {
@@ -462,11 +433,15 @@ namespace JKChat.Core.Models {
 			return message?.Contains(escapePrivate, StringComparison.Ordinal) ?? false;
 		}
 
-		private async Task AddToPrint(Command command) {
-			string text = command[1].TrimEnd('\n');
-			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02);
+		private void AddToPrint(Command command) {
+			string text = command[1];
+			bool mergeNext = !text.EndsWith('\n');
+			if (!mergeNext) {
+				text = text.TrimEnd('\n');
+			}
+			var chatItem = new ChatInfoItemVM(text, Client?.Version == ClientVersion.JO_v1_02, mergeNext);
 			ProcessItemForNotifications(chatItem, command);
-			await AddItem(chatItem);
+			AddItem(chatItem);
 		}
 
 		private void ProcessItemForNotifications(ChatMessageItemVM messageItem, Command command) {
@@ -507,74 +482,52 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		private async Task AddItem(ChatItemVM item) {
+		private void AddItem(ChatItemVM item) {
 			while (addingPending);
 			bool pending = false;
 			lock (pendingItems) {
 				lock (Items) {
 					pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
-					var items = pending ? pendingItems : Items;
-					if (items.Count > 0) {
-						ChatItemVM prevItem = null;
-						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							prevItem = items[^1];
-						} else if (DeviceInfo.Platform.IsApple()) {
-							prevItem = items[0];
-						}
-						prevItem.BottomVMType = item.ThisVMType;
-						item.TopVMType = prevItem.ThisVMType;
-					}
 					if (pending) {
 						pendingItems.Add(item);
 					}
 				}
 			}
 			if (!pending) {
-				await mainThread.ExecuteOnMainThreadAsync(() => {
+				chatQueue.EnqueueOnMainThread(() => {
 					lock (Items) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							Items.Add(item);
+							if (!mergeInfoItems(true)) {
+								Items.Add(item);
+							}
 						} else if (DeviceInfo.Platform.IsApple()) {
-							Items.Insert(0, item);
+							if (!mergeInfoItems(false)) {
+								Items.Insert(0, item);
+							}
+						}
+						bool mergeInfoItems(bool last) {
+							var prevItem = last ? Items.LastOrDefault() : Items.FirstOrDefault();
+							if (item is ChatInfoItemVM thisInfoItem && prevItem is ChatInfoItemVM prevInfoItem
+								&& (prevInfoItem.MergeNext || (thisInfoItem.DateTime - prevInfoItem.DateTime) < TimeSpan.FromSeconds(1.337))) {
+								if (prevInfoItem.MergeNext)
+									prevInfoItem.Text += thisInfoItem.Text;
+								else
+									prevInfoItem.Text += '\n' + thisInfoItem.Text;
+								prevInfoItem.MergeNext = thisInfoItem.MergeNext;
+								return true;
+							}
+							UnreadMessages++;
+							return false;
 						}
 					}
 				});
 			}
-			UnreadMessages++;
 		}
 
 		internal void RemoveItem(ChatItemVM item) {
 			lock (Items) {
 				int removeIndex = Items.IndexOf(item);
 				Items.Remove(item);
-				if (Items.Count > 0 && removeIndex >= 0) {
-					ChatItemVM prevItem = null, nextItem = null;
-					if (DeviceInfo.Platform == DevicePlatform.Android) {
-						int prevIndex = removeIndex - 1;
-						int nextIndex = removeIndex;
-						if (prevIndex >= 0) {
-							prevItem = Items[prevIndex];
-						}
-						if (nextIndex < Items.Count) {
-							nextItem = Items[nextIndex];
-						}
-					} else if (DeviceInfo.Platform.IsApple()) {
-						int prevIndex = removeIndex;
-						int nextIndex = removeIndex - 1;
-						if (prevIndex < Items.Count) {
-							prevItem = Items[prevIndex];
-						}
-						if (nextIndex >= 0) {
-							nextItem = Items[nextIndex];
-						}
-					}
-					if (prevItem != null) {
-						prevItem.BottomVMType = nextItem?.ThisVMType;
-					}
-					if (nextItem != null) {
-						nextItem.TopVMType = prevItem?.ThisVMType;
-					}
-				}
 			}
 		}
 
@@ -587,19 +540,6 @@ namespace JKChat.Core.Models {
 			var removeItems = Items.Where(it => it is ChatMessageItemVM messageItem && messageItem.EscapedPlayerName == playerName).ToArray();
 			foreach (var removeItem in removeItems) {
 				RemoveItem(removeItem);
-			}
-			//Items.RemoveItems(removeItems);
-		}
-
-		public void MakeAllPending() {
-			lock (pendingItems) {
-				lock (Items) {
-					if (false&&DeviceInfo.Platform == DevicePlatform.Android) {
-						Items.AddRange(pendingItems);
-						pendingItems.ReplaceWith(Items);
-						Items.Clear();
-					}
-				}
 			}
 		}
 

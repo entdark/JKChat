@@ -4,21 +4,10 @@ using JKChat.Core.ViewModels.Base.Items;
 
 namespace JKChat.Core.ViewModels.Chat.Items {
 	public abstract class ChatItemVM : SelectableItemVM {
-		public string Time { get; init; } = DateTime.Now.ToString("t");
+		internal DateTime DateTime { get; init; } = DateTime.Now;
 
-		public Type ThisVMType => this.GetType();
-
-		private Type topVMType;
-		public Type TopVMType {
-			get => topVMType;
-			set => SetProperty(ref topVMType, value);
-		}
-
-		private Type bottomVMType;
-		public Type BottomVMType {
-			get => bottomVMType;
-			set => SetProperty(ref bottomVMType, value);
-		}
+		private string time;
+		public string Time => time ??= DateTime.ToString("t");
 
 		public double EstimatedHeight { get; set; }
 	}

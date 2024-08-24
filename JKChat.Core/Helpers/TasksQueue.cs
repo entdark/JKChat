@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.Core.Helpers {
 	//source: https://github.com/gentlee/SerialQueue
 	public class TasksQueue {
@@ -46,6 +48,12 @@ namespace JKChat.Core.Helpers {
 				if (lockTaken)
 					spinLock.Exit(false);
 			}
+		}
+
+		public Task EnqueueOnMainThread(Action action) {
+			return Enqueue(async () => {
+				await MainThread.InvokeOnMainThreadAsync(action);
+			});
 		}
 	}
 }
