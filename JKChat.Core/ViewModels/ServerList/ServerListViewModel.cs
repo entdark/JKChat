@@ -155,7 +155,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 						OkText = "Connect",
 						CancelText = "Cancel",
 						OkAction = _ => {
-							Task.Run(async () => await ItemClickExecute(item));
+							Task.Run(item.Connect);
 						}
 					});
 					return;
@@ -179,7 +179,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					OkText = "Connect",
 					CancelText = "Cancel",
 					OkAction = config => {
-						Task.Run(async () => await ItemClickExecute(server));
+						Task.Run(server.Connect);
 					}
 				});
 			}
