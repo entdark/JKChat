@@ -9,7 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="8dp">
+        android:layout_marginVertical="8dp"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
+        app:paddingRightFitsWindowInsets="true">
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"

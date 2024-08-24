@@ -5,7 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="40dp"
     android:background="?attr/colorSurfaceContainerLow"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    app:paddingLeftFitsWindowInsetsButExpanded="true"
+    app:paddingRightFitsWindowInsets="true">
     <TextView
         style="@style/OnSurfaceText.BodyLarge"
         tools:text="/help"
