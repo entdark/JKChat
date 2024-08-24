@@ -9,8 +9,10 @@ namespace JKChat.Core.Services {
 	public interface ICacheService {
 		Task SaveRecentServer(ServerListItemVM server);
 		internal Task SaveRecentServer(ServerInfo serverInfo);
-		Task SaveRecentServers(IList<ServerListItemVM> servers);
+		Task SaveRecentServers(IEnumerable<ServerListItemVM> servers);
 		Task UpdateServer(ServerListItemVM server);
+		internal Task UpdateServer(ServerInfo serverInfo);
+		Task UpdateServers(IEnumerable<ServerListItemVM> servers);
 		Task<IEnumerable<ServerListItemVM>> LoadRecentServers();
 		Task AddReportedServer(ServerListItemVM server);
 		Task<IEnumerable<ServerListItemVM>> LoadReportedServers();

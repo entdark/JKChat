@@ -20,7 +20,6 @@ using JKChat.Core.ViewModels.ServerList.Items;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 
-using MvvmCross;
 using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
@@ -147,7 +146,9 @@ namespace JKChat.Core.ViewModels.Chat {
 			base.OnServerInfoMessage(message);
 			if (gameClient?.ServerInfo == message.ServerInfo) {
 				PrepareForModification();
-				Status = message.Status;
+				if (message.Status.HasValue) {
+					Status = message.Status.Value;
+				}
 				Title = message.ServerInfo.HostName;
 /*				if (gameClient.ViewModel == null && Status == ConnectionStatus.Disconnected) {
 					Task.Run(ShowDisconnected);
@@ -462,7 +463,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private void Prepare(JKClient.ServerInfo serverInfo, bool isFavourite) {
-			gameClient = gameClientsService.GetOrStartClient(serverInfo);
+			gameClient = gameClientsService.GetClient(serverInfo, true);
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;

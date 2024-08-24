@@ -56,7 +56,7 @@ namespace JKChat.Android.Views.Main {
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}
-			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
 
 			contentMasterView = FindViewById(Resource.Id.content_master);
 			contentDetailView = FindViewById(Resource.Id.content_detail);

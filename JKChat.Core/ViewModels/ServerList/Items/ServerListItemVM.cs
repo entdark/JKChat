@@ -98,19 +98,18 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 		}
 
 		internal ServerListItemVM(JKClient.ServerInfo serverInfo) : this() {
-			ServerInfo = serverInfo;
-			Game = serverInfo.Version.ToGame();
-			GameName = serverInfo.Version.ToDisplayString();
 			Set(serverInfo, ConnectionStatus.Disconnected);
 		}
 
-		internal void Set(JKClient.ServerInfo serverInfo, ConnectionStatus status) {
+		internal void Set(JKClient.ServerInfo serverInfo, ConnectionStatus? status) {
 			Set(serverInfo);
-			Status = status;
+			Status = status ?? Status;
 		}
 
 		internal void Set(JKClient.ServerInfo serverInfo) {
 			ServerInfo = serverInfo;
+			Game = serverInfo.Version.ToGame();
+			GameName = serverInfo.Version.ToDisplayString();
 			NeedPassword = serverInfo.NeedPassword;
 			ServerName = serverInfo.HostName;
 			MapName = serverInfo.MapName;
@@ -127,7 +126,7 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			if (Status == ConnectionStatus.Disconnected) {
 				await Mvx.IoCProvider.Resolve<INavigationService>().NavigateFromRoot<ChatViewModel, ServerInfoParameter>(new(this), this.ServerInfo);
 			} else {
-				Mvx.IoCProvider.Resolve<IGameClientsService>().GetOrStartClient(ServerInfo).Disconnect();
+				Mvx.IoCProvider.Resolve<IGameClientsService>().GetClient(ServerInfo)?.Disconnect();
 			}
 		}
 

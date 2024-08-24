@@ -26,6 +26,7 @@ namespace JKChat.Core.ViewModels.Chat {
 	public class ServerInfoViewModel : BaseServerViewModel<ServerInfoParameter>, IFromRootNavigatingViewModel {
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
+		private readonly ICacheService cacheService;
 		private readonly object serverInfoLocker = new();
 		
 		private string address;
@@ -89,9 +90,10 @@ namespace JKChat.Core.ViewModels.Chat {
 		public TabItems []AllSecondaryItems { get; init; } //array of 2 collections of first and second tab items
 		public MvxObservableCollection<KeyValueItemVM> AllItems { get; init; } //first 4 items + either first tab items or second tab items
 
-		public ServerInfoViewModel(IGameClientsService gameClientsService, IServerListService serverListService) {
+		public ServerInfoViewModel(IGameClientsService gameClientsService, IServerListService serverListService, ICacheService cacheService) {
 			this.gameClientsService = gameClientsService;
 			this.serverListService = serverListService;
+			this.cacheService = cacheService;
 			ConnectCommand = new MvxAsyncCommand(ConnectExecute);
 			FavouriteCommand = new MvxCommand(FavouriteExecute);
 			ShareCommand = new MvxAsyncCommand(ShareExecute);
@@ -117,12 +119,12 @@ namespace JKChat.Core.ViewModels.Chat {
 			Prepare(parameter.ServerInfo, parameter.IsFavourite, parameter.Status, parameter.LoadInfo);
 		}
 
-		private void Prepare(ServerInfo serverInfo, bool isFavourite, JKChat.Core.Models.ConnectionStatus status, bool loadData) {
+		private void Prepare(ServerInfo serverInfo, bool isFavourite, Models.ConnectionStatus status, bool loadData) {
 			ServerInfo = serverInfo;
 			Status = status;
 			IsFavourite = isFavourite;
 			if (!loadData) {
-				gameClient = gameClientsService.GetOrStartClient(ServerInfo);
+				gameClient = gameClientsService.GetClient(ServerInfo, true);
 				hasDeaths = gameClient.Modification == GameModification.JAPlus;
 			}
 		}
@@ -153,7 +155,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
 			if (ServerInfo == message.ServerInfo) {
-				Status = message.Status;
+				Status = message.Status ?? Status;
 				ServerInfo = message.ServerInfo;
 			}
 		}
@@ -208,7 +210,10 @@ namespace JKChat.Core.ViewModels.Chat {
 					}
 				}
 				var serverInfo = await this.serverListService.GetServerInfo(ServerInfo).ExecuteWithin(delay);
-				ServerInfo = serverInfo ?? ServerInfo;
+				if (serverInfo != null) {
+					ServerInfo = serverInfo;
+					await cacheService.UpdateServer(ServerInfo);
+				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
 			} finally {

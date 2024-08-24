@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -35,8 +35,10 @@ namespace JKChat.Core.Services {
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
+			if (!message.UpdateInCache)
+				return;
 			tasksQueue.Enqueue(updateServerInfoTask);
-			Task updateServerInfoTask() => UpdateServer(message.ServerInfo);
+			Task updateServerInfoTask() => (this as ICacheService).UpdateServer(message.ServerInfo);
 		}
 
 		private void OnFavouriteMessage(FavouriteMessage message) {
@@ -59,26 +61,31 @@ namespace JKChat.Core.Services {
 			cachedServer ??= new CachedServer(serverInfo);
 			cachedServer.LastConnected = DateTime.UtcNow;
 			await connection.InsertOrReplaceAsync(cachedServer);
+			Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new ServerInfoMessage(this, serverInfo) { UpdateInCache = false });
 		}
 
-		public async Task SaveRecentServers(IList<ServerListItemVM> servers) {
-			if (servers.Count <= 0) {
-				return;
-			}
+		public async Task SaveRecentServers(IEnumerable<ServerListItemVM> servers) {
 			foreach (var server in servers) {
 				await SaveRecentServer(server);
 			}
 		}
 
 		public async Task UpdateServer(ServerListItemVM server) {
-			await UpdateServer(server.ServerInfo);
+			await (this as ICacheService).UpdateServer(server.ServerInfo);
 		}
 
-		internal async Task UpdateServer(ServerInfo serverInfo) {
+		async Task ICacheService.UpdateServer(ServerInfo serverInfo) {
 			var cachedServer = await GetCachedServerAsync(serverInfo);
 			if (cachedServer != null) {
 				cachedServer.Update(serverInfo);
 				await connection.UpdateAsync(cachedServer);
+				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new ServerInfoMessage(this, serverInfo) { UpdateInCache = false });
+			}
+		}
+
+		public async Task UpdateServers(IEnumerable<ServerListItemVM> servers) {
+			foreach (var server in servers) {
+				await UpdateServer(server);
 			}
 		}
 

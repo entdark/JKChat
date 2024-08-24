@@ -16,6 +16,7 @@ namespace JKChat.Core.ViewModels.Favourites {
 	public class FavouritesViewModel : BaseServerViewModel {
 		private readonly ICacheService cacheService;
 		private readonly IServerListService serverListService;
+		private readonly IGameClientsService gameClientsService;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand RefreshCommand { get; init; }
@@ -29,20 +30,22 @@ namespace JKChat.Core.ViewModels.Favourites {
 			set => SetProperty(ref isRefreshing, value);
 		}
 
-		public FavouritesViewModel(ICacheService cacheService, IServerListService serverListService) {
+		public FavouritesViewModel(ICacheService cacheService, IServerListService serverListService, IGameClientsService gameClientsService) {
 			Title = "Favourites";
 			ItemClickCommand = new MvxAsyncCommand<ServerListItemVM>(ItemClickExecute);
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
 			Items = new();
 			this.cacheService = cacheService;
 			this.serverListService = serverListService;
+			this.gameClientsService = gameClientsService;
 		}
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
-			var item = Items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+			var item = Items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
 			if (item != null) {
-				if (message.Status != Models.ConnectionStatus.Disconnected
+				if (message.Status.HasValue
+					&& message.Status.Value != Models.ConnectionStatus.Disconnected
 					&& item.Status == Models.ConnectionStatus.Disconnected) {
 					Items.Move(Items.IndexOf(item), 0);
 				}
@@ -52,13 +55,18 @@ namespace JKChat.Core.ViewModels.Favourites {
 
 		protected override void OnFavouriteMessage(FavouriteMessage message) {
 			base.OnFavouriteMessage(message);
-			var item = Items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+			var item = Items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
 			if (item != null && !message.IsFavourite) {
 				Items.Remove(item);
 			} else if (item == null && message.IsFavourite) {
 				var server = new ServerListItemVM(message.ServerInfo);
 				server.SetFavourite(true);
-				Items.Add(server);
+				var gameClient = gameClientsService.GetClient(message.ServerInfo);
+				if (gameClient?.Status != Models.ConnectionStatus.Disconnected) {
+					Items.Insert(0, server);
+				} else {
+					Items.Add(server);
+				}
 			}
 		}
 

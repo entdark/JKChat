@@ -12,21 +12,18 @@ namespace JKChat.Core.Services {
 
 		public int UnreadMessages => clients.Sum(kv => kv.Value.UnreadMessages);
 
-		public GameClient GetOrStartClient(JKClient.ServerInfo serverInfo) {
+		public GameClient GetClient(JKClient.ServerInfo serverInfo, bool startNew = false) {
 			var address = serverInfo.Address;
-			if (clients.TryGetValue(address, out var client)) {
-				return client;
-			} else {
+			var client = GetClient(address);
+			if (client == null && startNew) {
 				return (clients[address] = new GameClient(serverInfo));
 			}
+			return client;
 		}
 
 		public GameClient GetClient(JKClient.NetAddress address) {
-			if (clients.TryGetValue(address, out var client)) {
-				return client;
-			} else {
-				return null;
-			}
+			clients.TryGetValue(address, out var client);
+			return client;
 		}
 
 		public IEnumerable<JKClient.NetAddress> AddressesWithStatus(ConnectionStatus status, bool without = false) {

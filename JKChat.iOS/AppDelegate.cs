@@ -81,7 +81,7 @@ namespace JKChat.iOS {
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
 			IsActive = true;
 			var messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
-			serverInfoMessageToken = messenger.Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			serverInfoMessageToken = messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
 			locationUpdateMessageToken = messenger.Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
 			widgetFavouritesMessageToken = messenger.Subscribe<WidgetFavouritesMessage>(OnWidgetFavouritesMessage);
 			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidBecomeMainNotification"), (notification) => {

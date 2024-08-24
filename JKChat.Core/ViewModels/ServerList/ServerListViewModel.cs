@@ -88,9 +88,10 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
-			var item = items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+			var item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
 			if (item != null) {
-				if (message.Status != Models.ConnectionStatus.Disconnected
+				if (message.Status.HasValue
+					&& message.Status.Value != Models.ConnectionStatus.Disconnected
 					&& item.Status == Models.ConnectionStatus.Disconnected) {
 					MoveItem(item, 0);
 				}
@@ -100,7 +101,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		protected override void OnFavouriteMessage(FavouriteMessage message) {
 			base.OnFavouriteMessage(message);
-			var item = items.FirstOrDefault(it => it.ServerInfo.Address == message.ServerInfo.Address);
+			var item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
 			item?.SetFavourite(message.IsFavourite);
 		}
 

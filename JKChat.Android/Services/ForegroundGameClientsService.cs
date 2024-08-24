@@ -35,7 +35,7 @@ namespace JKChat.Android.Services {
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}
-			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().Subscribe<ServerInfoMessage>(OnServerInfoMessage);
+			serverInfoMessageToken = Mvx.IoCProvider.Resolve<IMvxMessenger>().SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
 			HandleForeground(true);
 		}
 
