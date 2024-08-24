@@ -43,14 +43,7 @@ namespace JKChat.Android.Widgets {
 		private readonly TasksQueue tasksQueue = new();
 
 		public override void OnUpdate(Context context, AppWidgetManager appWidgetManager, int []appWidgetIds) {
-			var serverAddresses = AppSettings.ServerMonitorServers;
-			foreach (var appWidgetId in appWidgetIds) {
-				if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
-					Update(context, appWidgetManager, appWidgetId, serverAddress, false);
-				} else {
-					UpdateEmpty(context, appWidgetManager, appWidgetId);
-				}
-			}
+			UpdateMultiple(context, appWidgetManager, appWidgetIds, true);
 		}
 
 		public override void OnReceive(Context context, Intent intent) {
@@ -58,13 +51,21 @@ namespace JKChat.Android.Widgets {
 			var appWidgetManager = AppWidgetManager.GetInstance(context);
 			var componentName = new ComponentName(context, Java.Lang.Class.FromType(typeof(ServerMonitorAppWidget)));
 			if (intent.Action == UpdateAction) {
-				var appWidgetIds = appWidgetManager.GetAppWidgetIds(componentName);
-				//remove saved servers associated with widgets if OnDeleted failed to get called and do the job
 				var serversAddresses = AppSettings.ServerMonitorServers;
-				serversAddresses = serversAddresses.Where(kvp => appWidgetIds.Contains(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-				AppSettings.ServerMonitorServers = serversAddresses;
-				OnUpdate(context, appWidgetManager, appWidgetIds);
-			} else if (intent.Action == RefreshAction
+				int []appWidgetIds = null;
+				bool refresh;
+				if (intent.Extras?.IsEmpty == false && intent.Extras.GetString(ServerAddressExtraKey, null) is string serverAddress) {
+					appWidgetIds = serversAddresses.Where(kvp => kvp.Value == serverAddress).Select(kvp => kvp.Key).ToArray();
+					refresh = false;
+				} else {
+					appWidgetIds = appWidgetManager.GetAppWidgetIds(componentName);
+					//remove saved servers associated with widgets if OnDeleted failed to get called and do the job
+					serversAddresses = serversAddresses.Where(kvp => appWidgetIds.Contains(kvp.Key)).ToDictionary();
+					AppSettings.ServerMonitorServers = serversAddresses;
+					refresh = true;
+				}
+				UpdateMultiple(context, appWidgetManager, appWidgetIds, refresh);
+			} else if (intent is { Action: RefreshAction, Extras.IsEmpty: false }
 				&& intent.Extras.GetString(ServerAddressExtraKey, null) is string serverAddress
 				&& intent.Extras.GetInt(WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
 				Update(context, appWidgetManager, appWidgetId, serverAddress, true);
@@ -95,13 +96,26 @@ namespace JKChat.Android.Widgets {
 			base.OnDeleted(context, appWidgetIds);
 		}
 
-		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading) {
+		private void UpdateMultiple(Context context, AppWidgetManager appWidgetManager, int []appWidgetIds, bool refresh) {
+			var serverAddresses = AppSettings.ServerMonitorServers;
+			foreach (var appWidgetId in appWidgetIds) {
+				if (serverAddresses.TryGetValue(appWidgetId, out string serverAddress)) {
+					Update(context, appWidgetManager, appWidgetId, serverAddress, false, refresh);
+				} else {
+					UpdateEmpty(context, appWidgetManager, appWidgetId);
+				}
+			}
+		}
+
+		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading, bool refresh = true) {
 			tasksQueue.Enqueue(async () => {
 				await setLoading(true);
 				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true);
 				await Task.Delay(500);
 				if (server != null) {
-					await server.Refresh();
+					if (refresh) {
+						await server.Refresh();
+					}
 					await setView(server);
 				} else {
 					await setLoading(false);
@@ -195,7 +209,7 @@ namespace JKChat.Android.Widgets {
 	public class ServerMonitorDialogActivity : AppCompatActivity {
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
-			if (Intent.Action == ServerMonitorAppWidget.PlayersAction && Intent.Extras.GetStringArray(ServerMonitorAppWidget.PlayersExtraKey) is string[] players) {
+			if (Intent is { Action: ServerMonitorAppWidget.PlayersAction, Extras.IsEmpty: false } && Intent.Extras.GetStringArray(ServerMonitorAppWidget.PlayersExtraKey) is string []players) {
 				if (players.Length > 0) {
 					DialogService.Show(new(new DialogListViewModel(players.Select(p => new DialogItemVM() { Name = p }), DialogSelectionType.NoSelection), _ => {
 						Finish();
@@ -209,7 +223,7 @@ namespace JKChat.Android.Widgets {
 						}
 					});
 				}
-			} else if (Intent.Action == ServerMonitorAppWidget.AddAction && Intent.Extras.GetInt(ServerMonitorAppWidget.WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
+			} else if (Intent is { Action: ServerMonitorAppWidget.AddAction, Extras.IsEmpty: false } && Intent.Extras.GetInt(ServerMonitorAppWidget.WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
 				Task.Run(add);
 				async Task add() {
 					var servers = await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers();

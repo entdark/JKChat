@@ -2,6 +2,7 @@
 
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 
@@ -9,6 +10,7 @@ using AndroidX.Core.App;
 using AndroidX.Lifecycle;
 
 using JKChat.Android.Views.Main;
+using JKChat.Android.Widgets;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
 
@@ -16,7 +18,6 @@ using MvvmCross;
 using MvvmCross.Plugin.Messenger;
 
 using Microsoft.Maui.ApplicationModel;
-using Android.Content.PM;
 
 namespace JKChat.Android.Services {
 	[Service(Name = "com.vlbor.jkchat.ForegroundGameClientsService", Enabled = true, ForegroundServiceType = ForegroundService.TypeSpecialUse)]
@@ -59,6 +60,7 @@ namespace JKChat.Android.Services {
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
 			HandleForeground(false);
+			UpdateWidgets(message);
 		}
 
 		private void HandleForeground(bool start) {
@@ -88,17 +90,23 @@ namespace JKChat.Android.Services {
 			}
 		}
 
+		private void UpdateWidgets(ServerInfoMessage message) {
+			var intent = new Intent(this, typeof(ServerMonitorAppWidget));
+			intent.SetAction(ServerMonitorAppWidget.UpdateAction);
+			intent.PutExtra(ServerMonitorAppWidget.ServerAddressExtraKey, message.Address);
+			SendBroadcast(intent);
+		}
+
 		private Notification CreateNotification(int count, int messages) {
 			var activityIntent = new Intent(this, typeof(MainActivity));
-			var pendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, PendingIntentFlags.Immutable);
+			var activityPendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, PendingIntentFlags.Immutable);
 			var closeIntent = new Intent(this, typeof(ForegroundReceiver));
-			closeIntent.SetAction("Test");
 			var closePendingIntent = PendingIntent.GetBroadcast(this, 2, closeIntent, PendingIntentFlags.Immutable);
 			var notification = new NotificationCompat.Builder(this, NotificationChannelID)
 				.SetAutoCancel(false)
 				.SetContentTitle($"You are connected to {count} server" + (count > 1 ? "s" : string.Empty))
 				.SetSmallIcon(Resource.Mipmap.ic_launcher)
-				.SetContentIntent(pendingIntent)
+				.SetContentIntent(activityPendingIntent)
 				.SetPriority(NotificationCompat.PriorityLow)
 				.SetOngoing(true)
 				.AddAction(new NotificationCompat.Action(0, count > 1 ? "Disconnect from all" : "Disconnect", closePendingIntent));

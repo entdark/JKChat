@@ -77,9 +77,7 @@ namespace JKChat.Android.Views.Main {
 				}
 			));
 			CheckNotificationsPermission();
-			var intent = new Intent(this, typeof(ServerMonitorAppWidget));
-			intent.SetAction(ServerMonitorAppWidget.UpdateAction);
-			SendBroadcast(intent);
+			UpdateWidgets();
 		}
 
 		protected override void OnDestroy() {
@@ -159,6 +157,13 @@ namespace JKChat.Android.Views.Main {
 				ContextCompat.StartForegroundService(this, intent);
 			}
 		}
+
+		private void UpdateWidgets() {
+			var intent = new Intent(this, typeof(ServerMonitorAppWidget));
+			intent.SetAction(ServerMonitorAppWidget.UpdateAction);
+			SendBroadcast(intent);
+		}
+
 		private bool IsServiceRunning(Type serviceClass) {
 			var manager = (ActivityManager)GetSystemService(Context.ActivityService);
 			foreach (var service in manager.GetRunningServices(int.MaxValue)) {
