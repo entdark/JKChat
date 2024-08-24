@@ -45,6 +45,7 @@ namespace JKChat.Core.Models {
 		private bool addingPending = false;
 		private readonly HashSet<string> blockedPlayers;
 		private IMvxViewModel viewModel;
+		private bool dialogOffsersReconnect = false;
 		internal IMvxViewModel ViewModel {
 			get => viewModel;
 			set {
@@ -166,7 +167,7 @@ namespace JKChat.Core.Models {
 					Client.Start(ExceptionCallback);
 					return;
 				}
-				Client = new JKClient.JKClient(JKClient.JKClient.GetKnownClientHandler(ServerInfo)) {
+				Client = new(JKClient.JKClient.GetKnownClientHandler(ServerInfo)) {
 					Name = AppSettings.PlayerName
 				};
 				try {
@@ -199,12 +200,15 @@ namespace JKChat.Core.Models {
 		}
 
 		internal async Task Connect(bool ignoreDialog = true) {
+			if (!ignoreDialog && pendingShowingDialog && dialogOffsersReconnect) {
+				return;
+			}
 			if (Status != ConnectionStatus.Disconnected) {
 				return;
 			}
 			Status = ConnectionStatus.Connecting;
 			await Start();
-			if (ServerInfo.NeedPassword/* && string.IsNullOrEmpty(Client.Password)*/) {
+			if (ServerInfo.NeedPassword) {
 				string password = Client.Password;
 				await ShowDialog(new JKDialogConfig() {
 					Title = "Enter Password",
@@ -261,6 +265,7 @@ namespace JKChat.Core.Models {
 		}
 
 		private async Task ShowDisconnected() {
+			dialogOffsersReconnect = true;
 			await ShowDialog(new JKDialogConfig() {
 				Title = "Disconnected",
 				CancelText = "OK",
@@ -347,12 +352,14 @@ namespace JKChat.Core.Models {
 					return;
 				}
 				Disconnect();
-				await ShowDialog(new JKDialogConfig() {
-					Title = title,
-					OkText = "OK",
-					OkAction = _ => {
-						Task.Run(CloseViewModel);
-					}
+				Task.Run(async () => {
+					await ShowDialog(new JKDialogConfig() {
+						Title = title,
+						OkText = "OK",
+						OkAction = _ => {
+							Task.Run(CloseViewModel);
+						}
+					});
 				});
 			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
 				string reason;
@@ -366,17 +373,20 @@ namespace JKChat.Core.Models {
 					reason = command[1];
 				}
 				Disconnect();
-				await ShowDialog(new JKDialogConfig() {
-					Title = "Disconnected",
-					Message = reason,
-					CancelText = "OK",
-					CancelAction = (_) => {
-						Task.Run(CloseViewModel);
-					},
-					OkText = "Reconnect",
-					OkAction = (_) => {
-						Task.Run(Connect);
-					}
+				Task.Run(async () => {
+					dialogOffsersReconnect = true;
+					await ShowDialog(new JKDialogConfig() {
+						Title = "Disconnected",
+						Message = reason,
+						CancelText = "OK",
+						CancelAction = (_) => {
+							Task.Run(CloseViewModel);
+						},
+						OkText = "Reconnect",
+						OkAction = (_) => {
+							Task.Run(Connect);
+						}
+					});
 				});
 			}
 		}
@@ -593,9 +603,18 @@ namespace JKChat.Core.Models {
 			}
 		}
 
+		private bool pendingShowingDialog;
 		private async Task ShowDialog(JKDialogConfig config) {
+			if (pendingShowingDialog) {
+				return;
+			}
+			if (ViewModel == null) {
+				pendingShowingDialog = true;
+			}
 			while (ViewModel == null);
 			await dialogService.ShowAsync(config);
+			pendingShowingDialog = false;
+			dialogOffsersReconnect = false;
 		}
 
 		private async Task ExceptionCallback(JKClientException exception) {
