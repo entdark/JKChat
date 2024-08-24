@@ -72,7 +72,7 @@ namespace JKChat.iOS.Controls {
 
 			ShouldChangeText = (textView, range, text) => {
 				string textViewText = textView.Text ?? string.Empty;
-				var newText = textViewText.Substring(0, (int)range.Location) + text + textViewText.Substring((int)(range.Location + range.Length));//new NSString(textView.Text).Replace(range, new NSString(text));
+				var newText = textViewText[..(int)range.Location] + text + textViewText[(int)(range.Location + range.Length)..];
 				bool check = CheckMaxLength(ref newText);
 				TogglePlaceholder(newText);
 				if (check) {

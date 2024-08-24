@@ -123,11 +123,11 @@ namespace JKChat.Android.Views.Main {
 		protected override void ConfigurationChanged(Configuration configuration) {
 			base.ConfigurationChanged(configuration);
 			const float primaryWidth = 480.0f;
-			if (contentMasterView != null && contentMasterView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters) {
+			if (contentMasterView?.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters) {
 				marginLayoutParameters.Width = ExpandedWindow ? primaryWidth.DpToPx() : ViewGroup.LayoutParams.MatchParent;
 				contentMasterView.LayoutParameters = marginLayoutParameters;
 			}
-			if (contentDetailView != null && contentDetailView.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters2) {
+			if (contentDetailView?.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters2) {
 				marginLayoutParameters2.LeftMargin = ExpandedWindow ? primaryWidth.DpToPx() : 0.0f.DpToPx();
 				contentDetailView.LayoutParameters = marginLayoutParameters2;
 			}
