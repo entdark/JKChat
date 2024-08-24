@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -190,6 +191,15 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 				}
 				return true;
 			}
+		}
+	}
+
+	public sealed class ServerListItemVMComparer : EqualityComparer<ServerListItemVM> {
+		public override bool Equals(ServerListItemVM x, ServerListItemVM y) {
+			return x?.ServerInfo == y?.ServerInfo;
+		}
+		public override int GetHashCode(ServerListItemVM obj) {
+			return obj?.ServerInfo.GetHashCode() ?? 0;
 		}
 	}
 }

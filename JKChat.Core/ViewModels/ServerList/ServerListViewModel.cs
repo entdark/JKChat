@@ -258,17 +258,17 @@ namespace JKChat.Core.ViewModels.ServerList {
 				IEnumerable<ServerListItemVM> newItems = null;
 				var recentServers = await cacheService.LoadRecentServers();
 				var servers = await loadingFunc();
+				bool updateRecentServers = false;
 				if (!servers.IsNullOrEmpty()) {
 					var serverItems = recentServers
-						.Where(recentServer => !servers.Any(server => server == recentServer.ServerInfo))
-						.Reverse()
-						.Concat(servers
+						.ReverseWithUpdate(servers, () => updateRecentServers = true)
+						.Union(servers
 							.Where(server => server.Ping != 0)
 							.OrderByDescending(server => server.Clients)
 							.Select(server => new ServerListItemVM(server) {
-								Status = addressesWithStatuses.TryGetValue(server.Address, out var status) ? status : default
+								Status = addressesWithStatuses.TryGetValue(server.Address, out var status) ? status : Models.ConnectionStatus.Disconnected
 							})
-						);
+						, new ServerListItemVMComparer());
 					newItems = serverItems;
 				} else if (recentServers.Any()) {
 					newItems = recentServers
@@ -279,10 +279,13 @@ namespace JKChat.Core.ViewModels.ServerList {
 					var reportedServers = await cacheService.LoadReportedServers();
 					var favouriteServers = await cacheService.LoadFavouriteServers();
 					newItems = newItems
-						.UpdateFavourites(favouriteServers)
 						.Except(reportedServers)
+						.UpdateFavourites(favouriteServers)
 						.ApplyFilter(filter, SearchText);
 					SetItems(newItems);
+					if (updateRecentServers) {
+						await cacheService.SaveRecentServers(recentServers);
+					}
 					if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName)))
 						AppSettings.Filter = filter;
 				}
@@ -339,7 +342,20 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 	}
 
-	public static class ServerListViewModelExtensions {
+	internal static class ServerListViewModelExtensions {
+		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, Action infoUpdatedCallback) {
+			int count = servers.Count();
+			for (int i = count-1; i >= 0; i--) {
+				var server = servers.ElementAt(i);
+				var updatedRecentServerInfo = serverInfos.FirstOrDefault(serverInfo => serverInfo == server.ServerInfo);
+				if (updatedRecentServerInfo != null) {
+					infoUpdatedCallback?.Invoke();
+					server.Set(updatedRecentServerInfo);
+				}
+				yield return server;
+			}
+		}
+
 		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<NetAddress, Models.ConnectionStatus> addressesWithStatuses) {
 			foreach (var server in servers) {
 				server.Status = addressesWithStatuses.TryGetValue(server.ServerInfo.Address, out var status) ? status : default;
