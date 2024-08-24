@@ -54,6 +54,8 @@ namespace JKChat.Android.Views.ServerList {
 						if (viewHolder is IMvxRecyclerViewHolder { DataContext : ServerListItemVM item }) {
 							var connectButton = viewHolder.ItemView.FindViewById<MaterialButton>(Resource.Id.connect_button);
 							connectButton.ToggleIconButton(Resource.Drawable.ic_lock, item.NeedPassword);
+							var disconnectButton = viewHolder.ItemView.FindViewById<MaterialButton>(Resource.Id.disconnect_button);
+							disconnectButton.ToggleIconButton(Resource.Drawable.ic_lock, item.NeedPassword);
 						}
 					}
 				};

@@ -60,13 +60,23 @@
                         android:layout_weight="1"/>
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/connect_button"
-                        style="?attr/materialButtonOutlinedStyle"
-                        tools:text="Disconnect"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:text="Connect"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="0"
                         app:iconPadding="8dp"
-                        app:MvxBind="Click ConnectCommand; Text If(EnumBool(Status, 'Disconnected'), 'Connect', 'Disconnect')"/>
+                        app:MvxBind="Click ConnectCommand; Visibility EnumVisibility(Status, 'Disconnected')"/>
+                    <com.google.android.material.button.MaterialButton
+                        android:visibility="gone"
+                        android:id="@+id/disconnect_button"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:text="Disconnect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        app:iconPadding="8dp"
+                        app:MvxBind="Click ConnectCommand; Visibility EnumInvertedVisibility(Status, 'Disconnected')"/>
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>

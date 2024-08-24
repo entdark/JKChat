@@ -26,7 +26,7 @@ namespace JKChat.Android.Views.Chat {
 	[PushFragmentPresentation]
 	public class ServerInfoFragment : BaseFragment<ServerInfoViewModel> {
 		private IMenuItem favouriteItem;
-		private MaterialButton connectButton;
+		private MaterialButton connectButton, disconnectButton;
 
 		private bool needPassword;
 		public bool NeedPassword {
@@ -61,6 +61,7 @@ namespace JKChat.Android.Views.Chat {
 			base.OnViewCreated(view, savedInstanceState);
 
 			connectButton = view.FindViewById<MaterialButton>(Resource.Id.connect_button);
+			disconnectButton = view.FindViewById<MaterialButton>(Resource.Id.disconnect_button);
 
 			var tabLayout = view.FindViewById<TabLayout>(Resource.Id.tablayout);
 			var viewPager = view.FindViewById<ViewPager2>(Resource.Id.viewpager);
@@ -111,6 +112,7 @@ namespace JKChat.Android.Views.Chat {
 
 		private void UpdateConnectButton() {
 			connectButton?.ToggleIconButton(Resource.Drawable.ic_lock, NeedPassword);
+			disconnectButton?.ToggleIconButton(Resource.Drawable.ic_lock, NeedPassword);
 		}
 
 		private class TabConfigurationStrategy : Java.Lang.Object, TabLayoutMediator.ITabConfigurationStrategy {
