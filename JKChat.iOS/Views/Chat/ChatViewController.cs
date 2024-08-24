@@ -334,6 +334,7 @@ namespace JKChat.iOS.Views.Chat {
 		public override void ViewDidAppear(bool animated) {
 			base.ViewDidAppear(animated);
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset), true);
+			BecomeFirstResponder();
 		}
 
 		public override void ViewWillDisappear(bool animated) {
