@@ -31,5 +31,23 @@ namespace JKChat.iOS.Helpers {
 		public static IDictionary<string, string> ToDictionary(this NSDictionary dictionary) {
 			return dictionary.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value.ToString());
 		}
+
+		public static void AddWithConstraintsTo(this UIView view, UIView parent, float leading = 0.0f, float top = 0.0f, float trailing = 0.0f, float bottom = 0.0f) {
+			parent.AddSubview(view);
+			view.ApplyConstraints(parent, leading, top, trailing, bottom);
+		}
+
+		public static void InsertWithConstraintsInto(this UIView view, UIView parent, nint index, float leading = 0.0f, float top = 0.0f, float trailing = 0.0f, float bottom = 0.0f) {
+			parent.InsertSubview(view, index);
+			view.ApplyConstraints(parent, leading, top, trailing, bottom);
+		}
+
+		public static void ApplyConstraints(this UIView view, UIView parent, float leading = 0.0f, float top = 0.0f, float trailing = 0.0f, float bottom = 0.0f) {
+			view.TranslatesAutoresizingMaskIntoConstraints = false;
+			view.LeadingAnchor.ConstraintEqualTo(parent.LeadingAnchor, leading).Active = true;
+			view.TrailingAnchor.ConstraintEqualTo(parent.TrailingAnchor, trailing).Active = true;
+			view.TopAnchor.ConstraintEqualTo(parent.TopAnchor, top).Active = true;
+			view.BottomAnchor.ConstraintEqualTo(parent.BottomAnchor, bottom).Active = true;
+		}
 	}
 }

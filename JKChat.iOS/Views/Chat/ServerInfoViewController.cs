@@ -7,6 +7,7 @@ using Foundation;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base.Items;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.iOS.Helpers;
 using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
 
@@ -193,14 +194,9 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			scoreboardView.TopAnchor.ConstraintEqualTo(scoreLabel.TopAnchor, 0.0f).Active = true;
 			playerLabel.TrailingAnchor.ConstraintEqualTo(scoreLabel.LeadingAnchor, 16.0f).Active = true;
 			var headerStackView = new UIStackView(new []{ segmentsView, scoreboardView }) {
-				Axis = UILayoutConstraintAxis.Vertical,
-				TranslatesAutoresizingMaskIntoConstraints = false
+				Axis = UILayoutConstraintAxis.Vertical
 			};
-			headerView.AddSubview(headerStackView);
-			headerView.LeadingAnchor.ConstraintEqualTo(headerStackView.LeadingAnchor, 0.0f).Active = true;
-			headerView.TrailingAnchor.ConstraintEqualTo(headerStackView.TrailingAnchor, 0.0f).Active = true;
-			headerView.TopAnchor.ConstraintEqualTo(headerStackView.TopAnchor, 0.0f).Active = true;
-			headerView.BottomAnchor.ConstraintEqualTo(headerStackView.BottomAnchor, 0.0f).Active = true;
+			headerStackView.AddWithConstraintsTo(headerView);
 			return headerView;
 		}
 

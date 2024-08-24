@@ -5,6 +5,7 @@ using CoreGraphics;
 using Foundation;
 
 using JKChat.Core.ViewModels.Base;
+using JKChat.iOS.Helpers;
 
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
@@ -47,12 +48,7 @@ namespace JKChat.iOS.Views.Base {
 				UserInteractionEnabled = false,
 //				BackgroundColor = Theme.Color.LoadingBackground
 			};
-			View.AddSubview(loadingView);
-			loadingView.LeadingAnchor.ConstraintEqualTo(this.View.LeadingAnchor, 0.0f).Active = true;
-			loadingView.TrailingAnchor.ConstraintEqualTo(this.View.TrailingAnchor, 0.0f).Active = true;
-			loadingView.TopAnchor.ConstraintEqualTo(this.View.TopAnchor, 0.0f).Active = true;
-			loadingView.BottomAnchor.ConstraintEqualTo(this.View.BottomAnchor, 0.0f).Active = true;
-			loadingView.TranslatesAutoresizingMaskIntoConstraints = false;
+			loadingView.AddWithConstraintsTo(View);
 
 			var loadingIndicatorView = new UIActivityIndicatorView() {
 				ActivityIndicatorViewStyle = UIDevice.CurrentDevice.CheckSystemVersion(13, 0)

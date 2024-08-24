@@ -7,6 +7,7 @@ using CoreGraphics;
 using Foundation;
 
 using JKChat.Core.ViewModels.Chat.Items;
+using JKChat.iOS.Helpers;
 
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
@@ -20,13 +21,11 @@ namespace JKChat.iOS.Views.Chat.Cells {
 		public static readonly NSString Key = new NSString("ChatInfoViewCell");
 		public static readonly UINib Nib;
 
-		private CAGradientLayer backgroundGradientLayer, fadingGradientLayer;
-
 		public override CGRect Frame {
 			get => base.Frame;
 			set {
 				base.Frame = value;
-				ResizeGradient();
+				CountFadingGradientAlpha();
 			}
 		}
 
@@ -34,7 +33,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			get => base.Bounds;
 			set {
 				base.Bounds = value;
-				ResizeGradient();
+				CountFadingGradientAlpha();
 			}
 		}
 
@@ -44,7 +43,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 		protected ChatInfoViewCell(NativeHandle handle) : base(handle) {
 			this.DelayBind(() => {
-				ResizeGradient();
+				CountFadingGradientAlpha();
 
 				using var set = this.CreateBindingSet<ChatInfoViewCell, ChatInfoItemVM>();
 				set.Bind(TimeLabel).For(v => v.Text).To(vm => vm.Time);
@@ -55,24 +54,14 @@ namespace JKChat.iOS.Views.Chat.Cells {
 		public override void AwakeFromNib() {
 			base.AwakeFromNib();
 
-			this.ContentView.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);
+			this.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);
 
-			backgroundGradientLayer = new CAGradientLayer() {
-				LayerType = CAGradientLayerType.Axial,
-				Colors = new CGColor []{ Theme.Color.ChatInfoGradientStart.CGColor, Theme.Color.ChatInfoGradientEnd.CGColor },
-				StartPoint = new CGPoint(0.0f, 0.5f),
-				EndPoint = new CGPoint(1.0f, 0.5f),
-				Opacity = 0.8f
-			};
-			this.Layer.InsertSublayer(backgroundGradientLayer, 0);
+			var backgroundGradientView = new GradientView(Theme.Color.ChatInfoGradientStart, Theme.Color.ChatInfoGradientEnd, new(0.0f, 0.5f), new(1.0f, 0.5f));
+			backgroundGradientView.Layer.Opacity = 0.8f;
+			backgroundGradientView.InsertWithConstraintsInto(BackgroundView, 0);
 
-			fadingGradientLayer = new CAGradientLayer() {
-				LayerType = CAGradientLayerType.Axial,
-				Colors = new CGColor []{ UIColor.TertiarySystemBackground.ColorWithAlpha(0.0f).CGColor, UIColor.TertiarySystemBackground.CGColor },
-				StartPoint = new CGPoint(0.0f, 0.5f),
-				EndPoint = new CGPoint(0.712f, 0.5f)
-			};
-			FadingGradientView.Layer.InsertSublayer(fadingGradientLayer, 0);
+			var fadingGradientView = new GradientView(UIColor.TertiarySystemBackground.ColorWithAlpha(0.0f), UIColor.TertiarySystemBackground, new(0.0f, 0.5f), new(0.712f, 0.5f));
+			fadingGradientView.InsertWithConstraintsInto(FadingGradientView, 0);
 
 			TextLabel.Font = UIFont.GetMonospacedSystemFont(15.0f, UIFontWeight.Regular);
 			TimeLabel.Font = UIFont.GetMonospacedSystemFont(12.0f, UIFontWeight.Regular);
@@ -86,7 +75,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 
 		public override void LayoutSubviews() {
 			base.LayoutSubviews();
-			ResizeGradient();
+			CountFadingGradientAlpha();
 		}
 
 		public override void PrepareForReuse() {
@@ -94,16 +83,10 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			TextScrollView.ContentOffset = CGPoint.Empty;
 		}
 
-		private void ResizeGradient() {
-			if (backgroundGradientLayer == null || BackgroundView == null || fadingGradientLayer == null || FadingGradientView == null) {
+		private void CountFadingGradientAlpha() {
+			if (FadingGradientView == null) {
 				return;
 			}
-			backgroundGradientLayer.Frame = new CGRect(0.0f, 0.0f, BackgroundView.Bounds.Width, Frame.Height);
-			fadingGradientLayer.Frame = new CGRect(CGPoint.Empty, FadingGradientView.Frame.Size);
-			CountFadingGradientAlpha();
-		}
-
-		private void CountFadingGradientAlpha() {
 			var scrollView = TextScrollView;
 			nfloat dx = (scrollView.ContentSize.Width - (scrollView.ContentOffset.X + scrollView.Frame.Width));
 			FadingGradientView.Alpha = NMath.Min(NMath.Max((dx / 60.0f), 0.0f), 1.0f);
@@ -114,6 +97,21 @@ namespace JKChat.iOS.Views.Chat.Cells {
 				TextScrollView.Scrolled -= TextScrollViewScrolled;
 			}
 			base.Dispose(disposing);
+		}
+
+		private class GradientView : UIView {
+			[Export("layerClass")]
+			public static Class LayerClass() {
+				return new Class(typeof(CAGradientLayer));
+			}
+
+			public GradientView(UIColor startColor, UIColor endColor, CGPoint startPoint, CGPoint endPoint, CAGradientLayerType type = CAGradientLayerType.Axial) {
+				var gradientLayer = (this.Layer as CAGradientLayer);
+				gradientLayer.LayerType = type;
+				gradientLayer.Colors = new[] { startColor.CGColor, endColor.CGColor };
+				gradientLayer.StartPoint = startPoint;
+				gradientLayer.EndPoint = endPoint;
+			}
 		}
 	}
 }

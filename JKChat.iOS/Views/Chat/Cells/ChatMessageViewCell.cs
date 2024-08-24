@@ -33,7 +33,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			base.AwakeFromNib();
 
 //			this.ContentView.BackgroundColor = UIColor.Red;
-			this.ContentView.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);
+			this.Transform = CGAffineTransform.MakeScale(1.0f, -1.0f);
 
 //			MessageTextView.TextContainerInset = UIEdgeInsets.Zero;
 //			MessageTextView.TextContainer.LineFragmentPadding = 0.0f;
