@@ -33,6 +33,7 @@ The application is based on .NET Android and .NET iOS workloads and uses MvvmCro
 | iOS | Android |
 | --- | --- |
 | <img src="https://jkhub.org/uploads/monthly_2023_09/IMG_1730.png.de10248d003eb2b63a4e1c08f7d810a2.png" height="720"/> | <img src="https://jkhub.org/uploads/monthly_2023_09/Screenshot_20230922-042858_JKChatAndroid.png.6680683cf879fab798987deaf5d2fa6d.png" height="720"/> |
+| <img src="https://jkhub.org/uploads/monthly_2023_12/image.png.1ab1497dbd2dc6d376200d641e00d744.png" height="720"/> | <img src="https://jkhub.org/uploads/monthly_2023_12/image.png.edceb9e9296c610fc1e766c6c01c9b19.png" height="720"/> |
 
 ## Beta testing downloads:
 ### iOS:
