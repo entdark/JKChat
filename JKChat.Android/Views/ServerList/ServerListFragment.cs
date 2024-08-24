@@ -36,7 +36,7 @@ namespace JKChat.Android.Views.ServerList {
 			get => filterApplied;
 			set {
 				filterApplied = value;
-				filterBadgeDrawable.SetVisible(value);
+				FilterBadgeSetVisible(value);
 			}
 		}
 
@@ -108,7 +108,7 @@ namespace JKChat.Android.Views.ServerList {
 
 		public override void OnResume() {
 			base.OnResume();
-			filterBadgeDrawable.SetVisible(FilterApplied);
+			FilterBadgeSetVisible(FilterApplied);
 		}
 
 		protected override void CreateOptionsMenu() {
@@ -127,7 +127,6 @@ namespace JKChat.Android.Views.ServerList {
 			filterBadgeDrawable.BadgeGravity = BadgeDrawable.TopStart;
 			filterBadgeDrawable.HorizontalOffset = 36.DpToPx();
 			filterBadgeDrawable.VerticalOffset = 18.DpToPx();
-			BadgeUtils.AttachBadgeDrawable(filterBadgeDrawable, (filterItem.ActionView as ViewGroup).FindViewById(Resource.Id.toolbar_menu_item), filterItem.ActionView as FrameLayout);
 		}
 
 		protected override void ActivityExit() {
@@ -192,6 +191,17 @@ namespace JKChat.Android.Views.ServerList {
 				ViewModel.SearchText = string.Empty;
 			}
 			HideKeyboard(searchView, true);
+		}
+
+		private void FilterBadgeSetVisible(bool visible) {
+			var parent = filterItem.ActionView as FrameLayout;
+			var anchor = parent?.FindViewById(Resource.Id.toolbar_menu_item);
+			if (visible) {
+				BadgeUtils.AttachBadgeDrawable(filterBadgeDrawable, anchor, parent);
+			} else {
+				BadgeUtils.DetachBadgeDrawable(filterBadgeDrawable, anchor);
+			}
+			filterBadgeDrawable.SetVisible(visible);
 		}
 
 		private class OnScrollListener : RecyclerView.OnScrollListener {
