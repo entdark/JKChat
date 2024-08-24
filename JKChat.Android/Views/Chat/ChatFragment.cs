@@ -230,7 +230,7 @@ namespace JKChat.Android.Views.Chat {
 				view.ScaleY = scale;
 				view.Alpha = scale;
 				if (!show)
-					view.Visibility = ViewStates.Gone;
+					view.Visibility = ViewStates.Invisible;
 				return;
 			}
 			view.Animate()
@@ -241,7 +241,7 @@ namespace JKChat.Android.Views.Chat {
 				.SetInterpolator(new DecelerateInterpolator())
 				.WithEndAction(new Runnable(() => {
 					if (!show)
-						view.Visibility = ViewStates.Gone;
+						view.Visibility = ViewStates.Invisible;
 				}))
 				.Start();
 		}
