@@ -488,7 +488,7 @@ namespace JKChat.Core.Models {
 			lock (pendingItems) {
 				lock (Items) {
 					pending = DeviceInfo.Platform == DevicePlatform.Android && ViewModel == null;
-					if (pending) {
+					if (pending && !mergeInfoItems(pendingItems.LastOrDefault())) {
 						pendingItems.Add(item);
 					}
 				}
@@ -497,30 +497,29 @@ namespace JKChat.Core.Models {
 				chatQueue.EnqueueOnMainThread(() => {
 					lock (Items) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							if (!mergeInfoItems(true)) {
+							if (!mergeInfoItems(Items.LastOrDefault())) {
 								Items.Add(item);
 							}
 						} else if (DeviceInfo.Platform.IsApple()) {
-							if (!mergeInfoItems(false)) {
+							if (!mergeInfoItems(Items.FirstOrDefault())) {
 								Items.Insert(0, item);
 							}
 						}
-						bool mergeInfoItems(bool last) {
-							var prevItem = last ? Items.LastOrDefault() : Items.FirstOrDefault();
-							if (item is ChatInfoItemVM thisInfoItem && prevItem is ChatInfoItemVM prevInfoItem
-								&& (prevInfoItem.MergeNext || (thisInfoItem.DateTime - prevInfoItem.DateTime) < TimeSpan.FromSeconds(1.337))) {
-								if (prevInfoItem.MergeNext)
-									prevInfoItem.Text += thisInfoItem.Text;
-								else
-									prevInfoItem.Text += '\n' + thisInfoItem.Text;
-								prevInfoItem.MergeNext = thisInfoItem.MergeNext;
-								return true;
-							}
-							UnreadMessages++;
-							return false;
-						}
 					}
 				});
+			}
+			bool mergeInfoItems(ChatItemVM prevItem) {
+				if (item is ChatInfoItemVM thisInfoItem && prevItem is ChatInfoItemVM prevInfoItem
+					&& (prevInfoItem.MergeNext || (thisInfoItem.DateTime - prevInfoItem.DateTime) < TimeSpan.FromSeconds(1.337))) {
+					if (prevInfoItem.MergeNext)
+						prevInfoItem.Text += thisInfoItem.Text;
+					else
+						prevInfoItem.Text += '\n' + thisInfoItem.Text;
+					prevInfoItem.MergeNext = thisInfoItem.MergeNext;
+					return true;
+				}
+				UnreadMessages++;
+				return false;
 			}
 		}
 
