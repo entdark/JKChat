@@ -32,7 +32,12 @@ struct Provider: AppIntentTimelineProvider {
 
 @available(iOS 17.0, *)
 func loadServerInfo(configuration: ConfigurationAppIntent) async throws -> ServerMonitorEntry? {
-    let entity = configuration.server
+    let entity: ServerEntity
+    if configuration.server == nil {
+        entity = ServerEntity.empty
+    } else {
+        entity = configuration.server!
+    }
     if entity.isEmpty {
         return ServerMonitorEntry(date: .now, configuration: configuration, isEmpty: true)
     }
@@ -55,6 +60,10 @@ func loadServerInfo(configuration: ConfigurationAppIntent) async throws -> Serve
                     }
                 
                     let response = try await receiveUDP(connection: connection)
+                    if response == nil {
+                        print("no response")
+                        return
+                    }
                     let components = response!.components(separatedBy: "\n")
                     if (components[0].contains("statusResponse")) {
                         let firstIndex = components[1].firstIndex(of: "\\")
@@ -139,7 +148,8 @@ func receiveUDP(connection: NWConnection) async throws -> String? {
              if (isComplete) {
                  print("Receive is complete")
                  if (data != nil) {
-                     let response = String(data: data!, encoding: String.Encoding.ascii)
+                     let response = String(data: data!, encoding: String.Encoding.windowsCP1252)
+                     print(data! as NSData)
                      continuation.resume(returning: response)
                  } else {
                      continuation.resume(returning: nil)
