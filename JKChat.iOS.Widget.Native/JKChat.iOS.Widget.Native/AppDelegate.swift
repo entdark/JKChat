@@ -1,4 +1,6 @@
 import UIKit
+import ActivityKit
+internal import WidgetShared
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -10,7 +12,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         guard let userDefaults = UserDefaults(suiteName: "group.com.vlbor.JKChat") else {
             return true
         }
+        
         userDefaults.set("[{\"address\":\"132.145.168.101\",\"port\":29070,\"serverName\":\".........JA+ Official n°1 CTF Get JA+ Plugin & Maps at www.jactf.com, USA\"},{\"address\":\"135.125.145.49\",\"port\":29070,\"serverName\":\"{JoF}Public Server\"},{\"address\":\"132.145.168.101\",\"port\":29071,\"serverName\":\"Refresh1-PUG\"},{\"address\":\"135.180.64.82\",\"port\":29070,\"serverName\":\"Refresh2 PUG\"}]", forKey: "FavouritesServers")
+        
+        Task {
+            await startLiveActivity()
+        }
+        
         return true
     }
 
@@ -28,6 +36,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-
+    func startLiveActivity() async {
+        await WidgetShared.LiveActivityShared.showLiveActivity(servers: ["^4Re^7fresh^5-2"], messages: 2) {
+            
+        };
+    }
 }
 

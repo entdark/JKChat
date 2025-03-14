@@ -168,11 +168,12 @@ namespace JKChat.Android.Widgets {
 				minWidth = newOptions.GetInt(AppWidgetManager.OptionAppwidgetMinWidth),
 				maxWidth = newOptions.GetInt(AppWidgetManager.OptionAppwidgetMaxWidth);
 			bool bigView = maxHeight >= 120;
+			string players = $"{server.Players}/{server.MaxPlayers}";
 			if (bigView) {
-				views.SetTextViewText(Resource.Id.players_textview, $"{server.Players} players");
+				views.SetTextViewText(Resource.Id.players_textview, $"{players} players");
 				views.SetViewVisibility(Resource.Id.map_textview, ViewStates.Visible);
 			} else {
-				views.SetTextViewText(Resource.Id.players_textview, $"{server.Players}, {server.MapName}");
+				views.SetTextViewText(Resource.Id.players_textview, $"{players}, {server.MapName}");
 				views.SetViewVisibility(Resource.Id.map_textview, ViewStates.Gone);
 			}
 			views.SetTextViewText(Resource.Id.server_name_textview, ColourTextValueConverter.Convert(server.ServerName));

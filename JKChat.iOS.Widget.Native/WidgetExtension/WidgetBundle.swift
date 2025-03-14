@@ -6,5 +6,6 @@ import SwiftUI
 struct ServerMonitorWidgetBundle: WidgetBundle {
     var body: some Widget {
         ServerMonitorWidget()
+        GameActivityWidget()
     }
 }

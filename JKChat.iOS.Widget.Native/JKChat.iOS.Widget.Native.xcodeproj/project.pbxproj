@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,13 +13,19 @@
 		E70700792B191F6400BE82DA /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E70700782B191F6400BE82DA /* Widget.swift */; };
 		E707007B2B191F6400BE82DA /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E707007A2B191F6400BE82DA /* AppIntent.swift */; };
 		E707007D2B191F6500BE82DA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E707007C2B191F6500BE82DA /* Assets.xcassets */; };
+		E708E8A92CD129FA000BF71A /* GameActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E708E8A82CD129F9000BF71A /* GameActivityWidget.swift */; };
 		E77FEEAA2B1D237F00AAB05B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77FEEA92B1D237F00AAB05B /* AppDelegate.swift */; };
 		E77FEEAC2B1D237F00AAB05B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77FEEAB2B1D237F00AAB05B /* SceneDelegate.swift */; };
 		E77FEEAE2B1D237F00AAB05B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77FEEAD2B1D237F00AAB05B /* ViewController.swift */; };
 		E77FEEB12B1D237F00AAB05B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEAF2B1D237F00AAB05B /* Main.storyboard */; };
 		E77FEEB32B1D238000AAB05B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEB22B1D238000AAB05B /* Assets.xcassets */; };
 		E77FEEB62B1D238000AAB05B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E77FEEB42B1D238000AAB05B /* LaunchScreen.storyboard */; };
+		E7D8531E2D3E9F290083F0CA /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7D8531D2D3E9F290083F0CA /* ActivityKit.framework */; };
+		E7D853302D3EA85E0083F0CA /* WidgetShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */; };
+		E7D853312D3EA85E0083F0CA /* WidgetShared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E7D853372D3EA8990083F0CA /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7D8531D2D3E9F290083F0CA /* ActivityKit.framework */; platformFilter = ios; };
 		E7E49A882B2BBE83003B157A /* WidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E707006D2B191F6400BE82DA /* WidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E7F5C43C2D41D6A0000C95F4 /* WidgetShared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,9 +36,34 @@
 			remoteGlobalIDString = E707006C2B191F6400BE82DA;
 			remoteInfo = WidgetExtension;
 		};
+		E7D8532E2D3EA85E0083F0CA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E707004A2B191DD000BE82DA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E7D853292D3EA85E0083F0CA;
+			remoteInfo = WidgetShared;
+		};
+		E7F5C43E2D41D6A0000C95F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E707004A2B191DD000BE82DA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E7D853292D3EA85E0083F0CA;
+			remoteInfo = WidgetShared;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		E7D853362D3EA85E0083F0CA /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E7D853312D3EA85E0083F0CA /* WidgetShared.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E7E49A832B2BBE6D003B157A /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -55,6 +86,7 @@
 		E707007A2B191F6400BE82DA /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
 		E707007C2B191F6500BE82DA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E707007E2B191F6500BE82DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E708E8A82CD129F9000BF71A /* GameActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameActivityWidget.swift; sourceTree = "<group>"; };
 		E76B83F82B1BF56700E002A6 /* WidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WidgetExtension.entitlements; sourceTree = "<group>"; };
 		E77FEEA72B1D237F00AAB05B /* JKChat.iOS.Widget.Native.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JKChat.iOS.Widget.Native.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E77FEEA92B1D237F00AAB05B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -65,7 +97,23 @@
 		E77FEEB52B1D238000AAB05B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E77FEEB72B1D238000AAB05B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E77FEEBB2B1D23B200AAB05B /* JKChat.iOS.Widget.Native.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JKChat.iOS.Widget.Native.entitlements; sourceTree = "<group>"; };
+		E7D8531D2D3E9F290083F0CA /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
+		E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WidgetShared.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E7D853322D3EA85E0083F0CA /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			publicHeaders = (
+				WidgetShared.h,
+			);
+			target = E7D853292D3EA85E0083F0CA /* WidgetShared */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E7D8532B2D3EA85E0083F0CA /* WidgetShared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (E7D853322D3EA85E0083F0CA /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = WidgetShared; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E707006A2B191F6400BE82DA /* Frameworks */ = {
@@ -73,6 +121,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E70700722B191F6400BE82DA /* SwiftUI.framework in Frameworks */,
+				E7F5C43C2D41D6A0000C95F4 /* WidgetShared.framework in Frameworks */,
+				E7D8531E2D3E9F290083F0CA /* ActivityKit.framework in Frameworks */,
 				E70700702B191F6400BE82DA /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -81,6 +131,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7D853302D3EA85E0083F0CA /* WidgetShared.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E7D853272D3EA85E0083F0CA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7D853372D3EA8990083F0CA /* ActivityKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +152,7 @@
 				E76B83F82B1BF56700E002A6 /* WidgetExtension.entitlements */,
 				E70700732B191F6400BE82DA /* WidgetExtension */,
 				E77FEEA82B1D237F00AAB05B /* JKChat.iOS.Widget.Native */,
+				E7D8532B2D3EA85E0083F0CA /* WidgetShared */,
 				E707006E2B191F6400BE82DA /* Frameworks */,
 				E70700532B191DD000BE82DA /* Products */,
 			);
@@ -103,6 +163,7 @@
 			children = (
 				E707006D2B191F6400BE82DA /* WidgetExtension.appex */,
 				E77FEEA72B1D237F00AAB05B /* JKChat.iOS.Widget.Native.app */,
+				E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -110,6 +171,7 @@
 		E707006E2B191F6400BE82DA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E7D8531D2D3E9F290083F0CA /* ActivityKit.framework */,
 				E707006F2B191F6400BE82DA /* WidgetKit.framework */,
 				E70700712B191F6400BE82DA /* SwiftUI.framework */,
 			);
@@ -124,6 +186,7 @@
 				E707007A2B191F6400BE82DA /* AppIntent.swift */,
 				E707007C2B191F6500BE82DA /* Assets.xcassets */,
 				E707007E2B191F6500BE82DA /* Info.plist */,
+				E708E8A82CD129F9000BF71A /* GameActivityWidget.swift */,
 			);
 			path = WidgetExtension;
 			sourceTree = "<group>";
@@ -145,6 +208,16 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		E7D853252D3EA85E0083F0CA /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		E707006C2B191F6400BE82DA /* WidgetExtension */ = {
 			isa = PBXNativeTarget;
@@ -157,6 +230,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				E7F5C43F2D41D6A0000C95F4 /* PBXTargetDependency */,
 			);
 			name = WidgetExtension;
 			productName = WidgetExtension;
@@ -171,16 +245,41 @@
 				E77FEEA42B1D237F00AAB05B /* Frameworks */,
 				E77FEEA52B1D237F00AAB05B /* Resources */,
 				E7E49A832B2BBE6D003B157A /* Embed Foundation Extensions */,
+				E7D853362D3EA85E0083F0CA /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E7BC62DF2B2BC022000D112C /* PBXTargetDependency */,
+				E7D8532F2D3EA85E0083F0CA /* PBXTargetDependency */,
 			);
 			name = JKChat.iOS.Widget.Native;
 			productName = JKChat.iOS.Widget.Native;
 			productReference = E77FEEA72B1D237F00AAB05B /* JKChat.iOS.Widget.Native.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E7D853292D3EA85E0083F0CA /* WidgetShared */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7D853332D3EA85E0083F0CA /* Build configuration list for PBXNativeTarget "WidgetShared" */;
+			buildPhases = (
+				E7D853252D3EA85E0083F0CA /* Headers */,
+				E7D853262D3EA85E0083F0CA /* Sources */,
+				E7D853272D3EA85E0083F0CA /* Frameworks */,
+				E7D853282D3EA85E0083F0CA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E7D8532B2D3EA85E0083F0CA /* WidgetShared */,
+			);
+			name = WidgetShared;
+			packageProductDependencies = (
+			);
+			productName = WidgetShared;
+			productReference = E7D8532A2D3EA85E0083F0CA /* WidgetShared.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -190,13 +289,17 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					E707006C2B191F6400BE82DA = {
 						CreatedOnToolsVersion = 15.0.1;
 					};
 					E77FEEA62B1D237F00AAB05B = {
 						CreatedOnToolsVersion = 15.0.1;
+					};
+					E7D853292D3EA85E0083F0CA = {
+						CreatedOnToolsVersion = 16.0;
+						LastSwiftMigration = 1600;
 					};
 				};
 			};
@@ -215,6 +318,7 @@
 			targets = (
 				E77FEEA62B1D237F00AAB05B /* JKChat.iOS.Widget.Native */,
 				E707006C2B191F6400BE82DA /* WidgetExtension */,
+				E7D853292D3EA85E0083F0CA /* WidgetShared */,
 			);
 		};
 /* End PBXProject section */
@@ -238,6 +342,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E7D853282D3EA85E0083F0CA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -247,6 +358,7 @@
 			files = (
 				E707007B2B191F6400BE82DA /* AppIntent.swift in Sources */,
 				E70700752B191F6400BE82DA /* WidgetBundle.swift in Sources */,
+				E708E8A92CD129FA000BF71A /* GameActivityWidget.swift in Sources */,
 				E70700792B191F6400BE82DA /* Widget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,6 +373,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E7D853262D3EA85E0083F0CA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -268,6 +387,16 @@
 			isa = PBXTargetDependency;
 			target = E707006C2B191F6400BE82DA /* WidgetExtension */;
 			targetProxy = E7BC62DE2B2BC022000D112C /* PBXContainerItemProxy */;
+		};
+		E7D8532F2D3EA85E0083F0CA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E7D853292D3EA85E0083F0CA /* WidgetShared */;
+			targetProxy = E7D8532E2D3EA85E0083F0CA /* PBXContainerItemProxy */;
+		};
+		E7F5C43F2D41D6A0000C95F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E7D853292D3EA85E0083F0CA /* WidgetShared */;
+			targetProxy = E7F5C43E2D41D6A0000C95F4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -324,7 +453,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -347,7 +476,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -387,7 +516,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -413,13 +542,16 @@
 		E70700832B191F6500BE82DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphone*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -433,6 +565,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.3.2;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.JKChat.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -450,13 +583,16 @@
 		E70700842B191F6500BE82DA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_ENTITLEMENTS = WidgetExtension.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -470,6 +606,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.3.2;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.JKChat.Widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -487,14 +624,14 @@
 		E77FEEB92B1D238000AAB05B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_ENTITLEMENTS = JKChat.iOS.Widget.Native/JKChat.iOS.Widget.Native.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -510,6 +647,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.3.2;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.JKChat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -526,14 +664,14 @@
 		E77FEEBA2B1D238000AAB05B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_ENTITLEMENTS = JKChat.iOS.Widget.Native/JKChat.iOS.Widget.Native.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -549,6 +687,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.3.2;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.JKChat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -559,6 +698,113 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E7D853342D3EA85E0083F0CA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.WidgetShared;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_PREFIX = "";
+				XROS_DEPLOYMENT_TARGET = 1.3;
+			};
+			name = Debug;
+		};
+		E7D853352D3EA85E0083F0CA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = PGTE36R5G3;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = (
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.5;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				ONLY_ACTIVE_ARCH = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vlbor.WidgetShared;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_PREFIX = "";
+				XROS_DEPLOYMENT_TARGET = 1.3;
 			};
 			name = Release;
 		};
@@ -588,6 +834,15 @@
 			buildConfigurations = (
 				E77FEEB92B1D238000AAB05B /* Debug */,
 				E77FEEBA2B1D238000AAB05B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E7D853332D3EA85E0083F0CA /* Build configuration list for PBXNativeTarget "WidgetShared" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7D853342D3EA85E0083F0CA /* Debug */,
+				E7D853352D3EA85E0083F0CA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

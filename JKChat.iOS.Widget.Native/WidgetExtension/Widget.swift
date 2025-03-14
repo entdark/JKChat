@@ -159,7 +159,7 @@ func receiveUDP(connection: NWConnection) async throws -> String? {
      })
 }
 
-func convertToColourText(value: String) -> AttributedString {
+public func convertToColourText(value: String, systemColors: Bool = false) -> AttributedString {
     if value.count <= 0 {
         return AttributedString()
     }
@@ -188,22 +188,40 @@ func convertToColourText(value: String) -> AttributedString {
     }
     let attributedString = NSMutableAttributedString(string: cleanValue)
     for i in 0..<colorCodes.count {
-        attributedString.addAttribute(.foregroundColor, value: UIColor(gameColor(code: colorCodes[i])), range: NSRange(location: colorStarts[i], length: colorLengths[i]))
+        attributedString.addAttribute(.foregroundColor, value: UIColor(gameColor(code: colorCodes[i], systemColors: systemColors)), range: NSRange(location: colorStarts[i], length: colorLengths[i]))
     }
     return AttributedString(attributedString)
 }
 
-func gameColor(code: Int) -> Color {
-    return switch code {
-    case 0, 8: Color(red: 0, green: 0, blue: 0)
-    case 1, 9: Color(red: 1, green: 0, blue: 0)
-    case 2: Color(red: 0, green: 1, blue: 0)
-    case 3: Color(red: 1, green: 1, blue: 0)
-    case 4: Color(red: 0, green: 0, blue: 1)
-    case 5: Color(red: 0, green: 1, blue: 1)
-    case 6: Color(red: 1, green: 0, blue: 1)
-    case 7: Color(red: 1, green: 1, blue: 1)
-    default: Color(red: 1, green: 1, blue: 1)
+func gameColor(code: Int, systemColors: Bool = false) -> Color {
+    if systemColors {
+        return switch code {
+ //       case 0, 8: .black
+//black on black is bad: using darkGray as black
+        case 0, 8: Color(uiColor: UIColor.darkGray)
+        case 1, 9: .red
+        case 2: .green
+        case 3: .yellow
+        case 4: .blue
+        case 5: .cyan
+        case 6: .pink
+//        case 7: .white
+//white on white is bad: using lightGray as white
+        case 7: Color(uiColor: UIColor.lightGray)
+        default: Color(uiColor: UIColor.lightGray)
+        }
+    } else {
+        return switch code {
+        case 0, 8: Color(red: 0, green: 0, blue: 0)
+        case 1, 9: Color(red: 1, green: 0, blue: 0)
+        case 2: Color(red: 0, green: 1, blue: 0)
+        case 3: Color(red: 1, green: 1, blue: 0)
+        case 4: Color(red: 0, green: 0, blue: 1)
+        case 5: Color(red: 0, green: 1, blue: 1)
+        case 6: Color(red: 1, green: 0, blue: 1)
+        case 7: Color(red: 1, green: 1, blue: 1)
+        default: Color(red: 1, green: 1, blue: 1)
+        }
     }
 }
 
@@ -358,7 +376,7 @@ struct ServerMonitorWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: ServerMonitorWidget.kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             WidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(.fill, for: .widget)
                 .widgetURL(URL(string: "jkchat://widget?address="+entry.address))
         }
         .configurationDisplayName("Server monitor")
@@ -368,8 +386,8 @@ struct ServerMonitorWidget: Widget {
 }
 
 @available(iOS 17.0, *)
-#Preview(as: .systemMedium) {
+#Preview(as: .systemLarge) {
     ServerMonitorWidget()
 } timeline: {
-    ServerMonitorEntry(date: .now, configuration: ConfigurationAppIntent(), serverName: "Refresh2-PUGRefresh2-PUG", players: [ServerMonitorPlayer(name: "^3test ^3test^3test ^3test^3test ^3test^3test^3test ^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test")], maxPlayers: 32, mapName: "MPA/FFA 2", family: .systemMedium)
+    ServerMonitorEntry(date: .now, configuration: ConfigurationAppIntent(), serverName: "Refresh2-PUGRefresh2-PUG", players: [ServerMonitorPlayer(name: "^3test ^3test^3test ^3test^3test ^3test^3test^3test ^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^1test"), ServerMonitorPlayer(name: "^2test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^4test"), ServerMonitorPlayer(name: "^5test"), ServerMonitorPlayer(name: "^6test"), ServerMonitorPlayer(name: "^7test"), ServerMonitorPlayer(name: "^8test"), ServerMonitorPlayer(name: "^9test"), ServerMonitorPlayer(name: "^0test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test"), ServerMonitorPlayer(name: "^3test")], maxPlayers: 32, mapName: "MPA/FFA 2", family: .systemLarge)
 }

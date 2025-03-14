@@ -59,10 +59,14 @@
     <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.7" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalAppExtensions Include="$(MSBuildProjectDirectory)/../JKChat.iOS.Widget.Native">
+    <AdditionalAppExtensions Include="$(MSBuildProjectDirectory)\..\JKChat.iOS.Widget.Native">
       <Name>WidgetExtension</Name>
-      <BuildOutput Condition="!$(RuntimeIdentifier.Contains('simulator'))">build/$(Configuration)-iphoneos</BuildOutput>
-      <BuildOutput Condition="$(RuntimeIdentifier.Contains('simulator'))">build/$(Configuration)-iphonesimulator</BuildOutput>
+      <BuildOutput>build</BuildOutput>
     </AdditionalAppExtensions>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="WidgetShared">
+      <HintPath>..\JKChat.iOS.Widget.Native\Binding\WidgetShared\bin\WidgetShared\WidgetShared.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

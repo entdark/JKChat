@@ -42,7 +42,7 @@ namespace JKChat.iOS.Views.ServerList.Cells {
 			using var set = this.CreateBindingSet<ServerListViewCell, ServerListItemVM>();
 			set.Bind(ServerNameLabel).For(v => v.AttributedText).To(vm => vm.ServerName).WithConversion("ColourText");
 			set.Bind(MapNameLabel).For(v => v.Text).To(vm => vm.MapName);
-			set.Bind(PlayersLabel).For(v => v.Text).To("Format('{0} players', Players)");
+			set.Bind(PlayersLabel).For(v => v.Text).To("Format('{0}/{1} players', Players, MaxPlayers)");
 			set.Bind(GameLabel).For(v => v.AttributedText).To("ColourText(If(Modification, Format('{0} - {1}', GameName, Modification), GameName))");
 			set.Bind(FavouriteButton).For(v => v.Selected).To(vm => vm.IsFavourite);
 			set.Bind(StatusLabel).For(v => v.Text).To(vm => vm.Status);

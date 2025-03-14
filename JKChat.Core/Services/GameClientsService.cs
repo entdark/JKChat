@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 using JKChat.Core.Models;
+using JKChat.Core.ViewModels.ServerList.Items;
 
 namespace JKChat.Core.Services {
 	internal class GameClientsService : IGameClientsService {
-		private readonly Dictionary<JKClient.NetAddress, GameClient> clients = new(new JKClient.NetAddressComparer());
+		private readonly Dictionary<JKClient.NetAddress, GameClient> clients = new(new JKClient.NetAddress.Comparer());
 
-		public int ActiveClients => clients.Count(kv => kv.Value.Status != ConnectionStatus.Disconnected);
+		public IEnumerable<ServerListItemVM> ActiveServers => clients.Where(kv => kv.Value.Status != ConnectionStatus.Disconnected).Select(kv => new ServerListItemVM(kv.Value.ServerInfo));
 
 		public int UnreadMessages => clients.Sum(kv => kv.Value.UnreadMessages);
 

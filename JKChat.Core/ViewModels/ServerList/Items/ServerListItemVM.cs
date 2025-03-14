@@ -46,10 +46,16 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			set => SetProperty(ref mapName, value);
 		}
 
-		private string players;
-		public string Players {
+		private int players;
+		public int Players {
 			get => players;
 			set => SetProperty(ref players, value);
+		}
+
+		private int maxPlayers;
+		public int MaxPlayers {
+			get => maxPlayers;
+			set => SetProperty(ref maxPlayers, value);
 		}
 
 		private ConnectionStatus status;
@@ -114,7 +120,8 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			NeedPassword = serverInfo.NeedPassword;
 			ServerName = serverInfo.HostName;
 			MapName = serverInfo.MapName;
-			Players = $"{serverInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{serverInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
+			Players = serverInfo.Clients;
+			MaxPlayers = serverInfo.MaxClients;
 			Modification = serverInfo.GameName;
 			Ping = serverInfo.Ping.ToString();
 		}

@@ -7,8 +7,8 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     static var description = IntentDescription("Selects a server to monitor")
 
     // An example configurable parameter.
-    @Parameter(title: "Server")
-    var server: ServerEntity
+    @Parameter(title: "Server", default: nil)
+    var server: ServerEntity?
 }
 
 @available(iOS 17.0, *)
@@ -83,13 +83,14 @@ struct ServerEntityQuery: EntityQuery {
     func favouritesServers(empty: Bool = false) -> [ServerEntity] {
         var entities: [ServerEntity] = [ServerEntity.empty]
         guard let userDefaults = UserDefaults(suiteName: "group.com.vlbor.JKChat") else {
+            print("favouritesServers: no shared settings")
             return entities
         }
-//        print(userDefaults.object(forKey: "FavouritesServers") != nil)
         guard let favouritesServers = userDefaults.string(forKey: "FavouritesServers") else {
+            print("favouritesServers: no FavouritesServers key")
             return entities
         }
-        print(favouritesServers)
+        print("favouritesServers: \(favouritesServers)")
         entities = ServerEntity.arrayFromString(json: favouritesServers)
         if entities.isEmpty {
             entities = [ServerEntity.empty]

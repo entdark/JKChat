@@ -38,6 +38,7 @@ namespace JKChat.iOS {
 		private NSUrl delayedOpenUrl;
 		private int lastActiveCount, lastMessages;
 		private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken, widgetFavouritesMessageToken;
+		private IDisposable liveActivityDisconnectObserver = null;
 
 		private CLAuthorizationStatus AuthorizationStatus {
 			get {
@@ -56,7 +57,13 @@ namespace JKChat.iOS {
 		private bool isActive;
 		public bool IsActive {
 			get => isActive;
-			set => isActive = value;
+			set {
+				isActive = value;
+				if (isActive && delayedOpenUrl != null) {
+					OpenUrl(delayedOpenUrl);
+					delayedOpenUrl = null;
+				}
+			}
 		}
 
 		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions) {
@@ -95,6 +102,30 @@ namespace JKChat.iOS {
 			SetCommonFavourites();
 			OpenUrl(delayedOpenUrl);
 			delayedOpenUrl = null;
+			var userDefaults = new NSUserDefaults("group.com.vlbor.JKChat", NSUserDefaultsType.SuiteName);
+			userDefaults.SetBool(false, "LiveActivityDisconnect");
+			//dirty way, but the observer doesn't work for some reason
+			Task.Run(async () => {
+				var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
+				while (true) {
+					await Task.Delay(1000);
+					bool active = gameClientsService.ActiveServers.Any();
+					if (active) {
+						var value = userDefaults.ValueForKey(new("LiveActivityDisconnect"));
+						if (value is NSNumber { BoolValue: true }) {
+							gameClientsService.DisconnectFromAll();
+							userDefaults.SetBool(false, "LiveActivityDisconnect");
+						}
+					}
+				}
+			});
+/*			var liveActivityDisconnectObserver = userDefaults.AddObserver("LiveActivityDisconnect", NSKeyValueObservingOptions.OldNew, change => {
+				Debug.WriteLine("w00t");
+				if (change.NewValue is NSNumber { BoolValue: true }) {
+					Mvx.IoCProvider.Resolve<IGameClientsService>().DisconnectFromAll();
+					userDefaults.SetBool(false, "LiveActivityDisconnect");
+				}
+			});*/
 			return finishedLaunching;
 		}
 
@@ -109,7 +140,7 @@ namespace JKChat.iOS {
 		public override void DidEnterBackground(UIApplication application) {
 			ExecuteOnBackground();
 			StartLocationUpdate();
-			CreateNotification(false);
+			CreateLiveActivity();
 			base.DidEnterBackground(application);
 			// Use this method to release shared resources, save user data, invalidate timers and store the application state.
 			// If your application supports background execution this method is called instead of WillTerminate when the user quits.
@@ -119,7 +150,7 @@ namespace JKChat.iOS {
 			base.WillEnterForeground(application);
 			IsActive = true;
 			StopLocationUpdate();
-			CreateNotification();
+			CreateLiveActivity();
 			// Called as part of the transition from background to active state.
 			// Here you can undo many of the changes made on entering the background.
 		}
@@ -140,10 +171,22 @@ namespace JKChat.iOS {
 				delayedOpenUrl = url;
 				return;
 			}
+			if (url == null || url.Scheme != "jkchat")
+				return;
+			var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
+			if (url.Host == "liveactivity") {
+				var activeServers = Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.ToArray();
+				if (activeServers.Length == 1) {
+					var address = activeServers[0].Address;
+					var parameters = navigationService.MakeNavigationParameters($"jkchat://chat?address={address}", address);
+					navigationService.Navigate(parameters);
+				}
+				return;
+			}
 			var widgetLink = AppSettings.WidgetLink;
 			if (widgetLink == WidgetLink.Application)
 				return;
-			if (url == null || url.Scheme != "jkchat" || url.Host != "widget")
+			if (url.Host != "widget")
 				return;
 			var queryItems = new NSUrlComponents(url, true).QueryItems;
 			if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address }) || address.Length == 0)
@@ -207,7 +250,9 @@ namespace JKChat.iOS {
 			}
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 			gameClientsService.ShutdownAll();
+			WidgetShared.LiveActivityShared.StopLiveActivity(() => {});
 			IsActive = false;
+			liveActivityDisconnectObserver?.Dispose();
 			base.WillTerminate(application);
 			// Called when the application is about to terminate. Save data, if needed. See also DidEnterBackground.
 		}
@@ -218,6 +263,9 @@ namespace JKChat.iOS {
 				return;
 			}
 			if (DeviceInfo.IsRunningOnMacOS) {
+				return;
+			}
+			if (!Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.Any()) {
 				return;
 			}
 			var taskID = UIApplication.SharedApplication.BeginBackgroundTask(() => {
@@ -262,52 +310,29 @@ namespace JKChat.iOS {
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
 			FreeMemory();
-			CreateNotification();
+			CreateLiveActivity();
 		}
 
-		private void CreateNotification(bool respectCount = true) {
-			if (!UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && IsActive) {
-//				return;
-			}
-			respectCount = !IsActive;
+		private DateTime nextWidgetsUpdateTime = default;
+		private void CreateLiveActivity() {
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
-			int count = gameClientsService.ActiveClients;
+			var activeServers = gameClientsService.ActiveServers.ToArray();
 			InvokeOnMainThread(() => {
-				int messages = gameClientsService.UnreadMessages;
-				if (count > 0) {
-					if (respectCount) {
-						if (count != lastActiveCount) {
-							lastActiveCount = count;
-						}/* else if (respectCount) {
-							return;
-						}*/ else if (messages != lastMessages) {
-							lastMessages = messages;
-							if ((messages % 50) != 0) {
-								return;
-							}
-						} else {
-							return;
-						}
-					} else {
-						lastActiveCount = count;
+				if (activeServers.Length > 0) {
+					var now = DateTime.Now;
+					if (nextWidgetsUpdateTime < now) {
+						WidgetShared.LiveActivityShared.RefreshWidgetsOfKind(null);
+						nextWidgetsUpdateTime = now.AddSeconds(30.0);
 					}
-					lastMessages = messages;
-					var content = new UNMutableNotificationContent() {
-						Title = $"You are connected to {count} server" + (count > 1 ? "s" : string.Empty)
-					};
-					if (messages > 0) {
-						content.Body = $"You have {messages} unread message" + (messages > 1 ? "s" : string.Empty);
-					}
-					var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
-					var request = UNNotificationRequest.FromIdentifier(ServerInfoNotificationRequestId, content, trigger);
-					UNUserNotificationCenter.Current.AddNotificationRequest(request, (error) => {
-						if (error != null) {
-							Debug.WriteLine(error);
-						}
-					});
+					WidgetShared.LiveActivityShared.ShowLiveActivityWithServers(
+						activeServers.Select(s => s.ServerName).ToArray(),
+						(uint)gameClientsService.UnreadMessages,
+						(uint)activeServers[0].Players,
+						(uint)activeServers[0].MaxPlayers,
+						gameClientsService.DisconnectFromAll, () => {}
+					);
 				} else {
-					lastActiveCount = count;
-					UNUserNotificationCenter.Current.RemoveAllDeliveredNotifications();
+					WidgetShared.LiveActivityShared.StopLiveActivity(() => {});
 				}
 			});
 		}
@@ -316,9 +341,10 @@ namespace JKChat.iOS {
 			SetCommonFavourites();
 		}
 
+		private readonly TasksQueue favouritesQueue = new();
 		private void SetCommonFavourites() {
-			Task.Run(add);
-			async Task add() {
+			favouritesQueue.Enqueue(add);
+			static async Task add() {
 				var servers = await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers();
 				var jsonString = servers.Select(s => new {
 					address = s.Address.Split(':')[0],
@@ -366,7 +392,7 @@ namespace JKChat.iOS {
 				return;
 			}
 			RequestLocationAuthorization(locationManager, this.AuthorizationStatus);
-			if (Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveClients > 0) {
+			if (Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.Any()) {
 				locationManager?.StartUpdatingLocation();
 			}
 		}
@@ -407,5 +433,3 @@ namespace JKChat.iOS {
 		}
 	}
 }
-
-
