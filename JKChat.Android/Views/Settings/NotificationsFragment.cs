@@ -1,9 +1,8 @@
 ﻿using System;
+
 using Android;
 using Android.Content;
 using Android.Content.PM;
-using Android.Graphics;
-using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Views;
 
@@ -62,7 +61,7 @@ namespace JKChat.Android.Views.Settings {
 				recyclerView.Adapter = new TableGroupedRecyclerViewAdapter((IMvxAndroidBindingContext)BindingContext);
 			if (recyclerView.ItemTemplateSelector is not TableGroupedItemTemplateSelector)
 				recyclerView.ItemTemplateSelector = new TableGroupedItemTemplateSelector(true);
-			recyclerView.AddItemDecoration(new FadingMaterialDividerItemDecoration(Context, LinearLayoutManager.Vertical));
+			recyclerView.AddItemDecoration(new MaterialDividerItemDecoration(Context, LinearLayoutManager.Vertical));
 
 			using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.NotificationsEnabled).To(vm => vm.NotificationsEnabled);
@@ -96,40 +95,6 @@ namespace JKChat.Android.Views.Settings {
 				});
 			} else if (isTiramisuOrHigher) {
 				notificationsPermissionActivityResultLauncher.Launch(new Java.Lang.String(Manifest.Permission.PostNotifications));
-			}
-		}
-
-		private class FadingMaterialDividerItemDecoration : MaterialDividerItemDecoration {
-			private readonly Drawable dividerDrawable;
-			private RecyclerView recyclerView;
-
-			public FadingMaterialDividerItemDecoration(Context context, int orientation) : base(context, orientation) {
-				try {
-					var field = Class.Superclass.GetDeclaredField("dividerDrawable");
-					field.Accessible = true;
-					dividerDrawable = field.Get(this) as Drawable;
-				} catch (Exception exception) {
-					System.Diagnostics.Debug.WriteLine(exception);
-				}
-			}
-
-			public override void OnDraw(Canvas canvas, RecyclerView parent, RecyclerView.State state) {
-				recyclerView = parent;
-				base.OnDraw(canvas, parent, state);
-				recyclerView = null;
-				dividerDrawable?.SetAlpha(255);
-			}
-
-			protected override bool ShouldDrawDivider(int position, RecyclerView.Adapter adapter) {
-				bool shouldDraw = base.ShouldDrawDivider(position, adapter);
-				if (shouldDraw && recyclerView != null && dividerDrawable != null) {
-					var viewHolder = recyclerView?.FindViewHolderForAdapterPosition(position);
-					var view = viewHolder?.ItemView;
-					if (view != null) {
-						dividerDrawable.Alpha = (int)(view.Alpha * 255);
-					}
-				}
-				return shouldDraw;
 			}
 		}
 	}
