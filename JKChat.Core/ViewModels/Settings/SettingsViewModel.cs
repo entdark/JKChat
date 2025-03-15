@@ -137,13 +137,19 @@ namespace JKChat.Core.ViewModels.Settings {
 		}
 
 		private async Task WidgetLinkExecute(TableValueItemVM item) {
-			var dialogList = new DialogListViewModel(Enum.GetValues<WidgetLink>().Select(widgetLink => {
-				return new DialogItemVM() {
-					Id = widgetLink,
-					Name = widgetLink.ToDisplayString(),
-					IsSelected = widgetLink == AppSettings.WidgetLink
-				};
-			}), DialogSelectionType.SingleSelection);
+			var dialogList = new DialogListViewModel(Enum.GetValues<WidgetLink>()
+				.OrderBy(widgetLink => widgetLink switch {
+					WidgetLink.ServerInfo => 0,
+					WidgetLink.Chat => 1,
+					WidgetLink.ChatIfConnected => 2,
+					_ => 3
+				}).Select(widgetLink => {
+					return new DialogItemVM() {
+						Id = widgetLink,
+						Name = widgetLink.ToDisplayString(),
+						IsSelected = widgetLink == AppSettings.WidgetLink
+					};
+				}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Widget Navigation",
 				CancelText = "Cancel",

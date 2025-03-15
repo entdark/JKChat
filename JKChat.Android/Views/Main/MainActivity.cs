@@ -112,15 +112,17 @@ namespace JKChat.Android.Views.Main {
 						navigationService.Navigate(parameters);
 					}
 				} else if (action == ServerMonitorAppWidget.WidgetLinkAction && !isEmpty
-					&& extras.GetString(ServerMonitorAppWidget.ServerAddressExtraKey, null) is string serverAddress) {
+					&& extras.GetString(ServerMonitorAppWidget.ServerAddressExtraKey, null) is string address) {
 					var widgetLink = AppSettings.WidgetLink;
 					if (widgetLink != WidgetLink.Application) {
-						string path = widgetLink switch {
-							WidgetLink.ServerInfo => "info",
-							WidgetLink.Chat => "chat",
-							_ => string.Empty
-						};
-						var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={serverAddress}", serverAddress);
+						var connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address) == ConnectionStatus.Connected;
+						string path = string.Empty;
+						if (widgetLink == WidgetLink.Chat || (widgetLink == WidgetLink.ChatIfConnected && connected)) {
+							path = "chat";
+						} else if (widgetLink == WidgetLink.ServerInfo || widgetLink == WidgetLink.ChatIfConnected) {
+							path = "info";
+						}
+						var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address}", address);
 						navigationService.Navigate(parameters);
 					}
 				}

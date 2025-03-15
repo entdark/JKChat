@@ -31,14 +31,15 @@ namespace JKChat.Android.Widgets {
 	[IntentFilter(new string[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
 	[MetaData("android.appwidget.provider", Resource = "@xml/server_monitor_widget_provider")]
 	public class ServerMonitorAppWidget : AppWidgetProvider {
-		public const string WidgetLinkAction = nameof(ServerMonitorAppWidget)+nameof(WidgetLinkAction);
-		public const string RefreshAction = nameof(ServerMonitorAppWidget)+nameof(RefreshAction);
-		public const string PlayersAction = nameof(ServerMonitorAppWidget)+nameof(PlayersAction);
-		public const string UpdateAction = nameof(ServerMonitorAppWidget)+nameof(UpdateAction);
-		public const string AddAction = nameof(ServerMonitorAppWidget)+nameof(AddAction);
-		public const string ServerAddressExtraKey = nameof(ServerMonitorAppWidget)+nameof(ServerAddressExtraKey);
-		public const string WidgetIdExtraKey = nameof(ServerMonitorAppWidget)+nameof(WidgetIdExtraKey);
-		public const string PlayersExtraKey = nameof(ServerMonitorAppWidget)+nameof(PlayersExtraKey);
+		private const string Prefix = nameof(ServerMonitorAppWidget);
+		public const string WidgetLinkAction = Prefix+nameof(WidgetLinkAction);
+		public const string RefreshAction = Prefix+nameof(RefreshAction);
+		public const string PlayersAction = Prefix+nameof(PlayersAction);
+		public const string UpdateAction = Prefix+nameof(UpdateAction);
+		public const string AddAction = Prefix+nameof(AddAction);
+		public const string ServerAddressExtraKey = Prefix+nameof(ServerAddressExtraKey);
+		public const string WidgetIdExtraKey = Prefix+nameof(WidgetIdExtraKey);
+		public const string PlayersExtraKey = Prefix+nameof(PlayersExtraKey);
 
 		private readonly TasksQueue tasksQueue = new();
 

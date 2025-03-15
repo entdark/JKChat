@@ -97,7 +97,7 @@ namespace JKChat.Core {
 			set => SetSerialized(value);
 		}
 		public static WidgetLink WidgetLink {
-			get => (WidgetLink)Get((int)WidgetLink.ServerInfo);
+			get => (WidgetLink)Get((int)WidgetLink.ChatIfConnected);
 			set => Set((int)value);
 		}
 

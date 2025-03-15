@@ -189,16 +189,17 @@ namespace JKChat.iOS {
 			if (url.Host != "widget")
 				return;
 			var queryItems = new NSUrlComponents(url, true).QueryItems;
-			if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address }) || address.Length == 0)
+			if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address2 }) || address2.Length == 0)
 				return;
-			string path = widgetLink switch {
-				WidgetLink.ServerInfo => "info",
-				WidgetLink.Chat => "chat",
-				_ => string.Empty
-			};
-			var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
-			var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address}", address);
-			navigationService.Navigate(parameters);
+			var connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address2) == ConnectionStatus.Connected;
+			string path = string.Empty;
+			if (widgetLink == WidgetLink.Chat || (widgetLink == WidgetLink.ChatIfConnected && connected)) {
+				path = "chat";
+			} else if (widgetLink == WidgetLink.ServerInfo || widgetLink == WidgetLink.ChatIfConnected) {
+				path = "info";
+			}
+			var parameters2 = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address2}", address2);
+			navigationService.Navigate(parameters2);
 		}
 
 		[Export("userNotificationCenter:willPresentNotification:withCompletionHandler:")]
