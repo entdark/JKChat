@@ -94,8 +94,16 @@ namespace JKChat.Core.ViewModels.ServerList {
 					&& message.Status.Value != Models.ConnectionStatus.Disconnected
 					&& item.Status == Models.ConnectionStatus.Disconnected) {
 					MoveItem(item, 0);
+					if (!Items.Contains(item)) {
+						Items.Insert(0, item);
+					}
 				}
 				item.Set(message.ServerInfo, message.Status);
+			} else if (message.Status.HasValue && message.Status.Value != Models.ConnectionStatus.Disconnected) {
+				var server = new ServerListItemVM(message.ServerInfo) {
+					Status = message.Status.Value
+				};
+				InsertItem(0, server);
 			}
 		}
 
@@ -171,7 +179,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 					return;
 				}
 				var server = new ServerListItemVM(serverInfo);
-				InsertItem(0, server);
+				await InvokeOnMainThreadAsync(() => {
+					InsertItem(0, server);
+				});
 				IsLoading = false;
 				await DialogService.ShowAsync(new JKDialogConfig() {
 					Title = "Server Added",
@@ -187,6 +197,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private async Task RefreshExecute() {
 			if (IsLoading) {
+				IsRefreshing = false;
 				return;
 			}
 			IsRefreshing = true;
@@ -250,29 +261,27 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private async Task LoadServerList(Func<Task<IEnumerable<ServerInfo>>> loadingFunc) {
 			try {
-				var addressesWithStatuses = Enum.GetValues(typeof(Models.ConnectionStatus))
-					.Cast<Models.ConnectionStatus>()
-					.SelectMany(status => (gameClientsService.AddressesWithStatus(status) ?? Enumerable.Empty<NetAddress>()).Select(address => new { Status = status, Address = address }))
-					.Where(addressWithStatus => addressWithStatus != null)
-					.ToDictionary(addressWithStatus => addressWithStatus.Address, addressWithStatus => addressWithStatus.Status);
+				var serverInfosWithStatuses = Enum.GetValues<Models.ConnectionStatus>()
+					.SelectMany(status => (gameClientsService.ServerInfosWithStatuses(status) ?? Enumerable.Empty<ServerInfo>()).Select(serverInfo => new { Status = status, ServerInfo = serverInfo }))
+					.Where(serverInfoWithStatus => serverInfoWithStatus != null)
+					.ToDictionary(serverInfoWithStatus => serverInfoWithStatus.ServerInfo, serverInfoWithStatus => serverInfoWithStatus.Status);
 				IEnumerable<ServerListItemVM> newItems = null;
-				var recentServers = await cacheService.LoadRecentServers();
+				var recentServers = (await cacheService.LoadRecentServers()).ToArray();
 				var servers = await loadingFunc();
-				bool updateRecentServers = false;
 				if (!servers.IsNullOrEmpty()) {
 					var serverItems = recentServers
-						.ReverseWithUpdate(servers, () => updateRecentServers = true)
+						.ReverseWithUpdate(servers, serverInfosWithStatuses)
 						.Union(servers
 							.Where(server => server.Ping != 0)
 							.OrderByDescending(server => server.Clients)
 							.Select(server => new ServerListItemVM(server) {
-								Status = addressesWithStatuses.TryGetValue(server.Address, out var status) ? status : Models.ConnectionStatus.Disconnected
+								Status = serverInfosWithStatuses.TryGetValue(server, out var status) ? status : Models.ConnectionStatus.Disconnected
 							})
-						, new ServerListItemVMComparer());
+						, new ServerListItemVM.Comparer());
 					newItems = serverItems;
-				} else if (recentServers.Any()) {
+				} else if (recentServers.Length > 0) {
 					newItems = recentServers
-						.UpdateStatuses(addressesWithStatuses)
+						.UpdateStatuses(serverInfosWithStatuses)
 						.Reverse();
 				}
 				if (newItems != null) {
@@ -280,14 +289,16 @@ namespace JKChat.Core.ViewModels.ServerList {
 					var favouriteServers = await cacheService.LoadFavouriteServers();
 					newItems = newItems
 						.Except(reportedServers)
-						.UpdateFavourites(favouriteServers)
-						.ApplyFilter(filter, SearchText);
-					SetItems(newItems);
-					if (updateRecentServers) {
-						await cacheService.SaveRecentServers(recentServers);
-					}
-					if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName)))
-						AppSettings.Filter = filter;
+						.UpdateFavourites(favouriteServers);
+					ServerListItemVM []updatedCachedServers = null;
+					await InvokeOnMainThreadAsync(() => {
+						SetItems(newItems);
+						updatedCachedServers = this.items.Where(item => item.IsFavourite || recentServers.Any(recentServer => recentServer == item)).ToArray();
+						if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName))) {
+							AppSettings.Filter = filter;
+						}
+					});
+					await cacheService.UpdateServers(updatedCachedServers ?? Array.Empty<ServerListItemVM>());
 				}
 			} catch (Exception exception) {
 				Helpers.Common.ExceptionCallback(exception);
@@ -297,7 +308,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private void SetItems(IEnumerable<ServerListItemVM> items) {
 			lock (this.items) lock (this.Items) {
 				this.items.ReplaceWith(items);
-				this.Items.ReplaceWith(this.items);
+				this.Items.ReplaceWith(this.items.ApplyFilter(filter, SearchText));
 			}
 		}
 
@@ -343,36 +354,40 @@ namespace JKChat.Core.ViewModels.ServerList {
 	}
 
 	internal static class ServerListViewModelExtensions {
-		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, Action infoUpdatedCallback) {
-			int count = servers.Count();
-			for (int i = count-1; i >= 0; i--) {
-				var server = servers.ElementAt(i);
-				var updatedRecentServerInfo = serverInfos.FirstOrDefault(serverInfo => serverInfo == server.ServerInfo);
-				if (updatedRecentServerInfo != null) {
-					infoUpdatedCallback?.Invoke();
-					server.Set(updatedRecentServerInfo);
+		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatuses) {
+			var serversArray = servers is ServerListItemVM []array ? array : servers.ToArray();
+			for (int i = serversArray.Length-1; i >= 0; i--) {
+				var server = serversArray[i];
+				var serverInfoAndStatus = serverInfosWithStatuses.FirstOrDefault(kv => kv.Key == server.ServerInfo);
+				if (serverInfoAndStatus.Key is { } serverInfo && serverInfoAndStatus.Value != Models.ConnectionStatus.Disconnected) {
+					server.Set(serverInfo, serverInfoAndStatus.Value);
+				} else {
+					var updatedRecentServerInfo = serverInfos.FirstOrDefault(serverInfo => serverInfo.Ping != 0 && serverInfo == server.ServerInfo);
+					if (updatedRecentServerInfo != null) {
+						server.Set(updatedRecentServerInfo);
+					}
 				}
 				yield return server;
 			}
 		}
 
-		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<NetAddress, Models.ConnectionStatus> addressesWithStatuses) {
+		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatuses) {
 			foreach (var server in servers) {
-				server.Status = addressesWithStatuses.TryGetValue(server.ServerInfo.Address, out var status) ? status : default;
+				server.Status = serverInfosWithStatuses.TryGetValue(server.ServerInfo, out var status) ? status : default;
 				yield return server;
 			}
 		}
 
 		public static IEnumerable<ServerListItemVM> UpdateFavourites(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerListItemVM> favouriteServers) {
 			foreach (var server in servers) {
-				bool isFavourite = favouriteServers.Any(favouriteItem => favouriteItem == server);
-				server.SetFavourite(isFavourite);
+				var updatedFavouriteItem = favouriteServers.FirstOrDefault(favouriteItem => favouriteItem == server);
+				server.SetFavourite(updatedFavouriteItem != null);
 				yield return server;
 			}
 		}
 
 		public static IEnumerable<ServerListItemVM> ApplyFilter(this IEnumerable<ServerListItemVM> servers, Filter filter, string searchText) {
-			var filteredItems = filter.Apply(servers);
+			var filteredItems = filter.Apply(servers, item => item.Status != Models.ConnectionStatus.Disconnected);
 			if (!string.IsNullOrEmpty(searchText)) {
 				filteredItems = filteredItems
 					.Where(item =>

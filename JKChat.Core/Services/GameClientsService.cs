@@ -13,6 +13,17 @@ namespace JKChat.Core.Services {
 
 		public int UnreadMessages => clients.Sum(kv => kv.Value.UnreadMessages);
 
+		public ConnectionStatus? GetStatus(JKClient.ServerInfo serverInfo) {
+			return GetStatus(serverInfo?.Address);
+		}
+		public ConnectionStatus? GetStatus(JKClient.NetAddress address) {
+			var client = GetClient(address);
+			return client?.Status;
+		}
+		public ConnectionStatus? GetStatus(string address) {
+			return GetStatus(JKClient.NetAddress.FromString(address));
+		}
+
 		public GameClient GetClient(JKClient.ServerInfo serverInfo, bool startNew = false) {
 			var address = serverInfo.Address;
 			var client = GetClient(address);
@@ -27,7 +38,7 @@ namespace JKChat.Core.Services {
 			return client;
 		}
 
-		public IEnumerable<JKClient.NetAddress> AddressesWithStatus(ConnectionStatus status, bool without = false) {
+		public IEnumerable<JKClient.ServerInfo> ServerInfosWithStatuses(ConnectionStatus status, bool without = false) {
 			if (clients.Count <= 0) {
 				return null;
 			}
@@ -37,7 +48,7 @@ namespace JKChat.Core.Services {
 			} else {
 				condition = (s) => s != status;
 			}
-			return clients.Where(kv => condition(kv.Value.Status)).Select(kv => kv.Key);
+			return clients.Where(kv => condition(kv.Value.Status)).Select(kv => kv.Value.ServerInfo);
 		}
 
 		public void DisconnectFromAll() {

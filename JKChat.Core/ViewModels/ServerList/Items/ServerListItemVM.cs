@@ -205,14 +205,14 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 				return false;
 			}
 		}
-	}
 
-	public sealed class ServerListItemVMComparer : EqualityComparer<ServerListItemVM> {
-		public override bool Equals(ServerListItemVM x, ServerListItemVM y) {
-			return x?.ServerInfo == y?.ServerInfo;
-		}
-		public override int GetHashCode(ServerListItemVM obj) {
-			return obj?.ServerInfo.GetHashCode() ?? 0;
+		public sealed class Comparer : EqualityComparer<ServerListItemVM> {
+			public override bool Equals(ServerListItemVM x, ServerListItemVM y) {
+				return x?.ServerInfo == y?.ServerInfo;
+			}
+			public override int GetHashCode(ServerListItemVM obj) {
+				return obj?.ServerInfo.GetHashCode() ?? 0;
+			}
 		}
 	}
 }

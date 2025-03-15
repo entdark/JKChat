@@ -102,8 +102,10 @@ namespace JKChat.Core.Models {
 			}
 		}
 
-		public IEnumerable<ServerListItemVM> Apply(IEnumerable<ServerListItemVM> items) {
+		public IEnumerable<ServerListItemVM> Apply(IEnumerable<ServerListItemVM> items, Func<ServerListItemVM, bool> exceptionPredicate = null) {
 			return IsReset ? items : items.Where(item => {
+				if (exceptionPredicate?.Invoke(item) ?? false)
+					return true;
 				var serverInfo = item.ServerInfo;
 				if (!ShowFull && serverInfo.Clients == serverInfo.MaxClients)
 					return false;

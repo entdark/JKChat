@@ -34,19 +34,19 @@ namespace JKChat.Core.Services {
 
 		public async Task<IEnumerable<ServerInfo>> GetNewList() {
 			var getNewListTasks = serverBrowsers.Select(s => s.GetNewList());
-			this.servers = (await Task.WhenAll(getNewListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
+			this.servers = (await Task.WhenAll(getNewListTasks)).SelectMany(t => t).Distinct(new ServerInfo.Comparer());
 			return this.servers;
 		}
 
 		public async Task<IEnumerable<ServerInfo>> RefreshList() {
 			var refreshListTasks = serverBrowsers.Select(s => s.RefreshList());
-			this.servers = (await Task.WhenAll(refreshListTasks)).SelectMany(t => t).Distinct(new ServerInfoComparer());
+			this.servers = (await Task.WhenAll(refreshListTasks)).SelectMany(t => t).Distinct(new ServerInfo.Comparer());
 			return this.servers;
 		}
 
 		public async Task<IEnumerable<ServerInfo>> RefreshList(IEnumerable<ServerInfo> serverInfos) {
 			var getServerInfoTasks = serverInfos.Select(GetServerInfo);
-			var servers = (await Task.WhenAll(getServerInfoTasks)).Where(s => s != null).Distinct(new ServerInfoComparer());
+			var servers = (await Task.WhenAll(getServerInfoTasks)).Where(s => s != null).Distinct(new ServerInfo.Comparer());
 			return servers;
 		}
 

@@ -9,7 +9,7 @@ namespace JKChat.Core.ViewModels.Base {
 
 		public BaseServerViewModel() {
 			serverInfoMessageToken = Messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
-			favouriteMessageToken = Messenger.Subscribe<FavouriteMessage>(OnFavouriteMessage);
+			favouriteMessageToken = Messenger.SubscribeOnMainThread<FavouriteMessage>(OnFavouriteMessage);
 		}
 
 		protected virtual void OnServerInfoMessage(ServerInfoMessage message) {}
@@ -19,7 +19,7 @@ namespace JKChat.Core.ViewModels.Base {
 		public override void ViewCreated() {
 			base.ViewCreated();
 			serverInfoMessageToken ??= Messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
-			favouriteMessageToken ??= Messenger.Subscribe<FavouriteMessage>(OnFavouriteMessage);
+			favouriteMessageToken ??= Messenger.SubscribeOnMainThread<FavouriteMessage>(OnFavouriteMessage);
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {
