@@ -16,5 +16,17 @@
         android:ellipsize="end"
         android:lines="1"
         app:MvxBind="TextFormatted ColourText(Title)"/>
-    <include layout="@layout/connection_status"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <include layout="@layout/connection_status"/>
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/OnSurfaceText.LabelLarge"
+            tools:text=", 2/32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:MvxBind="Text Format(', {0}', Players); Visibility Visibility(Players)"/>
+    </LinearLayout>
 </LinearLayout>

@@ -296,7 +296,7 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(ChatTypeStackView).For("Visibility").To(vm => vm.SelectingChatType).WithConversion("Visibility");
 			set.Bind(this).For(v => v.SelectingChatType).To(vm => vm.SelectingChatType);
 			set.Bind(titleLabel).For(v => v.AttributedText).To(vm => vm.Title).WithConversion("ColourText");
-			set.Bind(statusLabel).For(v => v.Text).To(vm => vm.Status);
+			set.Bind(statusLabel).For(v => v.Text).To("If(Players, Format('{0}, {1}', Status, Players), Status)");
 			set.Bind(statusLabel).For(v => v.TextColor).To(vm => vm.Status).WithDictionaryConversion(new Dictionary<ConnectionStatus, UIColor>() {
 				[ConnectionStatus.Connected] = UIColor.Label
 			}, UIColor.SecondaryLabel);

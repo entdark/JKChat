@@ -68,6 +68,12 @@ namespace JKChat.Core.ViewModels.Chat {
 			});
 		}
 
+		private string players;
+		public string Players {
+			get => players;
+			set => SetProperty(ref players, value);
+		}
+
 		private string message;
 		public string Message {
 			get => message;
@@ -122,6 +128,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		public ChatViewModel(ICacheService cacheService, IGameClientsService gameClientsService) {
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
+
 			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
 			CopyCommand = new MvxAsyncCommand<ChatItemVM>(CopyExecute);
 			SendMessageCommand = new MvxAsyncCommand(SendMessageExecute, SendMessageCanExecute);
@@ -150,6 +157,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					Status = message.Status.Value;
 				}
 				Title = message.ServerInfo.HostName;
+				Players = $"{message.ServerInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{message.ServerInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
 /*				if (gameClient.ViewModel == null && Status == ConnectionStatus.Disconnected) {
 					Task.Run(ShowDisconnected);
 				}*/
