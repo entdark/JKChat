@@ -95,4 +95,19 @@ namespace JKChat.Core.Helpers {
 			return GameTypes.Count(ver => gameType.HasField(ver));
 		}
 	}
+	internal static class ClientInfoExtensions {
+		public static long CompareTo(this ClientInfo ci1, ref ClientInfo ci2) {
+			return GetComparerKey(ci1) - GetComparerKey(ci2);
+		}
+		public static long GetComparerKey(this ClientInfo? ci) {
+			long score = ci.HasValue ? ci.Value.Score : 0;
+			var team = ci.HasValue ? ci.Value.Team : JKClient.Team.Spectator;
+			return score + team switch {
+				JKClient.Team.Red => (long)int.MaxValue << 2,
+				JKClient.Team.Blue => (long)int.MaxValue << 1,
+				JKClient.Team.Free => int.MaxValue << 0,
+				_ => 0
+			};
+		}
+	}
 }

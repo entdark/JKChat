@@ -14,15 +14,15 @@
 		<item name="android:tint">?attr/colorOnSurfaceVariant</item>
 	</style>
 	<style name="ToolbarMenuListItem" parent="@style/Widget.Material3.PopupMenu.Overflow">
-        <item name="android:textColor">?attr/colorOnSurface</item>
-    </style>
+		<item name="android:textColor">?attr/colorOnSurface</item>
+	</style>
 	<style name="Widget.Material3.Button.IconButton.Fixed" parent="@style/Widget.Material3.Button.IconButton">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.IconButton.Fixed</item>
-    </style>
+		<item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.IconButton.Fixed</item>
+	</style>
 	<style name="ThemeOverlay.Material3.Button.IconButton.Fixed" parent="ThemeOverlay.Material3.Button.TextButton">
 		<item name="colorOnContainer">?attr/colorOnSurfaceVariant</item>
 	</style>
-	
+
 	<style name="OnSurfaceText">
 		<item name="android:textColor">?attr/colorOnSurface</item>
 	</style>

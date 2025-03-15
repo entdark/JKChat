@@ -13,7 +13,9 @@
         android:paddingLeft="16dp"
         android:paddingRight="24dp"
         android:gravity="center_vertical"
-        android:background="?android:attr/colorBackground">
+        android:background="?android:attr/colorBackground"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
+        app:paddingRightFitsWindowInsets="true">
         <com.google.android.material.textview.MaterialTextView
             style="@style/OnSurfaceText.LabelMedium"
             android:text="Player"
@@ -39,6 +41,6 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         app:paddingBottomFitsWindowInsets="true"
-        app:MvxItemTemplate="@layout/server_info_item"
+        app:MvxItemTemplate="@layout/player_info_item"
         app:MvxBind="ItemsSource Items"/>
 </LinearLayout>

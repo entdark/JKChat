@@ -11,6 +11,7 @@ using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.ServerList.Items;
 
 using JKClient;
@@ -85,7 +86,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		public List<KeyValueItemVM> PrimaryInfoItems { get; init; } //first 4 items
-		public MvxObservableCollection<KeyValueItemVM> PlayerItems { get; init; } //first tab items
+		public MvxObservableCollection<PlayerInfoItemVM> PlayerItems { get; init; } //first tab items
 		public MvxObservableCollection<KeyValueItemVM> FullInfoItems { get; init; } //second tab items
 		public TabItems []AllSecondaryItems { get; init; } //array of 2 collections of first and second tab items
 		public MvxObservableCollection<KeyValueItemVM> AllItems { get; init; } //first 4 items + either first tab items or second tab items
@@ -120,8 +121,8 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private void Prepare(ServerInfo serverInfo, bool isFavourite, Models.ConnectionStatus status, bool loadData) {
-			ServerInfo = serverInfo;
 			Status = status;
+			ServerInfo = serverInfo;
 			IsFavourite = isFavourite;
 			if (!loadData) {
 				gameClient = gameClientsService.GetClient(ServerInfo, true);
@@ -244,19 +245,20 @@ namespace JKChat.Core.ViewModels.Chat {
 					});
 				}
 				if (ServerInfo.PlayersInfo != null) {
-					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new KeyValueItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Data = player }), (oldItem, newItem) => {
-						bool theSame = oldItem.Data is ServerInfo.PlayerInfo oldPlayer
-							&& newItem.Data is ServerInfo.PlayerInfo newPlayer
+					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new PlayerInfoItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Team = Status == Models.ConnectionStatus.Connected ? (JKChat.Core.Models.Team)player.Team : Models.Team.Spectator, Data = player }), (oldItem, newItem) => {
+						bool theSame = oldItem.Data is ClientInfo oldPlayer
+							&& newItem.Data is ClientInfo newPlayer
 							&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
 							&& oldPlayer.ClientNum == newPlayer.ClientNum;
 						if (theSame) {
 							oldItem.Key = newItem.Key;
 							oldItem.Value = newItem.Value;
+							oldItem.Team = newItem.Team;
 							oldItem.Data = newItem.Data;
 						}
 						return theSame;
 					}, (newItem) => {
-						return (newItem?.Data as ServerInfo.PlayerInfo)?.Score ?? 0;
+						return (newItem?.Data as ClientInfo?).GetComparerKey();
 					});
 				}
 				if (SelectedTab == 0) {
@@ -267,21 +269,24 @@ namespace JKChat.Core.ViewModels.Chat {
 							if (PrimaryInfoItems.Contains(oldItem) || PrimaryInfoItems.Contains(newItem)) {
 								return oldItem == newItem;
 							} else {
-								bool theSame = oldItem.Data is ServerInfo.PlayerInfo oldPlayer
-									&& newItem.Data is ServerInfo.PlayerInfo newPlayer
+								bool theSame = oldItem is PlayerInfoItemVM
+									&& newItem is PlayerInfoItemVM
+									&& oldItem.Data is ClientInfo oldPlayer
+									&& newItem.Data is ClientInfo newPlayer
 									&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
 									&& oldPlayer.ClientNum == newPlayer.ClientNum;
 								if (theSame) {
 									oldItem.Key = newItem.Key;
 									oldItem.Value = newItem.Value;
 									oldItem.Data = newItem.Data;
+									((PlayerInfoItemVM)oldItem).Team = ((PlayerInfoItemVM)newItem).Team;
 								}
 								return theSame;
 							}
 						}, (newItem) => {
 							if (PrimaryInfoItems.Contains(newItem))
-								return int.MaxValue;
-							return (newItem?.Data as ServerInfo.PlayerInfo)?.Score ?? 0;
+								return (long)int.MaxValue << 3;
+							return (newItem?.Data as ClientInfo?).GetComparerKey();
 						});
 					}
 				} else {
@@ -340,8 +345,8 @@ namespace JKChat.Core.ViewModels.Chat {
 		public class TabItems {
 			public int TabIndex { get; init; }
 			public string TabTitle { get; init; }
-			public MvxObservableCollection<KeyValueItemVM> Items { get; init; }
-			public TabItems(int tab, string tabTitle, MvxObservableCollection<KeyValueItemVM> items) {
+			public IEnumerable<KeyValueItemVM> Items { get; init; }
+			public TabItems(int tab, string tabTitle, IEnumerable<KeyValueItemVM> items) {
 				TabIndex = tab;
 				TabTitle = tabTitle;
 				Items = items;

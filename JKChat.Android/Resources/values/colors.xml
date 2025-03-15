@@ -8,6 +8,9 @@
 	<color name="chat_type_common">#00FF00</color>
 	<color name="chat_type_team">#00FFFF</color>
 	<color name="chat_type_private">#FF00FF</color>
+	<color name="team_red">#3FFF0000</color>
+	<color name="team_blue">#3F0000FF</color>
+	<color name="team_free">#3FFFFF00</color>
 
 	<color name="seed">#00E2F3</color>
 	<color name="md_theme_light_primary">#006971</color>

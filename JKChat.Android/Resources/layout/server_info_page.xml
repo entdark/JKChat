@@ -93,8 +93,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:background="@null"
-                    app:paddingLeftFitsWindowInsetsButExpanded="true"
-                    app:paddingRightFitsWindowInsets="true"
                     app:layout_scrollFlags="scroll|exitUntilCollapsed|snap|snapMargins">
                     <MvvmCross.Platforms.Android.Binding.Views.MvxLinearLayout
                         android:orientation="vertical"
@@ -109,16 +107,12 @@
                     android:id="@+id/tablayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorSurface"
-                    app:paddingLeftFitsWindowInsetsButExpanded="true"
-                    app:paddingRightFitsWindowInsets="true"/>
+                    android:background="?attr/colorSurface"/>
             </com.google.android.material.appbar.AppBarLayout>
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewpager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:paddingLeftFitsWindowInsetsButExpanded="true"
-                app:paddingRightFitsWindowInsets="true"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </LinearLayout>

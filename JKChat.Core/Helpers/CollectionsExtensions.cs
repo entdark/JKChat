@@ -11,7 +11,7 @@ namespace JKChat.Core {
 
 //not the best way to handle multi diff but fine for small data
 //compares 2 collections: removes non-existing items, adds missing items, sorts and moves items if necessarily
-		public static void MergeWith<T>(this ObservableCollection<T> collection, IEnumerable<T> items, Func<T, T, bool> areItemsTheSame, Func<T, int> keySelector = null) {
+		public static void MergeWith<T>(this ObservableCollection<T> collection, IEnumerable<T> items, Func<T, T, bool> areItemsTheSame, Func<T, long> keySelector = null) {
 			var newItems = items?.ToArray() ?? Array.Empty<T>();
 			var toRemoveIndicies = new List<int>(collection.Count);
 			var toNotInsertIndicies = new HashSet<int>();

@@ -7,6 +7,7 @@ using Foundation;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base.Items;
 using JKChat.Core.ViewModels.Chat;
+using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.iOS.Helpers;
 using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
@@ -150,6 +151,8 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		protected override UITableViewCell GetOrCreateCellFor(UITableView tableView, NSIndexPath indexPath, object item) {
 			if (indexPath.Section == 0)
 				return new KeyValuePrimaryViewCell();
+			else if (item is PlayerInfoItemVM)
+				return new PlayerInfoViewCell();
 			else
 				return new KeyValueSecondaryViewCell();
 		}
@@ -291,7 +294,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			}
 
 			public KeyValuePrimaryViewCell() : base(string.Empty, UITableViewCellStyle.Value1, Key) {
-				BackgroundColor = UIColor.TertiarySystemBackground;
+				BackgroundColor = UIColor.Clear;
 				this.DelayBind(() => {
 					using var set = this.CreateBindingSet<KeyValuePrimaryViewCell, KeyValueItemVM>();
 					set.Bind(this).For(v => v.Title).To(vm => vm.Value);
@@ -330,8 +333,11 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 				}
 			}
 
-			public KeyValueSecondaryViewCell() : base(string.Empty, UITableViewCellStyle.Value1, Key) {
-				BackgroundColor = UIColor.TertiarySystemBackground;
+			public KeyValueSecondaryViewCell() : this(Key) {
+			}
+
+			protected KeyValueSecondaryViewCell(NSString key) : base(string.Empty, UITableViewCellStyle.Value1, key) {
+				BackgroundColor = UIColor.Clear;
 				this.DelayBind(() => {
 					using var set = this.CreateBindingSet<KeyValueSecondaryViewCell, KeyValueItemVM>();
 					set.Bind(this).For(v => v.Title).To(vm => vm.Key);
@@ -345,6 +351,31 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 				config.SecondaryAttributedText = ColourTextValueConverter.Convert(detail);
 				ContentConfiguration = config;
 				LayoutSubviews();
+			}
+		}
+
+		private class PlayerInfoViewCell : KeyValueSecondaryViewCell {
+			public static readonly new NSString Key = new(nameof(PlayerInfoViewCell));
+
+			private Team team;
+			public Team Team {
+				get => team;
+				set {
+					team = value;
+					BackgroundColor = value switch {
+						Team.Red => UIColor.Red.ColorWithAlpha(0.25f),
+						Team.Blue => UIColor.Blue.ColorWithAlpha(0.25f),
+						Team.Free => UIColor.Yellow.ColorWithAlpha(0.25f),
+						_ => UIColor.Clear
+					};
+				}
+			}
+
+			public PlayerInfoViewCell() : base(Key) {
+				this.DelayBind(() => {
+					using var set = this.CreateBindingSet<PlayerInfoViewCell, PlayerInfoItemVM>();
+					set.Bind(this).For(v => v.Team).To(vm => vm.Team);
+				});
 			}
 		}
 	}
