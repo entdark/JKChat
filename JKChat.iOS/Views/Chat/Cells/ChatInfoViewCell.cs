@@ -103,7 +103,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			}
 			var scrollView = TextScrollView;
 			nfloat dx = (scrollView.ContentSize.Width - (scrollView.ContentOffset.X + scrollView.Frame.Width));
-			FadingGradientView.Alpha = NMath.Min(NMath.Max((dx / 60.0f), 0.0f), 1.0f);
+			FadingGradientView.Alpha = 0.0f;//NMath.Min(NMath.Max((dx / 60.0f), 0.0f), 1.0f);
 		}
 
 		protected override void Dispose(bool disposing) {
