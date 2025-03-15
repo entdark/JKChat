@@ -111,7 +111,7 @@ namespace JKChat.Android.Widgets {
 		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading, bool refresh = true) {
 			tasksQueue.Enqueue(async () => {
 				await setLoading(true);
-				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true);
+				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, preferGameClient: !refresh);
 				await Task.Delay(500);
 				if (server != null) {
 					if (refresh) {

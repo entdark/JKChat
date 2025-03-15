@@ -178,25 +178,31 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 			return false;
 		}
 
-		public static async Task<ServerListItemVM> FindExistingOrLoad(string address, bool silently = false, bool load = true) {
+		public static async Task<ServerListItemVM> FindExistingOrLoad(string address, bool silently = false, bool load = true, bool preferGameClient = false) {
 			ServerListItemVM server = null;
 			bool success = silently ? await task() : await Common.ExceptionalTaskRun(task);
 			return server;
 			async Task<bool> task() {
 				var netAddress = JKClient.NetAddress.FromString(address);
-				server = await Mvx.IoCProvider.Resolve<ICacheService>().GetCachedServer(netAddress);
-				if (server != null)
-					return false;
 				var gameClient = Mvx.IoCProvider.Resolve<IGameClientsService>().GetClient(netAddress);
-				if (gameClient != null) {
+				if (preferGameClient/* && gameClient?.Status != ConnectionStatus.Disconnected*/) {
+					server = gameClient != null ? new ServerListItemVM(gameClient.ServerInfo) : null;
+					return server != null;
+				}
+				server = await Mvx.IoCProvider.Resolve<ICacheService>().GetCachedServer(netAddress);
+				if (server != null) {
+					return true;
+				} else if (gameClient != null) {
 					server = new ServerListItemVM(gameClient.ServerInfo);
+					return true;
 				} else if (load) {
 					var serverInfo = await Mvx.IoCProvider.Resolve<IServerListService>().GetServerInfo(netAddress);
 					if (serverInfo != null) {
 						server = new ServerListItemVM(serverInfo);
+						return true;
 					}
 				}
-				return true;
+				return false;
 			}
 		}
 	}

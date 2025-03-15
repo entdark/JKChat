@@ -133,6 +133,10 @@ namespace JKChat.Core.ViewModels.Chat {
 		public void Init(string address) {
 			if (string.IsNullOrEmpty(this.address))
 				this.address = address;
+			if (!string.IsNullOrEmpty(this.address) && gameClientsService.GetClient(NetAddress.FromString(this.address)) is { } gameClient) {
+				loadData = true;
+				Prepare(gameClient.ServerInfo, false, gameClient.Status, true);
+			}
 		}
 
 		protected override void SaveStateToBundle(IMvxBundle bundle) {
@@ -172,24 +176,24 @@ namespace JKChat.Core.ViewModels.Chat {
 			if (data is ServerInfo serverInfo)
 				return this.ServerInfo != serverInfo;
 			else if (data is string s && NetAddress.FromString(s) is var address)
-				return this.ServerInfo.Address != address;
+				return this.ServerInfo?.Address != address;
 			return true;
 		}
 
 		private async Task LoadData() {
 			if (!loadData && ServerInfo != null)
 				return;
-			IsLoading = true;
 			try {
 				int delay = 777;
 				if (ServerInfo == null) {
+					IsLoading = true;
 					if (!string.IsNullOrEmpty(this.address)) {
 						var server = await ServerListItemVM.FindExistingOrLoad(this.address).ExecuteWithin(delay);
 						delay = 0;
 						if (server == null) {
 							await DialogService.ShowAsync(new JKDialogConfig() {
 								Title = "Failed to Load",
-								Message = $"There is no server with address \"{address}\" {server}",
+								Message = $"There is no server with address \"{address}\"",
 								OkText = "OK",
 								OkAction = _ => {
 									Task.Run(close);
@@ -210,10 +214,22 @@ namespace JKChat.Core.ViewModels.Chat {
 						return;
 					}
 				}
-				var serverInfo = await this.serverListService.GetServerInfo(ServerInfo).ExecuteWithin(delay);
-				if (serverInfo != null) {
-					ServerInfo = serverInfo;
-					await cacheService.UpdateServer(ServerInfo);
+				if (ServerInfo != null) {
+					var server = await cacheService.GetCachedServer(ServerInfo);
+					IsFavourite = server?.IsFavourite == true;
+					bool update = false;
+					var status = gameClientsService.GetStatus(serverInfo);
+					if (status == null || status == Models.ConnectionStatus.Disconnected) {
+						IsLoading = true;
+						var newServerInfo = await this.serverListService.GetServerInfo(serverInfo).ExecuteWithin(delay);
+						if (newServerInfo != null) {
+							ServerInfo = newServerInfo;
+							update = true;
+						}
+					}
+					if (update) {
+						await cacheService.UpdateServer(ServerInfo);
+					}
 				}
 			} catch (Exception exception) {
 				await ExceptionCallback(exception);
