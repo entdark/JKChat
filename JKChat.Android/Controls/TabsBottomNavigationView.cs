@@ -75,7 +75,7 @@ namespace JKChat.Android.Controls {
 		}
 
 		public bool TryRegisterViewModel(Type viewModelType, string title, int iconDrawableResourceId) {
-			int menuId = ViewPager.Adapter.Count - 1;
+			int menuId = ViewPager.Adapter.FragmentsInfo.Count - 1;
 			return TryRegisterViewModel(viewModelType, title, iconDrawableResourceId, menuId);
 		}
 

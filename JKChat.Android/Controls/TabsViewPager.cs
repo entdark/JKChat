@@ -21,6 +21,18 @@ namespace JKChat.Android.Controls {
 	public class TabsViewPager : AndroidX.ViewPager.Widget.ViewPager {
 		public bool ScrollEnabled { get; set; }
 
+		public Fragment CurrentFragment {
+			get {
+				var fragment = Adapter?.InstantiateItem(null, CurrentItem) as Fragment;
+				return fragment;
+			}
+		}
+
+		public new TabsAdapter Adapter {
+			get => base.Adapter as TabsAdapter;
+			set => base.Adapter = value;
+		}
+
 		public TabsViewPager(Context context) : base(context) {
 		}
 
@@ -36,16 +48,6 @@ namespace JKChat.Android.Controls {
 
 		public override bool OnInterceptTouchEvent(MotionEvent ev) {
 			return ScrollEnabled && base.OnInterceptTouchEvent(ev);
-		}
-
-		public Fragment CurrentFragment {
-			get {
-				var adapter = Adapter as MvxCachingFragmentStatePagerAdapter;
-				//HACK: actually getting an existing fragment: https://github.com/MvvmCross/MvvmCross/blob/bde315c52b61c84f1e1f0d7f913a1c14359e486b/MvvmCross/Platforms/Android/Views/ViewPager/MvxCachingFragmentPagerAdapter.cs#L93
-				//TODO: test if restoration works correctly
-				var fragment = adapter?.InstantiateItem(null, CurrentItem) as Fragment;
-				return fragment;
-			}
 		}
 
 		public void CloseTabsInnerFragments(bool animated, int tab = -1) {
@@ -70,13 +72,24 @@ namespace JKChat.Android.Controls {
 		//source: https://github.com/anne-k/TabBarViewPagerAdapter
 		public class TabsAdapter : MvxCachingFragmentStatePagerAdapter {
 			private const string bundleFragmentsInfoKey = nameof(MvxCachingFragmentStatePagerAdapter) + nameof(bundleFragmentsInfoKey);
+
 			private readonly FragmentManager fragmentManager;
+			private readonly int tabsCount;
+
+			public override int Count => FragmentsInfo?.Count != tabsCount ? 0 : base.Count;
 
 			protected TabsAdapter(IntPtr javaReference, JniHandleOwnership transfer)
 				: base(javaReference, transfer) { }
 
-			public TabsAdapter(Context context, FragmentManager fragmentManager, List<MvxViewPagerFragmentInfo> fragmentsInfo) : base(context, fragmentManager, fragmentsInfo) {
+			public TabsAdapter(Context context, FragmentManager fragmentManager, int tabsCount) : base(context, fragmentManager, new()) {
 				this.fragmentManager = fragmentManager;
+				this.tabsCount = tabsCount;
+			}
+
+			public override void NotifyDataSetChanged() {
+				if (FragmentsInfo.Count != tabsCount)
+					return;
+				base.NotifyDataSetChanged();
 			}
 
 			public override IParcelable SaveState() {

@@ -195,6 +195,9 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		protected virtual void OnBackPressedCallback() {
+			if (ParentFragmentManager is { IsStateSaved: false } && ParentFragmentManager.PopBackStackImmediate())
+				return;
+
 			Mvx.IoCProvider.Resolve<INavigationService>().Close(ViewModel);
 		}
 

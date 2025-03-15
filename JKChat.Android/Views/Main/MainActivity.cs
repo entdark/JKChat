@@ -37,7 +37,7 @@ namespace JKChat.Android.Views.Main {
 		Label = "@string/app_name",
 		Theme = "@style/AppThemeMaterial3",
 		MainLauncher = true,
-		LaunchMode = LaunchMode.SingleTop,
+		LaunchMode = LaunchMode.SingleInstance,
 		ConfigurationChanges = ConfigChanges.ScreenLayout | ConfigChanges.ScreenSize | ConfigChanges.SmallestScreenSize | ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden,
 		WindowSoftInputMode = SoftInput.StateAlwaysHidden | SoftInput.AdjustResize
 	)]

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-using Android.OS;
+﻿using Android.OS;
 using Android.Views;
 
 using AndroidX.Fragment.App;
@@ -9,10 +7,10 @@ using AndroidX.ViewPager.Widget;
 using JKChat.Android.Controls;
 using JKChat.Core.ViewModels.Base;
 
-using MvvmCross.Platforms.Android.Views.ViewPager;
-
 namespace JKChat.Android.Views.Base {
 	public abstract class TabsFragment<TViewModel> : BaseFragment<TViewModel>, ITabsView where TViewModel : class, IBaseViewModel {
+		private readonly int tabsCount;
+
 		protected TabsViewPager ViewPager { get; private set; }
 		protected TabsBottomNavigationView BottomNavigationView { get; private set; }
 
@@ -23,9 +21,10 @@ namespace JKChat.Android.Views.Base {
 		public int BottomNavigationViewId { get; init; }
 		public int DefaultTab { get; init; } = 0;
 
-		public TabsFragment(int layoutId, int viewPagerId, int bottomNavigationViewId) : base(layoutId) {
+		public TabsFragment(int layoutId, int viewPagerId, int bottomNavigationViewId, int tabsCount) : base(layoutId) {
 			ViewPagerId = viewPagerId;
 			BottomNavigationViewId = bottomNavigationViewId;
+			this.tabsCount = tabsCount;
 			RegisterBackPressedCallback = true;
 		}
 
@@ -35,8 +34,8 @@ namespace JKChat.Android.Views.Base {
 			ViewPager.ScrollEnabled = false;
 			ViewPager.OffscreenPageLimit = 3;
 			ViewPager.PageSelected += TabPageSelected;
-			if (ViewPager.Adapter is not TabsViewPager.TabsAdapter)
-				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.Context, this.ChildFragmentManager, new List<MvxViewPagerFragmentInfo>());
+			if (ViewPager.Adapter == null)
+				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.Context, this.ChildFragmentManager, this.tabsCount);
 			BottomNavigationView = view.FindViewById<TabsBottomNavigationView>(BottomNavigationViewId);
 			BottomNavigationView.ViewPager = ViewPager;
 		}
