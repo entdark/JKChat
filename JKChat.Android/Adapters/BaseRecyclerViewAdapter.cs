@@ -1,4 +1,6 @@
-﻿using AndroidX.RecyclerView.Widget;
+﻿using Android.Views;
+
+using AndroidX.RecyclerView.Widget;
 
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
@@ -7,10 +9,17 @@ namespace JKChat.Android.Adapters {
 	public class BaseRecyclerViewAdapter : MvxRecyclerAdapter {
 		protected MvxRecyclerView RecyclerView { get; private set; }
 
+		public AdjustHolderDelegate AdjustHolderOnCreate { get; set; }
 		public AdjustHolderPositionDelegate AdjustHolderOnBind { get; set; }
 		public AdjustHolderDelegate AdjustHolderOnRecycle { get; set; }
 
 		public BaseRecyclerViewAdapter(IMvxAndroidBindingContext bindingContext) : base(bindingContext) {}
+
+		public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) {
+			var viewHolder = base.OnCreateViewHolder(parent, viewType);
+			AdjustHolderOnCreate?.Invoke(viewHolder);
+			return viewHolder;
+		}
 
 		public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 			base.OnBindViewHolder(holder, position);

@@ -105,9 +105,7 @@ namespace JKChat.Android.Views.Chat {
 		}
 
 		private void UpdateFavouriteItem() {
-			if (favouriteItem == null)
-				return;
-			favouriteItem.SetIcon(IsFavourite ? Resource.Drawable.ic_star_filled : Resource.Drawable.ic_star_outlined);
+			favouriteItem?.SetIcon(IsFavourite ? Resource.Drawable.ic_star_filled : Resource.Drawable.ic_star_outlined);
 		}
 
 		private void UpdateConnectButton() {

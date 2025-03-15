@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Linq;
+
 using Android.Animation;
 using Android.OS;
 using Android.Text;
@@ -68,7 +69,7 @@ namespace JKChat.Android.Views.Chat {
 						ChatType.Private => Resource.Color.chat_type_private,
 						_ => Resource.Color.chat_type_common,
 					};
-					chatTypeButton.ImageTintList = global::Android.Content.Res.ColorStateList.ValueOf(new global::Android.Graphics.Color(ContextCompat.GetColor(Context, tintColor)));
+					chatTypeButton.ImageTintList = global::Android.Content.Res.ColorStateList.ValueOf(new(ContextCompat.GetColor(Context, tintColor)));
 				}
 				chatType = value;
 			}
@@ -102,11 +103,14 @@ namespace JKChat.Android.Views.Chat {
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
 				recyclerView.Adapter = scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
-					AdjustHolderOnBind = (viewHolder, position) => {
+					AdjustHolderOnCreate = (viewHolder) => {
 						var textView = viewHolder.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
-						(textView.Parent as ViewGroup).LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
-					}
+
+						var scrollView = viewHolder.ItemView.FindViewById<HorizontalScrollView>(Resource.Id.message_scrollview);
+						scrollView?.LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
+						scrollView?.SetOnTouchListener(new MessageScrollListener());
+					},
 				};
 			}
 			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
@@ -124,6 +128,21 @@ namespace JKChat.Android.Views.Chat {
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
 			SetCustomTitleView(titleView);
+		}
+
+		private class MessageScrollListener : Java.Lang.Object, View.IOnTouchListener {
+			public bool OnTouch(View view, MotionEvent ev) {
+				if (ev == null)
+					return false;
+				MotionEvent newEv;
+				if (ev.Action != MotionEventActions.Move) {
+					newEv = MotionEvent.Obtain(ev);
+				} else {
+					newEv = MotionEvent.Obtain(ev.DownTime, ev.EventTime, MotionEventActions.Cancel, ev.GetX(), ev.GetY(), ev.MetaState);
+				}
+				(view.Parent?.Parent as View)?.OnTouchEvent(newEv);
+				return false;
+			}
 		}
 
 		private void AfterMessageTextChanged(object sender, AfterTextChangedEventArgs ev) {
@@ -338,7 +357,7 @@ namespace JKChat.Android.Views.Chat {
 
 		public class LongClickLinkMovementMethod : LinkMovementMethod {
 			private static readonly int LongClickTime = ViewConfiguration.LongPressTimeout;
-			private readonly Handler longClickHandler = new Handler(Looper.MainLooper);
+			private readonly Handler longClickHandler = new(Looper.MainLooper);
 			private bool isLongPressed = false;
 
 			public override bool OnTouchEvent(TextView widget, ISpannable buffer, MotionEvent ev) {
@@ -393,9 +412,7 @@ namespace JKChat.Android.Views.Chat {
 
 			public new static IMovementMethod Instance {
 				get {
-					if (instance == null) {
-						instance = new LongClickLinkMovementMethod();
-					}
+					instance ??= new LongClickLinkMovementMethod();
 					return instance;
 				}
 			}
