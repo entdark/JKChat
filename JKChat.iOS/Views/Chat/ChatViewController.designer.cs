@@ -52,6 +52,9 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.NSLayoutConstraint CommandsTableViewHeightConstraint { get; set; }
 
 		[Outlet]
+		UIKit.UIView InfoView { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		JKChat.iOS.Controls.PlaceholderTextView MessageTextView { get; set; }
 
@@ -63,8 +66,14 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.UIView MessageView { get; set; }
 
 		[Outlet]
+		UIKit.UILabel ScoresLabel { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UIKit.UIButton SendButton { get; set; }
+
+		[Outlet]
+		UIKit.UILabel TimerLabel { get; set; }
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
@@ -107,6 +116,26 @@ namespace JKChat.iOS.Views.Chat
 				ChatTypeTeamButton = null;
 			}
 
+			if (CommandsButton != null) {
+				CommandsButton.Dispose ();
+				CommandsButton = null;
+			}
+
+			if (CommandsTableView != null) {
+				CommandsTableView.Dispose ();
+				CommandsTableView = null;
+			}
+
+			if (CommandsTableViewBottomConstraint != null) {
+				CommandsTableViewBottomConstraint.Dispose ();
+				CommandsTableViewBottomConstraint = null;
+			}
+
+			if (CommandsTableViewHeightConstraint != null) {
+				CommandsTableViewHeightConstraint.Dispose ();
+				CommandsTableViewHeightConstraint = null;
+			}
+
 			if (MessageTextView != null) {
 				MessageTextView.Dispose ();
 				MessageTextView = null;
@@ -122,9 +151,19 @@ namespace JKChat.iOS.Views.Chat
 				MessageView = null;
 			}
 
+			if (ScoresLabel != null) {
+				ScoresLabel.Dispose ();
+				ScoresLabel = null;
+			}
+
 			if (SendButton != null) {
 				SendButton.Dispose ();
 				SendButton = null;
+			}
+
+			if (TimerLabel != null) {
+				TimerLabel.Dispose ();
+				TimerLabel = null;
 			}
 
 			if (ViewBottomConstraint != null) {
@@ -132,24 +171,9 @@ namespace JKChat.iOS.Views.Chat
 				ViewBottomConstraint = null;
 			}
 
-			if (CommandsTableView != null) {
-				CommandsTableView.Dispose ();
-				CommandsTableView = null;
-			}
-
-			if (CommandsTableViewHeightConstraint != null) {
-				CommandsTableViewHeightConstraint.Dispose ();
-				CommandsTableViewHeightConstraint = null;
-			}
-
-			if (CommandsButton != null) {
-				CommandsButton.Dispose ();
-				CommandsButton = null;
-			}
-
-			if (CommandsTableViewBottomConstraint != null) {
-				CommandsTableViewBottomConstraint.Dispose ();
-				CommandsTableViewBottomConstraint = null;
+			if (InfoView != null) {
+				InfoView.Dispose ();
+				InfoView = null;
 			}
 		}
 	}

@@ -11,8 +11,42 @@
         app:paddingLeftFitsWindowInsetsButExpanded="true"
         app:paddingRightFitsWindowInsets="true"
         app:paddingTopFitsWindowInsets="true"
-        app:liftOnScrollTargetViewId="@id/mvxrecyclerview">
-        <include layout="@layout/toolbar"/>
+        app:liftOnScroll="false">
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <include layout="@layout/toolbar"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="24dp"
+                android:paddingVertical="12dp"
+                android:background="?attr/colorSurfaceContainerLow"
+                app:MvxBind="Click ServerInfoCommand">
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/OnSurfaceText.LabelMedium"
+                    tools:text="Red: 2 Blue: 5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start|top"
+                    app:MvxBind="TextFormatted ColourText(Scores)"/>
+                <com.google.android.material.textview.MaterialTextView
+                    style="@style/OnSurfaceText.LabelMedium"
+                    android:text="13:37"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:lines="1"
+                    android:ellipsize="none"
+                    android:gravity="top|end"
+                    app:MvxBind="Text Timer"/>
+            </LinearLayout>
+        </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
     <FrameLayout
         android:layout_width="match_parent"
@@ -114,10 +148,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_gravity="center_vertical"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp"
-                        android:paddingLeft="0dp"
-                        android:paddingRight="0dp"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="4dp"
                         android:minHeight="48dp"
                         android:maxLength="149"
                         android:background="@null"

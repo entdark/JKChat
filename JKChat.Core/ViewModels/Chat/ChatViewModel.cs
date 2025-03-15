@@ -24,6 +24,8 @@ using MvvmCross.Commands;
 using MvvmCross.Navigation;
 using MvvmCross.ViewModels;
 
+using JAClientGame = JKClient.JAClientGame;
+
 [assembly: MvxNavigation(typeof(ChatViewModel), @"jkchat://chat\?address=(?<address>.*)")]
 namespace JKChat.Core.ViewModels.Chat {
 	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerInfoParameter>, IFromRootNavigatingViewModel {
@@ -121,6 +123,19 @@ namespace JKChat.Core.ViewModels.Chat {
 		public bool CommandSetAutomatically {
 			get => commandSetAutomatically;
 			set => SetProperty(ref commandSetAutomatically, value);
+		}
+
+		private string timer;
+		public string Timer {
+			get => timer;
+			set => SetProperty(ref timer, value);
+		}
+
+		private const string DefaultScores = "Scores: -";
+		private string scores = DefaultScores;
+		public string Scores {
+			get => scores;
+			set => SetProperty(ref scores, value);
 		}
 
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
@@ -446,14 +461,77 @@ namespace JKChat.Core.ViewModels.Chat {
 				Task.Run(async () => {
 					await Task.Delay(200);
 					gameClient.ViewModel = this;
+					gameClient.FrameExecuted += FrameExecuted;
 				});
 			} else {
 				gameClient.ViewModel = this;
+				gameClient.FrameExecuted += FrameExecuted;
 			}
+		}
+
+		private void FrameExecuted(long frameTime){
+			var clientGame = gameClient.ClientGame;
+			Timer = $"{clientGame.Timer/60000}:{clientGame.Timer/1000%60:D2}";
+
+			switch (ServerInfo.GameType) {
+				case JKClient.GameType.Siege when clientGame is JAClientGame jaClientGame:
+					Scores = scoresSiege(jaClientGame, ServerInfo);
+					break;
+				case >= JKClient.GameType.Team:
+					Scores = $"^7Red: ^1{scoresString(clientGame.Scores1)}^7 Blue: ^4{scoresString(clientGame.Scores2)}";
+					break;
+				default:
+					var clientInfo = clientGame.ClientsInfo != null ? clientGame.ClientsInfo.Where(ci => ci.InfoValid).Append(default).Aggregate((ci1, ci2) => ci1.CompareTo(ref ci2) > 0 ? ci1 : ci2) : default;
+					Scores = clientInfo.InfoValid ? $"Leader: {scoresString(clientInfo.Score)}\n{clientInfo.Name}" : DefaultScores;
+					break;
+			}
+
+			static string scoresSiege(JAClientGame clientGame, JKClient.ServerInfo serverInfo) {
+				if (clientGame.SiegeRoundState != 0) {
+					switch (clientGame.SiegeRoundState) {
+						case 1:
+							return "Waiting for players";
+						case 2:
+							int time = JAClientGame.SiegeRoundBeginTime - (clientGame.Time - clientGame.SiegeRoundTime);
+							time = Math.Clamp(time, 0, JAClientGame.SiegeRoundBeginTime);
+							time /= 1000;
+							time++;
+							if (time < 1)
+								time = 1;
+							return $"Round begins in {time}";
+						default:
+							return DefaultScores;
+					}
+				} else if (clientGame.SiegeRoundTime != 0) {
+					//dirty, clientGame data has to be read only
+					clientGame.SiegeRoundTime = 0;
+				} else if (clientGame.SiegeRoundBeganTime != 0) {
+					int timedValue = clientGame.BeatingSiegeTime;
+					int timeRemaining;
+					bool forward = true;
+					if (JKClient.Common.Atoi(serverInfo["g_siegeTeamSwitch"]) != 0 && clientGame.BeatingSiegeTime == 0) {
+						forward = true;
+						timeRemaining = clientGame.Time - clientGame.SiegeRoundBeganTime;
+					} else {
+						forward = false;
+						timeRemaining = clientGame.SiegeRoundBeganTime + timedValue - clientGame.Time;
+					}
+					if (timedValue > 0 && timeRemaining > timedValue) {
+						timeRemaining = timedValue;
+					} else if (timeRemaining < 0) {
+						timeRemaining = 0;
+					}
+					timeRemaining /= 1000;
+					return $"Round time: ^{(forward ? 2 : 1)}{timeRemaining/60}:{timeRemaining%60:D2}";
+				}
+				return DefaultScores;
+			}
+			static string scoresString(int scores) => scores == JKClient.ClientGame.ScoreNotPresent ? "-" : scores.ToString();
 		}
 
 		public override void ViewDisappearing() {
 			if (gameClient != null) {
+				gameClient.FrameExecuted -= FrameExecuted;
 				gameClient.ViewModel = null;
 			}
 			base.ViewDisappearing();
@@ -464,6 +542,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			Items = gameClient.Items;
 			Status = gameClient.Status;
 			Title = gameClient.ServerInfo.HostName;
+			Players = $"{gameClient.ServerInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{gameClient.ServerInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
 			IsFavourite = isFavourite;
 			PrepareForModification();
 		}
@@ -501,6 +580,8 @@ namespace JKChat.Core.ViewModels.Chat {
 			//should never happen
 			if (gameClient == null)
 				return;
+			//force IsLoading = true;
+			Status = gameClient.Status;
 			await cacheService.SaveRecentServer(ServerInfo);
 			await gameClient.Connect(false);
 
@@ -513,7 +594,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			if (data is JKClient.ServerInfo serverInfo)
 				return this.ServerInfo != serverInfo;
 			else if (data is string s && JKClient.NetAddress.FromString(s) is var address)
-				return this.ServerInfo.Address != address;
+				return this.ServerInfo?.Address != address;
 			return true;
 		}
 	}

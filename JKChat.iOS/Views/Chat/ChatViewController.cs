@@ -13,6 +13,7 @@ using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.iOS.Controls;
 using JKChat.iOS.Helpers;
+using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.ViewSources;
 
@@ -101,6 +102,18 @@ namespace JKChat.iOS.Views.Chat {
 					ViewModel.CommandSetAutomatically = false;
 					MessageTextView.BecomeFirstResponder();
 				}
+			}
+		}
+
+		private string scores;
+		public string Scores {
+			get => scores;
+			set {
+				scores = value;
+				ScoresLabel.AttributedText = ColourTextValueConverter.Convert(scores);
+				this.View.LayoutIfNeeded();
+				ChatTableView.ContentInset = new(InfoView.Frame.Height, 0.0f, ChatTableView.SpecialOffset, 0.0f);
+				ChatTableView.ScrollIndicatorInsets = new(InfoView.Frame.Height, 0.0f, ChatTableView.SpecialOffset, 0.0f);
 			}
 		}
 
@@ -239,6 +252,10 @@ namespace JKChat.iOS.Views.Chat {
 			RespaceTitleView();
 
 			NavigationItem.TitleView = titleStackView;
+
+			InfoView.AddGestureRecognizer(new UITapGestureRecognizer(() => {
+				ViewModel.ServerInfoCommand?.Execute();
+			}));
 		}
 
 		[Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]
@@ -303,6 +320,8 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(statusImageView).For(v => v.TintColor).To(vm => vm.Status).WithConversion("ConnectionColor");
 			set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
 			set.Bind(this).For(v => v.CommandSetAutomatically).To(vm => vm.CommandSetAutomatically);
+			set.Bind(TimerLabel).For(v => v.AttributedText).To(vm => vm.Timer).WithConversion("ColourText");
+			set.Bind(this).For(v => v.Scores).To(vm => vm.Scores);
 
 			UpdateCommandsTableView();
 		}
@@ -322,7 +341,7 @@ namespace JKChat.iOS.Views.Chat {
 			NavigationController.NavigationBar.ScrollEdgeAppearance = appearance;
 			NavigationController.NavigationBar.CompactAppearance = appearance;
 			NavigationController.NavigationBar.CompactScrollEdgeAppearance = appearance;
-			//HACK: to blur NavigationBar since it starts blurring after scrolling
+//HACK: to blur NavigationBar since it starts blurring after scrolling
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset-1.0f), false);
 
 			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);

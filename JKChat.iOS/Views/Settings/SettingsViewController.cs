@@ -13,12 +13,6 @@ namespace JKChat.iOS.Views.Settings {
 	public partial class SettingsViewController : BaseViewController<SettingsViewModel> {
 		public SettingsViewController() : base("SettingsViewController", null) {}
 
-		public override void LoadView() {
-			base.LoadView();
-
-			SettingsTableView.ContentInset = new UIEdgeInsets(18.0f, 0.0f, 18.0f, 0.0f);
-		}
-
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
 
