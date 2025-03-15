@@ -98,12 +98,20 @@ namespace JKChat.Android.Views.Main {
 		protected override void OnResume() {
 			base.OnResume();
 			System.Diagnostics.Debug.WriteLine($"flags: {pendingIntent?.Flags}");
-			if (pendingIntent is { Flags: var flags, Extras: { IsEmpty: false } extras, Action: var action } && !flags.HasFlag(ActivityFlags.LaunchedFromHistory)) {
+			if (pendingIntent is { Flags: var flags, Extras: var extras, Action: var action } && !flags.HasFlag(ActivityFlags.LaunchedFromHistory)) {
 				var navigationService = Mvx.IoCProvider.Resolve<INavigationService>();
-				if (action == NotificationsService.NotificationAction) {
+				bool isEmpty = extras?.IsEmpty == true;
+				if (action == NotificationsService.NotificationAction && !isEmpty) {
 					var parameters = extras?.ToDictionary();
 					navigationService.Navigate(parameters);
-				} else if (action == ServerMonitorAppWidget.WidgetLinkAction
+				} if (action == ForegroundGameClientsService.ForegroundAction) {
+					var activeServers = Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.ToArray();
+					if (activeServers.Length == 1) {
+						var address = activeServers[0].Address;
+						var parameters = navigationService.MakeNavigationParameters($"jkchat://chat?address={address}", address);
+						navigationService.Navigate(parameters);
+					}
+				} else if (action == ServerMonitorAppWidget.WidgetLinkAction && !isEmpty
 					&& extras.GetString(ServerMonitorAppWidget.ServerAddressExtraKey, null) is string serverAddress) {
 					var widgetLink = AppSettings.WidgetLink;
 					if (widgetLink != WidgetLink.Application) {
@@ -150,9 +158,8 @@ namespace JKChat.Android.Views.Main {
 		}
 
 		private void OnServerInfoMessage(ServerInfoMessage message) {
-			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
-			int activeClients = gameClientsService.ActiveClients;
-			if (activeClients > 0 && !IsServiceRunning(typeof(ForegroundGameClientsService))) {
+			if (Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.Any()
+				&& !IsServiceRunning(typeof(ForegroundGameClientsService))) {
 				var intent = new Intent(this, typeof(ForegroundGameClientsService));
 				ContextCompat.StartForegroundService(this, intent);
 			}

@@ -19,7 +19,7 @@ using JKChat.Core.Services;
 namespace JKChat.Android.Services {
 	public class NotificationsService : INotificationsService {
 		private const string NotificationChannelID = "JKChat Chat";
-		public const string NotificationAction = nameof(NotificationsService) +nameof(NotificationAction);
+		public const string NotificationAction = nameof(NotificationsService)+nameof(NotificationAction);
 
 		private int notificationId = 1337;
 		private readonly Dictionary<string, HashSet<int>> shownNotifications = new();
@@ -31,7 +31,7 @@ namespace JKChat.Android.Services {
 		public void CancelNotifications(string tag = null) {
 			var context = global::Android.App.Application.Context;
 			var notificationManager = (NotificationManager)context.GetSystemService(Context.NotificationService);
-			bool hasIdsSet = shownNotifications.TryGetValue(tag, out var idsSet) && idsSet != null;
+			bool hasIdsSet = shownNotifications.TryGetValue(tag, out var idsSet) && !idsSet.IsNullOrEmpty();
 			if (string.IsNullOrEmpty(tag)) {
 				notificationManager.CancelAll();
 				shownNotifications.Clear();
@@ -85,17 +85,16 @@ namespace JKChat.Android.Services {
 		public bool NotificationsEnabled => ContextCompat.CheckSelfPermission(global::Android.App.Application.Context, Manifest.Permission.PostNotifications) == Permission.Granted;
 
 		private void CreateNotificationChannel() {
-			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-				var context = global::Android.App.Application.Context;
-				var channel = new NotificationChannel(NotificationChannelID, NotificationChannelID, NotificationImportance.Max) {
-					LightColor = MaterialColors.GetColor(context, Resource.Attribute.colorPrimaryFixed, Color.Blue)
-				};
-				channel.EnableLights(true);
-				channel.EnableVibration(true);
-				channel.SetShowBadge(true);
-				var notificationManager = NotificationManagerCompat.From(context);
-				notificationManager.CreateNotificationChannel(channel);
-			}
+			var context = global::Android.App.Application.Context;
+			var builder = new NotificationChannelCompat.Builder(NotificationChannelID, NotificationManagerCompat.ImportanceMax)
+				.SetName(NotificationChannelID)
+				.SetShowBadge(true)
+				.SetLightsEnabled(true)
+				.SetLightColor(MaterialColors.GetColor(context, Resource.Attribute.colorPrimaryFixed, Color.Blue))
+				.SetVibrationEnabled(true);
+			var channel = builder.Build();
+			var notificationManager = NotificationManagerCompat.From(context);
+			notificationManager.CreateNotificationChannel(channel);
 		}
 	}
 }

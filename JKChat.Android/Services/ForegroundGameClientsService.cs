@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Android.App;
 using Android.Content;
@@ -9,10 +10,12 @@ using Android.Runtime;
 using AndroidX.Core.App;
 using AndroidX.Lifecycle;
 
+using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Main;
 using JKChat.Android.Widgets;
 using JKChat.Core.Messages;
 using JKChat.Core.Services;
+using JKChat.Core.ViewModels.ServerList.Items;
 
 using MvvmCross;
 using MvvmCross.Plugin.Messenger;
@@ -24,6 +27,8 @@ namespace JKChat.Android.Services {
 	public class ForegroundGameClientsService : Service {
 		private const string NotificationChannelID = "JKChat Foreground Service";
 		private const int NotificationID = 2;
+
+		public const string ForegroundAction = nameof(ForegroundGameClientsService)+nameof(ForegroundAction);
 
 		private MvxSubscriptionToken serverInfoMessageToken;
 
@@ -66,10 +71,10 @@ namespace JKChat.Android.Services {
 		private void HandleForeground(bool start) {
 			FreeMemory();
 			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
-			int clientsCount = gameClientsService.ActiveClients;
+			var activeServers = gameClientsService.ActiveServers.ToArray();
 			int unreadMessages = gameClientsService.UnreadMessages;
-			if (clientsCount > 0/* || unreadMessages > 0*/) {
-				var notification = CreateNotification(clientsCount, unreadMessages);
+			if (activeServers.Length > 0/* || unreadMessages > 0*/) {
+				var notification = CreateNotification(activeServers, unreadMessages);
 				if (start) {
 					ServiceCompat.StartForeground(this, NotificationID, notification, (int)ForegroundService.TypeSpecialUse);
 				} else {
@@ -83,11 +88,7 @@ namespace JKChat.Android.Services {
 		}
 
 		private void StopForeground() {
-			if (Build.VERSION.SdkInt >= BuildVersionCodes.N) {
-				StopForeground(StopForegroundFlags.Remove);
-			} else {
-				StopForeground(true);
-			}
+			ServiceCompat.StopForeground(this, (int)StopForegroundFlags.Remove);
 		}
 
 		private void UpdateWidgets(ServerInfoMessage message) {
@@ -97,32 +98,38 @@ namespace JKChat.Android.Services {
 			SendBroadcast(intent);
 		}
 
-		private Notification CreateNotification(int count, int messages) {
+		private Notification CreateNotification(ServerListItemVM[] servers, int messages) {
 			var activityIntent = new Intent(this, typeof(MainActivity));
+			activityIntent.SetAction(ForegroundGameClientsService.ForegroundAction);
 			var activityPendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, PendingIntentFlags.Immutable);
 			var closeIntent = new Intent(this, typeof(ForegroundReceiver));
 			var closePendingIntent = PendingIntent.GetBroadcast(this, 2, closeIntent, PendingIntentFlags.Immutable);
+			string title = $"🌐 Connected to " + (servers.Length > 1 ? $"{servers.Length} servers" : servers[0].ServerName);
 			var notification = new NotificationCompat.Builder(this, NotificationChannelID)
 				.SetAutoCancel(false)
-				.SetContentTitle($"You are connected to {count} server" + (count > 1 ? "s" : string.Empty))
+				.SetContentTitle(ColourTextValueConverter.Convert(title))
 				.SetSmallIcon(Resource.Mipmap.ic_launcher)
 				.SetContentIntent(activityPendingIntent)
 				.SetPriority(NotificationCompat.PriorityLow)
 				.SetOngoing(true)
-				.AddAction(new NotificationCompat.Action(0, count > 1 ? "Disconnect from all" : "Disconnect", closePendingIntent));
-			if (messages > 0) {
-				notification.SetContentText($"You have {messages} unread message" + (messages > 1 ? "s" : string.Empty));
+				.AddAction(new NotificationCompat.Action(0, servers.Length > 1 ? "Disconnect from all" : "Disconnect", closePendingIntent));
+			if (messages > 0 || servers.Length == 1	) {
+				string message = servers.Length > 1 ? string.Empty : $"👤 {servers[0].Players}/{servers[0].MaxPlayers} players{(messages > 0 ? "\n" : string.Empty)}";
+				if (messages > 0) {
+					message += $"💬 {messages} unread message" + (messages > 1 ? "s" : string.Empty);
+				}
+				notification.SetContentText(message);
 			}
 			return notification.Build();
 		}
 
 		private void CreateNotificationChannel() {
-			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
-				var channel = new NotificationChannel(NotificationChannelID, NotificationChannelID, NotificationImportance.Low);
-				channel.SetShowBadge(false);
-				var notificationManager = NotificationManagerCompat.From(this);
-				notificationManager.CreateNotificationChannel(channel);
-			}
+			var builder = new NotificationChannelCompat.Builder(NotificationChannelID, NotificationManagerCompat.ImportanceLow)
+				.SetName(NotificationChannelID)
+				.SetShowBadge(false);
+			var channel = builder.Build();
+			var notificationManager = NotificationManagerCompat.From(this);
+			notificationManager.CreateNotificationChannel(channel);
 		}
 
 		private static void FreeMemory() {
