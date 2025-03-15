@@ -5,6 +5,7 @@ using JKChat.Core.ViewModels.Dialog;
 
 namespace JKChat.Core.Services {
 	public interface IDialogService {
+		void Show(JKDialogConfig config);
 		Task ShowAsync(JKDialogConfig config);
 		public Task ShowAsync(string message) {
 			return ShowAsync(new JKDialogConfig(message));

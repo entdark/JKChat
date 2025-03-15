@@ -14,10 +14,10 @@ using MvvmCross;
 
 namespace JKChat.Core.Helpers {
 	public static class Common {
-		public static async Task ExceptionCallback(Exception exception) {
+		public static void ExceptionCallback(Exception exception) {
 			string message = GetExceptionMessage(exception);
 
-			await Mvx.IoCProvider.Resolve<IDialogService>().ShowAsync(new JKDialogConfig() {
+			Mvx.IoCProvider.Resolve<IDialogService>().Show(new JKDialogConfig() {
 				Title = "Error",
 				Message = message,
 				OkText = "Copy",
@@ -54,11 +54,11 @@ namespace JKChat.Core.Helpers {
 		public static async Task<bool> ExceptionalTaskRun(Task task) {
 			bool result = true;
 			await task
-				.ContinueWith(async t => {
+				.ContinueWith(t => {
 					Debug.WriteLine("t: " + t.Status);
 					if (t.IsFaulted) {
 						result = false;
-						await ExceptionCallback(t.Exception);
+						ExceptionCallback(t.Exception);
 					}
 				});
 			return result;

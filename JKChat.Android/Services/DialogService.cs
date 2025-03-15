@@ -30,6 +30,11 @@ using Builder = AndroidX.AppCompat.App.AlertDialog.Builder;
 
 namespace JKChat.Android.Services {
 	public class DialogService : IDialogService {
+		void IDialogService.Show(JKDialogConfig config) {
+			MainThread.BeginInvokeOnMainThread(() => {
+				Show(config);
+			});
+		}
 		public async Task ShowAsync(JKDialogConfig config) {
 			await MainThread.InvokeOnMainThreadAsync(() => {
 				Show(config);

@@ -290,7 +290,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 						AppSettings.Filter = filter;
 				}
 			} catch (Exception exception) {
-				await ExceptionCallback(exception);
+				Helpers.Common.ExceptionCallback(exception);
 			}
 		}
 

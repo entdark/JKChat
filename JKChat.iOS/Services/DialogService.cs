@@ -7,6 +7,9 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.iOS.Services {
 	public class DialogService : IDialogService {
+		void IDialogService.Show(JKDialogConfig config) {
+			Show(config);
+		}
 		public async Task ShowAsync(JKDialogConfig config) {
 			await MainThread.InvokeOnMainThreadAsync(() => Show(config));
 		}

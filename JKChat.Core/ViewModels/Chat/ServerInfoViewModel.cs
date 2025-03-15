@@ -232,7 +232,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					}
 				}
 			} catch (Exception exception) {
-				await ExceptionCallback(exception);
+				Helpers.Common.ExceptionCallback(exception);
 			} finally {
 				IsLoading = false;
 			}

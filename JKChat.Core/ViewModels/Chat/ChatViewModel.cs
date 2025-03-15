@@ -317,7 +317,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				command = $"say_team \"{Message}\"\n";
 				break;
 			case ChatType.Private:
-				var dialogList = new DialogListViewModel(gameClient.ClientInfo?.Where(ci => ci.InfoValid).Select(ci => new DialogItemVM() {
+				var dialogList = new DialogListViewModel(gameClient.ClientGame?.ClientsInfo?.Where(ci => ci.InfoValid).Select(ci => new DialogItemVM() {
 					Id = ci.ClientNum,
 					Name = ci.Name
 				}), DialogSelectionType.InstantSelection);

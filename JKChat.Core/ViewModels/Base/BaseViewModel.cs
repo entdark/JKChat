@@ -40,10 +40,6 @@ namespace JKChat.Core.ViewModels.Base {
 		protected virtual Task BackgroundInitialize() {
 			return Task.CompletedTask;
 		}
-
-		protected virtual Task ExceptionCallback(Exception exception) {
-			return Helpers.Common.ExceptionCallback(exception);
-		}
 	}
 
 	public abstract class BaseViewModel<TParameter> : BaseViewModel, IMvxViewModel<TParameter> {

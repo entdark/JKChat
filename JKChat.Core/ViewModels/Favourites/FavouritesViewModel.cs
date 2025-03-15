@@ -86,7 +86,7 @@ namespace JKChat.Core.ViewModels.Favourites {
 				}
 				Items.ReplaceWith(favouriteServers);
 			} catch (Exception exception) {
-				await ExceptionCallback(exception);
+				Helpers.Common.ExceptionCallback(exception);
 			}
 			IsRefreshing = false;
 		}
@@ -110,7 +110,7 @@ namespace JKChat.Core.ViewModels.Favourites {
 				var favouriteServers = await cacheService.LoadFavouriteServers();
 				Items.ReplaceWith(favouriteServers);
 			} catch (Exception exception) {
-				await ExceptionCallback(exception);
+				Helpers.Common.ExceptionCallback(exception);
 			}
 			IsLoading = false;
 		}
