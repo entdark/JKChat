@@ -180,7 +180,7 @@ namespace JKChat.Core.ViewModels.Chat {
 				return;
 			IsLoading = true;
 			try {
-				int delay = 500;
+				int delay = 777;
 				if (ServerInfo == null) {
 					if (!string.IsNullOrEmpty(this.address)) {
 						var server = await ServerListItemVM.FindExistingOrLoad(this.address).ExecuteWithin(delay);

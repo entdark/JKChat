@@ -53,7 +53,6 @@ namespace JKChat.Android.Presenter {
 		}
 
 		protected virtual async Task<bool> ShowTabFragment(Type view, TabFragmentPresentationAttribute attribute, MvxViewModelRequest request) {
-//			ValidateArguments(view, attribute, request);
 			var showViewPagerFragment = await ShowViewPagerFragment(view, attribute, request).ConfigureAwait(true);
 			if (!showViewPagerFragment)
 				return false;
