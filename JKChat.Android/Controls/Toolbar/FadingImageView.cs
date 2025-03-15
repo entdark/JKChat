@@ -1,11 +1,12 @@
 ﻿using System;
 
-using Android.Animation;
 using Android.Content;
 using Android.Runtime;
 using Android.Util;
 using Android.Views.Animations;
 using Android.Widget;
+
+using Java.Lang;
 
 namespace JKChat.Android.Controls.Toolbar {
 	[Register("JKChat.Android.Controls.Toolbar.FadingImageView")]
@@ -47,45 +48,28 @@ namespace JKChat.Android.Controls.Toolbar {
 			float value = show ? 1.0f : 0.0f;
 			if (!animated) {
 				Alpha = value;
-				//ScaleX = value;
 				ScaleY = value;
 				completion?.Invoke();
 				return;
 			}
-			ObjectAnimator []animators;
+			var animator = this.Animate()
+				.Alpha(value)
+				.SetDuration(200)
+				.SetInterpolator(new DecelerateInterpolator());
 			if (show) {
 				this.completion = () => {
 					completion?.Invoke();
 				};
-				animators = new ObjectAnimator[] {
-					//ObjectAnimator.OfFloat(this, "scaleX", value),
-					ObjectAnimator.OfFloat(this, "scaleY", value),
-					ObjectAnimator.OfFloat(this, "alpha", value)
-				};
+				animator.ScaleY(value);
 			} else {
 				this.completion = () => {
 					ScaleY = value;
 					completion?.Invoke();
 				};
-				animators = new ObjectAnimator[] {
-					//ObjectAnimator.OfFloat(this, "scaleX", value),
-					//ObjectAnimator.OfFloat(this, "scaleY", value),
-					ObjectAnimator.OfFloat(this, "alpha", value)
-				};
 			}
-			var set = new AnimatorSet();
-			set.PlayTogether(animators);
-			set.SetDuration(200);
-			set.SetInterpolator(new DecelerateInterpolator());
-			set.AnimationEnd += VisibilityAnimationEnd;
-			set.Start();
-		}
-
-		private void VisibilityAnimationEnd(object sender, EventArgs ev) {
-			var set = sender as AnimatorSet;
-			set.AnimationEnd -= VisibilityAnimationEnd;
-			this.completion?.Invoke();
-			this.completion = null;
+			animator
+				.WithEndAction(new Runnable(this.completion))
+				.Start();
 		}
 
 		protected override void Dispose(bool disposing) {
