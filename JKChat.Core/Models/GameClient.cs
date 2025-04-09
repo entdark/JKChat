@@ -255,7 +255,6 @@ namespace JKChat.Core.Models {
 			if (ViewModel == null) {
 				return;
 			}
-			dialogOffsersReconnect = true;
 			ShowDialog(new JKDialogConfig() {
 				Title = "Disconnected",
 				CancelText = "OK",
@@ -268,7 +267,7 @@ namespace JKChat.Core.Models {
 				OkAction = (_) => {
 					Task.Run(Connect);
 				}
-			});
+			}, true);
 		}
 
 		internal void Shutdown() {
@@ -361,7 +360,6 @@ namespace JKChat.Core.Models {
 					reason = command[1];
 				}
 				Disconnect();
-				dialogOffsersReconnect = true;
 				ShowDialog(new JKDialogConfig() {
 					Title = "Disconnected",
 					Message = reason,
@@ -373,7 +371,7 @@ namespace JKChat.Core.Models {
 					OkAction = (_) => {
 						Task.Run(Connect);
 					}
-				});
+				}, true);
 			}
 		}
 
@@ -558,9 +556,13 @@ namespace JKChat.Core.Models {
 		}
 
 		private JKDialogConfig pendingDialogConfig;
-		private void ShowDialog(JKDialogConfig config) {
-			if (dialogOffsersReconnect) {
-				return;
+		private void ShowDialog(JKDialogConfig config, bool offersReconnect = false) {
+			if (offersReconnect) {
+				if (dialogOffsersReconnect) {
+					return;
+				} else {
+					dialogOffsersReconnect = true;
+				}
 			}
 			if (pendingDialogConfig != null) {
 				return;
