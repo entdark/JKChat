@@ -2,6 +2,7 @@
 
 using Android.Content;
 using Android.Views;
+using Android.Widget;
 
 using AndroidX.Core.View;
 
@@ -9,6 +10,7 @@ using Google.Android.Material.Internal;
 
 using JKChat.Android.Presenter;
 using JKChat.Android.Services;
+using JKChat.Android.TargetBindings;
 using JKChat.Android.Views.Base;
 using JKChat.Core;
 using JKChat.Core.Navigation;
@@ -66,6 +68,11 @@ namespace JKChat.Android {
 		protected override void FillValueCombiners(IMvxValueCombinerRegistry registry) {
 			base.FillValueCombiners(registry);
 			registry.AddOrOverwrite("ColourTextParameter", new ColourTextParameterValueCombiner());
+		}
+
+		protected override void FillTargetFactories(IMvxTargetBindingFactoryRegistry registry) {
+			base.FillTargetFactories(registry);
+			registry.RegisterCustomBindingFactory<TextSwitcher>("TextFormatted", view => new TextSwitcherTextFormattedTargetBinding(view));
 		}
 
 		public override void LoadPlugins(IMvxPluginManager pluginManager) {

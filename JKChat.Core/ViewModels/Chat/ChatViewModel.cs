@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 
 using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
@@ -136,6 +137,34 @@ namespace JKChat.Core.ViewModels.Chat {
 		public string Scores {
 			get => scores;
 			set => SetProperty(ref scores, value);
+		}
+
+		private Timer centerPrintTimer;
+		private string centerPrint;
+		public string CenterPrint {
+			get => centerPrint;
+			set => SetProperty(ref centerPrint, value, () => {
+				ShowCenterPrint = true;
+				if (centerPrintTimer == null) {
+					centerPrintTimer = new Timer(3000.0);
+					centerPrintTimer.Elapsed += TimerElapsed;
+					centerPrintTimer.Start();
+				} else {
+					centerPrintTimer.Interval = 3000.0;
+				}
+			});
+		}
+
+		private void TimerElapsed(object sender, ElapsedEventArgs ev) {
+			ShowCenterPrint = false;
+			centerPrintTimer.Elapsed -= TimerElapsed;
+			centerPrintTimer = null;
+		}
+
+		private bool showCenterPrint;
+		public bool ShowCenterPrint {
+			get => showCenterPrint;
+			set => SetProperty(ref showCenterPrint, value);
 		}
 
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;

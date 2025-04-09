@@ -202,6 +202,41 @@
             app:reverseLayout="false"
             app:MvxItemTemplate="@layout/command_item"
             app:MvxBind="ItemsSource CommandItems; ItemClick CommandItemClickCommand; Visibility Visibility(CommandItems.Count)"/>
+<!--https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/layout/transient_notification_with_icon.xml-->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:paddingLeftFitsWindowInsetsButExpanded="true"
+            app:paddingRightFitsWindowInsets="true">
+            <TextSwitcher
+                android:id="@+id/center_print_textswitcher"
+                android:visibility="gone"
+                android:alpha="0.0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="32dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:animateLayoutChanges="true"
+                android:background="@android:drawable/toast_frame"
+                android:backgroundTint="?attr/colorSurface"
+                android:inAnimation="@android:anim/fade_in"
+                android:outAnimation="@android:anim/fade_out"
+                app:MvxBind="TextFormatted ColourText(CenterPrint)">
+                <TextView
+                    tools:text="Waiting for players..."
+                    android:gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    tools:text="Waiting for players..."
+                    android:gravity="center_horizontal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </TextSwitcher>
+        </FrameLayout>
         <include layout="@layout/loading"/>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

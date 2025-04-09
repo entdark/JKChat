@@ -13,6 +13,12 @@ namespace JKChat.iOS.Views.Chat
 	partial class ChatViewController
 	{
 		[Outlet]
+		UIKit.UILabel CenterPrintLabel { get; set; }
+
+		[Outlet]
+		UIKit.UIVisualEffectView CenterPrintView { get; set; }
+
+		[Outlet]
 		UIKit.NSLayoutConstraint ChatBottomMessageTopConstraint { get; set; }
 
 		[Outlet]
@@ -81,6 +87,11 @@ namespace JKChat.iOS.Views.Chat
 		
 		void ReleaseDesignerOutlets ()
 		{
+			if (CenterPrintLabel != null) {
+				CenterPrintLabel.Dispose ();
+				CenterPrintLabel = null;
+			}
+
 			if (ChatBottomMessageTopConstraint != null) {
 				ChatBottomMessageTopConstraint.Dispose ();
 				ChatBottomMessageTopConstraint = null;
@@ -136,6 +147,11 @@ namespace JKChat.iOS.Views.Chat
 				CommandsTableViewHeightConstraint = null;
 			}
 
+			if (InfoView != null) {
+				InfoView.Dispose ();
+				InfoView = null;
+			}
+
 			if (MessageTextView != null) {
 				MessageTextView.Dispose ();
 				MessageTextView = null;
@@ -171,9 +187,9 @@ namespace JKChat.iOS.Views.Chat
 				ViewBottomConstraint = null;
 			}
 
-			if (InfoView != null) {
-				InfoView.Dispose ();
-				InfoView = null;
+			if (CenterPrintView != null) {
+				CenterPrintView.Dispose ();
+				CenterPrintView = null;
 			}
 		}
 	}

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Timers;
 
+using CoreAnimation;
+
 using CoreGraphics;
 
 using Foundation;
@@ -114,6 +116,50 @@ namespace JKChat.iOS.Views.Chat {
 				this.View.LayoutIfNeeded();
 				ChatTableView.ContentInset = new(InfoView.Frame.Height, 0.0f, ChatTableView.SpecialOffset, 0.0f);
 				ChatTableView.ScrollIndicatorInsets = new(InfoView.Frame.Height, 0.0f, ChatTableView.SpecialOffset, 0.0f);
+			}
+		}
+
+		private readonly CATransition centerPrintTransition = new() {
+			TimingFunction = CAMediaTimingFunction.FromName(CAMediaTimingFunction.Default),
+			Type = CAAnimation.TransitionFade,
+			Duration = 0.500
+		};
+		private readonly UILabel centerPrintLabel = new() {
+			TextAlignment = UITextAlignment.Center,
+			Font = UIFont.PreferredBody,
+			LineBreakMode = UILineBreakMode.WordWrap,
+			Lines = 0
+		};
+		private string centerPrint;
+		public string CenterPrint {
+			get => centerPrint;
+			set {
+				if (centerPrint != value) {
+					var text = ColourTextValueConverter.Convert(value);
+					var parentFrame = CenterPrintView.Superview.Frame;
+					centerPrintLabel.Frame = new(0.0f, 0.0f, parentFrame.Width-32.0f, 0.0f);
+					centerPrintLabel.AttributedText = text;
+					centerPrintLabel.SizeToFit();
+					var countedLabelFrame = centerPrintLabel.Frame;
+					CGRect viewFrame = new(parentFrame.GetMidX()-countedLabelFrame.GetMidX()-32.0f, 0.0f, countedLabelFrame.Width+32.0f, countedLabelFrame.Height+24.0f);
+					UIView.Animate(0.200, 0.0f, UIViewAnimationOptions.CurveEaseOut, () => {
+						CenterPrintView.Frame = viewFrame;
+					}, null);
+					CenterPrintLabel.Layer.AddAnimation(centerPrintTransition, CAAnimation.TransitionFade.ToString());
+					CenterPrintLabel.AttributedText = text;
+				}
+				centerPrint = value;
+			}
+		}
+
+		private bool showCenterPrint;
+		public bool ShowCenterPrint {
+			get => showCenterPrint;
+			set {
+				if (showCenterPrint != value) {
+					AnimateCenterPrint(CenterPrintView.Superview, value);
+				}
+				showCenterPrint = value;
 			}
 		}
 
@@ -256,6 +302,9 @@ namespace JKChat.iOS.Views.Chat {
 			InfoView.AddGestureRecognizer(new UITapGestureRecognizer(() => {
 				ViewModel.ServerInfoCommand?.Execute();
 			}));
+
+			CenterPrintView.Superview.Hidden = true;
+			CenterPrintLabel.Text = string.Empty;
 		}
 
 		[Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]
@@ -290,8 +339,7 @@ namespace JKChat.iOS.Views.Chat {
 		public override void ViewDidLoad() {
 			base.ViewDidLoad();
 			var chatSource = new ChatTableViewSource(ChatTableView) {
-				ViewControllerWithKeyboard = this,
-				ViewBottomConstraint = ViewBottomConstraint
+				ViewControllerWithKeyboard = this
 			};
 			var commandsSource = new CommandsViewSource(CommandsTableView);
 
@@ -322,6 +370,8 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(this).For(v => v.CommandSetAutomatically).To(vm => vm.CommandSetAutomatically);
 			set.Bind(TimerLabel).For(v => v.AttributedText).To(vm => vm.Timer).WithConversion("ColourText");
 			set.Bind(this).For(v => v.Scores).To(vm => vm.Scores);
+			set.Bind(this).For(v => v.CenterPrint).To(vm => vm.CenterPrint);
+			set.Bind(this).For(v => v.ShowCenterPrint).To(vm => vm.ShowCenterPrint);
 
 			UpdateCommandsTableView();
 		}
@@ -366,7 +416,7 @@ namespace JKChat.iOS.Views.Chat {
 
 		#endregion
 
-		private void AnimateButton(UIButton button, bool show) {
+		private static void AnimateButton(UIButton button, bool show) {
 			if (show) {
 				button.Hidden = false;
 				UIView.Animate(0.200, () => {
@@ -378,6 +428,22 @@ namespace JKChat.iOS.Views.Chat {
 					button.Transform = CGAffineTransform.MakeScale(float.Epsilon, float.Epsilon);
 				}, () => {
 					button.Hidden = true;
+				});
+			}
+		}
+
+		private static void AnimateCenterPrint(UIView view, bool show) {
+			if (show) {
+				view.Hidden = false;
+				UIView.Animate(0.200, () => {
+					view.Alpha = 1.0f;
+				});
+			} else {
+				UIView.Animate(0.200, () => {
+					//setting 0.0f, 0.0f causes the bug where animation happens instantly
+					view.Alpha = 0.0f;
+				}, () => {
+					view.Hidden = true;
 				});
 			}
 		}

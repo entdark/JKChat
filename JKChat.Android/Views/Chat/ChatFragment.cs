@@ -21,6 +21,7 @@ using JKChat.Android.Adapters;
 using JKChat.Android.Controls;
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
+using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
@@ -46,6 +47,7 @@ namespace JKChat.Android.Views.Chat {
 		private EditText messageEditText;
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
 		private MvxRecyclerView recyclerView;
+		private TextSwitcher centerPrintTextSwitcher;
 
 		private string message;
 		public string Message {
@@ -84,6 +86,17 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
+		private bool showCenterPrint;
+		public bool ShowCenterPrint {
+			get => showCenterPrint;
+			set {
+				if (showCenterPrint != value) {
+					FadeCenterPrint(centerPrintTextSwitcher, value);
+				}
+				showCenterPrint = value;
+			}
+		}
+
 		public ChatFragment() : base(Resource.Layout.chat_page, Resource.Menu.chat_toolbar_items) {
 			PostponeTransition = true;
 		}
@@ -94,6 +107,7 @@ namespace JKChat.Android.Views.Chat {
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
 			set.Bind(this).For(v => v.ChatType).To(vm => vm.ChatType);
 			set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
+			set.Bind(this).For(v => v.ShowCenterPrint).To(vm => vm.ShowCenterPrint);
 			return view;
 		}
 
@@ -125,6 +139,9 @@ namespace JKChat.Android.Views.Chat {
 
 			messageEditText = view.FindViewById<EditText>(Resource.Id.message_edittext);
 			messageEditText.AfterTextChanged += AfterMessageTextChanged;
+			
+			centerPrintTextSwitcher = view.FindViewById<TextSwitcher>(Resource.Id.center_print_textswitcher);
+			centerPrintTextSwitcher.LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
 
 			var titleView = this.BindingInflate(Resource.Layout.chat_title, null, false);
 			SetCustomTitleView(titleView);
@@ -256,6 +273,27 @@ namespace JKChat.Android.Views.Chat {
 				.ScaleX(scale)
 				.ScaleY(scale)
 				.Alpha(scale)
+				.SetDuration(200)
+				.SetInterpolator(new DecelerateInterpolator())
+				.WithEndAction(new Runnable(() => {
+					if (!show)
+						view.Visibility = ViewStates.Invisible;
+				}))
+				.Start();
+		}
+
+		private static void FadeCenterPrint(View view, bool show, bool animated = true) {
+			float alpha = show ? 1.0f : 0.0f;
+			if (show)
+				view.Visibility = ViewStates.Visible;
+			if (!animated) {
+				view.Alpha = alpha;
+				if (!show)
+					view.Visibility = ViewStates.Invisible;
+				return;
+			}
+			view.Animate()
+				.Alpha(alpha)
 				.SetDuration(200)
 				.SetInterpolator(new DecelerateInterpolator())
 				.WithEndAction(new Runnable(() => {

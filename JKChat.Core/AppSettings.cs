@@ -100,6 +100,11 @@ namespace JKChat.Core {
 			get => (WidgetLink)Get((int)WidgetLink.ChatIfConnected);
 			set => Set((int)value);
 		}
+		private static CachedValue<bool> centerPrint;
+		public static bool CenterPrint {
+			get => GetCached(true, ref centerPrint, Get);
+			set => SetCached(value, ref centerPrint, Set);
+		}
 
 		private static bool Get(bool defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
 		private static void Set(bool value, [CallerMemberName] string key = "") => Preferences.Set(key, value);

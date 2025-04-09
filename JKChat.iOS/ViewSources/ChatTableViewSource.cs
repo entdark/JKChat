@@ -26,7 +26,6 @@ namespace JKChat.iOS.ViewSources {
 		private bool dragging = false;
 
 		public IKeyboardViewController ViewControllerWithKeyboard { get; set; }
-		public NSLayoutConstraint ViewBottomConstraint { get; set; }
 
 		public ChatTableViewSource(UITableView tableView) : base(tableView) {
 			tableView.Source = this;

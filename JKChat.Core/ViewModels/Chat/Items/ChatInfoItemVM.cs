@@ -27,7 +27,7 @@ namespace JKChat.Core.ViewModels.Chat.Items {
 			MergeNext = mergeNext;
 		}
 
-		private void TimerElapsed(object sender, ElapsedEventArgs ev){
+		private void TimerElapsed(object sender, ElapsedEventArgs ev) {
 			RaisePropertyChanged(nameof(Text));
 			timer.Elapsed -= TimerElapsed;
 			timer = null;

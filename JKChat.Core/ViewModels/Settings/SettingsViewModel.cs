@@ -55,6 +55,11 @@ namespace JKChat.Core.ViewModels.Settings {
 							Title = "Encoding",
 							Value = jkclientService.Encoding.EncodingName,
 							OnClick = EncodingExecute
+						},
+						new TableToggleItemVM() {
+							Title = "Center print",
+							IsChecked = AppSettings.CenterPrint,
+							Toggled = item => AppSettings.CenterPrint = item.IsChecked
 						}
 					}
 				},

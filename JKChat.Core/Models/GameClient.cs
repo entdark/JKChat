@@ -10,11 +10,12 @@ using JKChat.Core.Messages;
 using JKChat.Core.Navigation;
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
+using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
 using JKChat.Core.ViewModels.Dialog;
 
 using JKClient;
-using Microsoft.Maui.ApplicationModel;
+
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 using Microsoft.Maui.Devices;
 
@@ -45,9 +46,9 @@ namespace JKChat.Core.Models {
 		private bool addingPending = false;
 		private readonly HashSet<string> blockedPlayers;
 		private readonly TasksQueue chatQueue = new();
-		private IMvxViewModel viewModel;
+		private ChatViewModel viewModel;
 		private bool dialogOffsersReconnect = false;
-		internal IMvxViewModel ViewModel {
+		internal ChatViewModel ViewModel {
 			get => viewModel;
 			set {
 				viewModel = value;
@@ -322,13 +323,17 @@ namespace JKChat.Core.Models {
 		private void ServerCommandExecuted(CommandEventArgs commandEventArgs) {
 			var command = commandEventArgs.Command;
 			string cmd = command[0];
-			if (string.Compare(cmd, "chat", StringComparison.OrdinalIgnoreCase) == 0
-				|| string.Compare(cmd, "tchat", StringComparison.OrdinalIgnoreCase) == 0) {
+			if (string.Compare(cmd, "chat", StringComparison.Ordinal) == 0
+				|| string.Compare(cmd, "tchat", StringComparison.Ordinal) == 0) {
 				AddToChat(command);
-			} else if (string.Compare(cmd, "lchat", StringComparison.OrdinalIgnoreCase) == 0
-				|| string.Compare(cmd, "ltchat", StringComparison.OrdinalIgnoreCase) == 0) {
+			} else if (string.Compare(cmd, "lchat", StringComparison.Ordinal) == 0
+				|| string.Compare(cmd, "ltchat", StringComparison.Ordinal) == 0) {
 				AddToLocationChat(command);
-			} else if (string.Compare(cmd, "print", StringComparison.OrdinalIgnoreCase) == 0) {
+			} else if (string.Compare(cmd, "cp", StringComparison.Ordinal) == 0) {
+				if (AppSettings.CenterPrint && ViewModel != null) {
+					ViewModel.CenterPrint = command[1].TrimEnd('\n');
+				}
+			} else if (string.Compare(cmd, "print", StringComparison.Ordinal) == 0) {
 				string title;
 				if (string.Compare(command[1], 0, "@@@INVALID_ESCAPE_TO_MAIN", 0, 25, StringComparison.OrdinalIgnoreCase) == 0
 					|| string.Compare(command[1], 0, "Invalid password", 0, 16, StringComparison.OrdinalIgnoreCase) == 0) {
@@ -348,7 +353,7 @@ namespace JKChat.Core.Models {
 						Task.Run(CloseViewModel);
 					}
 				});
-			} else if (string.Compare(cmd, "disconnect", StringComparison.OrdinalIgnoreCase) == 0) {
+			} else if (string.Compare(cmd, "disconnect", StringComparison.Ordinal) == 0) {
 				string reason;
 				if (string.Compare(command[1], 0, "@@@WAS_KICKED", 0, 13, StringComparison.OrdinalIgnoreCase) == 0
 					|| string.Compare(command[1], 0, "was kicked", 0, 10, StringComparison.OrdinalIgnoreCase) == 0) {
