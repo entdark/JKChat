@@ -24,7 +24,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:paddingLeftFitsWindowInsetsButExpanded="true"
         app:paddingRightFitsWindowInsets="true">
         <HorizontalScrollView
             android:id="@+id/message_scrollview"
@@ -32,7 +31,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="2"
             android:scrollbars="none"
-            android:animateLayoutChanges="true">
+            android:animateLayoutChanges="true"
+            android:clipToPadding="false"
+            app:paddingLeftFitsWindowInsetsButExpanded="true">
             <LinkTextView
                 android:id="@+id/message"
                 style="@style/OnSurfaceText.BodyMedium"

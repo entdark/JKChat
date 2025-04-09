@@ -5,13 +5,14 @@ using Android.Runtime;
 using Android.Text;
 using Android.Util;
 using Android.Views;
-using Android.Widget;
+
+using Google.Android.Material.TextView;
 
 using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 
 namespace JKChat.Android.Controls {
 	[Register("JKChat.Android.Controls.LinkTextView")]
-	public class LinkTextView : TextView {
+	public class LinkTextView : MaterialTextView {
 		public LinkTextView(Context context) : base(context) {
 		}
 
