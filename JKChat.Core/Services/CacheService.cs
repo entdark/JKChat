@@ -122,8 +122,8 @@ namespace JKChat.Core.Services {
 		}
 
 		private async Task<IEnumerable<ServerListItemVM>> LoadCachedServers(Expression<Func<CachedServer, bool>> predicate) {
-			return (await connection.Table<CachedServer>().Where(predicate).ToArrayAsync())
-				.Select(recentServer => recentServer.ToServerVM());
+			return (await connection.Table<CachedServer>().Where(predicate).OrderByDescending(server => server.LastConnected).ToArrayAsync())
+				.Select(server => server.ToServerVM());
 		}
 
 		private async Task<CachedServer> GetCachedServerAsync(ServerInfo serverInfo) {
