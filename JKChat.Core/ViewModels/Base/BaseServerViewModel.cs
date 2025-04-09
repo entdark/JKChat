@@ -1,4 +1,6 @@
-﻿using JKChat.Core.Messages;
+﻿using JKChat.Core.Helpers;
+
+using JKChat.Core.Messages;
 
 using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
@@ -8,8 +10,8 @@ namespace JKChat.Core.ViewModels.Base {
 		private MvxSubscriptionToken serverInfoMessageToken, favouriteMessageToken;
 
 		public BaseServerViewModel() {
-			serverInfoMessageToken = Messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
-			favouriteMessageToken = Messenger.SubscribeOnMainThread<FavouriteMessage>(OnFavouriteMessage);
+			serverInfoMessageToken = Messenger.SubscribeOnMainThread2<ServerInfoMessage>(OnServerInfoMessage);
+			favouriteMessageToken = Messenger.SubscribeOnMainThread2<FavouriteMessage>(OnFavouriteMessage);
 		}
 
 		protected virtual void OnServerInfoMessage(ServerInfoMessage message) {}
@@ -18,8 +20,8 @@ namespace JKChat.Core.ViewModels.Base {
 
 		public override void ViewCreated() {
 			base.ViewCreated();
-			serverInfoMessageToken ??= Messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
-			favouriteMessageToken ??= Messenger.SubscribeOnMainThread<FavouriteMessage>(OnFavouriteMessage);
+			serverInfoMessageToken ??= Messenger.SubscribeOnMainThread2<ServerInfoMessage>(OnServerInfoMessage);
+			favouriteMessageToken ??= Messenger.SubscribeOnMainThread2<FavouriteMessage>(OnFavouriteMessage);
 		}
 
 		public override void ViewDestroy(bool viewFinishing = true) {
