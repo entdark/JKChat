@@ -4,7 +4,7 @@ namespace JKChat.Android.Views.Base {
 	public interface IBaseActivity {
 		bool ExpandedWindow { get; }
 		Toolbar Toolbar { get; }
-		void Exit();
-		void PopEnter();
+		void Exit(int order);
+		void PopEnter(int order);
 	}
 }

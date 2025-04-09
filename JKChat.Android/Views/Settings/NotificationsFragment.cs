@@ -49,8 +49,8 @@ namespace JKChat.Android.Views.Settings {
 				new ActivityResultContracts.RequestPermission(),
 				new ActivityResultCallback<Java.Lang.Boolean>(granted => {
 					CheckNotificationsPermission(granted.BooleanValue());
-				}
-			));
+				})
+			);
 		}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {

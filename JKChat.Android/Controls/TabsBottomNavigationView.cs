@@ -66,7 +66,7 @@ namespace JKChat.Android.Controls {
 			bool allow = HandleItemSelection?.Invoke(ev.Item.ItemId) ?? true;
 			if (!allow)
 				return;
-			ViewPager?.SetCurrentItem(ev.Item.ItemId, true);
+			ViewPager?.SetCurrentItem(ev.Item.ItemId, false);
 			ev.Handled = true;
 		}
 

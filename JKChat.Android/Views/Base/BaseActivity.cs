@@ -88,9 +88,9 @@ namespace JKChat.Android.Views.Base {
 			ExpandedWindow = width > maxWidth && height > maxHeight;
 		}
 
-		public virtual void Exit() {}
+		public virtual void Exit(int order) {}
 
-		public virtual void PopEnter() {}
+		public virtual void PopEnter(int order) {}
 
 		private class OnApplyWindowInsetsListener : Java.Lang.Object, IOnApplyWindowInsetsListener {
 			public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insets) {

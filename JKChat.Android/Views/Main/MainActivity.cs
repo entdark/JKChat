@@ -47,6 +47,7 @@ namespace JKChat.Android.Views.Main {
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private View contentMasterView, contentDetailView;
 		private Intent pendingIntent;
+		private Handler handler = new(Looper.MainLooper);
 
 		public MainActivity() : base(Resource.Layout.activity_main) {}
 
@@ -74,8 +75,8 @@ namespace JKChat.Android.Views.Main {
 					else
 						options &= ~NotificationOptions.Enabled;
 					AppSettings.NotificationOptions = options;
-				}
-			));
+				})
+			);
 			CheckNotificationsPermission();
 			UpdateWidgets();
 		}
@@ -85,8 +86,6 @@ namespace JKChat.Android.Views.Main {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 				serverInfoMessageToken = null;
 			}
-/*			var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
-			gameClientsService.ShutdownAll();*/
 			base.OnDestroy();
 		}
 
@@ -143,19 +142,35 @@ namespace JKChat.Android.Views.Main {
 			}
 		}
 
-		public override void Exit() {
-			base.Exit();
+		public override void Exit(int order) {
+			base.Exit(order);
 			if (!ExpandedWindow) {
-				var exitAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_hslide_rtl);
-				contentMasterView.StartAnimation(exitAnimation);
+				if (order == 1) {
+					var exitAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_push_exit);
+					contentMasterView.StartAnimation(exitAnimation);
+				} else if (order > 1) {
+					handler.RemoveCallbacksAndMessages(null);
+					contentMasterView.Alpha = 0.0f;
+					handler.PostDelayed(() => {
+						contentMasterView.Alpha = 1.0f;
+					}, 400);
+				}
 			}
 		}
 
-		public override void PopEnter() {
-			base.PopEnter();
+		public override void PopEnter(int order) {
+			base.PopEnter(order);
 			if (!ExpandedWindow) {
-				var popEnterAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_hslide_ltr);
-				contentMasterView.StartAnimation(popEnterAnimation);
+				if (order == 1) {
+					var popEnterAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_push_pop_enter);
+					contentMasterView.StartAnimation(popEnterAnimation);
+				} else if (order > 1) {
+					handler.RemoveCallbacksAndMessages(null);
+					contentMasterView.Alpha = 0.0f;
+					handler.PostDelayed(() => {
+						contentMasterView.Alpha = 1.0f;
+					}, 400);
+				}
 			}
 		}
 

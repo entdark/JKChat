@@ -209,15 +209,15 @@ namespace JKChat.Android.Views.Base {
 		protected virtual void ActivityExit() {
 			if (Order == 1) {
 				HideKeyboard();
-				(Activity as IBaseActivity)?.Exit();
 			}
+			(Activity as IBaseActivity)?.Exit(Order);
 		}
 
 		protected virtual void ActivityPopEnter() {
 			if (Order == 1) {
 				HideKeyboard();
-				(Activity as IBaseActivity)?.PopEnter();
 			}
+			(Activity as IBaseActivity)?.PopEnter(Order);
 		}
 
 		private bool toolbarCustomTitleAdded = false;

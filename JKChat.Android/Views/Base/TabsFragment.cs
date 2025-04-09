@@ -32,7 +32,7 @@ namespace JKChat.Android.Views.Base {
 			base.OnViewCreated(view, savedInstanceState);
 			ViewPager = view.FindViewById<TabsViewPager>(ViewPagerId);
 			ViewPager.ScrollEnabled = false;
-			ViewPager.OffscreenPageLimit = 3;
+			ViewPager.OffscreenPageLimit = this.tabsCount;
 			ViewPager.PageSelected += TabPageSelected;
 			if (ViewPager.Adapter == null)
 				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.Context, this.ChildFragmentManager, this.tabsCount);
@@ -48,8 +48,7 @@ namespace JKChat.Android.Views.Base {
 			base.OnDestroyView();
 		}
 
-		private void TabPageSelected(object sender, ViewPager.PageSelectedEventArgs ev) {
-//			ToggleBackPressedCallback(ev.Position != DefaultTab);
+		protected virtual void TabPageSelected(object sender, ViewPager.PageSelectedEventArgs ev) {
 		}
 
 		public void CloseFragments(bool animated, int tab = -1) {
@@ -57,7 +56,7 @@ namespace JKChat.Android.Views.Base {
 		}
 
 		public void MoveToTab(int tab) {
-			ViewPager.SetCurrentItem(tab, true);
+			BottomNavigationView.SelectedItemId = tab;
 		}
 
 		protected override void OnBackPressedCallback() {
