@@ -18,37 +18,24 @@ namespace JKChat.Core {
 			for (int i = 0; i < collection.Count; i++) {
 				var oldItem = collection[i];
 				bool deleteItem = true;
-				int j = 0;
-				foreach (var newItem in newItems) {
-					if (areItemsTheSame(oldItem, newItem)) {
+				for (int j = 0; j < newItems.Length; j++) {
+					if (areItemsTheSame(oldItem, newItems[j])) {
 						toNotInsertIndicies.Add(j);
 						deleteItem = false;
 						break;
 					}
-					j++;
 				}
 				if (deleteItem) {
 					toRemoveIndicies.Add(i);
 				}
 			}
-/*			bool removeALot = toRemoveIndicies.Count > 1;
-			bool removeOne = toRemoveIndicies.Count == 1;
-			int toAddCount = Math.Abs(toNotInsertIndicies.Count-newItems.Length);
-			bool addALot = toAddCount > 1;
-			bool addOne = toAddCount == 1;
-			if (removeALot || addALot || (removeOne && addOne)) {
-				ReplaceWith(items);
-				return;
-			}*/
 			for (int i = toRemoveIndicies.Count-1; i >= 0 ; i--) {
 				collection.RemoveAt(toRemoveIndicies[i]);
 			}
-			int k = 0;
-			foreach (var newItem in newItems) {
+			for (int k = 0; k < newItems.Length; k++) {
 				if (!toNotInsertIndicies.Contains(k)) {
-					collection.Add(newItem);
+					collection.Add(newItems[k]);
 				}
-				k++;
 			}
 			if (keySelector != null) {
 				var sortedItems = collection.OrderByDescending(keySelector).ToArray();
