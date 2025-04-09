@@ -261,8 +261,8 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		private async Task LoadServerList(Func<Task<IEnumerable<ServerInfo>>> loadingFunc) {
 			try {
-				var serverInfosWithStatuses = Enum.GetValues<Models.ConnectionStatus>()
-					.SelectMany(status => (gameClientsService.ServerInfosWithStatuses(status) ?? Enumerable.Empty<ServerInfo>()).Select(serverInfo => new { Status = status, ServerInfo = serverInfo }))
+				var serverInfosWithStatus = Enum.GetValues<Models.ConnectionStatus>()
+					.SelectMany(status => (gameClientsService.ServerInfosWithStatus(status) ?? Enumerable.Empty<ServerInfo>()).Select(serverInfo => new { Status = status, ServerInfo = serverInfo }))
 					.Where(serverInfoWithStatus => serverInfoWithStatus != null)
 					.ToDictionary(serverInfoWithStatus => serverInfoWithStatus.ServerInfo, serverInfoWithStatus => serverInfoWithStatus.Status);
 				IEnumerable<ServerListItemVM> newItems = null;
@@ -270,18 +270,18 @@ namespace JKChat.Core.ViewModels.ServerList {
 				var servers = await loadingFunc();
 				if (!servers.IsNullOrEmpty()) {
 					var serverItems = recentServers
-						.ReverseWithUpdate(servers, serverInfosWithStatuses)
+						.ReverseWithUpdate(servers, serverInfosWithStatus)
 						.Union(servers
 							.Where(server => server.Ping != 0)
 							.OrderByDescending(server => server.Clients)
 							.Select(server => new ServerListItemVM(server) {
-								Status = serverInfosWithStatuses.TryGetValue(server, out var status) ? status : Models.ConnectionStatus.Disconnected
+								Status = serverInfosWithStatus.TryGetValue(server, out var status) ? status : Models.ConnectionStatus.Disconnected
 							})
 						, new ServerListItemVM.Comparer());
 					newItems = serverItems;
 				} else if (recentServers.Length > 0) {
 					newItems = recentServers
-						.UpdateStatuses(serverInfosWithStatuses)
+						.UpdateStatuses(serverInfosWithStatus)
 						.Reverse();
 				}
 				if (newItems != null) {
@@ -354,11 +354,11 @@ namespace JKChat.Core.ViewModels.ServerList {
 	}
 
 	internal static class ServerListViewModelExtensions {
-		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatuses) {
+		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatus) {
 			var serversArray = servers is ServerListItemVM []array ? array : servers.ToArray();
 			for (int i = serversArray.Length-1; i >= 0; i--) {
 				var server = serversArray[i];
-				var serverInfoAndStatus = serverInfosWithStatuses.FirstOrDefault(kv => kv.Key == server.ServerInfo);
+				var serverInfoAndStatus = serverInfosWithStatus.FirstOrDefault(kv => kv.Key == server.ServerInfo);
 				if (serverInfoAndStatus.Key is { } serverInfo && serverInfoAndStatus.Value != Models.ConnectionStatus.Disconnected) {
 					server.Set(serverInfo, serverInfoAndStatus.Value);
 				} else {
@@ -371,9 +371,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 			}
 		}
 
-		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatuses) {
+		public static IEnumerable<ServerListItemVM> UpdateStatuses(this IEnumerable<ServerListItemVM> servers, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatus) {
 			foreach (var server in servers) {
-				server.Status = serverInfosWithStatuses.TryGetValue(server.ServerInfo, out var status) ? status : default;
+				server.Status = serverInfosWithStatus.TryGetValue(server.ServerInfo, out var status) ? status : default;
 				yield return server;
 			}
 		}

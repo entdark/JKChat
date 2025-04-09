@@ -38,7 +38,7 @@ namespace JKChat.Core.Services {
 			return client;
 		}
 
-		public IEnumerable<JKClient.ServerInfo> ServerInfosWithStatuses(ConnectionStatus status, bool without = false) {
+		public IEnumerable<JKClient.ServerInfo> ServerInfosWithStatus(ConnectionStatus status, bool without = false) {
 			if (clients.Count <= 0) {
 				return null;
 			}

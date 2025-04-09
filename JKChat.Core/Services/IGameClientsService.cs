@@ -12,7 +12,7 @@ namespace JKChat.Core.Services {
 		ConnectionStatus? GetStatus(string address);
 		internal GameClient GetClient(JKClient.ServerInfo serverInfo, bool startNew = false);
 		internal GameClient GetClient(JKClient.NetAddress address);
-		internal IEnumerable<JKClient.ServerInfo> ServerInfosWithStatuses(ConnectionStatus status, bool without = false);
+		internal IEnumerable<JKClient.ServerInfo> ServerInfosWithStatus(ConnectionStatus status, bool without = false);
 		void DisconnectFromAll();
 		void ShutdownAll();
 	}
