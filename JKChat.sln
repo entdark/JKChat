@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JKChat.iOS", "JKChat.iOS\JK
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JKClient", "JKClient\JKClient\JKClient.csproj", "{7D1C8733-2E77-43B9-9C40-99E53081CB76}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helper", "Helper\Helper.csproj", "{F3FE55DC-CD00-47CE-A01A-E8952E06319F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils.csproj", "{2E299412-7C1A-46EE-9368-E256FA5DD472}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +39,14 @@ Global
 		{0E16FA34-571C-4DF8-B707-9BB82BFCC7E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E16FA34-571C-4DF8-B707-9BB82BFCC7E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E16FA34-571C-4DF8-B707-9BB82BFCC7E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3FE55DC-CD00-47CE-A01A-E8952E06319F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3FE55DC-CD00-47CE-A01A-E8952E06319F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3FE55DC-CD00-47CE-A01A-E8952E06319F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3FE55DC-CD00-47CE-A01A-E8952E06319F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E299412-7C1A-46EE-9368-E256FA5DD472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E299412-7C1A-46EE-9368-E256FA5DD472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E299412-7C1A-46EE-9368-E256FA5DD472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E299412-7C1A-46EE-9368-E256FA5DD472}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
