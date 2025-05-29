@@ -20,6 +20,8 @@ namespace JKChat.iOS {
 			public static readonly UIImage Line3HorizontalDecreaseCircle = UIImage.GetSystemImage("line.3.horizontal.decrease.circle");
 			public static readonly UIImage Line3HorizontalDecreaseCircleFill = UIImage.GetSystemImage("line.3.horizontal.decrease.circle.fill");
 			public static readonly UIImage PlusCircle = UIImage.GetSystemImage("plus.circle");
+			public static readonly UIImage MapCircle = UIImage.GetSystemImage("map.circle");
+			public static readonly UIImage MapCircleFill = UIImage.GetSystemImage("map.circle.fill");
 		}
 	}
 }

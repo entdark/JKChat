@@ -1,7 +1,6 @@
 ﻿using System;
 
 using Android;
-using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Views;
@@ -20,6 +19,8 @@ using JKChat.Android.Services;
 using JKChat.Android.TemplateSelectors;
 using JKChat.Android.Views.Base;
 using JKChat.Core.ViewModels.Settings;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross.DroidX.RecyclerView;
 using MvvmCross.Platforms.Android.Binding.BindingContext;
@@ -82,9 +83,8 @@ namespace JKChat.Android.Views.Settings {
 					CancelText = "Cancel",
 					OkAction = _ => {
 						ViewModel.NotificationsEnabled = false;
-						var intent = new Intent(global::Android.Provider.Settings.ActionApplicationDetailsSettings, global::Android.Net.Uri.Parse($"package:" + global::Android.App.Application.Context.PackageName));
 						try {
-							StartActivity(intent);
+							AppInfo.ShowSettingsUI();
 						} catch (Exception exception) {
 							System.Diagnostics.Debug.WriteLine(exception);
 						}

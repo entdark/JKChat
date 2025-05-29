@@ -15,29 +15,8 @@
     <ProjectReference Include="..\JKChat.Core\JKChat.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\anewhope_regular.ttf">
-      <Link>Resources\font\anewhope_regular.ttf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\arial_regular.ttf">
-      <Link>Resources\font\arial_regular.ttf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\ergoe_bold.TTF">
-      <Link>Resources\font\ergoe_bold.TTF</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\ergoe_medium.ttf">
-      <Link>Resources\font\ergoe_medium.ttf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\ergoe_regular.ttf">
-      <Link>Resources\font\ergoe_regular.ttf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\ocrastd_regular.otf">
-      <Link>Resources\font\ocrastd_regular.otf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\roboto_mono_regular.ttf">
-      <Link>Resources\font\roboto_mono_regular.ttf</Link>
-    </AndroidResource>
-    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\roboto_mono_medium.ttf">
-      <Link>Resources\font\roboto_mono_medium.ttf</Link>
+    <AndroidResource Include="..\JKChat.Core\Resources\Fonts\*">
+      <Link>Resources\font\%(Filename)%(Extension)</Link>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>

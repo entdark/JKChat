@@ -13,8 +13,10 @@
             <connections>
                 <outlet property="CenterPrintLabel" destination="Ivh-UK-sqq" id="2o4-sG-wGC"/>
                 <outlet property="CenterPrintView" destination="Mj7-zF-Jpy" id="2Cm-V2-JaY"/>
-                <outlet property="ChatBottomMessageTopConstraint" destination="Tql-je-bnA" id="Rau-OF-B3A"/>
                 <outlet property="ChatTableView" destination="175" id="name-outlet-175"/>
+                <outlet property="ChatTableViewBottomConstraint" destination="V61-e1-Qix" id="Ugx-Fl-0dn"/>
+                <outlet property="ChatTableViewBottomToMessageViewTopConstraint" destination="g4n-Jx-p8q" id="U54-mX-vRS"/>
+                <outlet property="ChatTableViewToMinimapViewBottomConstraint" destination="gOV-nm-yjQ" id="KOd-Yu-Wep"/>
                 <outlet property="ChatTypeButton" destination="1670" id="name-outlet-1670"/>
                 <outlet property="ChatTypeCommonButton" destination="1276" id="name-outlet-1276"/>
                 <outlet property="ChatTypePrivateButton" destination="1428" id="name-outlet-1428"/>
@@ -22,16 +24,16 @@
                 <outlet property="ChatTypeTeamButton" destination="1417" id="name-outlet-1417"/>
                 <outlet property="CommandsButton" destination="02t-5t-fLm" id="59Y-ia-ZXP"/>
                 <outlet property="CommandsTableView" destination="Fa1-th-FG9" id="sDU-gb-ecv"/>
-                <outlet property="CommandsTableViewBottomConstraint" destination="ldY-wp-dQ9" id="34n-On-1KY"/>
+                <outlet property="CommandsTableViewBottomConstraint" destination="fgq-A6-Bzc" id="OAf-Qg-0PL"/>
                 <outlet property="CommandsTableViewHeightConstraint" destination="CFb-la-hMt" id="aqD-QI-X2V"/>
                 <outlet property="InfoView" destination="bc5-sV-ejZ" id="FOJ-Pe-BHe"/>
                 <outlet property="MessageTextView" destination="1903" id="name-outlet-1903"/>
                 <outlet property="MessageToolbar" destination="fup-dp-pgP" id="5Km-1m-lhf"/>
                 <outlet property="MessageView" destination="3687" id="name-outlet-3687"/>
+                <outlet property="MinimapView" destination="gb6-se-fJP" id="cpW-dG-Emu"/>
                 <outlet property="ScoresLabel" destination="EaT-0w-uRo" id="lXL-PG-w55"/>
                 <outlet property="SendButton" destination="2313" id="name-outlet-2313"/>
                 <outlet property="TimerLabel" destination="CaR-4c-YPP" id="zIP-U1-tGM"/>
-                <outlet property="ViewBottomConstraint" destination="uab-qN-vGf" id="name-outlet-uab-qN-vGf"/>
                 <outlet property="view" destination="1" id="RRd-Eg-VrN"/>
             </connections>
         </placeholder>
@@ -42,9 +44,12 @@
             <subviews>
                 <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="674"/>
-                    <color key="backgroundColor" systemColor="tertiarySystemBackgroundColor"/>
-                    <color key="tintColor" systemColor="systemTealColor"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </tableView>
+                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gb6-se-fJP" customClass="MinimapView">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="674"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bc5-sV-ejZ">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="68"/>
                     <subviews>
@@ -308,30 +313,34 @@ Longest Nickname 420</string>
             <color key="backgroundColor" systemColor="tertiarySystemBackgroundColor"/>
             <color key="tintColor" systemColor="systemMintColor"/>
             <constraints>
+                <constraint firstItem="175" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="089-jU-x03"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="trailing" secondItem="jed-Jv-Lo4" secondAttribute="trailing" constant="16" id="0JF-JD-YjP"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="top" secondItem="NOh-Zt-4h4" secondAttribute="bottom" id="1sS-Qk-Pc1"/>
+                <constraint firstItem="bc5-sV-ejZ" firstAttribute="bottom" secondItem="gb6-se-fJP" secondAttribute="top" id="45W-gK-VKr"/>
+                <constraint firstItem="175" firstAttribute="top" secondItem="1" secondAttribute="top" id="4JY-az-blb"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="9rE-dh-OpY"/>
                 <constraint firstItem="jed-Jv-Lo4" firstAttribute="leading" secondItem="NOh-Zt-4h4" secondAttribute="leading" constant="16" id="Dib-hX-Rhn"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="jed-Jv-Lo4" secondAttribute="bottom" constant="32" id="Fod-yH-hkN"/>
-                <constraint firstItem="175" firstAttribute="top" secondItem="1" secondAttribute="top" id="OBO-Qg-MoO"/>
+                <constraint firstItem="gb6-se-fJP" firstAttribute="leading" secondItem="NOh-Zt-4h4" secondAttribute="leading" id="N07-6B-5zc"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="0BW-om-Vsj" secondAttribute="bottom" id="P0O-tp-Fs7"/>
-                <constraint firstItem="bc5-sV-ejZ" firstAttribute="leading" secondItem="NOh-Zt-4h4" secondAttribute="leading" id="SBQ-1F-kIn"/>
-                <constraint firstItem="0BW-om-Vsj" firstAttribute="top" secondItem="175" secondAttribute="bottom" id="Tql-je-bnA"/>
+                <constraint firstItem="bc5-sV-ejZ" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="SBQ-1F-kIn"/>
+                <constraint firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="V61-e1-Qix"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="leading" secondItem="EaT-0w-uRo" secondAttribute="leading" constant="-16" id="ViL-Ef-fNU"/>
                 <constraint firstAttribute="trailing" secondItem="Fa1-th-FG9" secondAttribute="trailing" id="WNc-az-8ZS"/>
+                <constraint firstItem="NOh-Zt-4h4" firstAttribute="trailing" secondItem="gb6-se-fJP" secondAttribute="trailing" id="Wtj-rb-4bd"/>
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="cYK-8w-CnP"/>
+                <constraint firstAttribute="trailing" secondItem="175" secondAttribute="trailing" id="eFz-VC-mpZ"/>
                 <constraint firstItem="bc5-sV-ejZ" firstAttribute="top" secondItem="1" secondAttribute="top" id="f6Y-7N-NHI"/>
-                <constraint firstItem="NOh-Zt-4h4" firstAttribute="trailing" secondItem="bc5-sV-ejZ" secondAttribute="trailing" id="fAh-nR-dqQ"/>
+                <constraint firstAttribute="trailing" secondItem="bc5-sV-ejZ" secondAttribute="trailing" id="fAh-nR-dqQ"/>
+                <constraint firstItem="Fa1-th-FG9" firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="fgq-A6-Bzc"/>
+                <constraint firstItem="0BW-om-Vsj" firstAttribute="top" secondItem="175" secondAttribute="bottom" id="g4n-Jx-p8q"/>
+                <constraint firstItem="175" firstAttribute="bottom" secondItem="gb6-se-fJP" secondAttribute="bottom" id="gOV-nm-yjQ"/>
                 <constraint firstItem="CaR-4c-YPP" firstAttribute="trailing" secondItem="NOh-Zt-4h4" secondAttribute="trailing" constant="-16" id="iLs-tr-dE1"/>
                 <constraint firstItem="Fa1-th-FG9" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="lcG-Oq-CQt"/>
-                <constraint firstItem="Fa1-th-FG9" firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="ldY-wp-dQ9"/>
                 <constraint firstItem="jed-Jv-Lo4" firstAttribute="top" secondItem="bc5-sV-ejZ" secondAttribute="bottom" constant="16" id="twx-Cb-n4X"/>
                 <constraint firstAttribute="bottom" secondItem="KtL-wy-5qa" secondAttribute="bottom" id="uGI-Wh-lgf"/>
-                <constraint firstAttribute="bottom" secondItem="175" secondAttribute="bottom" id="uab-qN-vGf"/>
-                <constraint firstItem="175" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="wRR-VV-sYN"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="trailing" secondItem="1" secondAttribute="trailing" id="x9j-9q-oWD"/>
                 <constraint firstAttribute="trailing" secondItem="0BW-om-Vsj" secondAttribute="trailing" id="yNL-jZ-lB9"/>
-                <constraint firstItem="175" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="zYm-M2-3RO"/>
             </constraints>
             <point key="canvasLocation" x="194.40000000000001" y="0.0"/>
         </view>
@@ -350,16 +359,13 @@ Longest Nickname 420</string>
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="separatorColor">
-            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemMintColor">
-            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemTealColor">
-            <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

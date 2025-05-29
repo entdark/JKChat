@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -33,6 +34,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		private static readonly string []commonCommands = new []{ "/rcon", "/callvote" };
 		private static readonly string []baseEnhancedCommands = new []{ "/whois", "/rules", "/mappool", "/ctfstats", "/toptimes", "/topaim", "/pugstats" };
 		private static readonly string []jaPlusCommands = new []{ "/aminfo", "/amsay" };
+		private static readonly string []mapHelperCommands = new []{ "/follownext", "/followprev", "/follow", "/team spectator" };
 		private readonly HashSet<string> commands = commonCommands.ToHashSet();
 		
 		private readonly ICacheService cacheService;
@@ -40,6 +42,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 		private string address;
 		private GameClient gameClient;
+		private string mapName;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand CopyCommand { get; init; }
@@ -85,14 +88,13 @@ namespace JKChat.Core.ViewModels.Chat {
 				StartCommandCommand.RaiseCanExecuteChanged();
 				int oldCount = CommandItems.Count;
 				if (message?.StartsWith('/') ?? false) {
-					var matchingCommands = commands.Where(c => c.Contains(message) && string.Compare(c, message, StringComparison.OrdinalIgnoreCase) != 0);
+					var commandsAll = MapData != null ? commands.Concat(mapHelperCommands) : commands;
+					var matchingCommands = commandsAll.Where(c => c.Contains(message) && string.Compare(c, message, StringComparison.OrdinalIgnoreCase) != 0);
 					CommandItems.ReplaceWith(matchingCommands);
 				} else if (CommandItems.Count > 0) {
 					CommandItems.Clear();
 				}
-				if (CommandItems.Count != oldCount) {
-					RaisePropertyChanged(nameof(CommandItems) + "." + nameof(CommandItems.Count));
-				}
+				CommandItemsCount = CommandItems.Count;
 			});
 		}
 
@@ -112,6 +114,12 @@ namespace JKChat.Core.ViewModels.Chat {
 		public MvxObservableCollection<string> CommandItems {
 			get => commandItems;
 			set => SetProperty(ref commandItems, value);
+		}
+
+		private int commandItemsCount;
+		public int CommandItemsCount {
+			get => commandItemsCount;
+			set => SetProperty(ref commandItemsCount, value);
 		}
 
 		private bool isFavourite;
@@ -167,6 +175,26 @@ namespace JKChat.Core.ViewModels.Chat {
 			set => SetProperty(ref showCenterPrint, value);
 		}
 
+		private EntityData []entities;
+		public EntityData []Entities {
+			get => entities;
+			set => SetProperty(ref entities, value);
+		}
+
+		private MapData mapData;
+		public MapData MapData {
+			get => mapData;
+			set => SetProperty(ref mapData, value, () => {
+				MapFocused = MapData != null && Items.Count == 0;
+			});
+		}
+
+		private bool mapFocused;
+		public bool MapFocused {
+			get => mapFocused;
+			set => SetProperty(ref mapFocused, value);
+		}
+
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
 
 		public ChatViewModel(ICacheService cacheService, IGameClientsService gameClientsService) {
@@ -196,6 +224,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
 			if (gameClient?.ServerInfo == message.ServerInfo) {
+				LoadMapData();
 				PrepareForModification();
 				if (message.Status.HasValue) {
 					Status = message.Status.Value;
@@ -496,10 +525,21 @@ namespace JKChat.Core.ViewModels.Chat {
 				gameClient.ViewModel = this;
 				gameClient.FrameExecuted += FrameExecuted;
 			}
+			Items.CollectionChanged += ItemsCollectionChanged;
 		}
 
+		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs ev) {
+			if (Items.Count == 1 && AppSettings.MinimapOptions.HasFlag(MinimapOptions.FirstUnfocus))
+				MapFocused = false;
+		}
+
+		private List<EntityData> ents;
 		private void FrameExecuted(long frameTime){
 			var clientGame = gameClient.ClientGame;
+			Entities = getEntities(clientGame)
+				.OrderBy(entity => entity.Team)
+				.Concat(this.gameClient.TempEntities)
+				.ToArray();
 			Timer = $"{clientGame.Timer/60000}:{clientGame.Timer/1000%60:D2}";
 
 			switch (ServerInfo.GameType) {
@@ -513,6 +553,76 @@ namespace JKChat.Core.ViewModels.Chat {
 					var clientInfo = clientGame.ClientsInfo != null ? clientGame.ClientsInfo.Where(ci => ci.InfoValid).Append(default).Aggregate((ci1, ci2) => ci1.CompareTo(ref ci2) > 0 ? ci1 : ci2) : default;
 					Scores = clientInfo.InfoValid ? $"Leader: {scoresString(clientInfo.Score)}\n{clientInfo.Name}" : DefaultScores;
 					break;
+			}
+
+			IEnumerable<EntityData> getEntities(JKClient.ClientGame clientGame) {
+				var options = AppSettings.MinimapOptions;
+				if (!options.HasFlag(MinimapOptions.Enabled))
+					return Array.Empty<EntityData>();
+
+				var entities = clientGame.Entities;
+				ents?.Clear();
+				ents ??= new(entities.Length);
+				for (int i = 0; i < entities.Length; i++) {
+					ref var cent = ref entities[i];
+					if (!cent.Valid || clientGame.IsNoDraw(ref cent)) {
+						continue;
+					}
+					JKClient.ClientEntity playerCent = default;
+					if (options.HasFlag(MinimapOptions.Players) && clientGame.IsPlayer(ref cent) && !clientGame.IsInvisible(ref cent)
+						&& (clientGame.ClientsInfo?[cent.ClientNum].InfoValid ?? false)) {
+						var team = clientGame.ClientsInfo[cent.ClientNum].Team;
+						string name = clientGame.ClientsInfo[cent.ClientNum].Name;
+						if (clientGame.IsFollowed(ref cent))
+							name = "👁 " + name;
+						ents.Add(new EntityData(EntityType.Player, (Team)team) {
+							Origin = cent.LerpOrigin,
+							Angles = cent.LerpAngles,
+							Name = options.HasFlag(MinimapOptions.Names) ? name : null
+						});
+					} else if (options.HasFlag(MinimapOptions.Predicted) && clientGame.IsPredictedClient(ref cent) && clientGame.IsInvisible(ref cent)
+						&& (clientGame.ClientsInfo?[cent.ClientNum].InfoValid ?? false)) {
+						var team = clientGame.ClientsInfo[cent.ClientNum].Team;
+						string name = clientGame.ClientsInfo[cent.ClientNum].Name;
+						ents.Add(new EntityData(EntityType.Player, (Team)team) {
+							Origin = cent.LerpOrigin,
+							Angles = cent.LerpAngles,
+							Name = options.HasFlag(MinimapOptions.Names) ? name : null
+						});
+					} else if (options.HasFlag(MinimapOptions.Players) && clientGame.IsVehicle(ref cent, ref playerCent)
+						&& (clientGame.ClientsInfo?[cent.Owner].InfoValid ?? false)) {
+						var team = clientGame.ClientsInfo[cent.Owner].Team;
+						string name = clientGame.ClientsInfo[cent.Owner].Name;
+						if (!playerCent.Valid || clientGame.IsNoDraw(ref playerCent)) {
+							if (clientGame.IsFollowed(ref playerCent))
+								name = "👁 " + name;
+							ents.Add(new EntityData(EntityType.Player, (Team)team) {
+								Origin = cent.LerpOrigin,
+								Angles = cent.LerpAngles,
+								Name = options.HasFlag(MinimapOptions.Names) ? name : null
+							});
+						}
+						ents.Add(new EntityData(EntityType.Vehicle, (Team)team) {
+							Origin = cent.LerpOrigin,
+							Angles = cent.LerpAngles
+						});
+					} else if (options.HasFlag(MinimapOptions.Weapons) && clientGame.IsMissile(ref cent)) {
+						var weapon = clientGame.GetWeapon(ref cent, out bool altFire);
+						var color = weapon.ToColor(altFire);
+						ents.Add(new EntityData(EntityType.Projectile) {
+							Origin = cent.LerpOrigin,
+							Angles = cent.LerpAngles,
+							Color = color
+						});
+					}
+					if (options.HasFlag(MinimapOptions.Flags) && clientGame.GetFlagTeam(ref cent) is var team3 && team3 is JKClient.Team.Red or JKClient.Team.Blue) {
+						ents.Add(new EntityData(EntityType.Flag, (Team)team3) {
+							Origin = cent.LerpOrigin,
+							Angles = cent.LerpAngles
+						});
+					}
+				}
+				return ents;
 			}
 
 			static string scoresSiege(JAClientGame clientGame, JKClient.ServerInfo serverInfo) {
@@ -532,7 +642,7 @@ namespace JKChat.Core.ViewModels.Chat {
 							return DefaultScores;
 					}
 				} else if (clientGame.SiegeRoundTime != 0) {
-					//dirty, clientGame data has to be read only
+//dirty, clientGame data has to be read only
 					clientGame.SiegeRoundTime = 0;
 				} else if (clientGame.SiegeRoundBeganTime != 0) {
 					int timedValue = clientGame.BeatingSiegeTime;
@@ -563,6 +673,9 @@ namespace JKChat.Core.ViewModels.Chat {
 				gameClient.FrameExecuted -= FrameExecuted;
 				gameClient.ViewModel = null;
 			}
+			if (Items != null) {
+				Items.CollectionChanged -= ItemsCollectionChanged;
+			}
 			base.ViewDisappearing();
 		}
 
@@ -573,6 +686,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			Title = gameClient.ServerInfo.HostName;
 			Players = $"{gameClient.ServerInfo.Clients.ToString(CultureInfo.InvariantCulture)}/{gameClient.ServerInfo.MaxClients.ToString(CultureInfo.InvariantCulture)}";
 			IsFavourite = isFavourite;
+			LoadMapData();
 			PrepareForModification();
 		}
 
@@ -606,10 +720,10 @@ namespace JKChat.Core.ViewModels.Chat {
 					return;
 				}
 			}
-			//should never happen
+//should never happen
 			if (gameClient == null)
 				return;
-			//force IsLoading = true;
+//force IsLoading = true;
 			Status = gameClient.Status;
 			await cacheService.SaveRecentServer(ServerInfo);
 			await gameClient.Connect(false);
@@ -625,6 +739,51 @@ namespace JKChat.Core.ViewModels.Chat {
 			else if (data is string s && JKClient.NetAddress.FromString(s) is var address)
 				return this.ServerInfo?.Address != address;
 			return true;
+		}
+
+		private void LoadMapData() {
+			if (!AppSettings.MinimapOptions.HasFlag(MinimapOptions.Enabled))
+				return;
+
+			if (string.Compare(mapName, ServerInfo.MapName, StringComparison.OrdinalIgnoreCase) == 0)
+				return;
+
+			var resourceMapName = mapName = ServerInfo.MapName;
+
+			if (mapName == null) {
+				MapData = null;
+				return;
+			}
+
+//special case for mappers who cannot properly recreate a map
+			const string siege_hoth = "siege_hoth";
+			if (mapName.StartsWith(siege_hoth) && mapName.Length > siege_hoth.Length && mapName[siege_hoth.Length] is char c && char.IsDigit(c) && (c - '0') >= 3)
+				resourceMapName = "mp/siege_hoth2";
+			var assembly = this.GetType().Assembly;
+			string path = $"JKChat.Core.Resources.Minimaps.{ServerInfo.Version.ToGame()}.{resourceMapName.Replace('/','.')}.xy,";
+			foreach (var resourceName in assembly.GetManifestResourceNames()) {
+				if (resourceName.StartsWith(path, StringComparison.OrdinalIgnoreCase)) {
+					string []minMax = resourceName.Substring(path.Length).Replace(".png","").Split(',');
+					if (minMax?.Length == 6
+						&& int.TryParse(minMax[0], out int minX)
+						&& int.TryParse(minMax[1], out int minY)
+						&& int.TryParse(minMax[2], out int minZ)
+						&& int.TryParse(minMax[3], out int maxX)
+						&& int.TryParse(minMax[4], out int maxY)
+						&& int.TryParse(minMax[5], out int maxZ)) {
+						MapData = new() {
+							Assembly = assembly,
+							Path = resourceName,
+							Min = new(minX, minY, minZ),
+							Max = new(maxX, maxY, maxZ),
+							HasShadow = ServerInfo.Version == JKClient.ClientVersion.JO_v1_02
+						};
+						return;
+					}
+					break;
+				}
+			}
+			MapData = null;
 		}
 	}
 }

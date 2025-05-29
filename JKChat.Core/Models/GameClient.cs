@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,7 +26,6 @@ using MvvmCross.Base;
 using MvvmCross.Core;
 using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
-using MvvmCross.ViewModels;
 
 using Common = JKClient.Common;
 
@@ -154,6 +155,7 @@ namespace JKChat.Core.Models {
 					Client.Guid = AppSettings.PlayerId;
 				} catch {}
 				Client.ServerCommandExecuted += ServerCommandExecuted;
+				Client.EntityEventExecuted += EntityEventExecuted;
 				Client.ServerInfoChanged += ServerInfoChanged;
 				Client.FrameExecuted += ClientFrameExecuted;
 				Client.Start(ExceptionCallback);
@@ -178,6 +180,7 @@ namespace JKChat.Core.Models {
 			}
 			lastFrameTime = frameTime;
 			FrameExecuted?.Invoke(frameTime);
+			lastDisruptorEnd = Vector3.Zero;
 		}
 
 		internal async Task Connect(bool ignoreDialog = true) {
@@ -275,6 +278,7 @@ namespace JKChat.Core.Models {
 			Disconnect();
 			if (Client != null) {
 				Client.ServerCommandExecuted -= ServerCommandExecuted;
+				Client.EntityEventExecuted -= EntityEventExecuted;
 				Client.ServerInfoChanged -= ServerInfoChanged;
 				Client.FrameExecuted -= ClientFrameExecuted;
 				Client.Dispose();
@@ -377,6 +381,73 @@ namespace JKChat.Core.Models {
 						Task.Run(Connect);
 					}
 				}, true);
+			}
+		}
+
+		private Vector3 lastDisruptorEnd = Vector3.Zero;
+		public List<EntityData> TempEntities { get; init; } = new();
+		private void EntityEventExecuted(EntityEventArgs entityEventArgs) {
+			Vector3 start, end;
+			var entity = entityEventArgs.Entity;
+			var now = DateTime.UtcNow;
+			TempEntities.RemoveAll(entity => (entity.Life - now).TotalMilliseconds <= 0);
+
+			var options = AppSettings.MinimapOptions;
+			if (!options.HasFlag(MinimapOptions.Weapons))
+				return;
+
+			switch (entityEventArgs.Event) {
+				case ClientGame.EntityEvent.DisruptorMainShot:
+					if (lastDisruptorEnd != Vector3.Zero) {
+						start = lastDisruptorEnd;
+						lastDisruptorEnd = Vector3.Zero;
+					} else {
+						start = entity.Origin2;
+					}
+					end = entity.LerpOrigin;
+					TempEntities.Add(new EntityData(EntityType.Shot, 1000) {
+						Origin = start,
+						Origin2 = end,
+						Color = Color.OrangeRed
+					});
+					lastDisruptorEnd = end;
+					addImpact(end, Color.OrangeRed);
+					break;
+				case ClientGame.EntityEvent.DisruptorSniperShot:
+					start = entity.Origin2;
+					end = entity.LerpOrigin;
+					TempEntities.Add(new EntityData(EntityType.Shot, 1000) {
+						Origin = start,
+						Origin2 = end,
+						Color = Color.OrangeRed
+					});
+					lastDisruptorEnd = end;
+					addImpact(end, Color.OrangeRed);
+					break;
+				case ClientGame.EntityEvent.ConcAltImpact:
+					start = entity.Origin2;
+					end = entity.Origin2+entity.Angles2*entity.Angles.Length();
+					TempEntities.Add(new EntityData(EntityType.Shot, 500) {
+						Origin = start,
+						Origin2 = end,
+						Color = Color.DodgerBlue
+					});
+					addImpact(end, Color.DodgerBlue);
+					break;
+				case ClientGame.EntityEvent.PlayEffect:
+				case ClientGame.EntityEvent.MissileHit:
+				case ClientGame.EntityEvent.MissileMiss:
+				case ClientGame.EntityEvent.MissileMissMetal:
+					var weapon = ClientGame.GetWeapon(ref entity, out bool altFire);
+					var color = weapon.ToColor(altFire);
+					addImpact(entity.LerpOrigin, color);
+					break;
+			}
+			void addImpact(Vector3 origin, Color color, int life = 700) {
+				TempEntities.Add(new EntityData(EntityType.Impact, life) {
+					Origin = origin,
+					Color = color
+				});
 			}
 		}
 

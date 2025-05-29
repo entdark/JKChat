@@ -21,7 +21,6 @@ using JKChat.Android.Adapters;
 using JKChat.Android.Controls;
 using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
-using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
 using JKChat.Core.Messages;
@@ -42,11 +41,12 @@ using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 namespace JKChat.Android.Views.Chat {
 	[PushFragmentPresentation]
 	public class ChatFragment : ReportFragment<ChatViewModel, ChatItemVM> {
-		private IMenuItem copyItem, favouriteItem;
+		private IMenuItem copyItem, favouriteItem, minimapItem;
 		private ImageButton sendButton, commandButton, chatTypeButton;
 		private EditText messageEditText;
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
 		private MvxRecyclerView recyclerView;
+		private MinimapView minimapView;
 		private TextSwitcher centerPrintTextSwitcher;
 
 		private string message;
@@ -86,6 +86,27 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
+		private MapData mapData;
+		public MapData MapData {
+			get => mapData;
+			set {
+				mapData = value;
+				UpdateMinimapItem();
+			}
+		}
+
+		private bool mapFocused;
+		public bool MapFocused {
+			get => mapFocused;
+			set {
+				if (mapFocused != value) {
+					SwapMapAndChat(value, true);
+				}
+				mapFocused = value;
+				UpdateMinimapItem();
+			}
+		}
+
 		private bool showCenterPrint;
 		public bool ShowCenterPrint {
 			get => showCenterPrint;
@@ -108,6 +129,8 @@ namespace JKChat.Android.Views.Chat {
 			set.Bind(this).For(v => v.ChatType).To(vm => vm.ChatType);
 			set.Bind(this).For(v => v.IsFavourite).To(vm => vm.IsFavourite);
 			set.Bind(this).For(v => v.ShowCenterPrint).To(vm => vm.ShowCenterPrint);
+			set.Bind(this).For(v => v.MapData).To(vm => vm.MapData);
+			set.Bind(this).For(v => v.MapFocused).To(vm => vm.MapFocused);
 			return view;
 		}
 
@@ -128,6 +151,9 @@ namespace JKChat.Android.Views.Chat {
 				};
 			}
 			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
+
+			minimapView = view.FindViewById<MinimapView>(Resource.Id.minimap_view);
+			SwapMapAndChat(ViewModel.MapFocused, false);
 
 			sendButton = view.FindViewById<ImageButton>(Resource.Id.send_button);
 			ScaleButton(sendButton, !string.IsNullOrEmpty(ViewModel.Message), false);
@@ -231,6 +257,13 @@ namespace JKChat.Android.Views.Chat {
 				ViewModel?.CopyCommand?.Execute(SelectedItem);
 				CloseSelection();
 			});
+			minimapItem = Menu.FindItem(Resource.Id.minimap_item);
+			minimapItem.SetClickAction(() => {
+				if (ViewModel == null)
+					return;
+				ViewModel.MapFocused = !ViewModel.MapFocused;
+			});
+			UpdateMinimapItem();
 		}
 
 		protected override void ShowSelection(bool animated = true) {
@@ -257,6 +290,11 @@ namespace JKChat.Android.Views.Chat {
 			favouriteItem.AdjustIconInsets();
 		}
 
+		private void UpdateMinimapItem() {
+			minimapItem?.SetVisible(MapData != null);
+			minimapItem?.SetIcon(MapFocused ? Resource.Drawable.ic_map_filled : Resource.Drawable.ic_map_outlined);
+		}
+
 		private static void ScaleButton(View view, bool show, bool animated = true) {
 			float scale = show ? 1.0f : 0.0f;
 			if (show)
@@ -279,6 +317,33 @@ namespace JKChat.Android.Views.Chat {
 					if (!show)
 						view.Visibility = ViewStates.Invisible;
 				}))
+				.Start();
+		}
+
+		private void SwapMapAndChat(bool mapFocused, bool animated = true) {
+			if (recyclerView == null || minimapView == null)
+				return;
+			float minimapAlpha = mapFocused ? 1.0f : 0.3f,
+				recyclerAlpha = mapFocused ? 0.3f : 1.0f;
+			if (mapFocused) {
+				minimapView.BringToFront();
+			} else {
+				recyclerView.BringToFront();
+			}
+			if (!animated) {
+				minimapView.Alpha = minimapAlpha;
+				recyclerView.Alpha = recyclerAlpha;
+				return;
+			}
+			minimapView.Animate()
+				.Alpha(minimapAlpha)
+				.SetDuration(200)
+				.SetInterpolator(new DecelerateInterpolator())
+				.Start();
+			recyclerView.Animate()
+				.Alpha(recyclerAlpha)
+				.SetDuration(200)
+				.SetInterpolator(new DecelerateInterpolator())
 				.Start();
 		}
 

@@ -18,22 +18,27 @@ using Google.Android.Material.Button;
 using JKChat.Android.Controls.Listeners;
 using JKChat.Android.Controls.Toolbar;
 
+using Microsoft.Maui.ApplicationModel;
+
 namespace JKChat.Android.Helpers {
 	public static class AndroidExtensions {
 		public static int DpToPx(this int dp) {
-			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics));
+			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Context.Resources.DisplayMetrics));
 		}
 		public static int DpToPx(this float dp) {
-			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics));
+			return (int)Math.Ceiling(TypedValueCompat.DpToPx(dp, Context.Resources.DisplayMetrics));
 		}
 		public static float DpToPxF(this float dp) {
-			return TypedValueCompat.DpToPx(dp, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.DpToPx(dp, Context.Resources.DisplayMetrics);
 		}
 		public static float PxToDp(this int px) {
-			return TypedValueCompat.PxToDp(px, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.PxToDp(px, Context.Resources.DisplayMetrics);
 		}
 		public static float PxToDp(this float px) {
-			return TypedValueCompat.PxToDp(px, Application.Context.Resources.DisplayMetrics);
+			return TypedValueCompat.PxToDp(px, Context.Resources.DisplayMetrics);
+		}
+		public static float SpToPxF(this float dp) {
+			return TypedValueCompat.SpToPx(dp, Context.Resources.DisplayMetrics);
 		}
 
 		public static int GetDimensionInPx(this Context context, int id) {
@@ -107,5 +112,7 @@ namespace JKChat.Android.Helpers {
 		public static IDictionary<string, string> ToDictionary(this Bundle bundle) {
 			return bundle?.IsEmpty ?? true ? new Dictionary<string, string>() : bundle.KeySet().ToDictionary(key => key, bundle.GetString);
 		}
+
+		private static Context Context => Platform.CurrentActivity ?? Application.Context;
 	}
 }

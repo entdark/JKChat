@@ -106,6 +106,12 @@ namespace JKChat.Core {
 			set => SetCached(value, ref centerPrint, Set);
 		}
 
+		private static CachedValue<int> minimapOptions;
+		public static MinimapOptions MinimapOptions {
+			get => (MinimapOptions)GetCached((int)MinimapOptions.Default, ref minimapOptions, Get);
+			set => SetCached((int)value, ref minimapOptions, Set);
+		}
+
 		private static bool Get(bool defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);
 		private static void Set(bool value, [CallerMemberName] string key = "") => Preferences.Set(key, value);
 

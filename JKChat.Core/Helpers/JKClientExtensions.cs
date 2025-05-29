@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 
 using JKChat.Core.Models;
 
 using JKClient;
+
+using Weapon = JKClient.ClientGame.Weapon;
 
 namespace JKChat.Core.Helpers {
 	internal static class ClientVersionExtensions {
@@ -107,6 +110,33 @@ namespace JKChat.Core.Helpers {
 				JKClient.Team.Blue => (long)int.MaxValue << 1,
 				JKClient.Team.Free => int.MaxValue << 0,
 				_ => 0
+			};
+		}
+	}
+	internal static class WeaponExtensions {
+//colors: https://learn.microsoft.com/en-us/dotnet/api/system.windows.media.brushes?view=windowsdesktop-9.0
+		public static Color ToColor(this Weapon weapon, bool altFire = false) {
+			return weapon switch {
+				Weapon.BryarPistol or Weapon.BryarOld or Weapon.Turret => Color.Yellow,
+				Weapon.Blaster or Weapon.EmplacedGun => Color.DeepPink,
+				Weapon.Bowcaster => Color.Lime,
+				Weapon.Repeater when altFire => Color.DeepSkyBlue,
+				Weapon.Repeater => Color.Yellow,
+				Weapon.Demp2 => Color.MediumPurple,
+				Weapon.Flechette => Color.Gold,
+				Weapon.RocketLauncher => Color.Red,
+				Weapon.Thermal or Weapon.GrenadeLauncher => Color.LimeGreen,
+				Weapon.Concussion => Color.DodgerBlue,
+				Weapon.TripMine => Color.DodgerBlue,
+				Weapon.DetPack => Color.OrangeRed,
+				Weapon.Machinegun => Color.Khaki,
+				Weapon.Shotgun => Color.Khaki,
+				Weapon.Lightning => Color.LightYellow,
+				Weapon.Railgun => Color.SpringGreen,
+				Weapon.Plasmagun => Color.Cyan,
+				Weapon.BFG => Color.Lime,
+				Weapon.GrapplingHook => Color.SaddleBrown,
+				_ => Color.White
 			};
 		}
 	}

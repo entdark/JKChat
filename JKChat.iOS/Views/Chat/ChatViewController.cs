@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Timers;
 
 using CoreAnimation;
@@ -18,6 +19,8 @@ using JKChat.iOS.Helpers;
 using JKChat.iOS.ValueConverters;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.ViewSources;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross.Binding.BindingContext;
 using MvvmCross.Platforms.Ios.Binding.Views;
@@ -41,7 +44,8 @@ namespace JKChat.iOS.Views.Chat {
 		private CGPoint lastTappedPoint = CGPoint.Empty;
 		private long lastTappedTime = 0L;
 		private ChatItemVM lastTappedItem = null;
-		private UIBarButtonItem moreButtonItem;
+		private UIBarButtonItem moreButtonItem, minimapButtonItem;
+		private bool viewAppeared = false;
 
 		public override string Title {
 			get => base.Title;
@@ -119,36 +123,35 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		private readonly CATransition centerPrintTransition = new() {
-			TimingFunction = CAMediaTimingFunction.FromName(CAMediaTimingFunction.Default),
-			Type = CAAnimation.TransitionFade,
-			Duration = 0.500
-		};
-		private readonly UILabel centerPrintLabel = new() {
-			TextAlignment = UITextAlignment.Center,
-			Font = UIFont.PreferredBody,
-			LineBreakMode = UILineBreakMode.WordWrap,
-			Lines = 0
-		};
+		private MapData mapData;
+		public MapData MapData {
+			get => mapData;
+			set {
+				mapData = value;
+				UpdateButtonItems();
+			}
+		}
+
+		private bool mapFocused;
+		public bool MapFocused {
+			get => mapFocused;
+			set {
+				if (viewAppeared && mapFocused != value) {
+					SwapMapAndChat(value, true);
+				}
+				mapFocused = value;
+				UpdateButtonItems();
+			}
+		}
+
 		private string centerPrint;
 		public string CenterPrint {
 			get => centerPrint;
 			set {
 				if (centerPrint != value) {
-					var text = ColourTextValueConverter.Convert(value);
-					var parentFrame = CenterPrintView.Superview.Frame;
-					centerPrintLabel.Frame = new(0.0f, 0.0f, parentFrame.Width-32.0f, 0.0f);
-					centerPrintLabel.AttributedText = text;
-					centerPrintLabel.SizeToFit();
-					var countedLabelFrame = centerPrintLabel.Frame;
-					CGRect viewFrame = new(parentFrame.GetMidX()-countedLabelFrame.GetMidX()-32.0f, 0.0f, countedLabelFrame.Width+32.0f, countedLabelFrame.Height+24.0f);
-					UIView.Animate(0.200, 0.0f, UIViewAnimationOptions.CurveEaseOut, () => {
-						CenterPrintView.Frame = viewFrame;
-					}, null);
-					CenterPrintLabel.Layer.AddAnimation(centerPrintTransition, CAAnimation.TransitionFade.ToString());
-					CenterPrintLabel.AttributedText = text;
+					centerPrint = value;
+					UpdateCenterPrint();
 				}
-				centerPrint = value;
 			}
 		}
 
@@ -180,14 +183,16 @@ namespace JKChat.iOS.Views.Chat {
 			if (!DeviceInfo.IsRunningOnMacOS) {
 				MessageView.RemoveFromSuperview();
 				inputAccessoryView.AddAccessoryView(MessageView);
-				ViewBottomConstraint.Active = true;
-				ChatBottomMessageTopConstraint.Active = false;
+				ChatTableViewBottomConstraint.Active = true;
+				ChatTableViewBottomToMessageViewTopConstraint.Active = false;
 				MessageToolbar.Hidden = true;
 				CommandsTableViewBottomConstraint.Constant = -ChatTableView.SpecialOffset;
+				ChatTableViewToMinimapViewBottomConstraint.Constant = ChatTableView.SpecialOffset;
 			} else {
-				ViewBottomConstraint.Active = false;
-				ChatBottomMessageTopConstraint.Active = true;
+				ChatTableViewBottomConstraint.Active = false;
+				ChatTableViewBottomToMessageViewTopConstraint.Active = true;
 				CommandsTableViewBottomConstraint.Constant = 0.0f;
+				ChatTableViewToMinimapViewBottomConstraint.Constant = 0.0f;
 			}
 			ChatTableView.KeyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive;
 			ChatTableView.KeyboardViewController = this;
@@ -258,7 +263,7 @@ namespace JKChat.iOS.Views.Chat {
 					lastTappedPoint = CGPoint.Empty;
 				});
 			};
-			ViewBottomConstraint.Constant = 44.0f + DeviceInfo.SafeAreaInsets.Bottom - ChatTableView.SpecialOffset;
+			ChatTableViewBottomConstraint.Constant = 44.0f + DeviceInfo.SafeAreaInsets.Bottom - ChatTableView.SpecialOffset;
 
 			MessageTextView.Placeholder = "Write a message...";
 			MessageTextView.PlaceholderColor = UIColor.TertiaryLabel;
@@ -312,6 +317,32 @@ namespace JKChat.iOS.Views.Chat {
 			return true;
 		}
 
+		private readonly CATransition centerPrintTransition = new() {
+			TimingFunction = CAMediaTimingFunction.FromName(CAMediaTimingFunction.Default),
+			Type = CAAnimation.TransitionFade,
+			Duration = 0.500
+		};
+		private readonly UILabel centerPrintLabel = new() {
+			TextAlignment = UITextAlignment.Center,
+			Font = UIFont.PreferredBody,
+			LineBreakMode = UILineBreakMode.WordWrap,
+			Lines = 0
+		};
+		private void UpdateCenterPrint() {
+			var text = ColourTextValueConverter.Convert(CenterPrint);
+			var parentFrame = CenterPrintView.Superview.Frame;
+			centerPrintLabel.Frame = new(0.0f, 0.0f, DeviceInfo.ScreenBounds.Width-DeviceInfo.SafeAreaInsets.Left-DeviceInfo.SafeAreaInsets.Right-64.0f, 0.0f);
+			centerPrintLabel.AttributedText = text;
+			centerPrintLabel.SizeToFit();
+			var countedLabelFrame = centerPrintLabel.Frame;
+			CGRect viewFrame = new(parentFrame.GetMidX()-countedLabelFrame.GetMidX()-32.0f, 0.0f, countedLabelFrame.Width+32.0f, countedLabelFrame.Height+24.0f);
+			UIView.Animate(0.200, 0.0f, UIViewAnimationOptions.CurveEaseOut, () => {
+				CenterPrintView.Frame = viewFrame;
+			}, null);
+			CenterPrintLabel.Layer.AddAnimation(centerPrintTransition, CAAnimation.TransitionFade.ToString());
+			CenterPrintLabel.AttributedText = text;
+		}
+
 		private void UpdateMoreButtonItem() {
 			if (moreButtonItem == null)
 				return;
@@ -334,6 +365,19 @@ namespace JKChat.iOS.Views.Chat {
 			moreButtonItem.Menu = menu;
 		}
 
+		private void UpdateButtonItems() {
+			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);
+			UpdateMoreButtonItem();
+			if (MapData != null) {
+				minimapButtonItem = new UIBarButtonItem(MapFocused ? Theme.Image.MapCircleFill : Theme.Image.MapCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+					ViewModel.MapFocused = !ViewModel.MapFocused;
+				});
+				NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+			} else {
+				NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem }, true);
+			}
+		}
+
 		#region View lifecycle
 
 		public override void ViewDidLoad() {
@@ -348,7 +392,7 @@ namespace JKChat.iOS.Views.Chat {
 //			set.Bind(chatSource).For(s => s.SelectionChangedCommand).To(vm => vm.SelectionChangedCommand);
 			set.Bind(commandsSource).For(s => s.ItemsSource).To(vm => vm.CommandItems);
 			set.Bind(commandsSource).For(s => s.SelectionChangedCommand).To(vm => vm.CommandItemClickCommand);
-			set.Bind(this).For(v => v.CommandItemsCount).To(vm => vm.CommandItems.Count);
+			set.Bind(this).For(v => v.CommandItemsCount).To(vm => vm.CommandItemsCount);
 			set.Bind(CommandsButton).To(vm => vm.StartCommandCommand);
 			set.Bind(MessageTextView).For(v => v.Text).To(vm => vm.Message).TwoWay();
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
@@ -372,7 +416,13 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(this).For(v => v.Scores).To(vm => vm.Scores);
 			set.Bind(this).For(v => v.CenterPrint).To(vm => vm.CenterPrint);
 			set.Bind(this).For(v => v.ShowCenterPrint).To(vm => vm.ShowCenterPrint);
+			set.Bind(MinimapView).For(v => v.Entities).To(vm => vm.Entities);
+			set.Bind(MinimapView).For(v => v.MapData).To(vm => vm.MapData);
+			set.Bind(this).For(v => v.MapData).To(vm => vm.MapData);
+			set.Bind(this).For(v => v.MapFocused).To(vm => vm.MapFocused);
 
+			InfoView.Alpha = 0.0f;
+			MinimapView.Alpha = 0.0f;
 			UpdateCommandsTableView();
 		}
 
@@ -394,16 +444,27 @@ namespace JKChat.iOS.Views.Chat {
 //HACK: to blur NavigationBar since it starts blurring after scrolling
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset-1.0f), false);
 
-			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);
-			UpdateMoreButtonItem();
-
-			NavigationItem.RightBarButtonItem = moreButtonItem;
+			UpdateButtonItems();
 		}
 
 		public override void ViewDidAppear(bool animated) {
 			base.ViewDidAppear(animated);
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset), true);
 			BecomeFirstResponder();
+
+			InfoView.SetNeedsUpdateConstraints();
+			InfoView.UpdateConstraints();
+
+			Task.Run(async () => {
+				await Task.Delay(200);
+				await MainThread.InvokeOnMainThreadAsync(() => {
+					UIView.Animate(0.200, () => {
+						InfoView.Alpha = 1.0f;
+					});
+					SwapMapAndChat(MapFocused, true);
+				});
+			});
+			viewAppeared = true;
 		}
 
 		public override void ViewWillDisappear(bool animated) {
@@ -412,6 +473,7 @@ namespace JKChat.iOS.Views.Chat {
 
 		public override void ViewDidDisappear(bool animated) {
 			base.ViewDidDisappear(animated);
+			viewAppeared = false;
 		}
 
 		#endregion
@@ -430,6 +492,25 @@ namespace JKChat.iOS.Views.Chat {
 					button.Hidden = true;
 				});
 			}
+		}
+
+		private void SwapMapAndChat(bool mapFocused, bool animated = true) {
+			float minimapAlpha = mapFocused ? 1.0f : 0.3f,
+				tableAlpha = mapFocused ? 0.3f : 1.0f;
+			int i = Array.IndexOf(MinimapView.Superview.Subviews, MinimapView);
+			int j = Array.IndexOf(ChatTableView.Superview.Subviews, ChatTableView);
+			if ((i < j && mapFocused) || (i > j && !mapFocused)) {
+				MinimapView.Superview.ExchangeSubview(i, j);
+			}
+			if (!animated) {
+				MinimapView.Alpha = minimapAlpha;
+				ChatTableView.Alpha = tableAlpha;
+				return;
+			}
+			UIView.Animate(0.200, () => {
+				MinimapView.Alpha = minimapAlpha;
+				ChatTableView.Alpha = tableAlpha;
+			});
 		}
 
 		private static void AnimateCenterPrint(UIView view, bool show) {
@@ -493,6 +574,7 @@ namespace JKChat.iOS.Views.Chat {
 			base.ViewWillTransitionToSize(toSize, coordinator);
 			coordinator.AnimateAlongsideTransition(animateContext => {
 //				RecountAllCellHeights(toSize);
+				UpdateCenterPrint();
 			},
 			completionContext => {
 				RecountAllCellHeights(toSize);
@@ -505,7 +587,7 @@ namespace JKChat.iOS.Views.Chat {
 			BeginKeyboardFrame = beginKeyboardFrame;
 			EndKeyboardFrame = endKeyboardFrame;
 			UIView.Animate(duration, 0.0, animationOptions, () => {
-				ViewBottomConstraint.Constant = endKeyboardFrame.Height - ChatTableView.SpecialOffset;
+				ChatTableViewBottomConstraint.Constant = endKeyboardFrame.Height - ChatTableView.SpecialOffset;
 				this.View.LayoutIfNeeded();
 			}, null);
 		}
@@ -518,7 +600,7 @@ namespace JKChat.iOS.Views.Chat {
 			endKeyboardFrame = new CGRect(endKeyboardFrame.X, endKeyboardFrame.Y+dy, endKeyboardFrame.Width, endKeyboardHeight);
 			EndKeyboardFrame = endKeyboardFrame;
 			UIView.Animate(duration, 0.0, animationOptions, () => {
-				ViewBottomConstraint.Constant = endKeyboardFrame.Height - ChatTableView.SpecialOffset;
+				ChatTableViewBottomConstraint.Constant = endKeyboardFrame.Height - ChatTableView.SpecialOffset;
 				this.View.LayoutIfNeeded();
 			}, null);
 		}

@@ -270,7 +270,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 				var servers = await loadingFunc();
 				if (!servers.IsNullOrEmpty()) {
 					var serverItems = recentServers
-						.ReverseWithUpdate(servers, serverInfosWithStatus)
+						.UpdateInfosAndStatuses(servers, serverInfosWithStatus)
 						.Union(servers
 							.Where(server => server.Ping != 0)
 							.OrderByDescending(server => server.Clients)
@@ -281,8 +281,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					newItems = serverItems;
 				} else if (recentServers.Length > 0) {
 					newItems = recentServers
-						.UpdateStatuses(serverInfosWithStatus)
-						.Reverse();
+						.UpdateStatuses(serverInfosWithStatus);
 				}
 				if (newItems != null) {
 					var reportedServers = await cacheService.LoadReportedServers();
@@ -354,9 +353,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 	}
 
 	internal static class ServerListViewModelExtensions {
-		public static IEnumerable<ServerListItemVM> ReverseWithUpdate(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatus) {
+		public static IEnumerable<ServerListItemVM> UpdateInfosAndStatuses(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatus) {
 			var serversArray = servers is ServerListItemVM []array ? array : servers.ToArray();
-			for (int i = serversArray.Length-1; i >= 0; i--) {
+			for (int i = 0; i < serversArray.Length; i++) {
 				var server = serversArray[i];
 				var serverInfoAndStatus = serverInfosWithStatus.FirstOrDefault(kv => kv.Key == server.ServerInfo);
 				if (serverInfoAndStatus.Key is { } serverInfo && serverInfoAndStatus.Value != Models.ConnectionStatus.Disconnected) {

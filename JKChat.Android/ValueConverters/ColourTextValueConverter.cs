@@ -29,12 +29,13 @@ namespace JKChat.Android.ValueConverters {
 				else
 					return new SpannableString(string.Empty);
 			}
-			bool parseUri = false, parseShadow = false;
+			bool parseUri = false, parseShadow = false, addShadow = false;
 			if (parameter is bool b) {
 				parseUri = b;
 			} else if (parameter is ColourTextParameter ct) {
 				parseUri = ct.ParseUri;
 				parseShadow = ct.ParseShadow;
+				addShadow = ct.AddShadow;
 			}
 			var colorAttributes = new List<AttributeData<int>>();
 			List<AttributeData<Uri>> uriAttributes = parseUri ? new() : null;
@@ -50,6 +51,8 @@ namespace JKChat.Android.ValueConverters {
 				foreach (var shadowColorAttribute in shadowColorAttributes) {
 					spannable.SetSpan(new ShadowSpan(GetColor(shadowColorAttribute.Value)), shadowColorAttribute.Start, shadowColorAttribute.Start+shadowColorAttribute.Length, SpanTypes.ExclusiveExclusive);
 				}
+			} else if (addShadow) {
+				spannable.SetSpan(new ShadowSpan(ShadowColor), 0, cleanStr.Length, SpanTypes.ExclusiveExclusive);
 			}
 			foreach (var colorAttribute in colorAttributes) {
 				spannable.SetSpan(new ForegroundColorCodeSpan(colorAttribute.Value), colorAttribute.Start, colorAttribute.Start+colorAttribute.Length, SpanTypes.ExclusiveExclusive);

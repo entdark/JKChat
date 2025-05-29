@@ -19,11 +19,17 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.UIVisualEffectView CenterPrintView { get; set; }
 
 		[Outlet]
-		UIKit.NSLayoutConstraint ChatBottomMessageTopConstraint { get; set; }
-
-		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		JKChat.iOS.Controls.ChatTableView ChatTableView { get; set; }
+
+		[Outlet]
+		UIKit.NSLayoutConstraint ChatTableViewBottomConstraint { get; set; }
+
+		[Outlet]
+		UIKit.NSLayoutConstraint ChatTableViewBottomToMessageViewTopConstraint { get; set; }
+
+		[Outlet]
+		UIKit.NSLayoutConstraint ChatTableViewToMinimapViewBottomConstraint { get; set; }
 
 		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
@@ -72,6 +78,9 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.UIView MessageView { get; set; }
 
 		[Outlet]
+		JKChat.iOS.Controls.MinimapView MinimapView { get; set; }
+
+		[Outlet]
 		UIKit.UILabel ScoresLabel { get; set; }
 
 		[Outlet]
@@ -80,10 +89,6 @@ namespace JKChat.iOS.Views.Chat
 
 		[Outlet]
 		UIKit.UILabel TimerLabel { get; set; }
-
-		[Outlet]
-		[GeneratedCode ("iOS Designer", "1.0")]
-		UIKit.NSLayoutConstraint ViewBottomConstraint { get; set; }
 		
 		void ReleaseDesignerOutlets ()
 		{
@@ -92,9 +97,9 @@ namespace JKChat.iOS.Views.Chat
 				CenterPrintLabel = null;
 			}
 
-			if (ChatBottomMessageTopConstraint != null) {
-				ChatBottomMessageTopConstraint.Dispose ();
-				ChatBottomMessageTopConstraint = null;
+			if (CenterPrintView != null) {
+				CenterPrintView.Dispose ();
+				CenterPrintView = null;
 			}
 
 			if (ChatTableView != null) {
@@ -137,11 +142,6 @@ namespace JKChat.iOS.Views.Chat
 				CommandsTableView = null;
 			}
 
-			if (CommandsTableViewBottomConstraint != null) {
-				CommandsTableViewBottomConstraint.Dispose ();
-				CommandsTableViewBottomConstraint = null;
-			}
-
 			if (CommandsTableViewHeightConstraint != null) {
 				CommandsTableViewHeightConstraint.Dispose ();
 				CommandsTableViewHeightConstraint = null;
@@ -167,6 +167,11 @@ namespace JKChat.iOS.Views.Chat
 				MessageView = null;
 			}
 
+			if (MinimapView != null) {
+				MinimapView.Dispose ();
+				MinimapView = null;
+			}
+
 			if (ScoresLabel != null) {
 				ScoresLabel.Dispose ();
 				ScoresLabel = null;
@@ -182,14 +187,24 @@ namespace JKChat.iOS.Views.Chat
 				TimerLabel = null;
 			}
 
-			if (ViewBottomConstraint != null) {
-				ViewBottomConstraint.Dispose ();
-				ViewBottomConstraint = null;
+			if (ChatTableViewBottomConstraint != null) {
+				ChatTableViewBottomConstraint.Dispose ();
+				ChatTableViewBottomConstraint = null;
 			}
 
-			if (CenterPrintView != null) {
-				CenterPrintView.Dispose ();
-				CenterPrintView = null;
+			if (ChatTableViewToMinimapViewBottomConstraint != null) {
+				ChatTableViewToMinimapViewBottomConstraint.Dispose ();
+				ChatTableViewToMinimapViewBottomConstraint = null;
+			}
+
+			if (ChatTableViewBottomToMessageViewTopConstraint != null) {
+				ChatTableViewBottomToMessageViewTopConstraint.Dispose ();
+				ChatTableViewBottomToMessageViewTopConstraint = null;
+			}
+
+			if (CommandsTableViewBottomConstraint != null) {
+				CommandsTableViewBottomConstraint.Dispose ();
+				CommandsTableViewBottomConstraint = null;
 			}
 		}
 	}

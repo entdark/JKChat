@@ -56,17 +56,26 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <mvvmcross.droidx.recyclerview.MvxRecyclerView
-                android:id="@+id/mvxrecyclerview"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-	            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:stackFromEnd="true"
-                app:reverseLayout="false"
-                app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
-                app:MvxBind="ItemsSource Items; ItemLongClick SelectCommand"/>
+                android:layout_weight="1">
+                <JKChat.Android.Controls.MinimapView
+                    android:id="@+id/minimap_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:MvxBind="Entities Entities; MapData MapData"/>
+                <mvvmcross.droidx.recyclerview.MvxRecyclerView
+                    android:id="@+id/mvxrecyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:stackFromEnd="true"
+                    app:reverseLayout="false"
+                    app:MvxTemplateSelector="JKChat.Android.TemplateSelectors.ChatItemTemplateSelector,JKChat.Android"
+                    app:MvxBind="ItemsSource Items; ItemLongClick SelectCommand"/>
+            </FrameLayout>
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -155,15 +164,6 @@
                         android:background="@null"
                         android:inputType="text|textMultiLine"
                         app:MvxBind="Text Message"/>
-<!--                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/send_button"
-                        style="@style/Widget.Material3.Button.IconButton.Fixed"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:layout_gravity="bottom"
-                        app:icon="@drawable/ic_send"
-                        app:MvxBind="Click SendMessageCommand"/>-->
                     <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -197,7 +197,7 @@
             android:layout_marginBottom="48dp"
             android:layout_gravity="bottom"
             app:marginBottomFitsWindowInsets="true"
-	        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:stackFromEnd="true"
             app:reverseLayout="false"
             app:MvxItemTemplate="@layout/command_item"

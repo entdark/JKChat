@@ -10,8 +10,14 @@
 	<item
 		android:id="@+id/report_item"
 		android:icon="@drawable/ic_report_problem"
+		android:iconTint="?attr/colorOnSurfaceVariant"
 		app:showAsAction="always"
 		app:actionLayout="@layout/report_menu_item"/>
+	<item
+		android:id="@+id/minimap_item"
+		android:icon="@drawable/ic_map_outlined"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="always"/>
 	<item
 		android:id="@+id/favourite_item"
 		android:icon="@drawable/ic_star_outlined"

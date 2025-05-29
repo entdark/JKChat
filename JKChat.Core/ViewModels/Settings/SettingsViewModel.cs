@@ -60,6 +60,10 @@ namespace JKChat.Core.ViewModels.Settings {
 							Title = "Center print",
 							IsChecked = AppSettings.CenterPrint,
 							Toggled = item => AppSettings.CenterPrint = item.IsChecked
+						},
+						new TableNavigationItemVM() {
+							Title = "Minimap",
+							OnClick = MinimapExecute
 						}
 					}
 				},
@@ -98,6 +102,10 @@ namespace JKChat.Core.ViewModels.Settings {
 
 		private async Task ItemClickExecute(TableItemVM item) {
 			await item.ClickCommand.ExecuteAsync();
+		}
+
+		private async Task MinimapExecute(TableNavigationItemVM item) {
+			await NavigationService.NavigateFromRoot<MinimapSettingsViewModel>();
 		}
 
 		private async Task NotificationsExecute(TableNavigationItemVM item) {

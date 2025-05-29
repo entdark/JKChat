@@ -24,12 +24,13 @@ namespace JKChat.iOS.ValueConverters {
 			if (string.IsNullOrEmpty(value)) {
 				return new NSAttributedString(string.Empty);
 			}
-			bool parseUri = false, parseShadow = false;
+			bool parseUri = false, parseShadow = false, addShadow = false;
 			if (parameter is bool b) {
 				parseUri = b;
 			} else if (parameter is ColourTextParameter ct) {
 				parseUri = ct.ParseUri;
 				parseShadow = ct.ParseShadow;
+				addShadow = ct.AddShadow;
 			}
 			var colorAttributes = new List<AttributeData<int>>();
 			List<AttributeData<Uri>> uriAttributes = parseUri ? new() : null;
@@ -45,6 +46,8 @@ namespace JKChat.iOS.ValueConverters {
 				foreach (var shadowColorAttribute in shadowColorAttributes) {
 					attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(shadowColorAttribute.Value), new NSRange(shadowColorAttribute.Start, shadowColorAttribute.Length));
 				}
+			} else if (addShadow) {
+				attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(), new NSRange(0, cleanStr.Length));
 			}
 			foreach (var colorAttribute in colorAttributes) {
 				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, colorAttribute.Length));

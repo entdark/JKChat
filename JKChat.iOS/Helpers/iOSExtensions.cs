@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 using CoreGraphics;
@@ -48,6 +49,14 @@ namespace JKChat.iOS.Helpers {
 			view.TrailingAnchor.ConstraintEqualTo(parent.TrailingAnchor, trailing).Active = true;
 			view.TopAnchor.ConstraintEqualTo(parent.TopAnchor, top).Active = true;
 			view.BottomAnchor.ConstraintEqualTo(parent.BottomAnchor, bottom).Active = true;
+		}
+
+		public static void BringToFront(this UIView view) {
+			view?.Superview?.BringSubviewToFront(view);
+		}
+
+		public static UIColor ToUIColor(this Color color) {
+			return UIColor.FromRGBA(color.R, color.G, color.B, color.A);
 		}
 	}
 }
