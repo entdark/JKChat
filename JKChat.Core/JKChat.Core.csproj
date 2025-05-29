@@ -9,6 +9,9 @@
     <None Remove="Resources\Fonts\**" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Minimaps\**\*.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MvvmCross" Version="9.2.0" />
     <PackageReference Include="MvvmCross.Plugin.Messenger" Version="9.2.0" />
     <PackageReference Include="MvvmCross.Plugin.Visibility" Version="9.2.0" />
