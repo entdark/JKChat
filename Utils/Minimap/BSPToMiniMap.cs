@@ -33,7 +33,7 @@ namespace Utils.Minimap
 		const int LUMP_LIGHTGRID = 15;
 		const int LUMP_VISIBILITY = 16;
 		const int LUMP_LIGHTARRAY = 17;
-		const int HEADER_LUMPS = 18;
+		const int HEADER_LUMPS = 18; // q3 is 19. but its ok if we dont read the last one.
 
 		const int MAXLIGHTMAPS = 4;
 
@@ -81,6 +81,38 @@ namespace Utils.Minimap
 			public unsafe fixed float normal[3];
 			public unsafe fixed byte color[MAXLIGHTMAPS * 4];
 		}
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		struct mapVertQ3_t
+		{
+			public unsafe fixed float xyz[3];
+			public unsafe fixed float st[2];
+			public unsafe fixed float lightmap[2];
+			public unsafe fixed float normal[3];
+			public unsafe fixed byte color[4];
+		}
+		class mapVertWrapper
+		{
+			bool isQ3;
+			public float[] xyz = new float[3];
+			public unsafe mapVertWrapper(bool isQ3A, BinaryReader br)
+			{
+				isQ3 = isQ3A;
+				if (isQ3)
+				{
+					mapVertQ3_t a = Helpers.ReadBytesAsType<mapVertQ3_t>(br);
+					xyz[0] = a.xyz[0];
+					xyz[1] = a.xyz[1];
+					xyz[2] = a.xyz[2];
+				}
+				else
+				{
+					mapVert_t a = Helpers.ReadBytesAsType<mapVert_t>(br);
+					xyz[0] = a.xyz[0];
+					xyz[1] = a.xyz[1];
+					xyz[2] = a.xyz[2];
+				}
+			}
+		}
 
 		[StructLayout(LayoutKind.Sequential, Pack = 1)]
 		struct dsurface_t
@@ -105,6 +137,47 @@ namespace Utils.Minimap
 
 			public int patchWidth;
 			public int patchHeight;
+		}
+		[StructLayout(LayoutKind.Sequential, Pack = 1)]
+		struct dsurfaceQ3_t
+		{
+			public int shaderNum;
+			public int fogNum;
+			public int surfaceType;
+
+			public int firstVert;
+			public int numVerts;
+
+			public int firstIndex;
+			public int numIndexes;
+
+			public int lightmapNum;
+			public int lightmapX, lightmapY;
+			public int lightmapWidth, lightmapHeight;
+
+			public unsafe fixed float lightmapOrigin[3];
+			public unsafe fixed float lightmapVecs[9]; // for patches, [0] and [1] are lodbounds
+
+			public int patchWidth;
+			public int patchHeight;
+		}
+		class dsurfaceWrapper
+		{
+			object dsurface;
+			bool isQ3;
+			public int surfaceType { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.surfaceType : (dsurface as dsurface_t?).Value.surfaceType; } }
+			public int patchHeight { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.patchHeight : (dsurface as dsurface_t?).Value.patchHeight; } }
+			public int patchWidth { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.patchWidth : (dsurface as dsurface_t?).Value.patchWidth; } }
+			public int numIndexes { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.numIndexes : (dsurface as dsurface_t?).Value.numIndexes; } }
+			public int shaderNum { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.shaderNum : (dsurface as dsurface_t?).Value.shaderNum; } }
+			public int numVerts { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.numVerts : (dsurface as dsurface_t?).Value.numVerts; } }
+			public int firstVert { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.firstVert : (dsurface as dsurface_t?).Value.firstVert; } }
+			public int firstIndex { get { return isQ3 ? (dsurface as dsurfaceQ3_t?).Value.firstIndex : (dsurface as dsurface_t?).Value.firstIndex; } }
+			public dsurfaceWrapper(bool isQ3A, BinaryReader br)
+			{
+				isQ3 = isQ3A;
+				dsurface = isQ3 ? Helpers.ReadBytesAsType<dsurfaceQ3_t>(br) : Helpers.ReadBytesAsType<dsurface_t>(br);
+			}
 		}
 
 		class EzAccessTriangle
@@ -133,6 +206,7 @@ namespace Utils.Minimap
 
 		public static unsafe void MakeMiniMap(string mapNameClean, byte[] bspData, string minimapsPath, float pixelsPerUnit = 0.1f, int maxWidth = 4000, int maxHeight = 4000, int extraBorderUnits = 100)
 		{
+			bool isQ3 = false;
 			string minimapPath = Path.Combine(minimapsPath ?? minimapsPathDefault, mapNameClean);
 			string propsJsonFilePath = Path.Combine(minimapPath, "meta.json");
 			//string xyPath = Path.Combine(minimapPath, "xy.png");
@@ -162,7 +236,14 @@ namespace Utils.Minimap
 					dheader_t header = Helpers.ReadBytesAsType<dheader_t>(br);
 					if (header.version != 1)
 					{
-						throw new Exception("BSP header version is not 1");
+						if (header.version == 46)
+						{
+							isQ3 = true;
+						}
+						else
+						{
+							throw new Exception("BSP header version is not 1 or 46");
+						}
 					}
 
 					Directory.CreateDirectory(minimapPath);
@@ -203,19 +284,21 @@ namespace Utils.Minimap
 					lump_t vertsLump = header.GetLump(LUMP_DRAWVERTS);
 					lump_t indexLump = header.GetLump(LUMP_DRAWINDEXES);
 
-					int surfacesCount = surfacesLump.filelen / Marshal.SizeOf(typeof(dsurface_t));
-					int vertsCount = vertsLump.filelen / Marshal.SizeOf(typeof(mapVert_t));
+					int surfaceSize = isQ3 ? Marshal.SizeOf(typeof(dsurfaceQ3_t)) : Marshal.SizeOf(typeof(dsurface_t));
+					int surfacesCount = surfacesLump.filelen / surfaceSize;
+					int vertSize = isQ3 ? Marshal.SizeOf(typeof(mapVertQ3_t)) : Marshal.SizeOf(typeof(mapVert_t));
+					int vertsCount = vertsLump.filelen / vertSize;
 					int indexCount = indexLump.filelen / sizeof(int);
 
-					dsurface_t[] surfaces = new dsurface_t[surfacesCount];
-					mapVert_t[] verts = new mapVert_t[vertsCount];
+					dsurfaceWrapper[] surfaces = new dsurfaceWrapper[surfacesCount];
+					mapVertWrapper[] verts = new mapVertWrapper[vertsCount];
 					int[] indices = new int[indexCount];
 
 					// Read verts
 					br.BaseStream.Seek(vertsLump.fileofs, SeekOrigin.Begin);
 					for (int i = 0; i < vertsCount; i++)
 					{
-						verts[i] = Helpers.ReadBytesAsType<mapVert_t>(br);
+						verts[i] = new mapVertWrapper(isQ3, br);
 					}
 					// Read indices
 					br.BaseStream.Seek(indexLump.fileofs, SeekOrigin.Begin);
@@ -230,7 +313,7 @@ namespace Utils.Minimap
 					br.BaseStream.Seek(surfacesLump.fileofs, SeekOrigin.Begin);
 					for (int i = 0; i < surfacesCount; i++)
 					{
-						dsurface_t surf = surfaces[i] = Helpers.ReadBytesAsType<dsurface_t>(br);
+						dsurfaceWrapper surf = surfaces[i] = new dsurfaceWrapper(isQ3, br);
 						//if (surf.surfaceType != 2) continue;
 						int surfaceCount = surf.surfaceType == 2 ? ((surf.patchHeight - 1) * (surf.patchWidth - 0)) * 2 : surf.numIndexes;
 						if (surf.surfaceType != 2 && (surfaceCount % 3) > 0)
@@ -241,7 +324,7 @@ namespace Utils.Minimap
 						{
 							for (int v = 0; v < surf.numVerts; v++)
 							{
-								mapVert_t vert = verts[surf.firstVert + v];
+								mapVertWrapper vert = verts[surf.firstVert + v];
 								minX = Math.Min(vert.xyz[0], minX);
 								maxX = Math.Max(vert.xyz[0], maxX);
 								minY = Math.Min(vert.xyz[1], minY);
@@ -291,9 +374,9 @@ namespace Utils.Minimap
 									vertIndex2 = surf.firstVert + indices[surf.firstIndex + index + 2];
 								}
 
-								mapVert_t vert1 = verts[vertIndex0];
-								mapVert_t vert2 = verts[vertIndex1];
-								mapVert_t vert3 = verts[vertIndex2];
+								mapVertWrapper vert1 = verts[vertIndex0];
+								mapVertWrapper vert2 = verts[vertIndex1];
+								mapVertWrapper vert3 = verts[vertIndex2];
 
 
 								EzAccessTriangle triangle = new EzAccessTriangle()
