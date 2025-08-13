@@ -72,12 +72,14 @@ namespace JKChat.iOS.Controls.JKDialog {
 				ListTableView.AllowsMultipleSelection = list.SelectionType == DialogSelectionType.MultiSelection;
 
 				int count = list.Items.Count;
-				ListHeightConstraint.Constant = count > 5 ? 242.0f : (count * 44.0f);
+				ListHeightConstraint.Constant = count > 5 ? (5.5f * 44.0f) : (count * 44.0f);
 
 				var source = new MvxSimpleTableViewSource(ListTableView, JKDialogViewCell.Key) {
 					ItemsSource = list.Items,
 					SelectionChangedCommand = new MvxCommand<DialogItemVM>(item => {
 						switch (list.SelectionType) {
+							case DialogSelectionType.NoSelection:
+								break;
 							case DialogSelectionType.InstantSelection:
 								item.IsSelected = true;
 								ButtonTouchUpInside(config.OkAction);
@@ -110,7 +112,7 @@ namespace JKChat.iOS.Controls.JKDialog {
 
 		private void InputTextFieldEditingChanged(object sender, EventArgs ev) {
 			string text = (sender as UITextField)?.Text;
-			config.Input.Text = text;
+			config.Input.TextChangedAction?.Invoke(text);
 			if (!config.Input.HintAsColourText)
 				return;
 			SetMessageText(text);

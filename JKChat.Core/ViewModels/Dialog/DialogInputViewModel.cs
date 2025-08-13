@@ -2,7 +2,7 @@
 
 namespace JKChat.Core.ViewModels.Dialog {
 	public class DialogInputViewModel {
-		public string Text { get; set; }
+		public string Text { get; private set; }
 		public string Hint { get; init; }
 		public bool HintAsColourText { get; init; }
 		public Action<string> TextChangedAction { get; private init; }

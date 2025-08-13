@@ -67,6 +67,10 @@ namespace JKChat.Core {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new LocationUpdateMessage(value));
 			}
 		}
+		public static bool NativeAlertController {
+			get => Get(false);
+			set => Set(value);
+		}
 		public static Filter Filter {
 			get => GetDeserialized(() => new Filter());
 			set {
