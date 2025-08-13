@@ -379,7 +379,7 @@ namespace JKChat.iOS.Views.Chat {
 			centerPrintLabel.AttributedText = text;
 			centerPrintLabel.SizeToFit();
 			var countedLabelFrame = centerPrintLabel.Frame;
-			CGRect viewFrame = new(parentFrame.GetMidX()-countedLabelFrame.GetMidX()-32.0f, 0.0f, countedLabelFrame.Width+32.0f, countedLabelFrame.Height+24.0f);
+			var viewFrame = new CGRect(CenterPrintLabel.Frame.GetMidX()-countedLabelFrame.Width*0.5f-16.0f, 0.0f, countedLabelFrame.Width+32.0f, countedLabelFrame.Height+24.0f);
 			UIView.Animate(0.200, 0.0f, UIViewAnimationOptions.CurveEaseOut, () => {
 				CenterPrintView.Frame = viewFrame;
 			}, null);
