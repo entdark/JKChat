@@ -22,6 +22,9 @@ using JKChat.Core.ViewModels.Dialog;
 
 using Microsoft.Maui.ApplicationModel;
 
+using MvvmCross;
+using MvvmCross.Platforms.Android;
+
 #if true
 using Builder = Google.Android.Material.Dialog.MaterialAlertDialogBuilder;
 #else
@@ -30,6 +33,8 @@ using Builder = AndroidX.AppCompat.App.AlertDialog.Builder;
 
 namespace JKChat.Android.Services {
 	public class DialogService : IDialogService {
+		private AlertDialog lastShownDialog;
+
 		void IDialogService.Show(JKDialogConfig config) {
 			MainThread.BeginInvokeOnMainThread(() => {
 				Show(config);
@@ -42,6 +47,12 @@ namespace JKChat.Android.Services {
 		}
 
 		public static void Show(JKDialogConfig config) {
+			var dialogService = Mvx.IoCProvider.Resolve<IDialogService>() as DialogService;
+			var lastShownDialog = dialogService.lastShownDialog;
+			bool isShowing = !lastShownDialog.IsNull() && lastShownDialog.IsShowing;
+			if (isShowing)
+				return;
+
 			AlertDialog alert = null;
 			var context = Platform.CurrentActivity;
 			var builder = new Builder(context)
@@ -110,17 +121,24 @@ namespace JKChat.Android.Services {
 					.SetView(dialogInputView)
 					.SetOnDismissListener(new OnDismissListener(_ => {
 						context.HideKeyboard(textInputEditText, true);
+						dialogService.lastShownDialog = null;
 					}));
 				var handler = new Handler(Looper.MainLooper);
 				handler.PostDelayed(() => {
 					context.ShowKeyboard(textInputEditText);
 					textInputEditText.SetSelection(input.Text?.Length ?? 0);
 				}, 200);
+			} else {
+				builder
+					.SetOnDismissListener(new OnDismissListener(_ => {
+						dialogService.lastShownDialog = null;
+					}));
 			}
 			alert = builder
 				.Create();
 
 			alert.Show();
+			dialogService.lastShownDialog = alert;
 		}
 
 		private class OnDismissListener : Java.Lang.Object, IDialogInterfaceOnDismissListener {
