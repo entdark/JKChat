@@ -573,7 +573,7 @@ namespace JKChat.Core.ViewModels.Chat {
 #endif
 			var clientGame = gameClient.ClientGame;
 			Entities = getEntities(clientGame)
-				.OrderBy(entity => entity.Team)
+				.OrderByDescending(entity => entity.Team)
 				.Concat(this.gameClient.TempEntities)
 				.ToArray();
 			Timer = $"{clientGame.Timer/60000}:{clientGame.Timer/1000%60:D2}";
