@@ -34,8 +34,9 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Main {
 	[Activity(
+		Icon = "@mipmap/ic_launcher",
 		Label = "@string/app_name",
-		Theme = "@style/AppThemeMaterial3",
+		Theme = "@style/AppThemeSplashScreen",
 		MainLauncher = true,
 		LaunchMode = LaunchMode.SingleInstance,
 		ConfigurationChanges = ConfigChanges.ScreenLayout | ConfigChanges.ScreenSize | ConfigChanges.SmallestScreenSize | ConfigChanges.Orientation | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden,
@@ -52,6 +53,7 @@ namespace JKChat.Android.Views.Main {
 		public MainActivity() : base(Resource.Layout.activity_main) {}
 
 		protected override void OnCreate(Bundle savedInstanceState) {
+			var splashScreen = AndroidX.Core.SplashScreen.SplashScreen.InstallSplashScreen(this);
 			base.OnCreate(savedInstanceState);
 			EdgeToEdgeUtils.ApplyEdgeToEdge(this.Window, true);
 			if (serverInfoMessageToken != null) {

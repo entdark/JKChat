@@ -108,7 +108,7 @@ namespace JKChat.Android.Services {
 			var notification = new NotificationCompat.Builder(this, NotificationChannelID)
 				.SetAutoCancel(false)
 				.SetContentTitle(ColourTextValueConverter.Convert(title))
-				.SetSmallIcon(Resource.Mipmap.ic_launcher)
+				.SetSmallIcon(Resource.Drawable.ic_notification)
 				.SetContentIntent(activityPendingIntent)
 				.SetPriority(NotificationCompat.PriorityLow)
 				.SetOngoing(true)

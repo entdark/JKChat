@@ -66,7 +66,7 @@ namespace JKChat.Android.Services {
 			var notification = new NotificationCompat.Builder(context, NotificationChannelID)
 				.SetContentTitle(ColourTextValueConverter.Convert(title))
 				.SetContentText(ColourTextValueConverter.Convert(message))
-				.SetSmallIcon(Resource.Mipmap.ic_launcher)
+				.SetSmallIcon(Resource.Drawable.ic_notification)
 				.SetContentIntent(pendingIntent)
 				.SetPriority(NotificationCompat.PriorityHigh)
 				.SetLights(MaterialColors.GetColor(context, Resource.Attribute.colorPrimaryFixed, Color.Blue), 2000, 2000)

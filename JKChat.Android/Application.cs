@@ -24,11 +24,11 @@ namespace JKChat.Android {
 	[Application(
 		//AllowBackup = false,
 		Icon = "@mipmap/ic_launcher",
-		RoundIcon = "@mipmap/ic_launcher_round",
 		Label = "@string/app_name",
-		Theme = "@style/AppThemeMaterial3",
+		Theme = "@style/AppThemeSplashScreen",
 		ResizeableActivity = true,
-		HardwareAccelerated = true
+		HardwareAccelerated = true,
+		UsesCleartextTraffic = true
 	)]
 	public class Application : MvxAndroidApplication<Setup, App> {
 		public Application() {

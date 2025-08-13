@@ -11,6 +11,7 @@
 	<color name="team_red">#3FFF0000</color>
 	<color name="team_blue">#3F0000FF</color>
 	<color name="team_free">#3FFFFF00</color>
+	<color name="ic_launcher_background">@color/md_theme_light_background</color>
 
 	<color name="seed">#00E2F3</color>
 	<color name="md_theme_light_primary">#006971</color>

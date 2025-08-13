@@ -111,4 +111,21 @@
 		<item name="colorSurfaceBright">@color/md_theme_light_surfaceBright</item>
 		<item name="colorSurfaceDim">@color/md_theme_light_surfaceDim</item>
 	</style>
+	<style name="AppThemeSplashScreen" parent="AppThemeSplashScreen.Base">
+	</style>
+	<style name="AppThemeSplashScreen.Base" parent="Theme.SplashScreen">
+		<!-- Set the splash screen background, animated icon, and animation
+		duration. -->
+		<item name="windowSplashScreenBackground">@color/md_theme_light_background</item>
+
+		<!-- Use windowSplashScreenAnimatedIcon to add a drawable or an animated
+		drawable. One of these is required. -->
+		<item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_splashscreen</item>
+		<!-- Required for animated icons. -->
+<!--		<item name="windowSplashScreenAnimationDuration">200</item>-->
+
+		<!-- Set the theme of the Activity that directly follows your splash
+		screen. This is required. -->
+		<item name="postSplashScreenTheme">@style/AppThemeMaterial3</item>
+	</style>
 </resources>
