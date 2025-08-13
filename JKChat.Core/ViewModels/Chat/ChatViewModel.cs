@@ -178,7 +178,14 @@ namespace JKChat.Core.ViewModels.Chat {
 		private EntityData []entities;
 		public EntityData []Entities {
 			get => entities;
-			set => SetProperty(ref entities, value);
+			set {
+				bool isApple = DeviceInfo.Platform.IsApple();
+				if (!isApple)
+					ShouldAlwaysRaiseInpcOnUserInterfaceThread(false);
+				SetProperty(ref entities, value);
+				if (!isApple)
+					ShouldAlwaysRaiseInpcOnUserInterfaceThread(true);
+			}
 		}
 
 		private MapData mapData;
@@ -192,7 +199,10 @@ namespace JKChat.Core.ViewModels.Chat {
 		private bool mapFocused;
 		public bool MapFocused {
 			get => mapFocused;
-			set => SetProperty(ref mapFocused, value);
+			set => SetProperty(ref mapFocused, value, () => {
+				if (gameClient != null)
+					gameClient.MapFocused = value;
+			});
 		}
 
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
@@ -529,8 +539,9 @@ namespace JKChat.Core.ViewModels.Chat {
 		}
 
 		private void ItemsCollectionChanged(object sender, NotifyCollectionChangedEventArgs ev) {
-			if (Items.Count == 1 && AppSettings.MinimapOptions.HasFlag(MinimapOptions.FirstUnfocus))
+			if (Items.Count == 1 && AppSettings.MinimapOptions.HasFlag(MinimapOptions.FirstUnfocus)) {
 				MapFocused = false;
+			}
 		}
 
 		private List<EntityData> ents;

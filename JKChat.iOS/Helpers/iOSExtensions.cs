@@ -58,5 +58,13 @@ namespace JKChat.iOS.Helpers {
 		public static UIColor ToUIColor(this Color color) {
 			return UIColor.FromRGBA(color.R, color.G, color.B, color.A);
 		}
+
+		public static UIImage Scale(this UIImage image, nfloat scale) {
+			var size = new CGSize(image.Size.Width * scale, image.Size.Height * scale);
+			var renderer = new UIGraphicsImageRenderer(size);
+			return renderer.CreateImage(context => {
+				image.Draw(new CGRect(CGPoint.Empty, size));
+			});
+		}
 	}
 }

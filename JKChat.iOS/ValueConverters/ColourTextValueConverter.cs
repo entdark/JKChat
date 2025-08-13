@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 
 using Foundation;
@@ -7,7 +8,7 @@ using Foundation;
 using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.ValueCombiners;
-
+using JKChat.iOS.Helpers;
 using MvvmCross.Converters;
 
 using UIKit;
@@ -25,12 +26,14 @@ namespace JKChat.iOS.ValueConverters {
 				return new NSAttributedString(string.Empty);
 			}
 			bool parseUri = false, parseShadow = false, addShadow = false;
+			Color? defaultColor = null;
 			if (parameter is bool b) {
 				parseUri = b;
 			} else if (parameter is ColourTextParameter ct) {
 				parseUri = ct.ParseUri;
 				parseShadow = ct.ParseShadow;
 				addShadow = ct.AddShadow;
+				defaultColor = ct.DefaultColor;
 			}
 			var colorAttributes = new List<AttributeData<int>>();
 			List<AttributeData<Uri>> uriAttributes = parseUri ? new() : null;
@@ -48,6 +51,9 @@ namespace JKChat.iOS.ValueConverters {
 				}
 			} else if (addShadow) {
 				attributedString.AddAttribute(UIStringAttributeKey.Shadow, GetShadow(), new NSRange(0, cleanStr.Length));
+			}
+			if (defaultColor.HasValue) {
+				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, defaultColor.Value.ToUIColor(), new NSRange(0, cleanStr.Length));
 			}
 			foreach (var colorAttribute in colorAttributes) {
 				attributedString.AddAttribute(UIStringAttributeKey.ForegroundColor, GetColor(colorAttribute.Value), new NSRange(colorAttribute.Start, colorAttribute.Length));

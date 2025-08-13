@@ -20,7 +20,8 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.Android.ValueConverters {
 	public class ColourTextValueConverter : MvxValueConverter<string, ISpannable> {
-		private static readonly Color ShadowColor = new(38, 38, 38);
+		public static readonly Color ShadowColor = new(38, 38, 38);
+		public static readonly PointF ShadowOffset = new(1.337f, 1.337f);
 
 		public static ISpannable Convert(string value, object parameter = null) {
 			if (string.IsNullOrEmpty(value)) {
@@ -140,7 +141,7 @@ namespace JKChat.Android.ValueConverters {
 			}
 			public override void UpdateDrawState(TextPaint tp) {
 				UpdateMeasureState(tp);
-				tp.SetShadowLayer(float.Epsilon, 1.337f.DpToPxF(), 1.337f.DpToPxF(), ShadowColor);
+				tp.SetShadowLayer(float.Epsilon, ShadowOffset.X.DpToPxF(), ShadowOffset.Y.DpToPxF(), ShadowColor);
 			}
 			public override void UpdateMeasureState(TextPaint textPaint) {
 			}

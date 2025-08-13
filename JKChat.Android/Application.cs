@@ -27,7 +27,8 @@ namespace JKChat.Android {
 		RoundIcon = "@mipmap/ic_launcher_round",
 		Label = "@string/app_name",
 		Theme = "@style/AppThemeMaterial3",
-		ResizeableActivity = true
+		ResizeableActivity = true,
+		HardwareAccelerated = true
 	)]
 	public class Application : MvxAndroidApplication<Setup, App> {
 		public Application() {

@@ -11,7 +11,9 @@ namespace JKChat.Core.Models {
 		Flags			= 1 << 4,
 		Predicted		= 1 << 5,
 		FirstUnfocus	= 1 << 6,
+		RememberFocus	= 1 << 7,
+		HighPerformance	= 1 << 9,
 
-		Default			= Enabled | Players | Names | Weapons | Flags | Predicted | FirstUnfocus
-	}
+		Default			= Enabled | Players | Names | Weapons | Flags | Predicted | FirstUnfocus | RememberFocus
+    }
 }

@@ -30,6 +30,9 @@ namespace JKChat.Core.Helpers {
 					return string.Empty;
 				} else {
 					value = shadowStringBuilder.ToString();
+					if (colorAttributes == null && uriAttributes == null) {
+						return value;
+					}
 				}
 			}
 			int colorLength = 0;
@@ -98,6 +101,9 @@ namespace JKChat.Core.Helpers {
 						uriStringBuilder.Clear();
 					}
 				}
+			}
+			if (shadow) {
+				return value;
 			}
 			return stringBuilder.ToString();
 		}

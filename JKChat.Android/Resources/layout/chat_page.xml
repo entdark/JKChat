@@ -63,7 +63,7 @@
                 <JKChat.Android.Controls.MinimapView
                     android:id="@+id/minimap_view"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     app:MvxBind="Entities Entities; MapData MapData"/>
                 <mvvmcross.droidx.recyclerview.MvxRecyclerView
                     android:id="@+id/mvxrecyclerview"
@@ -191,17 +191,6 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-        <mvvmcross.droidx.recyclerview.MvxRecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_marginBottom="48dp"
-            android:layout_gravity="bottom"
-            app:marginBottomFitsWindowInsets="true"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:stackFromEnd="true"
-            app:reverseLayout="false"
-            app:MvxItemTemplate="@layout/command_item"
-            app:MvxBind="ItemsSource CommandItems; ItemClick CommandItemClickCommand; Visibility Visibility(CommandItems.Count)"/>
 <!--https://android.googlesource.com/platform/frameworks/base/+/refs/heads/main/core/res/res/layout/transient_notification_with_icon.xml-->
         <FrameLayout
             android:layout_width="match_parent"
@@ -237,6 +226,17 @@
                     android:layout_height="wrap_content"/>
             </TextSwitcher>
         </FrameLayout>
+        <mvvmcross.droidx.recyclerview.MvxRecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginBottom="48dp"
+            android:layout_gravity="bottom"
+            app:marginBottomFitsWindowInsets="true"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:stackFromEnd="true"
+            app:reverseLayout="false"
+            app:MvxItemTemplate="@layout/command_item"
+            app:MvxBind="ItemsSource CommandItems; ItemClick CommandItemClickCommand; Visibility Visibility(CommandItems.Count)"/>
         <include layout="@layout/loading"/>
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -310,6 +310,13 @@ namespace JKChat.iOS.Views.Chat {
 
 			CenterPrintView.Superview.Hidden = true;
 			CenterPrintLabel.Text = string.Empty;
+
+			var tap = new UITapGestureRecognizer(() => {
+				MessageTextView.ResignFirstResponder();
+			}) {
+				CancelsTouchesInView = false
+			};
+			MinimapView.AddGestureRecognizer(tap);
 		}
 
 		[Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]

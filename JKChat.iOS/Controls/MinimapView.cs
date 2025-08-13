@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Drawing;
 using System.Numerics;
+
 using CoreGraphics;
 
 using CoreText;
@@ -21,8 +23,13 @@ namespace JKChat.iOS.Controls;
 
 [Register("MinimapView")]
 public class MinimapView : UIView {
+	private const float OutOfBoundsOffset = 1333.7f;
+
 	private UIImageView minimapImageView;
 	private MinimapDrawingView minimapDrawingView;
+	private UIScrollView minimapScrollView;
+	private UIView minimapContainerView;
+	private NSLayoutConstraint imageRatioConstraint;
 
 	private EntityData []entities;
 	public EntityData []Entities {
@@ -41,8 +48,21 @@ public class MinimapView : UIView {
 
 			if (mapData != null) {
 				try {
-					var image = UIImage.FromResource(MapData.Assembly, MapData.Path);
+					var image = MapData.Assembly != null ? UIImage.FromResource(MapData.Assembly, MapData.Path) : UIImage.FromFile(MapData.Path);
+					CGSize size;
+					if (image != null) {
+//UIImageView fails to ScaleToFill when the image is smaller than the container, so scale it up to fit
+						if (image.Size.Width > 0.0f && image.Size.Width < DeviceInfo.ScreenBounds.Width) {
+							nfloat scale = DeviceInfo.ScreenBounds.Width / image.Size.Width;
+							image = image.Scale(scale);
+						}
+						size = image.Size;
+					} else {
+						size = new CGSize(1.0f, 1.0f);
+					}
 					minimapImageView.Image = image;
+					imageRatioConstraint.Active = false;
+					(imageRatioConstraint = NSLayoutConstraint.Create(minimapImageView, NSLayoutAttribute.Height, NSLayoutRelation.Equal, minimapImageView, NSLayoutAttribute.Width, size.Height / size.Width, 0.0f)).Active = true;
 					LayoutSubviews();
 				} catch (Exception exception) {
 					System.Diagnostics.Debug.WriteLine(exception);
@@ -51,7 +71,7 @@ public class MinimapView : UIView {
 			} else {
 				minimapImageView.Image = null;
 			}
-			minimapDrawingView.SetNeedsDisplay();
+			SetNeedsDisplay();
 		}
 	}
 
@@ -76,52 +96,89 @@ public class MinimapView : UIView {
 	}
 
 	private void Initialize() {
-		UserInteractionEnabled = false;
+		UserInteractionEnabled = true;
 		BackgroundColor = UIColor.Clear;
 		minimapImageView = new() {
 			ContentMode = UIViewContentMode.ScaleToFill
 		};
-		AddSubview(minimapImageView);
 		minimapDrawingView = new(this) {
+			UserInteractionEnabled = false,
 			BackgroundColor = UIColor.Clear
 		};
-		AddSubview(minimapDrawingView);
+		minimapContainerView = new() {
+			BackgroundColor = UIColor.Clear
+		};
+		minimapScrollView = new() {
+			UserInteractionEnabled = true,
+			MultipleTouchEnabled = true,
+			ClipsToBounds = false,
+			ContentMode = UIViewContentMode.ScaleToFill,
+			MinimumZoomScale = 1.0f,
+			MaximumZoomScale = 5.0f,
+			ScrollsToTop = false,
+			DelaysContentTouches = false,
+			ContentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentBehavior.Never,
+			ViewForZoomingInScrollView = _ => minimapContainerView
+		};
+		minimapScrollView.AddWithConstraintsTo(this);
+		minimapContainerView.AddSubview(minimapImageView);
+		minimapImageView.TranslatesAutoresizingMaskIntoConstraints = false;
+		minimapImageView.TopAnchor.ConstraintEqualTo(minimapContainerView.TopAnchor).Active = true;
+		minimapImageView.CenterXAnchor.ConstraintEqualTo(minimapContainerView.CenterXAnchor).Active = true;
+		minimapImageView.WidthAnchor.ConstraintLessThanOrEqualTo(minimapContainerView.WidthAnchor).Active = true;
+		minimapImageView.HeightAnchor.ConstraintLessThanOrEqualTo(minimapContainerView.HeightAnchor).Active = true;
+		(imageRatioConstraint = minimapImageView.HeightAnchor.ConstraintEqualTo(minimapImageView.WidthAnchor, 1.0f, 0.0f)).Active = true;
+		minimapContainerView.AddWithConstraintsTo(minimapScrollView);
+		minimapContainerView.WidthAnchor.ConstraintEqualTo(this.WidthAnchor).Active = true;
+		minimapContainerView.HeightAnchor.ConstraintEqualTo(this.HeightAnchor).Active = true;
+		minimapDrawingView.AddWithConstraintsTo(this,-OutOfBoundsOffset,0.0f,OutOfBoundsOffset,0.0f);
+		var tap = new UITapGestureRecognizer(t => {
+			if (minimapScrollView.ZoomScale > 1.0f) {
+				minimapScrollView.SetZoomScale(1.0f, true);
+			} else {
+				ZoomToPoint(t.LocationInView(this), 2.0f, true);
+			}
+		}) {
+			NumberOfTapsRequired = 2,
+			CancelsTouchesInView = false
+		};
+		this.AddGestureRecognizer(tap);
 	}
 
-	public override void LayoutSubviews() {
-		base.LayoutSubviews();
+	public void ZoomToPoint(CGPoint point, float scale, bool animated) {
+		var size = new CGSize(Bounds.Size.Width / scale, Bounds.Size.Height / scale);
+		var rect = new CGRect(new(point.X - size.Width * 0.5f, point.Y - size.Height * 0.5f), size);
+		this.minimapScrollView.ZoomToRect(rect, animated);
+	}
 
-		if (minimapImageView?.Image is not { } image)
-			return;
+	private static CGRect MakeAspectScaleToFitAlignToTopRect(CGSize containerSize, CGSize contentSize, bool fromLs) {
+		nfloat x = 0.0f,
+			y = 0.0f,
+			width,
+			height;
 
-		nfloat imageViewXOrigin = 0.0f,
-			imageViewYOrigin = 0.0f,
-			imageViewWidth,
-			imageViewHeight;
-
-		nfloat widthScaleFactor = Frame.Width / image.Size.Width,
-			heightScaleFactor = Frame.Height / image.Size.Height;
+		nfloat widthScaleFactor = containerSize.Width / contentSize.Width,
+			heightScaleFactor = containerSize.Height / contentSize.Height;
 
 //AspectScaleToFit
 		if (widthScaleFactor < heightScaleFactor) {
-			imageViewWidth = Bounds.Size.Width;
-			imageViewHeight = Bounds.Size.Width * image.Size.Height / image.Size.Width;
+			width = containerSize.Width;
+			height = contentSize.Height * widthScaleFactor;
 		} else {
-			imageViewWidth = Bounds.Size.Height * image.Size.Width / image.Size.Height;
-			imageViewHeight = Bounds.Size.Height;
+			width = contentSize.Width * heightScaleFactor;
+			height = containerSize.Height;
 		}
 
 //horizontal alignment center
-		imageViewXOrigin += (Frame.Width - imageViewWidth) * 0.5f;
+		x += (containerSize.Width - width) * 0.5f;
 
-		this.minimapDrawingView.Frame = this.minimapImageView.Frame = new CGRect(imageViewXOrigin, imageViewYOrigin, imageViewWidth, imageViewHeight);
+		return new CGRect(x, y, width, height);
 	}
 
 	private class MinimapDrawingView : UIView {
 		private const float fontSize = 12.0f;
 		private static readonly CGFont font = CGFont.CreateWithFontName(UIFont.SystemFontOfSize(fontSize, UIFontWeight.Regular).Name);
-		private static readonly CTLine constantCapLine = new(new NSAttributedString("JKchat"));
-		private MinimapView minimapView;
+		private readonly MinimapView minimapView;
 		public MinimapDrawingView(MinimapView minimapView) {
 			this.minimapView = minimapView;
 		}
@@ -137,28 +194,39 @@ public class MinimapView : UIView {
 			if (context == null)
 				return;
 
-			var now = DateTime.UtcNow;
 			context.ClearRect(rect);
-			context.TextMatrix = CGAffineTransform.MakeIdentity();
-			context.TranslateCTM(0.0f, rect.Height);
-			context.ScaleCTM(1.0f, -1.0f);
+			context.TextMatrix = CGAffineTransform.MakeScale(1.0f, -1.0f);
+
+			var contentSize = minimapView.minimapContainerView.Layer.PresentationLayer.Frame.Size;//minimapView.minimapScrollView.ContentSize;
+			var contentOffset = minimapView.minimapScrollView.Layer.PresentationLayer.Bounds.Location;//minimapView.minimapScrollView.ContentOffset;
+			var frame = MakeAspectScaleToFitAlignToTopRect(contentSize, minimapView.minimapImageView.Image.Size, false);
+			var size = frame.Size;
+			var posOffset = new Vector3(
+				(float)(frame.X-contentOffset.X+OutOfBoundsOffset),
+				(float)(frame.Y-contentOffset.Y),
+				0.0f
+			);
+
+			var now = DateTime.UtcNow;
 			CGPath path;
+
 			foreach (var entity in entities) {
-				var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,rect.Width,rect.Height,false);
-				var pos2 = entity.Origin2.ToViewPosition(mapData.Min,mapData.Max,rect.Width,rect.Height,false);
+				var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
+				pos += posOffset;
+				var pos2 = entity.Origin2.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
+				pos2 += posOffset;
 				var color = entity.Color.ToUIColor();
 				var lifeDiff = entity.Life - now;
-				var lifeLeft = lifeDiff.TotalMilliseconds;
+				double lifeLeft = lifeDiff.TotalMilliseconds;
 				switch (entity.Type) {
 					case EntityType.Player:
 						const float viewTriMedian = 30.0f;
 						const float viewTriAngle = 30.0f;
 						const float pointSize = 3.0f;
-						const float nameYOffset = 13.37f;
 //player triangle
 						context.SaveState();
 						context.TranslateCTM(pos.X, pos.Y);
-						context.RotateCTM((float)entity.Angles.Y.ToRadians());
+						context.RotateCTM((float)-entity.Angles.Y.ToRadians());
 						path = new CGPath();
 						path.AddLines(new CGPoint[]{ new(0.0f, 0.0f), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * -viewTriMedian), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * viewTriMedian) });
 						context.AddPath(path);
@@ -190,7 +258,7 @@ public class MinimapView : UIView {
 						context.SetStrokeColor(color.CGColor);
 						context.SetLineWidth(flagLineWidth);
 						path = new CGPath();
-						path.AddLines(new CGPoint[] { new(0.0f, 0.0f), new(0.0f, flagHeight), new(flagWidth, flagHeight*0.75f), new(0.0f, flagHeight*0.5f) });
+						path.AddLines(new CGPoint[] { new(0.0f, 0.0f), new(0.0f, -flagHeight), new(flagWidth, -flagHeight*0.75f), new(0.0f, -flagHeight*0.5f) });
 						context.AddPath(path);
 						context.DrawPath(CGPathDrawingMode.FillStroke);
 						context.RestoreState();
@@ -201,7 +269,7 @@ public class MinimapView : UIView {
 						if (lifeLeft <= 0.0) {
 							break;
 						} else if (lifeLeft <= shotFadeTime) {
-							color = color.ColorWithAlpha((float)(lifeLeft / shotFadeTime));
+							color = color.ColorWithAlpha((nfloat)(lifeLeft / shotFadeTime));
 						}
 						context.SetStrokeColor(color.CGColor);
 						context.SetLineWidth(shotLineWidth);
@@ -246,18 +314,18 @@ public class MinimapView : UIView {
 			}
 //2nd pass to draw texts above everything
 			foreach (var entity in entities) {
-				var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,rect.Width,rect.Height,false);
+				var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
+				pos += posOffset;
 				switch (entity.Type) {
 					case EntityType.Player:
 //player name
 						const float nameYOffset = 23.0f;
-						var text = ColourTextValueConverter.Convert(entity.Name, new ColourTextParameter() { ParseShadow = mapData.HasShadow, AddShadow = true });
+						var text = ColourTextValueConverter.Convert(entity.Name, new ColourTextParameter() { ParseShadow = mapData.HasShadow, AddShadow = true, DefaultColor = Color.White });
 						var line = new CTLine(text);
 						context.SetFont(font);
 						context.SetFontSize(fontSize);
-						var horizontalBounds = line.GetImageBounds(context);
-						var verticalBounds = constantCapLine.GetImageBounds(context);
-						context.TextPosition = new(pos.X-horizontalBounds.Width*0.5f, pos.Y-nameYOffset+verticalBounds.Height*0.5f);
+						var bounds = line.GetImageBounds(context);
+						context.TextPosition = new(pos.X-bounds.Width*0.5f, pos.Y+nameYOffset);
 						line.Draw(context);
 						break;
 				}

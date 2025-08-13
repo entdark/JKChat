@@ -78,10 +78,43 @@ namespace JKChat.Core.ViewModels.Settings {
 							Toggled = item => {
 								ToggleOptions(MinimapOptions.FirstUnfocus, item.IsChecked);
 							}
+						},
+						new TableToggleItemVM() {
+							Title = "Remember focus state",
+							IsChecked = options.HasFlag(MinimapOptions.RememberFocus),
+							Toggled = item => {
+								ToggleOptions(MinimapOptions.RememberFocus, item.IsChecked);
+							}
 						}
 					}
 				})
 			};
+			if (DeviceInfo.Platform == DevicePlatform.Android) {
+				groupItem.Items.Add(
+					new TableToggleItemVM() {
+						Title = "High performance",
+						IsChecked = options.HasFlag(MinimapOptions.HighPerformance),
+						Toggled = item => {
+							if (item.IsChecked) {
+								DialogService.Show(new() {
+									Title = "Warning",
+									Message = "The high performance mode uses a hack that can affect battery, warm up the device and might not higher the performance at all.\n\nDo you still want to enable high performance?",
+									OkText = "Enable",
+									OkAction = _ => {
+										ToggleOptions(MinimapOptions.HighPerformance, true);
+									},
+									CancelText = "Cancel",
+									CancelAction = _ => {
+										item.IsChecked = false;
+									}
+								});
+							} else {
+								ToggleOptions(MinimapOptions.HighPerformance, false);
+							}
+						}
+					}
+				);
+			}
 			if (!options.HasFlag(MinimapOptions.Enabled)) {
 				Items.Remove(groupItem);
 			}

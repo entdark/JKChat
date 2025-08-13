@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 using MvvmCross.Binding.Bindings.SourceSteps;
@@ -31,5 +32,6 @@ namespace JKChat.Core.ValueCombiners {
 		public bool ParseUri { get; init; }
 		public bool ParseShadow { get; init; }
 		public bool AddShadow { get; init; }
+		public Color? DefaultColor { get; init; }
 	}
 }

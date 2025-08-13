@@ -52,8 +52,12 @@ namespace JKChat.Core.Models {
 		internal ChatViewModel ViewModel {
 			get => viewModel;
 			set {
+				bool? oldMapFocused = ViewModel?.MapFocused;
 				viewModel = value;
 				if (value != null) {
+					if (AppSettings.MinimapOptions.HasFlag(MinimapOptions.RememberFocus)) {
+						viewModel.MapFocused = this.MapFocused;
+					}
 					if (pendingDialogConfig != null) {
 						dialogService.Show(pendingDialogConfig);
 						pendingDialogConfig = null;
@@ -88,6 +92,9 @@ namespace JKChat.Core.Models {
 						addingPending = false;
 					}
 				} else {
+					if (oldMapFocused.HasValue) {
+						MapFocused = oldMapFocused.Value;
+					}
 					FrameExecuted = null;
 				}
 			}
@@ -111,6 +118,7 @@ namespace JKChat.Core.Models {
 			}
 		}
 		internal LimitedObservableCollection<ChatItemVM> Items { get; init; }
+		internal bool MapFocused { get; set; }
 		internal ServerInfo ServerInfo { get; private set; }
 		internal NetAddress Address => ServerInfo.Address;
 		internal ClientGame ClientGame => Client.ClientGame;
