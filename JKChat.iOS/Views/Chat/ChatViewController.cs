@@ -10,7 +10,7 @@ using CoreAnimation;
 using CoreGraphics;
 
 using Foundation;
-
+using JKChat.Core.Helpers;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Chat;
 using JKChat.Core.ViewModels.Chat.Items;
@@ -45,6 +45,7 @@ namespace JKChat.iOS.Views.Chat {
 		private long lastTappedTime = 0L;
 		private ChatItemVM lastTappedItem = null;
 		private UIBarButtonItem moreButtonItem, minimapButtonItem;
+		private UIButton mapProgressPercentButton;
 		private bool viewAppeared = false;
 
 		public override string Title {
@@ -90,14 +91,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		private bool isFavourite;
-		public bool IsFavourite {
-			get => isFavourite;
-			set {
-				isFavourite = value;
-				UpdateMoreButtonItem();
-			}
-		}
+		public bool IsFavourite { get; set; }
 
 		private bool commandSetAutomatically;
 		public bool CommandSetAutomatically {
@@ -140,6 +134,15 @@ namespace JKChat.iOS.Views.Chat {
 					SwapMapAndChat(value, true);
 				}
 				mapFocused = value;
+				UpdateButtonItems();
+			}
+		}
+
+		private float mapLoadingProgress;
+		public float MapLoadingProgress {
+			get => mapLoadingProgress;
+			set {
+				mapLoadingProgress = value;
 				UpdateButtonItems();
 			}
 		}
@@ -300,7 +303,6 @@ namespace JKChat.iOS.Views.Chat {
 			titleStackView.AddGestureRecognizer(new UITapGestureRecognizer(() => {
 				ViewModel.ServerInfoCommand?.Execute();
 			}));
-			RespaceTitleView();
 
 			NavigationItem.TitleView = titleStackView;
 
@@ -317,6 +319,41 @@ namespace JKChat.iOS.Views.Chat {
 				CancelsTouchesInView = false
 			};
 			MinimapView.AddGestureRecognizer(tap);
+			
+			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);
+			var uncachedAction = UIDeferredMenuElement.CreateUncached(completion => {
+				var disconnectAction = UIAction.Create("Disconnect & exit", Theme.Image.DoorLeftHandOpen, null, action => {
+					ViewModel.DisconnectCommand?.Execute();
+				});
+				disconnectAction.Attributes = UIMenuElementAttributes.Destructive;
+				bool downloadMapAction = !MapLoadingProgress.IsProgressActive() && MapData == null;
+				var menuElements = new List<UIMenuElement>(4 + (downloadMapAction ? 1 : 0)) {
+					UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, null, action => {
+						ViewModel.FavouriteCommand?.Execute();
+					}),
+					UIAction.Create("Share", Theme.Image.SquareAndArrowUp, null, action => {
+						ViewModel.ShareCommand?.Execute();
+					}),
+					UIAction.Create("Info", Theme.Image.InfoCircle, null, action => {
+						ViewModel.ServerInfoCommand?.Execute();
+					}),
+					disconnectAction
+				};
+				if (downloadMapAction) {
+					menuElements.Insert(3, UIAction.Create("Download & generate minimap", Theme.Image.MapCircle, null, action => {
+						ViewModel.MapCommand?.Execute();
+					}));
+				}
+				completion(menuElements.ToArray());
+			});
+			moreButtonItem.Menu = UIMenu.Create(new[] { uncachedAction });
+			mapProgressPercentButton = new UIButton(UIButtonType.System) {
+				Frame = new(0.0f, 0.0f, 44.0f, 44.0f)
+			};
+
+			minimapButtonItem = new UIBarButtonItem(MapFocused ? Theme.Image.MapCircleFill : Theme.Image.MapCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+				ViewModel.MapCommand?.Execute();
+			});
 		}
 
 		[Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]
@@ -350,38 +387,30 @@ namespace JKChat.iOS.Views.Chat {
 			CenterPrintLabel.AttributedText = text;
 		}
 
-		private void UpdateMoreButtonItem() {
-			if (moreButtonItem == null)
-				return;
-			var disconnectAction = UIAction.Create("Disconnect & exit", Theme.Image.DoorLeftHandOpen, null, action => {
-				ViewModel.DisconnectCommand?.Execute();
-			});
-			disconnectAction.Attributes = UIMenuElementAttributes.Destructive;
-			var menu = UIMenu.Create(new UIMenuElement []{
-				UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, null, action => {
-					ViewModel.FavouriteCommand?.Execute();
-				}),
-				UIAction.Create("Share", Theme.Image.SquareAndArrowUp, null, action => {
-					ViewModel.ShareCommand?.Execute();
-				}),
-				UIAction.Create("Info", Theme.Image.InfoCircle, null, action => {
-					ViewModel.ServerInfoCommand?.Execute();
-				}),
-				disconnectAction
-			});
-			moreButtonItem.Menu = menu;
-		}
-
-		private void UpdateButtonItems() {
-			moreButtonItem = new UIBarButtonItem(Theme.Image.EllipsisCircle, null);
-			UpdateMoreButtonItem();
-			if (MapData != null) {
-				minimapButtonItem = new UIBarButtonItem(MapFocused ? Theme.Image.MapCircleFill : Theme.Image.MapCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
-					ViewModel.MapFocused = !ViewModel.MapFocused;
+		private void UpdateButtonItems(bool set = false) {
+			if (MapLoadingProgress.IsProgressActive()) {
+				minimapButtonItem.Image = null;
+				minimapButtonItem.CustomView ??= mapProgressPercentButton;
+				UIView.PerformWithoutAnimation(() => {
+					mapProgressPercentButton.SetTitle(MapLoadingProgress.ToPercentString(), UIControlState.Normal);
+					mapProgressPercentButton.LayoutIfNeeded();
 				});
-				NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+				if (set || NavigationItem.RightBarButtonItems?.Length == 1) {
+					NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+				}
 			} else {
-				NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem }, true);
+				if (MapData != null) {
+					minimapButtonItem.Image = MapFocused ? Theme.Image.MapCircleFill : Theme.Image.MapCircle;
+					minimapButtonItem.CustomView = null;
+					if (set || NavigationItem.RightBarButtonItems?.Length == 1) {
+						NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+					}
+				} else {
+					minimapButtonItem.Image = null;
+					if (set || NavigationItem.RightBarButtonItems?.Length == 2) {
+						NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem }, true);
+					}
+				}
 			}
 		}
 
@@ -427,6 +456,10 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(MinimapView).For(v => v.MapData).To(vm => vm.MapData);
 			set.Bind(this).For(v => v.MapData).To(vm => vm.MapData);
 			set.Bind(this).For(v => v.MapFocused).To(vm => vm.MapFocused);
+			set.Bind(MapLoadingProgressView).For(v => v.Progress).To(vm => vm.MapLoadingProgress);
+			set.Bind(MapLoadingProgressView).For("Visibility").To(vm => vm.MapLoadingProgress).WithConversion("Visibility");
+			set.Bind(this).For(v => v.MapLoadingProgress).To(vm => vm.MapLoadingProgress);
+			set.Bind(mapProgressPercentButton).To(vm => vm.MapCommand);
 
 			InfoView.Alpha = 0.0f;
 			MinimapView.Alpha = 0.0f;
@@ -451,7 +484,7 @@ namespace JKChat.iOS.Views.Chat {
 //HACK: to blur NavigationBar since it starts blurring after scrolling
 			ChatTableView.SetContentOffset(new CGPoint(0.0f, ChatTableView.SpecialOffset-1.0f), false);
 
-			UpdateButtonItems();
+			UpdateButtonItems(true);
 		}
 
 		public override void ViewDidAppear(bool animated) {
@@ -503,7 +536,7 @@ namespace JKChat.iOS.Views.Chat {
 
 		private void SwapMapAndChat(bool mapFocused, bool animated = true) {
 			float minimapAlpha = mapFocused ? 1.0f : 0.3f,
-				tableAlpha = mapFocused ? 0.3f : 1.0f;
+				chatAlpha = mapFocused ? 0.3f : 1.0f;
 			int i = Array.IndexOf(MinimapView.Superview.Subviews, MinimapView);
 			int j = Array.IndexOf(ChatTableView.Superview.Subviews, ChatTableView);
 			if ((i < j && mapFocused) || (i > j && !mapFocused)) {
@@ -511,12 +544,12 @@ namespace JKChat.iOS.Views.Chat {
 			}
 			if (!animated) {
 				MinimapView.Alpha = minimapAlpha;
-				ChatTableView.Alpha = tableAlpha;
+				ChatTableView.Alpha = chatAlpha;
 				return;
 			}
 			UIView.Animate(0.200, () => {
 				MinimapView.Alpha = minimapAlpha;
-				ChatTableView.Alpha = tableAlpha;
+				ChatTableView.Alpha = chatAlpha;
 			});
 		}
 

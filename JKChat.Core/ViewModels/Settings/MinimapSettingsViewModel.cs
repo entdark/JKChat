@@ -1,19 +1,27 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 
+using JKChat.Core.Helpers;
 using JKChat.Core.Models;
+using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
+
+using Microsoft.Maui.Devices;
 
 using MvvmCross.Commands;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Settings {
 	public class MinimapSettingsViewModel : BaseViewModel {
+		private readonly TableGroupedItemVM mapProgressesGroup;
+
 		public IMvxCommand ItemClickCommand { get; init; }
 
 		public MvxObservableCollection<TableGroupedItemVM> Items { get; init; }
 
-		public MinimapSettingsViewModel() {
+		public MinimapSettingsViewModel(IMinimapService minimapService) {
 			Title = "Minimap";
 			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
 			TableGroupedItemVM groupItem = null;
@@ -27,7 +35,7 @@ namespace JKChat.Core.ViewModels.Settings {
 							Toggled = item => {
 								ToggleOptions(MinimapOptions.Enabled, item.IsChecked);
 								if (item.IsChecked && !Items.Contains(groupItem)) {
-									 Items.Add(groupItem);
+									 Items.Insert(1, groupItem);
 								} else if (!item.IsChecked && Items.Contains(groupItem)) {
 									 Items.Remove(groupItem);
 								}
@@ -85,6 +93,28 @@ namespace JKChat.Core.ViewModels.Settings {
 							Toggled = item => {
 								ToggleOptions(MinimapOptions.RememberFocus, item.IsChecked);
 							}
+						},
+						new TableToggleItemVM() {
+							Title = "Autodownload maps",
+							IsChecked = options.HasFlag(MinimapOptions.AutoDownload),
+							Toggled = item => {
+								ToggleOptions(MinimapOptions.AutoDownload, item.IsChecked);
+							}
+						},
+						new TableValueItemVM() {
+							Title = "Download URL",
+							Value = AppSettings.MinimapDownloadURL,
+							OnClick = DownloadURLExecute
+						},
+						new TableValueItemVM() {
+							Title = "Server info key download URL",
+							Value = AppSettings.MinimapServerInfoKeyDownloadURL,
+							OnClick = ServerInfoKeyDownloadURLExecute
+						},
+						new TableValueItemVM() {
+							Title = "Minimap size (in pixels)",
+							Value = $"{AppSettings.MinimapSize}×{AppSettings.MinimapSize}",
+							OnClick = MinimapSizeExecute
 						}
 					}
 				})
@@ -118,10 +148,101 @@ namespace JKChat.Core.ViewModels.Settings {
 			if (!options.HasFlag(MinimapOptions.Enabled)) {
 				Items.Remove(groupItem);
 			}
+			var activeMapProgresses = minimapService.GetActiveMapProgresses();
+			mapProgressesGroup = new TableGroupedItemVM() {
+				Items = new()
+			};
+			foreach (var mapProgress in activeMapProgresses) {
+				mapProgressesGroup.Items.Add(new TableValueItemVM() {
+					Title = mapProgress.Key,
+					Value = mapProgress.Value.Progress.ToPercentString(),
+					OnClick = MapProgressClickExecute,
+					Data = mapProgress.Value
+				});
+			}
+			if (mapProgressesGroup.Items.Count > 0) {
+				Items.Add(mapProgressesGroup);
+			}
+		}
+
+		public override void ViewAppearing() {
+			base.ViewAppearing();
+			foreach (var item in mapProgressesGroup.Items) {
+				if (item.Data is MapProgressData mapProgress) {
+					mapProgress.ProgressChanged += MapLoadingProgressChanged;
+				}
+			}
+		}
+
+		public override void ViewDisappearing() {
+			foreach (var item in mapProgressesGroup.Items) {
+				if (item.Data is MapProgressData mapProgress) {
+					mapProgress.ProgressChanged -= MapLoadingProgressChanged;
+				}
+			}
+			base.ViewDisappearing();
+		}
+
+		private void MapLoadingProgressChanged(MapProgressData mapProgress) {
+			var item = mapProgressesGroup.Items.FirstOrDefault(item => object.ReferenceEquals(item.Data, mapProgress));
+			if (item is TableValueItemVM valueItem) {
+				if (mapProgress.Progress == 0.0f) {
+					mapProgressesGroup.Items.Remove(item);
+					Items.Remove(mapProgressesGroup);
+					Items.Add(mapProgressesGroup);
+				} else {
+					valueItem.Value = mapProgress.Progress.ToPercentString();
+				}
+			}
 		}
 
 		private async Task ItemClickExecute(TableItemVM item) {
 			await item.ClickCommand.ExecuteAsync();
+		}
+
+		private Task MapProgressClickExecute(TableValueItemVM item) {
+			(item.Data as MapProgressData)?.OfferCancel();
+			return Task.CompletedTask;
+		}
+
+		private async Task DownloadURLExecute(TableValueItemVM item) {
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Map download URL",
+				Input = new(item.Value),
+				OkText = "OK",
+				OkAction = config => {
+					AppSettings.MinimapDownloadURL = item.Value = config.Input?.Text;
+				},
+				CancelText = "Cancel"
+			});
+		}
+
+		private async Task ServerInfoKeyDownloadURLExecute(TableValueItemVM item) {
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Server info key map download URL",
+				Input = new(item.Value),
+				OkText = "OK",
+				OkAction = config => {
+					AppSettings.MinimapServerInfoKeyDownloadURL = item.Value = config.Input?.Text;
+				},
+				CancelText = "Cancel"
+			});
+		}
+
+		private async Task MinimapSizeExecute(TableValueItemVM item) {
+			await DialogService.ShowAsync(new JKDialogConfig() {
+				Title = "Minimap size",
+				Input = new(AppSettings.MinimapSize.ToString()),
+				OkText = "OK",
+				OkAction = config => {
+					if (int.TryParse(config.Input?.Text, out int i)) {
+						i = Math.Clamp(i, AppSettings.MinimapMinSize, AppSettings.MinimapMaxSize);
+						item.Value = $"{i}×{i}";
+						AppSettings.MinimapSize = i;
+					}
+				},
+				CancelText = "Cancel"
+			});
 		}
 
 		private static void ToggleOptions(MinimapOptions options, bool add) {

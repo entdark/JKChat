@@ -16,7 +16,7 @@ namespace JKChat.Core.Helpers {
 	public static class Common {
 		public static void ExceptionCallback(Exception exception) {
 			string message = GetExceptionMessage(exception);
-
+			Debug.WriteLine(message);
 			Mvx.IoCProvider.Resolve<IDialogService>().Show(new JKDialogConfig() {
 				Title = "Error",
 				Message = message,

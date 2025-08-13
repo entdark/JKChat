@@ -37,6 +37,12 @@
 		app:iconTint="?attr/colorOnSurfaceVariant"
 		app:showAsAction="never"/>
 	<item
+		android:id="@+id/download_map_item"
+		android:icon="@drawable/ic_map_filled"
+		android:title="Download &amp; create minimap"
+		app:iconTint="?attr/colorOnSurfaceVariant"
+		app:showAsAction="never"/>
+	<item
 		android:id="@+id/report_server_item"
 		android:icon="@drawable/ic_report_problem"
 		android:title="Report"

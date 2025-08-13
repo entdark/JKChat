@@ -25,9 +25,11 @@ namespace Utils.Minimap
 		Action<string, byte[], string, object> _foundFileCallback = null;
 		object _userData = null;
 		bool _trackVersions = false;
+		bool _rethrow;
+		bool _generatingMinimap;
 		string pathRoot = "";
 
-		public ZipRecursor(Regex fileSearchRegex, Action<string, byte[], string, object> foundFileCallback, object userData = null, bool trackVersions = false)
+		public ZipRecursor(Regex fileSearchRegex, Action<string, byte[], string, object> foundFileCallback, object userData = null, bool trackVersions = false, bool rethrow = false)
 		{
 			if (fileSearchRegex is null || foundFileCallback is null)
 			{
@@ -37,6 +39,7 @@ namespace Utils.Minimap
 			_foundFileCallback = foundFileCallback;
 			_userData = userData;
 			_trackVersions = trackVersions;
+			_rethrow = rethrow;
 		}
 		public void HandleFolder(string folderPath)
 		{
@@ -71,9 +74,11 @@ namespace Utils.Minimap
 					}
 #endif
 				}
-				catch (Exception ex)
+				catch (Exception exception)
 				{
-					Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+					Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", exception.Message);
+					if (_rethrow)
+						throw new Exception($"Error opening: {Path.Combine(folderPath, file)}", exception);
 				}
 			}
 			else if (file.EndsWith($".7z", StringComparison.OrdinalIgnoreCase))
@@ -88,6 +93,8 @@ namespace Utils.Minimap
 				catch (Exception ex)
 				{
 					Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+					if (_rethrow)
+						throw;
 				}
 			}
 			else
@@ -115,6 +122,8 @@ namespace Utils.Minimap
 					catch (Exception ex)
 					{
 						Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+						if (_rethrow)
+							throw;
 					}
 				}
 			}
@@ -151,9 +160,10 @@ namespace Utils.Minimap
 				listOfFiles = Directory.GetFiles(folderPath);
 				listOfFolders = Directory.GetDirectories(folderPath);
 			}
-			catch (Exception e)
+			catch (Exception exception)
 			{
-				Helpers.logToFile(e.ToString());
+				PrintAndThrow(exception);
+//				Helpers.logToFile(e.ToString());
 				return; // maybe for some reason the folder was not accessible, like junction tahts not connected
 			}
 
@@ -179,9 +189,9 @@ namespace Utils.Minimap
 						}
 #endif
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+						PrintAndThrow($"Error opening: {Path.Combine(folderPath, file)}", exception);
 					}
 				}
 				else if (file.EndsWith($".7z", StringComparison.OrdinalIgnoreCase))
@@ -193,9 +203,9 @@ namespace Utils.Minimap
 							Analyze7ZipFile(Path.Combine(folderPath, file), mainArchive, searchFile);
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+						PrintAndThrow($"Error opening: {Path.Combine(folderPath, file)}", exception);
 					}
 				}
 				else
@@ -220,9 +230,9 @@ namespace Utils.Minimap
 								AnalyzeSharpCompressReader(Path.Combine(folderPath, file), reader, searchFile);
 							}
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
-							Debug.WriteLine($"Error opening: {Path.Combine(folderPath, file)}", ex.Message);
+							PrintAndThrow($"Error opening: {Path.Combine(folderPath, file)}", exception);
 						}
 					}
 				}
@@ -271,9 +281,9 @@ namespace Utils.Minimap
 						}
 #endif
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {path}/{entry.FullName}", ex.Message);
+						PrintAndThrow($"Error opening: {path}/{entry.FullName}", exception);
 					}
 				}
 				else if (entry.Name.EndsWith($".7z", StringComparison.OrdinalIgnoreCase))
@@ -288,9 +298,9 @@ namespace Utils.Minimap
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {Path.Combine(path, entry.FullName)}", ex.Message);
+						PrintAndThrow($"Error opening: {Path.Combine(path, entry.FullName)}", exception);
 					}
 				}
 				else
@@ -316,9 +326,9 @@ namespace Utils.Minimap
 								AnalyzeSharpCompressReader(Path.Combine(path, entry.FullName), reader2, searchFile);
 							}
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
-							Debug.WriteLine($"Error opening: {Path.Combine(path, entry.FullName)}", ex.Message);
+							PrintAndThrow($"Error opening: {Path.Combine(path, entry.FullName)}", exception);
 						}
 					}
 				}
@@ -351,9 +361,9 @@ namespace Utils.Minimap
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {path}/{entry.Key}", ex.Message);
+						PrintAndThrow($"Error opening: {path}/{entry.Key}", exception);
 					}
 				}
 				else if (entry.Key.EndsWith($".7z", StringComparison.OrdinalIgnoreCase))
@@ -368,9 +378,9 @@ namespace Utils.Minimap
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {Path.Combine(path, entry.Key)}", ex.Message);
+						PrintAndThrow($"Error opening: {Path.Combine(path, entry.Key)}", exception);
 					}
 				}
 				else
@@ -396,9 +406,9 @@ namespace Utils.Minimap
 								AnalyzeSharpCompressReader(Path.Combine(path, entry.Key), reader2, searchFile);
 							}
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
-							Debug.WriteLine($"Error opening: {Path.Combine(path, entry.Key)}", ex.Message);
+							PrintAndThrow($"Error opening: {Path.Combine(path, entry.Key)}", exception);
 						}
 					}
 				}
@@ -431,9 +441,9 @@ namespace Utils.Minimap
 								}
 							}
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
-							Debug.WriteLine($"Error opening: {path}/{entry.Key}", ex.Message);
+							PrintAndThrow($"Error opening: {path}/{entry.Key}", exception);
 						}
 					}
 					else if (entry.Key.EndsWith($".7z", StringComparison.OrdinalIgnoreCase))
@@ -448,9 +458,9 @@ namespace Utils.Minimap
 								}
 							}
 						}
-						catch (Exception ex)
+						catch (Exception exception)
 						{
-							Debug.WriteLine($"Error opening: {Path.Combine(path, entry.Key)}", ex.Message);
+							PrintAndThrow($"Error opening: {Path.Combine(path, entry.Key)}", exception);
 						}
 					}
 					else
@@ -476,9 +486,9 @@ namespace Utils.Minimap
 									AnalyzeSharpCompressReader(Path.Combine(path, entry.Key), reader2, searchFile);
 								}
 							}
-							catch (Exception ex)
+							catch (Exception exception)
 							{
-								Debug.WriteLine($"Error opening: {Path.Combine(path, entry.Key)}", ex.Message);
+								PrintAndThrow($"Error opening: {Path.Combine(path, entry.Key)}", exception);
 							}
 						}
 					}
@@ -507,9 +517,9 @@ namespace Utils.Minimap
 							}
 						}
 					}
-					catch (Exception ex)
+					catch (Exception exception)
 					{
-						Debug.WriteLine($"Error opening: {path}/{entry.Name}", ex.Message);
+						PrintAndThrow($"Error opening: {path}/{entry.Name}", exception);
 					}
 				}
 				if (searchFile.Match(entry.Name).Success)
@@ -519,6 +529,22 @@ namespace Utils.Minimap
 
 				}
 			}*/
+		}
+
+		private void PrintAndThrow(Exception exception)
+		{
+			Debug.WriteLine(exception.ToString());
+			if (_rethrow)
+				throw exception;
+		}
+
+		private void PrintAndThrow(string message, Exception exception)
+		{
+			Debug.WriteLine(message, exception.Message);
+			bool allowRethrow = _generatingMinimap;
+			_generatingMinimap = false;
+			if (_rethrow && allowRethrow)
+				throw new Exception(message, exception);
 		}
 
 		void HandleMatchedFile(string fileName, string path, byte[] version)
@@ -548,7 +574,7 @@ namespace Utils.Minimap
 					//string targetFileName = entryNameLower;
 					//if (indexHere != 0)
 					//{
-					//    targetFileName = $"{Path.GetFileNameWithoutExtension(entryNameLower)}_version{(indexHere + 1)}{Path.GetExtension(entryNameLower)}";
+					//	targetFileName = $"{Path.GetFileNameWithoutExtension(entryNameLower)}_version{(indexHere + 1)}{Path.GetExtension(entryNameLower)}";
 					//}
 					//File.WriteAllBytes(targetFileName, version);
 					//File.SetLastWriteTime(targetFileName, entry.LastWriteTime.DateTime);
@@ -562,7 +588,9 @@ namespace Utils.Minimap
 			if (doProcess)
 			{
 				string relPath = Path.GetRelativePath(pathRoot, path);
+				_generatingMinimap = true;
 				_foundFileCallback(entryNameLower, version, relPath, _userData);
+				_generatingMinimap = false;
 			}
 		}
 

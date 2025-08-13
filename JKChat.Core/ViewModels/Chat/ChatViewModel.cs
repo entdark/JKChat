@@ -21,6 +21,7 @@ using JKChat.Core.ViewModels.ServerList.Items;
 
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Devices;
 
 using MvvmCross.Commands;
 using MvvmCross.Navigation;
@@ -39,10 +40,12 @@ namespace JKChat.Core.ViewModels.Chat {
 		
 		private readonly ICacheService cacheService;
 		private readonly IGameClientsService gameClientsService;
+		private readonly IMinimapService minimapService;
 
 		private string address;
 		private GameClient gameClient;
 		private string mapName;
+		private MapProgressData mapProgress;
 
 		public IMvxCommand ItemClickCommand { get; init; }
 		public IMvxCommand CopyCommand { get; init; }
@@ -58,6 +61,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		public IMvxCommand DisconnectCommand { get; init; }
 		public IMvxCommand ShareCommand { get; init; }
 		public IMvxCommand ServerReportCommand { get; init; }
+		public IMvxCommand MapCommand { get; init; }
 
 		protected override string ReportTitle => "Report message";
 		protected override string ReportMessage => "Do you want to report this message?";
@@ -205,11 +209,18 @@ namespace JKChat.Core.ViewModels.Chat {
 			});
 		}
 
+		private float mapLoadingProgress;
+		public float MapLoadingProgress {
+			get => mapLoadingProgress;
+			set => SetProperty(ref mapLoadingProgress, value);
+		}
+
 		internal JKClient.ServerInfo ServerInfo => gameClient?.ServerInfo;
 
-		public ChatViewModel(ICacheService cacheService, IGameClientsService gameClientsService) {
+		public ChatViewModel(ICacheService cacheService, IGameClientsService gameClientsService, IMinimapService minimapService) {
 			this.cacheService = cacheService;
 			this.gameClientsService = gameClientsService;
+			this.minimapService = minimapService;
 
 			ItemClickCommand = new MvxAsyncCommand<ChatItemVM>(ItemClickExecute);
 			CopyCommand = new MvxAsyncCommand<ChatItemVM>(CopyExecute);
@@ -225,6 +236,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			DisconnectCommand = new MvxAsyncCommand(DisconnectExecute);
 			ShareCommand = new MvxAsyncCommand(ShareExecute);
 			ServerReportCommand = new MvxAsyncCommand(ReportServerExecute);
+			MapCommand = new MvxCommand(MapExecute);
 
 			ChatType = ChatType.Common;
 			SelectingChatType = false;
@@ -334,20 +346,17 @@ namespace JKChat.Core.ViewModels.Chat {
 //					gameClient.RemoveItem(item);
 //				}
 				if (report && item is ChatMessageItemVM messageItem) {
-					Task.Run(async () => await reportExecuteBlock(messageItem));
+					DialogService.Show(new JKDialogConfig() {
+						Title = "Block User",
+						Message = "Would you like to block the user and hide all their messages?",
+						CancelText = "No",
+						OkText = "Yes",
+						OkAction = _ => {
+							gameClient.HideAllMessages(messageItem);
+						}
+					});
 				}
 			});
-			async Task reportExecuteBlock(ChatMessageItemVM item) {
-				await DialogService.ShowAsync(new JKDialogConfig() {
-					Title = "Block User",
-					Message = "Would you like to block the user and hide all their messages?",
-					CancelText = "No",
-					OkText = "Yes",
-					OkAction = _ => {
-						gameClient.HideAllMessages(item);
-					}
-				});
-			}
 		}
 
 		protected override void SelectExecute(ChatItemVM item) {
@@ -373,11 +382,11 @@ namespace JKChat.Core.ViewModels.Chat {
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Message is Copied",
 //				Message = "To copy message with color codes click \"With Colors\"",
-				CancelText = "With Colors",
-				CancelAction = _ => {
+				OkText = "With Colors",
+				OkAction = _ => {
 					Clipboard.SetTextAsync(text);
 				},
-				OkText = "OK"
+				CancelText = "OK"
 			});
 		}
 
@@ -497,6 +506,16 @@ namespace JKChat.Core.ViewModels.Chat {
 			Prepare(parameter.ServerInfo, parameter.IsFavourite);
 		}
 
+		private void MapExecute() {
+			if (MapData != null) {
+				MapFocused = !MapFocused;
+			} else if (mapProgress is { IsActive: true }) {
+				mapProgress.OfferCancel();
+			} else {
+				DownloadAndGenerateMap(true);
+			}
+		}
+
 		public void Init(string address) {
 			if (string.IsNullOrEmpty(this.address))
 				this.address = address;
@@ -544,8 +563,14 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 		}
 
+		long lastFrameTime = 0L;
 		private List<EntityData> ents;
-		private void FrameExecuted(long frameTime){
+		private void FrameExecuted(long frameTime) {
+#if false
+			if (lastFrameTime == 0L)
+				lastFrameTime = frameTime;
+			MapLoadingProgress = (frameTime - lastFrameTime) / 1000.0f / 100.0f * 2.0f;
+#endif
 			var clientGame = gameClient.ClientGame;
 			Entities = getEntities(clientGame)
 				.OrderBy(entity => entity.Team)
@@ -679,6 +704,13 @@ namespace JKChat.Core.ViewModels.Chat {
 			static string scoresString(int scores) => scores == JKClient.ClientGame.ScoreNotPresent ? "-" : scores.ToString();
 		}
 
+		public override void ViewAppearing() {
+			base.ViewAppearing();
+			if (mapProgress != null) {
+				mapProgress.ProgressChanged += MapProgressChanged;
+			}
+		}
+
 		public override void ViewDisappearing() {
 			if (gameClient != null) {
 				gameClient.FrameExecuted -= FrameExecuted;
@@ -686,6 +718,9 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 			if (Items != null) {
 				Items.CollectionChanged -= ItemsCollectionChanged;
+			}
+			if (mapProgress != null) {
+				mapProgress.ProgressChanged -= MapProgressChanged;
 			}
 			base.ViewDisappearing();
 		}
@@ -737,7 +772,9 @@ namespace JKChat.Core.ViewModels.Chat {
 //force IsLoading = true;
 			Status = gameClient.Status;
 			await cacheService.SaveRecentServer(ServerInfo);
+			bool wasConnected = Status == ConnectionStatus.Connected;
 			await gameClient.Connect(false);
+			LoadMapData(!wasConnected && Status == ConnectionStatus.Connected);
 
 			async Task close() {
 				await NavigationService.Close(this);
@@ -752,11 +789,19 @@ namespace JKChat.Core.ViewModels.Chat {
 			return true;
 		}
 
-		private void LoadMapData() {
+		private void LoadMapData(bool forceLoad = false, bool download = true) {
 			if (!AppSettings.MinimapOptions.HasFlag(MinimapOptions.Enabled))
 				return;
 
-			if (string.Compare(mapName, ServerInfo.MapName, StringComparison.OrdinalIgnoreCase) == 0)
+			bool sameMap = string.Compare(mapName, ServerInfo.MapName, StringComparison.OrdinalIgnoreCase) == 0;
+			if (!sameMap) {
+				if (mapProgress != null) {
+					mapProgress.ProgressChanged -= MapProgressChanged;
+					MapLoadingProgress = 0.0f;
+				}
+			}
+
+			if (!forceLoad && sameMap)
 				return;
 
 			var resourceMapName = mapName = ServerInfo.MapName;
@@ -766,35 +811,61 @@ namespace JKChat.Core.ViewModels.Chat {
 				return;
 			}
 
-//special case for mappers who cannot properly recreate a map
-			const string siege_hoth = "siege_hoth";
-			if (mapName.StartsWith(siege_hoth) && mapName.Length > siege_hoth.Length && mapName[siege_hoth.Length] is char c && char.IsDigit(c) && (c - '0') >= 3)
-				resourceMapName = "mp/siege_hoth2";
-			var assembly = this.GetType().Assembly;
-			string path = $"JKChat.Core.Resources.Minimaps.{ServerInfo.Version.ToGame()}.{resourceMapName.Replace('/','.')}.xy,";
-			foreach (var resourceName in assembly.GetManifestResourceNames()) {
-				if (resourceName.StartsWith(path, StringComparison.OrdinalIgnoreCase)) {
-					string []minMax = resourceName.Substring(path.Length).Replace(".png","").Split(',');
-					if (minMax?.Length == 6
-						&& int.TryParse(minMax[0], out int minX)
-						&& int.TryParse(minMax[1], out int minY)
-						&& int.TryParse(minMax[2], out int minZ)
-						&& int.TryParse(minMax[3], out int maxX)
-						&& int.TryParse(minMax[4], out int maxY)
-						&& int.TryParse(minMax[5], out int maxZ)) {
-						MapData = new() {
-							Assembly = assembly,
-							Path = resourceName,
-							Min = new(minX, minY, minZ),
-							Max = new(maxX, maxY, maxZ),
-							HasShadow = ServerInfo.Version == JKClient.ClientVersion.JO_v1_02
-						};
-						return;
-					}
-					break;
-				}
+			var mapData = minimapService.GetMapData(ServerInfo);
+
+			if (Status != ConnectionStatus.Connected) {
+				MapData = mapData;
+				return;
 			}
-			MapData = null;
+			if (mapData == null && !AppSettings.MinimapAutodownloadAsked) {
+				DialogService.Show(new JKDialogConfig() {
+					Title = "Missing minimap",
+					Message = "Would you like to enable maps auto-downloading, try to download the map, and generate the minimap? You can disable maps auto-downloading and generating in Minimap Settings.",
+					OkText = "Enable",
+					OkAction = _ => {
+						AppSettings.MinimapOptions |= MinimapOptions.AutoDownload;
+						AppSettings.MinimapAutodownloadAsked = true;
+					},
+					CancelText = "Disable",
+					CancelAction = _ => {
+						AppSettings.MinimapOptions &= ~MinimapOptions.AutoDownload;
+						AppSettings.MinimapAutodownloadAsked = true;
+					}
+				});
+				MapData = null;
+				return;
+			}
+			if (download && mapData == null) {
+				DownloadAndGenerateMap();
+			}
+			MapData = mapData;
+		}
+
+		private void DownloadAndGenerateMap(bool manual = false) {
+			MapFocused = false;
+
+			if (mapProgress != null)
+				mapProgress.ProgressChanged -= MapProgressChanged;
+
+			if (manual || AppSettings.MinimapOptions.HasFlag(MinimapOptions.AutoDownload)) {
+				mapProgress = minimapService.DownloadMapAndGenerateMinimap(ServerInfo, manual);
+			} else {
+				mapProgress = minimapService.GetActiveMapProgress(ServerInfo);
+			}
+
+			if (mapProgress != null) {
+				mapProgress.ProgressChanged += MapProgressChanged;
+				MapLoadingProgress = mapProgress.Progress;
+			}
+		}
+
+		private void MapProgressChanged(MapProgressData mapProgress) {
+			if (!mapProgress.IsActive) {
+				MapLoadingProgress = 0.0f;
+				LoadMapData(true, false);
+			} else {
+				MapLoadingProgress = mapProgress.Progress;
+			}
 		}
 	}
 }

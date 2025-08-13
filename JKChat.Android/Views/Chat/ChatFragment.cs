@@ -11,11 +11,13 @@ using Android.Views.Animations;
 using Android.Widget;
 
 using AndroidX.AppCompat.View.Menu;
+using AndroidX.AppCompat.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
 
 using Java.Lang;
+using Java.Util.Concurrent;
 
 using JKChat.Android.Adapters;
 using JKChat.Android.Controls;
@@ -23,6 +25,7 @@ using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Chat;
@@ -41,7 +44,7 @@ using static JKChat.Android.ValueConverters.ColourTextValueConverter;
 namespace JKChat.Android.Views.Chat {
 	[PushFragmentPresentation]
 	public class ChatFragment : ReportFragment<ChatViewModel, ChatItemVM> {
-		private IMenuItem copyItem, favouriteItem, minimapItem;
+		private IMenuItem copyItem, favouriteItem, downloadMapItem, minimapItem;
 		private ImageButton sendButton, commandButton, chatTypeButton;
 		private EditText messageEditText;
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
@@ -107,6 +110,18 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
+		private float mapLoadingProgress;
+		public float MapLoadingProgress {
+			get => mapLoadingProgress;
+			set {
+				int oldPercent = mapLoadingProgress.ToPercent(),
+					newPercent = value.ToPercent();
+				bool update = oldPercent != newPercent;
+				mapLoadingProgress = value;
+				UpdateMinimapItem(update);
+			}
+		}
+
 		private bool showCenterPrint;
 		public bool ShowCenterPrint {
 			get => showCenterPrint;
@@ -131,6 +146,7 @@ namespace JKChat.Android.Views.Chat {
 			set.Bind(this).For(v => v.ShowCenterPrint).To(vm => vm.ShowCenterPrint);
 			set.Bind(this).For(v => v.MapData).To(vm => vm.MapData);
 			set.Bind(this).For(v => v.MapFocused).To(vm => vm.MapFocused);
+			set.Bind(this).For(v => v.MapLoadingProgress).To(vm => vm.MapLoadingProgress);
 			return view;
 		}
 
@@ -221,10 +237,32 @@ namespace JKChat.Android.Views.Chat {
 			scrollToBottomRecyclerAdapter?.ScrollToBottom();
 		}
 
+		private ActionMenuPresenter menuPresenter;
 		protected override void CreateOptionsMenu() {
 			base.CreateOptionsMenu();
 			if (Menu is MenuBuilder menuBuilder) {
 				menuBuilder.SetOptionalIconsVisible(true);
+#if false
+				try {
+					var field = menuBuilder.Class.GetDeclaredField("mPresenters");
+					field.Accessible = true;
+					var presenters = field.Get(menuBuilder);
+					System.Diagnostics.Debug.WriteLine(presenters);
+					var presentersList = presenters as CopyOnWriteArrayList;
+					var presentersArray = presentersList?.ToArray();
+					if (presentersArray != null) {
+						System.Diagnostics.Debug.WriteLine(presentersArray);
+						foreach (var presenterRef in presentersArray) {
+							var presenter = (presenterRef as Java.Lang.Ref.WeakReference)?.Get();
+							if (presenter is ActionMenuPresenter actionMenuPresenter)
+								menuPresenter = actionMenuPresenter;
+							System.Diagnostics.Debug.WriteLine(presenter?.GetType());
+						}
+					}
+				} catch (System.Exception exception) {
+					System.Diagnostics.Debug.WriteLine(exception);
+				}
+#endif
 			}
 			favouriteItem = Menu.FindItem(Resource.Id.favourite_item);
 			favouriteItem.AdjustIconInsets();
@@ -241,6 +279,11 @@ namespace JKChat.Android.Views.Chat {
 			infoItem.AdjustIconInsets();
 			infoItem.SetClickAction(() => {
 				ViewModel?.ServerInfoCommand?.Execute();
+			});
+			downloadMapItem = Menu.FindItem(Resource.Id.download_map_item);
+			downloadMapItem.AdjustIconInsets();
+			downloadMapItem.SetClickAction(() => {
+				ViewModel?.MapCommand?.Execute();
 			});
 			var reportServerItem = Menu.FindItem(Resource.Id.report_server_item);
 			reportServerItem.AdjustIconInsets();
@@ -259,9 +302,7 @@ namespace JKChat.Android.Views.Chat {
 			});
 			minimapItem = Menu.FindItem(Resource.Id.minimap_item);
 			minimapItem.SetClickAction(() => {
-				if (ViewModel == null)
-					return;
-				ViewModel.MapFocused = !ViewModel.MapFocused;
+				ViewModel?.MapCommand?.Execute();
 			});
 			UpdateMinimapItem();
 		}
@@ -290,9 +331,26 @@ namespace JKChat.Android.Views.Chat {
 			favouriteItem.AdjustIconInsets();
 		}
 
-		private void UpdateMinimapItem() {
-			minimapItem?.SetVisible(MapData != null);
-			minimapItem?.SetIcon(MapFocused ? Resource.Drawable.ic_map_filled : Resource.Drawable.ic_map_outlined);
+		private void UpdateMinimapItem(bool updateProgress = false) {
+			if (minimapItem == null || downloadMapItem == null)
+				return;
+			if (MapLoadingProgress.IsProgressActive()) {
+				updateProgress |= !minimapItem.IsVisible;
+				updateProgress |= minimapItem.Icon != null;
+				updateProgress |= minimapItem.TitleFormatted == null;
+				updateProgress |= downloadMapItem.IsVisible;
+				if (updateProgress) {
+					minimapItem.SetVisible(true);
+					minimapItem.SetIcon(null);
+					minimapItem.SetTitle(MapLoadingProgress.ToPercentString());
+					downloadMapItem.SetVisible(false);
+				}
+			} else {
+				minimapItem.SetVisible(MapData != null);
+				minimapItem.SetIcon(MapFocused ? Resource.Drawable.ic_map_filled : Resource.Drawable.ic_map_outlined);
+				minimapItem.SetTitle(null);
+				downloadMapItem.SetVisible(MapData == null);
+			}
 		}
 
 		private static void ScaleButton(View view, bool show, bool animated = true) {
@@ -381,7 +439,7 @@ namespace JKChat.Android.Views.Chat {
 			private void RecyclerViewTouch(object sender, View.TouchEventArgs ev) {
 				if (ev.Event.Action == MotionEventActions.Down) {
 					dragging = true;
-				} else if (ev.Event.Action == MotionEventActions.Up) {
+				} else if (ev.Event.Action == MotionEventActions.Up || ev.Event.Action == MotionEventActions.Cancel) {
 					dragging = false;
 				}
 				touched = true;

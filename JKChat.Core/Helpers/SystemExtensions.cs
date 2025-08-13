@@ -42,5 +42,14 @@ namespace JKChat.Core.Helpers {
 		public static double ToRadians(this float angle) {
 			return (double)(angle * Math.PI / 180.0f);
 		}
+		public static bool IsProgressActive(this float p) {
+			return p > 0.0f && p < 1.0f;
+		}
+		public static int ToPercent(this float p) {
+			return (int)(p * 100.0f);
+		}
+		public static string ToPercentString(this float p) {
+			return p.ToPercent() + "%";
+		}
 	}
 }

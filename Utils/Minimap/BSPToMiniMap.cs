@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -204,7 +205,7 @@ namespace Utils.Minimap
 			return JsonSerializer.Deserialize<MiniMapMeta>(data, jsonOpts);
 		}
 
-		public static unsafe void MakeMiniMap(string mapNameClean, byte[] bspData, string minimapsPath, float pixelsPerUnit = 0.1f, int maxWidth = 4000, int maxHeight = 4000, int extraBorderUnits = 100)
+		public static unsafe void MakeMiniMap(string mapNameClean, byte[] bspData, string minimapsPath, float pixelsPerUnit = 0.1f, int maxWidth = 4000, int maxHeight = 4000, int extraBorderUnits = 100, Func<string, bool> predicate = null, Action<float> progressCallback = null, CancellationToken? cancellationToken = null)
 		{
 			bool isQ3 = false;
 			string minimapPath = Path.Combine(minimapsPath ?? minimapsPathDefault, mapNameClean);
@@ -213,12 +214,17 @@ namespace Utils.Minimap
 			//string xzPath = Path.Combine(minimapPath, "xz.png");
 			//string yzPath = Path.Combine(minimapPath, "yz.png");
 
+			bool doProcess = predicate?.Invoke(mapNameClean) ?? true;
+			if (!doProcess)
+				return;
+
 //			if (File.Exists(propsJsonFilePath))
 			if (new DirectoryInfo(minimapPath) is { Exists: true } d && d.GetFiles() is { Length: > 0 })
 			{
-				Console.WriteLine($"Minimap for {mapNameClean} seems to already exist. Overwrite [y/n]?");
+				Console.WriteLine($"Minimap for {mapNameClean} seems to already exist.");
 				return;
-/*/				string line = Console.ReadLine();
+/*				Console.WriteLine($"Minimap for {mapNameClean} seems to already exist. Overwrite [y/n]?");
+				string line = Console.ReadLine();
 				if (line?.StartsWith("n", StringComparison.InvariantCultureIgnoreCase) ?? false)
 				{
 					return;
@@ -333,8 +339,8 @@ namespace Utils.Minimap
 								maxZ = Math.Max(vert.xyz[2], maxZ);
 								//if(minX < 1000 || minY < 1000)
 								//{
-								//   string shaderName = shaderNames[surf.shaderNum];
-								//    int a = 1;
+								//	string shaderName = shaderNames[surf.shaderNum];
+								//	int a = 1;
 								//}
 							}
 
@@ -521,15 +527,19 @@ namespace Utils.Minimap
 								axisName = "yz";
 								break;
 						}
+						uint percent = 0;
+						float totalActions = xResHere * yResHere;
 
 						float[] pixelData = new float[xResHere * yResHere];
 						float[] pixelDataDivider = new float[xResHere * yResHere];
-
+						
+						cancellationToken?.ThrowIfCancellationRequested();
 						Parallel.For(0, yResHere, new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount / 2 }, (y) =>
 						{
+							cancellationToken?.ThrowIfCancellationRequested();
 							//for(int y = 0; y < yRes; y++)
 							//{
-							for (int x = 0; x < xResHere; x++)
+							for (int x = 0; x < xResHere; x++, Interlocked.Increment(ref percent), progressCallback?.Invoke(percent / totalActions))
 							{
 								Vector3 pixelWorldCoordinate = new Vector3() { X = (float)(x /*xResHere - x - 1*/) / (float)xResHere * xRangeHere + imgMinXHere, Y = (float)(yResHere - y - 1) / (float)yResHere * yRangeHere + imgMinYHere };
 
@@ -573,9 +583,10 @@ namespace Utils.Minimap
 						});
 
 						//float[] pixelDiffData = new float[xRes * yRes];
+						
+						cancellationToken?.ThrowIfCancellationRequested();
 
 						var image = new Image<La16>(xResHere, yResHere);
-
 						image.ProcessPixelRows(processor =>
 						{
 							// Kinda edge detection

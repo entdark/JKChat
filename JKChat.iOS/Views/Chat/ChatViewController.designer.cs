@@ -67,6 +67,9 @@ namespace JKChat.iOS.Views.Chat
 		UIKit.UIView InfoView { get; set; }
 
 		[Outlet]
+		UIKit.UIProgressView MapLoadingProgressView { get; set; }
+
+		[Outlet]
 		[GeneratedCode ("iOS Designer", "1.0")]
 		JKChat.iOS.Controls.PlaceholderTextView MessageTextView { get; set; }
 
@@ -107,6 +110,21 @@ namespace JKChat.iOS.Views.Chat
 				ChatTableView = null;
 			}
 
+			if (ChatTableViewBottomConstraint != null) {
+				ChatTableViewBottomConstraint.Dispose ();
+				ChatTableViewBottomConstraint = null;
+			}
+
+			if (ChatTableViewBottomToMessageViewTopConstraint != null) {
+				ChatTableViewBottomToMessageViewTopConstraint.Dispose ();
+				ChatTableViewBottomToMessageViewTopConstraint = null;
+			}
+
+			if (ChatTableViewToMinimapViewBottomConstraint != null) {
+				ChatTableViewToMinimapViewBottomConstraint.Dispose ();
+				ChatTableViewToMinimapViewBottomConstraint = null;
+			}
+
 			if (ChatTypeButton != null) {
 				ChatTypeButton.Dispose ();
 				ChatTypeButton = null;
@@ -140,6 +158,11 @@ namespace JKChat.iOS.Views.Chat
 			if (CommandsTableView != null) {
 				CommandsTableView.Dispose ();
 				CommandsTableView = null;
+			}
+
+			if (CommandsTableViewBottomConstraint != null) {
+				CommandsTableViewBottomConstraint.Dispose ();
+				CommandsTableViewBottomConstraint = null;
 			}
 
 			if (CommandsTableViewHeightConstraint != null) {
@@ -187,24 +210,9 @@ namespace JKChat.iOS.Views.Chat
 				TimerLabel = null;
 			}
 
-			if (ChatTableViewBottomConstraint != null) {
-				ChatTableViewBottomConstraint.Dispose ();
-				ChatTableViewBottomConstraint = null;
-			}
-
-			if (ChatTableViewToMinimapViewBottomConstraint != null) {
-				ChatTableViewToMinimapViewBottomConstraint.Dispose ();
-				ChatTableViewToMinimapViewBottomConstraint = null;
-			}
-
-			if (ChatTableViewBottomToMessageViewTopConstraint != null) {
-				ChatTableViewBottomToMessageViewTopConstraint.Dispose ();
-				ChatTableViewBottomToMessageViewTopConstraint = null;
-			}
-
-			if (CommandsTableViewBottomConstraint != null) {
-				CommandsTableViewBottomConstraint.Dispose ();
-				CommandsTableViewBottomConstraint = null;
+			if (MapLoadingProgressView != null) {
+				MapLoadingProgressView.Dispose ();
+				MapLoadingProgressView = null;
 			}
 		}
 	}

@@ -16,6 +16,11 @@ using MvvmCross.Plugin.Messenger;
 namespace JKChat.Core {
 	public static class AppSettings {
 		public const string DefaultName = "^5Jedi Knight";
+		public const string DefaultDownloadURL = "http://ws.q3df.org/maps/downloads";
+		public const string DefaultServerInfoKeyDownloadURL = "g_dlURL";
+		public const int DefaultMinimapSize = 1024;
+		public const int MinimapMinSize = 256;
+		public const int MinimapMaxSize = 16384;
 		public static bool FirstLaunch {
 			get {
 				bool firstLaunch = Get(true);
@@ -110,6 +115,22 @@ namespace JKChat.Core {
 		public static MinimapOptions MinimapOptions {
 			get => (MinimapOptions)GetCached((int)MinimapOptions.Default, ref minimapOptions, Get);
 			set => SetCached((int)value, ref minimapOptions, Set);
+		}
+		public static bool MinimapAutodownloadAsked {
+			get => Get(false);
+			set => Set(value);
+		}
+		public static string MinimapDownloadURL {
+			get => Get(DefaultDownloadURL);
+			set => Set(value);
+		}
+		public static string MinimapServerInfoKeyDownloadURL {
+			get => Get(DefaultServerInfoKeyDownloadURL);
+			set => Set(value);
+		}
+		public static int MinimapSize {
+			get => Get(DefaultMinimapSize);
+			set => Set(value);
 		}
 
 		private static bool Get(bool defaultValue, [CallerMemberName] string key = "") => Preferences.Get(key, defaultValue);

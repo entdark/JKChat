@@ -27,6 +27,7 @@
                 <outlet property="CommandsTableViewBottomConstraint" destination="fgq-A6-Bzc" id="OAf-Qg-0PL"/>
                 <outlet property="CommandsTableViewHeightConstraint" destination="CFb-la-hMt" id="aqD-QI-X2V"/>
                 <outlet property="InfoView" destination="bc5-sV-ejZ" id="FOJ-Pe-BHe"/>
+                <outlet property="MapLoadingProgressView" destination="Z0w-GY-wc4" id="DpK-fL-bww"/>
                 <outlet property="MessageTextView" destination="1903" id="name-outlet-1903"/>
                 <outlet property="MessageToolbar" destination="fup-dp-pgP" id="5Km-1m-lhf"/>
                 <outlet property="MessageView" destination="3687" id="name-outlet-3687"/>
@@ -42,12 +43,12 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" indicatorStyle="white" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" contentViewInsetsToSafeArea="NO" translatesAutoresizingMaskIntoConstraints="NO" id="175" customClass="ChatTableView">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="674"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </tableView>
-                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gb6-se-fJP" customClass="MinimapView">
-                    <rect key="frame" x="0.0" y="0.0" width="375" height="674"/>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gb6-se-fJP" customClass="MinimapView">
+                    <rect key="frame" x="0.0" y="68" width="375" height="606"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bc5-sV-ejZ">
@@ -100,13 +101,16 @@ Longest Nickname 420</string>
                         <constraint firstAttribute="bottom" secondItem="fXd-ey-bji" secondAttribute="bottom" id="hLk-Dq-RoB"/>
                     </constraints>
                 </view>
-                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0BW-om-Vsj">
+                <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Z0w-GY-wc4">
+                    <rect key="frame" x="0.0" y="68" width="375" height="5"/>
+                </progressView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0BW-om-Vsj">
                     <rect key="frame" x="0.0" y="674" width="375" height="104"/>
                     <subviews>
-                        <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3687">
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3687">
                             <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                             <subviews>
-                                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JrR-ah-AEs">
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="JrR-ah-AEs">
                                     <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                                 </view>
                                 <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fup-dp-pgP">
@@ -117,13 +121,13 @@ Longest Nickname 420</string>
                                     <items/>
                                 </toolbar>
                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="882">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="88"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="104"/>
                                     <subviews>
                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="fillProportionally" translatesAutoresizingMaskIntoConstraints="NO" id="1046">
-                                            <rect key="frame" x="0.0" y="0.0" width="375" height="28"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                                             <subviews>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1276">
-                                                    <rect key="frame" x="0.0" y="0.0" width="151.66666666666666" height="28"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="151.66666666666666" height="44"/>
                                                     <color key="tintColor" systemColor="labelColor"/>
                                                     <state key="normal" title="COMMON" image="ChatTypeCommon"/>
                                                     <buttonConfiguration key="configuration" style="plain" title="Common" imagePadding="4" buttonSize="small">
@@ -137,7 +141,7 @@ Longest Nickname 420</string>
                                                     </buttonConfiguration>
                                                 </button>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1417">
-                                                    <rect key="frame" x="151.66666666666666" y="0.0" width="110.33333333333334" height="28"/>
+                                                    <rect key="frame" x="151.66666666666666" y="0.0" width="110.33333333333334" height="44"/>
                                                     <color key="tintColor" systemColor="labelColor"/>
                                                     <state key="normal" title="Team" image="ChatTypeTeam"/>
                                                     <buttonConfiguration key="configuration" style="plain" title="Team" imagePadding="4" buttonSize="small">
@@ -151,7 +155,7 @@ Longest Nickname 420</string>
                                                     </buttonConfiguration>
                                                 </button>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1428">
-                                                    <rect key="frame" x="262" y="0.0" width="113" height="28"/>
+                                                    <rect key="frame" x="262" y="0.0" width="113" height="44"/>
                                                     <color key="tintColor" systemColor="labelColor"/>
                                                     <state key="normal" title="PRIVATE" image="ChatTypePrivate"/>
                                                     <buttonConfiguration key="configuration" style="plain" title="Private" imagePadding="4" buttonSize="small">
@@ -171,10 +175,10 @@ Longest Nickname 420</string>
                                             </constraints>
                                         </stackView>
                                         <stackView opaque="NO" contentMode="scaleToFill" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="1120">
-                                            <rect key="frame" x="0.0" y="28" width="375" height="60"/>
+                                            <rect key="frame" x="0.0" y="44" width="375" height="60"/>
                                             <subviews>
                                                 <view autoresizesSubviews="NO" userInteractionEnabled="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3295">
-                                                    <rect key="frame" x="0.0" y="5" width="56" height="50"/>
+                                                    <rect key="frame" x="0.0" y="8" width="56" height="44"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="56" id="3317"/>
                                                         <constraint firstAttribute="height" constant="44" id="VyP-11-IcJ"/>
@@ -191,7 +195,7 @@ Longest Nickname 420</string>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textView>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3401">
-                                                    <rect key="frame" x="321" y="5" width="54" height="50"/>
+                                                    <rect key="frame" x="321" y="8" width="54" height="44"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="54" id="3402"/>
                                                         <constraint firstAttribute="height" constant="44" id="Skq-15-taw"/>
@@ -203,7 +207,7 @@ Longest Nickname 420</string>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </stackView>
-                                <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1670">
                                     <rect key="frame" x="0.0" y="60" width="56" height="44"/>
                                     <constraints>
                                         <constraint firstAttribute="width" constant="56" id="1691"/>
@@ -215,7 +219,7 @@ Longest Nickname 420</string>
                                         <imageReference key="image" image="person.3.fill" catalog="system" symbolScale="small"/>
                                     </buttonConfiguration>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2313">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2313">
                                     <rect key="frame" x="321" y="60" width="54" height="44"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="44" id="2334"/>
@@ -225,7 +229,7 @@ Longest Nickname 420</string>
                                     <state key="normal" image="Send"/>
                                     <buttonConfiguration key="configuration" style="plain" image="arrow.up.circle.fill" catalog="system"/>
                                 </button>
-                                <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="02t-5t-fLm">
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="02t-5t-fLm">
                                     <rect key="frame" x="321" y="60" width="54" height="44"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="44" id="ILG-Ek-Xo3"/>
@@ -298,7 +302,7 @@ Longest Nickname 420</string>
                         <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="Ivh-UK-sqq" secondAttribute="bottom" constant="12" id="yCB-tI-WQ9"/>
                     </constraints>
                 </view>
-                <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Fa1-th-FG9">
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Fa1-th-FG9">
                     <rect key="frame" x="0.0" y="432" width="375" height="242"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     <constraints>
@@ -318,6 +322,7 @@ Longest Nickname 420</string>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="top" secondItem="NOh-Zt-4h4" secondAttribute="bottom" id="1sS-Qk-Pc1"/>
                 <constraint firstItem="bc5-sV-ejZ" firstAttribute="bottom" secondItem="gb6-se-fJP" secondAttribute="top" id="45W-gK-VKr"/>
                 <constraint firstItem="175" firstAttribute="top" secondItem="1" secondAttribute="top" id="4JY-az-blb"/>
+                <constraint firstItem="Z0w-GY-wc4" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="6Sl-pp-hVn"/>
                 <constraint firstItem="KtL-wy-5qa" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="9rE-dh-OpY"/>
                 <constraint firstItem="jed-Jv-Lo4" firstAttribute="leading" secondItem="NOh-Zt-4h4" secondAttribute="leading" constant="16" id="Dib-hX-Rhn"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="bottom" secondItem="jed-Jv-Lo4" secondAttribute="bottom" constant="32" id="Fod-yH-hkN"/>
@@ -328,6 +333,8 @@ Longest Nickname 420</string>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="leading" secondItem="EaT-0w-uRo" secondAttribute="leading" constant="-16" id="ViL-Ef-fNU"/>
                 <constraint firstAttribute="trailing" secondItem="Fa1-th-FG9" secondAttribute="trailing" id="WNc-az-8ZS"/>
                 <constraint firstItem="NOh-Zt-4h4" firstAttribute="trailing" secondItem="gb6-se-fJP" secondAttribute="trailing" id="Wtj-rb-4bd"/>
+                <constraint firstItem="Z0w-GY-wc4" firstAttribute="top" secondItem="bc5-sV-ejZ" secondAttribute="bottom" id="YvR-yW-5Z2"/>
+                <constraint firstAttribute="trailing" secondItem="Z0w-GY-wc4" secondAttribute="trailing" id="ZeI-gg-x0D"/>
                 <constraint firstItem="0BW-om-Vsj" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="cYK-8w-CnP"/>
                 <constraint firstAttribute="trailing" secondItem="175" secondAttribute="trailing" id="eFz-VC-mpZ"/>
                 <constraint firstItem="bc5-sV-ejZ" firstAttribute="top" secondItem="1" secondAttribute="top" id="f6Y-7N-NHI"/>
@@ -359,13 +366,13 @@ Longest Nickname 420</string>
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="separatorColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemMintColor">
-            <color red="0.0" green="0.78039215689999997" blue="0.74509803919999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.7803921568627451" blue="0.74509803921568629" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tertiarySystemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

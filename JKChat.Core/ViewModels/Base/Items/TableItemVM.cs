@@ -19,6 +19,8 @@ namespace JKChat.Core.ViewModels.Base.Items {
 
 		public Func<TableItemVM, Task> OnClick { get; set; }
 
+		public object Data { get; init; }
+
 		public TableItemVM() {
 			ClickCommand = new MvxAsyncCommand(ClickExecute);
 		}
