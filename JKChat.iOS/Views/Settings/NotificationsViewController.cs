@@ -1,9 +1,11 @@
-﻿using Foundation;
+﻿using System;
 
 using JKChat.Core.ViewModels.Settings;
 using JKChat.iOS.Services;
 using JKChat.iOS.Views.Base;
 using JKChat.iOS.ViewSources;
+
+using Microsoft.Maui.ApplicationModel;
 
 using MvvmCross.Platforms.Ios.Presenters.Attributes;
 
@@ -70,10 +72,10 @@ public partial class NotificationsViewController : BaseViewController<Notificati
 					OkAction = _ => {
 						ViewModel.NotificationsEnabled = false;
 						try {
-							var url = new NSUrl(UIApplication.OpenSettingsUrlString);
-							if (UIApplication.SharedApplication.CanOpenUrl(url))
-								UIApplication.SharedApplication.OpenUrl(url, new UIApplicationOpenUrlOptions(), null);
-						} catch {}
+							AppInfo.ShowSettingsUI();
+						} catch (Exception exception) {
+							System.Diagnostics.Debug.WriteLine(exception);
+						}
 					},
 					CancelAction = _ => {
 						ViewModel.NotificationsEnabled = false;
