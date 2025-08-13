@@ -119,6 +119,7 @@ namespace JKChat.iOS {
 					}
 				}
 			});
+			WidgetShared.LiveActivityShared.StopLiveActivity(() => {});
 /*			var liveActivityDisconnectObserver = userDefaults.AddObserver("LiveActivityDisconnect", NSKeyValueObservingOptions.OldNew, change => {
 				Debug.WriteLine("w00t");
 				if (change.NewValue is NSNumber { BoolValue: true }) {
