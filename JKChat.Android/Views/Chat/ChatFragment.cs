@@ -3,9 +3,12 @@ using System.Collections.Specialized;
 using System.Linq;
 
 using Android.Animation;
+using Android.Content.Res;
+using Android.Graphics;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
+using Android.Text.Style;
 using Android.Views;
 using Android.Views.Animations;
 using Android.Widget;
@@ -15,6 +18,8 @@ using AndroidX.AppCompat.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
+
+using Google.Android.Material.Color;
 
 using Java.Lang;
 using Java.Util.Concurrent;
@@ -295,6 +300,12 @@ namespace JKChat.Android.Views.Chat {
 			disconnectItem.SetClickAction(() => {
 				ViewModel?.DisconnectCommand?.Execute();
 			});
+			var title = disconnectItem.TitleFormatted;
+			var newTitle = new SpannableString(title);
+			var errorColour = new Color(MaterialColors.GetColor(Context, Resource.Attribute.colorError, Color.Transparent));
+			newTitle.SetSpan(new ForegroundColorSpan(errorColour), 0, newTitle.Length(), SpanTypes.ExclusiveExclusive);
+			disconnectItem.SetTitle(newTitle);
+			disconnectItem.SetIconTintList(ColorStateList.ValueOf(errorColour));
 			copyItem = Menu.FindItem(Resource.Id.copy_item);
 			copyItem.SetClickAction(() => {
 				ViewModel?.CopyCommand?.Execute(SelectedItem);
