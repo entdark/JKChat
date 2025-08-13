@@ -616,6 +616,16 @@ namespace JKChat.Core.ViewModels.Chat {
 							Angles = cent.LerpAngles,
 							Name = options.HasFlag(MinimapOptions.Names) ? name : null
 						});
+						if (options.HasFlag(MinimapOptions.Weapons) && clientGame.GetWeapon(ref cent, out bool firing) == JKClient.ClientGame.Weapon.Lightning && firing) {
+							var start = cent.LerpOrigin;
+							var end = start+JKClient.Common.ToAxis(cent.LerpAngles)[0]*300.0f;
+							ents.Add(new EntityData(EntityType.Shot, 500) {
+								Team = (Team)team,
+								Origin = start,
+								Origin2 = end,
+								Color = JKClient.ClientGame.Weapon.Lightning.ToColor()
+							});
+						}
 					} else if (options.HasFlag(MinimapOptions.Predicted) && clientGame.IsPredictedClient(ref cent) && clientGame.IsInvisible(ref cent)
 						&& (clientGame.ClientsInfo?[cent.ClientNum].InfoValid ?? false)) {
 						var team = clientGame.ClientsInfo[cent.ClientNum].Team;

@@ -119,6 +119,7 @@ namespace JKChat.Core.Helpers {
 			return weapon switch {
 				Weapon.BryarPistol or Weapon.BryarOld or Weapon.Turret => Color.Yellow,
 				Weapon.Blaster or Weapon.EmplacedGun => Color.DeepPink,
+				Weapon.Disruptor => Color.OrangeRed,
 				Weapon.Bowcaster => Color.Lime,
 				Weapon.Repeater when altFire => Color.DeepSkyBlue,
 				Weapon.Repeater => Color.Yellow,

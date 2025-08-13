@@ -404,8 +404,10 @@ namespace JKChat.Core.Models {
 			if (!options.HasFlag(MinimapOptions.Weapons))
 				return;
 
+			Color color;
 			switch (entityEventArgs.Event) {
 				case ClientGame.EntityEvent.DisruptorMainShot:
+					color = ClientGame.Weapon.Disruptor.ToColor();
 					if (lastDisruptorEnd != Vector3.Zero) {
 						start = lastDisruptorEnd;
 						lastDisruptorEnd = Vector3.Zero;
@@ -416,39 +418,56 @@ namespace JKChat.Core.Models {
 					TempEntities.Add(new EntityData(EntityType.Shot, 1000) {
 						Origin = start,
 						Origin2 = end,
-						Color = Color.OrangeRed
+						Color = color
 					});
 					lastDisruptorEnd = end;
-					addImpact(end, Color.OrangeRed);
+					addImpact(end, color);
 					break;
 				case ClientGame.EntityEvent.DisruptorSniperShot:
+					color = ClientGame.Weapon.Disruptor.ToColor();
 					start = entity.Origin2;
 					end = entity.LerpOrigin;
 					TempEntities.Add(new EntityData(EntityType.Shot, 1000) {
 						Origin = start,
 						Origin2 = end,
-						Color = Color.OrangeRed
+						Color = color
 					});
 					lastDisruptorEnd = end;
-					addImpact(end, Color.OrangeRed);
+					addImpact(end, color);
 					break;
 				case ClientGame.EntityEvent.ConcAltImpact:
+					color = ClientGame.Weapon.Concussion.ToColor();
 					start = entity.Origin2;
-					end = entity.Origin2+entity.Angles2*entity.Angles.Length();
+					end = start+entity.Angles2*entity.Angles.Length();
 					TempEntities.Add(new EntityData(EntityType.Shot, 500) {
 						Origin = start,
 						Origin2 = end,
-						Color = Color.DodgerBlue
+						Color = color
 					});
-					addImpact(end, Color.DodgerBlue);
+					addImpact(end, color);
 					break;
 				case ClientGame.EntityEvent.PlayEffect:
 				case ClientGame.EntityEvent.MissileHit:
 				case ClientGame.EntityEvent.MissileMiss:
 				case ClientGame.EntityEvent.MissileMissMetal:
+				case ClientGame.EntityEvent.BulletHitWall:
+				case ClientGame.EntityEvent.BulletHitFlesh:
 					var weapon = ClientGame.GetWeapon(ref entity, out bool altFire);
-					var color = weapon.ToColor(altFire);
+					color = weapon.ToColor(altFire);
 					addImpact(entity.LerpOrigin, color);
+					break;
+				case ClientGame.EntityEvent.Railtrail:
+					color = ClientGame.Weapon.Railgun.ToColor();
+					start = entity.Origin2;
+					end = entityEventArgs.TrajectoryBase;
+					TempEntities.Add(new EntityData(EntityType.Shot, 1000) {
+						Origin = start,
+						Origin2 = end,
+						Color = color
+					});
+					if (entityEventArgs.EventParm != 255) {
+						addImpact(entity.LerpOrigin, color);
+					}
 					break;
 			}
 			void addImpact(Vector3 origin, Color color, int life = 700) {
@@ -540,14 +559,15 @@ namespace JKChat.Core.Models {
 			ProcessItemForNotifications(chatItem, command);
 			AddItem(chatItem);
 		}
-
+		
+		private static readonly char []wordsSeparators = new []{' ', ',', '.', ';', ':', '(', ')', '[', ']', '{', '}', '!', '?', '+', '-', '='};
 		private void ProcessItemForNotifications(ChatMessageItemVM messageItem, Command command) {
 			var options = AppSettings.NotificationOptions;
 			bool show = false;
 			if (options.HasFlag(NotificationOptions.PrivateMessages) && IsPrivateMessage(command[1])) {
 				show = true;
 			} else if (AppSettings.NotificationKeywords is { Length: > 0 } keywords) {
-				var words = messageItem.Message.CleanString().Split(new []{' ', ',', '.', ';', ':', '(', ')', '[', ']', '{', '}', '!', '?', '+', '-', '='}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+				var words = messageItem.Message.CleanString().Split(wordsSeparators, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 				foreach (var word in words) {
 					foreach (var keyword in keywords) {
 						if (string.Compare(word, keyword, StringComparison.OrdinalIgnoreCase) == 0) {
