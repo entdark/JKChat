@@ -10,6 +10,8 @@ using CoreAnimation;
 using CoreGraphics;
 
 using Foundation;
+
+using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Chat;
@@ -326,7 +328,7 @@ namespace JKChat.iOS.Views.Chat {
 					ViewModel.DisconnectCommand?.Execute();
 				});
 				disconnectAction.Attributes = UIMenuElementAttributes.Destructive;
-				bool downloadMapAction = !MapLoadingProgress.IsProgressActive() && MapData == null;
+				bool downloadMapAction = !MapLoadingProgress.IsProgressActive() && MapData == null && AppSettings.MinimapOptions.HasFlag(MinimapOptions.Enabled);
 				var menuElements = new List<UIMenuElement>(4 + (downloadMapAction ? 1 : 0)) {
 					UIAction.Create(IsFavourite ? "Remove from favourites" : "Add to favourites", IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, null, action => {
 						ViewModel.FavouriteCommand?.Execute();

@@ -30,6 +30,7 @@ using JKChat.Android.Helpers;
 using JKChat.Android.Presenter.Attributes;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Views.Main;
+using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
@@ -360,7 +361,7 @@ namespace JKChat.Android.Views.Chat {
 				minimapItem.SetVisible(MapData != null);
 				minimapItem.SetIcon(MapFocused ? Resource.Drawable.ic_map_filled : Resource.Drawable.ic_map_outlined);
 				minimapItem.SetTitle(null);
-				downloadMapItem.SetVisible(MapData == null);
+				downloadMapItem.SetVisible(MapData == null && AppSettings.MinimapOptions.HasFlag(MinimapOptions.Enabled));
 			}
 		}
 
