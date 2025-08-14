@@ -1,4 +1,5 @@
-﻿using Android.Widget;
+﻿using Android.Graphics.Drawables;
+using Android.Widget;
 
 using AndroidX.RecyclerView.Widget;
 
@@ -24,6 +25,9 @@ namespace JKChat.Android {
 		}
 		public void Include(CheckBox checkBox) {
 			checkBox.CheckedChange += (sender, args) => { checkBox.Checked = !checkBox.Checked; };
+		}
+		public void Include(FrameLayout frameLayout) {
+			frameLayout.Background = new GradientDrawable();
 		}
 	}
 }
