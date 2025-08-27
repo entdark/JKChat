@@ -6,6 +6,6 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Utils\Utils.csproj" />
+    <ProjectReference Include="..\Q3MinimapGenerator\Q3MinimapGenerator.csproj" />
   </ItemGroup>
 </Project>

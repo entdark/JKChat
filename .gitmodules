@@ -1,3 +1,6 @@
 [submodule "JKClient"]
 	path = JKClient
 	url = https://github.com/entdark/JKClient
+[submodule "Q3MinimapGenerator"]
+	path = Q3MinimapGenerator
+	url = https://github.com/entdark/Q3MinimapGenerator

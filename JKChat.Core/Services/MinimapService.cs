@@ -18,8 +18,6 @@ using Microsoft.Maui.Storage;
 
 using MvvmCross;
 
-using Utils.Minimap;
-
 namespace JKChat.Core.Services;
 
 public class MinimapService : IMinimapService {
@@ -153,11 +151,13 @@ public class MinimapService : IMinimapService {
 				}
 				var stopwatch = Stopwatch.StartNew();
 				long lastProgressTime = stopwatch.ElapsedMilliseconds;
-				Minimap.Generate(pathDirectoryName, new() {
+				Q3MinimapGenerator.Helpers.GenerateMiniMap(pathDirectoryName, new() {
 					OutputFolderPath = minimapPath,
 					MaxWidth = AppSettings.MinimapSize,
 					MaxHeight = AppSettings.MinimapSize,
-					Predicate = foundName => {
+					ExtraBorderUnits = 10,
+					AxisPlane = Q3MinimapGenerator.MiniMapAxisPlane.XY,
+					Predicate = (foundName, _) => {
 						return mapName.Equals(foundName, StringComparison.OrdinalIgnoreCase);
 					},
 					ProgressCallback = p => {
@@ -166,6 +166,10 @@ public class MinimapService : IMinimapService {
 							return;
 						lastProgressTime = currentTime;
 						setProgress(p, 0.2f, 1.0f);
+					},
+					MakeMeta = false,
+					ImageFilePathFormatter = (path, axisName, meta) => {
+						return Path.Combine(path, $"{axisName},{meta}.png");
 					},
 					CancellationToken = mapProgress.CancellationToken
 				}, true);
