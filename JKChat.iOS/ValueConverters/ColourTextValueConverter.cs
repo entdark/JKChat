@@ -9,6 +9,7 @@ using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.ValueCombiners;
 using JKChat.iOS.Helpers;
+
 using MvvmCross.Converters;
 
 using UIKit;
