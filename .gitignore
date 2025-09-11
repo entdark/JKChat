@@ -379,6 +379,10 @@ xcuserdata/
 *.xccheckout
 
 
+# Rider
+.idea
+
+
 ## Custom
 
 JKChat.iOS.Widget.Native/build

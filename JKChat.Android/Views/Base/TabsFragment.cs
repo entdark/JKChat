@@ -35,7 +35,7 @@ namespace JKChat.Android.Views.Base {
 			ViewPager.OffscreenPageLimit = this.tabsCount;
 			ViewPager.PageSelected += TabPageSelected;
 			if (ViewPager.Adapter == null)
-				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.Context, this.ChildFragmentManager, this.tabsCount);
+				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.ChildFragmentManager, this.tabsCount);
 			BottomNavigationView = view.FindViewById<TabsBottomNavigationView>(BottomNavigationViewId);
 			BottomNavigationView.ViewPager = ViewPager;
 		}

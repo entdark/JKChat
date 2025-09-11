@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Microsoft.Extensions.Logging;
+
 using MvvmCross.Binding;
 using MvvmCross.Binding.Bindings.Target;
 using MvvmCross.WeakSubscription;
@@ -19,7 +21,7 @@ namespace JKChat.iOS.TargetBindings {
 		public override void SubscribeToEvents() {
 			var uiControl = Target;
 			if (uiControl == null) {
-				MvxBindingLog.Error("Error - Control is null in UIControlSelectedTargetBinding");
+				MvxBindingLog.Instance?.LogError("Error - Control is null in UIControlSelectedTargetBinding");
 				return;
 			}
 

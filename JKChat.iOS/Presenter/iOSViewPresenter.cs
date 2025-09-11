@@ -13,11 +13,8 @@ using MvvmCross.ViewModels;
 using UIKit;
 
 namespace JKChat.iOS.Presenter {
-	public class iOSViewPresenter : MvxIosViewPresenter, IViewPresenter {
+	public class iOSViewPresenter(UIWindow window) : MvxIosViewPresenter(window), IViewPresenter {
 		public bool IsCollapsed => (SplitViewController as UISplitViewController)?.Collapsed ?? true;
-
-		public iOSViewPresenter(IUIApplicationDelegate applicationDelegate, UIWindow window) : base(applicationDelegate, window) {
-		}
 
 		protected override async Task<bool> ShowTabViewController(UIViewController viewController, MvxTabPresentationAttribute attribute, MvxViewModelRequest request) {
 			if (TabBarViewController == null) {
@@ -29,14 +26,14 @@ namespace JKChat.iOS.Presenter {
 				await ShowMasterSplitViewController(TabBarViewController as UIViewController, splitViewPresentationAttribute, splitViewModelRequest);
 				(TabBarViewController as UIViewController).NavigationController.NavigationBarHidden = true;
 
-				if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
+/*				if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0)) {
 					var detailViewModelRequest = new MvxViewModelRequest<WrapperDetailViewModel>();
 					var detailViewController = (UIViewController)this.CreateViewControllerFor(detailViewModelRequest);
 					var detailPresentationAttribute = new MvxSplitViewPresentationAttribute(MasterDetailPosition.Detail) {
 						WrapInNavigationController = true
 					};
 					await ShowDetailSplitViewController(detailViewController, detailPresentationAttribute, detailViewModelRequest);
-				}
+				}*/
 			}
 
 			return await base.ShowTabViewController(viewController, attribute, request);

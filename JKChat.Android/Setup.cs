@@ -95,7 +95,7 @@ namespace JKChat.Android {
 		}
 
 		private class InsetsAndroidBindingBuilder : MvxAndroidBindingBuilder {
-			public InsetsAndroidBindingBuilder(Action<IMvxValueConverterRegistry> fillValueConverters, Action<IMvxValueCombinerRegistry> fillValueCombiners, Action<IMvxTargetBindingFactoryRegistry> fillTargetFactories, Action<IMvxBindingNameRegistry> fillBindingNames, Action<IMvxTypeCache<View>> fillViewTypes, Action<IMvxAxmlNameViewTypeResolver> fillAxmlViewTypeResolver, Action<IMvxNamespaceListViewTypeResolver> fillNamespaceListViewTypeResolver)
+			public InsetsAndroidBindingBuilder(Action<IMvxValueConverterRegistry> fillValueConverters, Action<IMvxValueCombinerRegistry> fillValueCombiners, Action<IMvxTargetBindingFactoryRegistry> fillTargetFactories, Action<IMvxBindingNameRegistry> fillBindingNames, Action<IMvxTypeCache> fillViewTypes, Action<IMvxAxmlNameViewTypeResolver> fillAxmlViewTypeResolver, Action<IMvxNamespaceListViewTypeResolver> fillNamespaceListViewTypeResolver)
 				: base(fillValueConverters, fillValueCombiners, fillTargetFactories, fillBindingNames, fillViewTypes, fillAxmlViewTypeResolver, fillNamespaceListViewTypeResolver) {
 			}
 

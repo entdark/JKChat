@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-android</TargetFramework>
+    <TargetFramework>net9.0-android</TargetFramework>
     <OutputType>Exe</OutputType>
     <SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
     <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
@@ -20,22 +21,22 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MvvmCross" Version="9.2.0" />
-    <PackageReference Include="MvvmCross.Plugin.Messenger" Version="9.2.0" />
-    <PackageReference Include="MvvmCross.Plugin.Visibility" Version="9.2.0" />
-    <PackageReference Include="MvvmCross.DroidX.SwipeRefreshLayout" Version="9.2.0" />
-    <PackageReference Include="MvvmCross.DroidX.RecyclerView" Version="9.2.0" />
-    <PackageReference Include="Microsoft.AppCenter" Version="5.0.2" />
-    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.2" />
-    <PackageReference Include="Xamarin.Google.Android.Material" Version="1.12.0.2" />
-    <PackageReference Include="Serilog" Version="3.0.1" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.0" />
-    <PackageReference Include="Serilog.Sinks.Xamarin" Version="1.0.0-dev-00104-fd287b7" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
-    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
-    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.4" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.7" />
-    <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.8.5.1" />
-    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.16" />
+    <PackageReference Include="MvvmCross" Version="9.4.0" />
+    <PackageReference Include="MvvmCross.Plugin.Messenger" Version="9.4.0" />
+    <PackageReference Include="MvvmCross.Plugin.Visibility" Version="9.4.0" />
+    <PackageReference Include="MvvmCross.DroidX.SwipeRefreshLayout" Version="9.4.0" />
+    <PackageReference Include="MvvmCross.DroidX.RecyclerView" Version="9.4.0" />
+    <PackageReference Include="Microsoft.AppCenter" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AppCenter.Crashes" Version="5.0.7" />
+    <PackageReference Include="Xamarin.Google.Android.Material" Version="1.12.0.5" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+    <PackageReference Include="Serilog.Sinks.Xamarin" Version="1.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.8" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.100" />
+    <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.8.9" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.17" />
   </ItemGroup>
 </Project>

@@ -23,8 +23,8 @@ namespace JKChat.iOS.Services {
 					var idsToRemove = new List<string>(notifications.Length);
 					foreach (var notification in notifications) {
 						string id = notification.Request.Identifier;
-						if (id == AppDelegate.BackgroundNotificationRequestId
-							|| id == AppDelegate.ServerInfoNotificationRequestId)
+						if (id == SceneDelegate.BackgroundNotificationRequestId
+							|| id == SceneDelegate.ServerInfoNotificationRequestId)
 							continue;
 						var nId = NotificationId.FromString(id);
 						if (nId?.Tag == tag) {

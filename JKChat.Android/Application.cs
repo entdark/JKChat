@@ -50,14 +50,9 @@ namespace JKChat.Android {
 			RegisterActivityLifecycleCallbacks(new ActivityLifecycleCallbacks(this));
 		}
 
-		private class ActivityLifecycleCallbacks : Java.Lang.Object, IActivityLifecycleCallbacks {
-			private readonly global::Android.App.Application application;
+		private class ActivityLifecycleCallbacks(global::Android.App.Application application) : Java.Lang.Object, IActivityLifecycleCallbacks {
 			private bool isResumed;
 			private Bundle bundle;
-
-			public ActivityLifecycleCallbacks(global::Android.App.Application application) {
-				this.application = application;
-			}
 
 			private Setup setup => MvxAndroidSetupSingleton.EnsureSingletonAvailable(application).PlatformSetup<Setup>();
 
@@ -88,7 +83,7 @@ namespace JKChat.Android {
 			public void OnActivityStarted(Activity activity) {}
 			public void OnActivityStopped(Activity activity) {}
 
-			public void InitializationComplete() {
+			private void InitializationComplete() {
 				if (!isResumed)
 					return;
 				if (Mvx.IoCProvider.TryResolve(out IMvxAppStart startup)) {
