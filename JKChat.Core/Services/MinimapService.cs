@@ -157,6 +157,7 @@ public class MinimapService : IMinimapService {
 					MaxHeight = AppSettings.MinimapSize,
 					ExtraBorderUnits = 10,
 					AxisPlane = Q3MinimapGenerator.MiniMapAxisPlane.XY,
+					ImageType = Q3MinimapGenerator.ImageType.GrayscaleA,
 					Predicate = (foundName, _) => {
 						return mapName.Equals(foundName, StringComparison.OrdinalIgnoreCase);
 					},
