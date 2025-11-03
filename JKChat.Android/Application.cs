@@ -20,6 +20,11 @@ using MvvmCross.Platforms.Android.Core;
 using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 
+[assembly: UsesPermission(Android.Manifest.Permission.Internet)]
+[assembly: UsesPermission(Android.Manifest.Permission.ForegroundService)]
+[assembly: UsesPermission(Android.Manifest.Permission.ForegroundServiceSpecialUse)]
+[assembly: UsesPermission(Android.Manifest.Permission.PostNotifications)]
+
 namespace JKChat.Android {
 	[Application(
 		//AllowBackup = false,

@@ -29,8 +29,8 @@ using MvvmCross;
 
 namespace JKChat.Android.Widgets {
 	[BroadcastReceiver(Label = "Server monitor", Exported = false)]
-	[IntentFilter(new string[] { "android.appwidget.action.APPWIDGET_UPDATE" })]
-	[MetaData("android.appwidget.provider", Resource = "@xml/server_monitor_widget_provider")]
+	[IntentFilter([AppWidgetManager.ActionAppwidgetUpdate])]
+	[MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/server_monitor_widget_provider")]
 	public class ServerMonitorAppWidget : AppWidgetProvider {
 		private const string Prefix = nameof(ServerMonitorAppWidget);
 		public const string WidgetLinkAction = Prefix+nameof(WidgetLinkAction);

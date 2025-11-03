@@ -23,7 +23,8 @@ using MvvmCross.Plugin.Messenger;
 using Microsoft.Maui.ApplicationModel;
 
 namespace JKChat.Android.Services {
-	[Service(Name = "com.vlbor.jkchat.ForegroundGameClientsService", Enabled = true, ForegroundServiceType = ForegroundService.TypeSpecialUse)]
+	[Service(Enabled = true, ForegroundServiceType = ForegroundService.TypeSpecialUse)]
+	[Property(PackageManager.PropertySpecialUseFgsSubtype, Value = "Foreground service keeps connection to game servers")]
 	public class ForegroundGameClientsService : Service {
 		private const string NotificationChannelID = "JKChat Foreground Service";
 		private const int NotificationID = 2;
