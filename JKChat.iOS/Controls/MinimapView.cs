@@ -312,10 +312,10 @@ public class MinimapView : UIView {
 			}
 //2nd pass to draw texts above everything
 			foreach (var entity in entities) {
-				var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
-				pos += posOffset;
 				switch (entity.Type) {
 					case EntityType.Player:
+						var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
+						pos += posOffset;
 //player name
 						const float nameYOffset = 23.0f;
 						var text = ColourTextValueConverter.Convert(entity.Name, new ColourTextParameter() { ParseShadow = mapData.HasShadow, AddShadow = true, DefaultColor = Color.White });

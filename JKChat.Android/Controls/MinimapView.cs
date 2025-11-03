@@ -315,10 +315,10 @@ public class MinimapView : FrameLayout {
 				}
 //2nd pass to draw texts above everything
 				foreach (var entity in entities) {
-					var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,width,height,true);
-					pos += posOffset;
 					switch (entity.Type) {
 						case EntityType.Player: {
+							var pos = entity.Origin.ToViewPosition(mapData.Min,mapData.Max,width,height,true);
+							pos += posOffset;
 //player name
 							using var ss = ColourTextValueConverter.Convert(entity.Name);
 							if (ss == null)
