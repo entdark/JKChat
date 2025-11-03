@@ -612,6 +612,8 @@ namespace JKChat.iOS.Views.Chat {
 
 		protected override void KeyboardWillShowNotification(NSNotification notification) {
 			notification.GetKeyboardUserInfo(out double duration, out UIViewAnimationOptions animationOptions, out CGRect endKeyboardFrame, out CGRect beginKeyboardFrame);
+			if (endKeyboardFrame.Height == 0.0f)
+				return;
 			BeginKeyboardFrame = beginKeyboardFrame;
 			EndKeyboardFrame = endKeyboardFrame;
 			UIView.Animate(duration, 0.0, animationOptions, () => {
