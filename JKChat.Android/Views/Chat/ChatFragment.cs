@@ -182,6 +182,10 @@ namespace JKChat.Android.Views.Chat {
 						scrollView?.LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
 						scrollView?.SetOnTouchListener(new MessageScrollListener());
 					},
+					AdjustHolderOnBind = (viewHolder, position) => {
+						var scrollView = viewHolder.ItemView.FindViewById<HorizontalScrollView>(Resource.Id.message_scrollview);
+						scrollView?.ScrollTo(0, 0);
+					}
 				};
 			}
 			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
