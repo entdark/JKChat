@@ -40,6 +40,7 @@ namespace JKChat.Android.Widgets {
 		public const string AddAction = Prefix+nameof(AddAction);
 		public const string ServerAddressExtraKey = Prefix+nameof(ServerAddressExtraKey);
 		public const string WidgetIdExtraKey = Prefix+nameof(WidgetIdExtraKey);
+		public const string FirstRefreshExtraKey = Prefix+nameof(FirstRefreshExtraKey);
 		public const string PlayersExtraKey = Prefix+nameof(PlayersExtraKey);
 
 		private readonly TasksQueue tasksQueue = new();
@@ -67,10 +68,11 @@ namespace JKChat.Android.Widgets {
 					refresh = true;
 				}
 				UpdateMultiple(context, appWidgetManager, appWidgetIds, refresh);
-			} else if (intent is { Action: RefreshAction, Extras.IsEmpty: false }
-				&& intent.Extras.GetString(ServerAddressExtraKey, null) is string serverAddress
-				&& intent.Extras.GetInt(WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
-				Update(context, appWidgetManager, appWidgetId, serverAddress, true);
+			} else if (intent is { Action: RefreshAction, Extras: { IsEmpty: false } extras }
+				&& extras.GetString(ServerAddressExtraKey, null) is string serverAddress
+				&& extras.GetInt(WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
+				bool firstRefresh = extras.GetBoolean(FirstRefreshExtraKey, false);
+				Update(context, appWidgetManager, appWidgetId, serverAddress, true, firstRefresh: firstRefresh);
 			}
 		}
 
@@ -109,7 +111,7 @@ namespace JKChat.Android.Widgets {
 			}
 		}
 
-		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading, bool refresh = true) {
+		private void Update(Context context, AppWidgetManager appWidgetManager, int appWidgetId, string serverAddress, bool showLoading, bool refresh = true, bool firstRefresh = false) {
 			tasksQueue.Enqueue(async () => {
 				await setLoading(true);
 				var server = await ServerListItemVM.FindExistingOrLoad(serverAddress, true, preferGameClient: !refresh);
@@ -135,6 +137,14 @@ namespace JKChat.Android.Widgets {
 					return;
 				await MainThread.InvokeOnMainThreadAsync(() => {
 					var views = new RemoteViews(context.PackageName, Resource.Layout.server_monitor_widget);
+					if (loading && firstRefresh) {
+						views.SetTextViewText(Resource.Id.refresh_button, string.Empty);
+						views.SetTextViewText(Resource.Id.players_button, string.Empty);
+						views.SetTextViewText(Resource.Id.players_textview, string.Empty);
+						views.SetTextViewText(Resource.Id.server_name_textview, string.Empty);
+						views.SetTextViewText(Resource.Id.map_textview, string.Empty);
+						views.SetTextViewText(Resource.Id.datetime_textview, string.Empty);
+					}
 					views.SetViewVisibility(Resource.Id.loading_progressbar, loading ? ViewStates.Visible : ViewStates.Gone);
 					appWidgetManager.UpdateAppWidget(appWidgetId, views);
 				});
@@ -158,12 +168,14 @@ namespace JKChat.Android.Widgets {
 			refreshIntent.PutExtra(WidgetIdExtraKey, appWidgetId);
 			var refreshPendingIntent = PendingIntentCompat.GetBroadcast(context, appWidgetId, refreshIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.refresh_button, refreshPendingIntent);
+			views.SetTextViewText(Resource.Id.refresh_button, "Refresh");
 
 			var playersIntent = new Intent(context, typeof(ServerMonitorDialogActivity));
 			playersIntent.SetAction(PlayersAction);
 			playersIntent.PutExtra(PlayersExtraKey, server.PlayersList ?? []);
 			var playersPendingIntent = PendingIntentCompat.GetActivity(context, appWidgetId, playersIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.players_button, playersPendingIntent);
+			views.SetTextViewText(Resource.Id.players_button, "Players");
 			
 			int minHeight = newOptions.GetInt(AppWidgetManager.OptionAppwidgetMinHeight),
 				maxHeight = newOptions.GetInt(AppWidgetManager.OptionAppwidgetMaxHeight),
@@ -244,6 +256,7 @@ namespace JKChat.Android.Widgets {
 									intent.SetAction(ServerMonitorAppWidget.RefreshAction);
 									intent.PutExtra(ServerMonitorAppWidget.ServerAddressExtraKey, serverAddress);
 									intent.PutExtra(ServerMonitorAppWidget.WidgetIdExtraKey, appWidgetId);
+									intent.PutExtra(ServerMonitorAppWidget.FirstRefreshExtraKey, true);
 									SendBroadcast(intent);
 									Finish();
 								},

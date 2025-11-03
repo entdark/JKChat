@@ -16,7 +16,7 @@
         <TextView
             style="@style/OnSurfaceText.TitleMedium"
             android:id="@+id/server_name_textview"
-            tools:text="Server Title 01"
+            android:text="Server Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:lines="1"
@@ -24,7 +24,7 @@
         <TextView
             style="@style/OnSurfaceText.BodyMedium"
             android:id="@+id/players_textview"
-            tools:text="27/32 players"
+            android:text="27/32 players"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
@@ -34,7 +34,7 @@
             android:visibility="visible"
             style="@style/OnSurfaceText.BodyMedium"
             android:id="@+id/map_textview"
-            tools:text="MPA/FFA 2"
+            android:text="mp/ffa2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
@@ -64,7 +64,7 @@
     <TextView
         style="@style/OnSurfaceVariantText.LabelSmall"
         android:id="@+id/datetime_textview"
-        tools:text="2023.12.17 23:12"
+        android:text="2077.12.17 23:12"
         android:textSize="10sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
