@@ -121,6 +121,7 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 	}
 
 	public override void DidDisconnect(UIScene scene) {
+		base.DidDisconnect(scene);
 		if (locationManager != null) {
 			if (UIDevice.CurrentDevice.CheckSystemVersion(14, 0)) {
 				locationManager.DidChangeAuthorization -= LocationManagerDidChangeAuthorization;
@@ -150,20 +151,24 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 	}
 
 	public override void DidBecomeActive(UIScene scene) {
+		base.DidBecomeActive(scene);
 		IsActive = true;
 	}
 
 	public override void WillResignActive(UIScene scene) {
+		base.WillResignActive(scene);
 		IsActive = false;
 	}
 
 	public override void WillEnterForeground(UIScene scene) {
+		base.WillEnterForeground(scene);
 		IsActive = true;
 		StopLocationUpdate();
 		CreateLiveActivity();
 	}
 
 	public override void DidEnterBackground(UIScene scene) {
+		base.DidEnterBackground(scene);
 		ExecuteOnBackground();
 		StartLocationUpdate();
 		CreateLiveActivity();
