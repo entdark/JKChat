@@ -52,6 +52,7 @@ public class MinimapView : FrameLayout {
 						drawable = Drawable.CreateFromPath(MapData.Path);
 					}
 					minimapImageView.SetImageDrawable(drawable);
+					minimapImageView.ResetZoom();
 				} catch (Exception exception) {
 					System.Diagnostics.Debug.WriteLine(exception);
 				}

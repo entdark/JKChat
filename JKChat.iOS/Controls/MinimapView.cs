@@ -63,6 +63,7 @@ public class MinimapView : UIView {
 					minimapImageView.Image = image;
 					imageRatioConstraint.Active = false;
 					(imageRatioConstraint = NSLayoutConstraint.Create(minimapImageView, NSLayoutAttribute.Height, NSLayoutRelation.Equal, minimapImageView, NSLayoutAttribute.Width, size.Height / size.Width, 0.0f)).Active = true;
+					minimapScrollView.SetZoomScale(1.0f, false);
 					LayoutSubviews();
 				} catch (Exception exception) {
 					System.Diagnostics.Debug.WriteLine(exception);
