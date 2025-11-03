@@ -26,14 +26,4 @@
         android:tint="?attr/colorOnSurface"
         android:scaleType="center"
         android:src="@drawable/ic_arrow_right"/>
-<!--    <com.google.android.material.textview.MaterialTextView
-        style="@style/OnSurfaceText.BodyLarge"
-        tools:text="All"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:lines="1"
-        android:ellipsize="end"
-        android:gravity="end"
-        app:MvxBind="TextFormatted ColourText(Value)"/>-->
 </LinearLayout>

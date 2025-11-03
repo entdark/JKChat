@@ -76,19 +76,19 @@ namespace JKChat.Android.Services {
 			if (activeServers.Length > 0/* || unreadMessages > 0*/) {
 				var notification = CreateNotification(activeServers, unreadMessages);
 				if (start) {
-					ServiceCompat.StartForeground(this, NotificationID, notification, (int)ForegroundService.TypeSpecialUse);
+					int type = 0;
+					if (Build.VERSION.SdkInt >= BuildVersionCodes.UpsideDownCake) {
+						type = (int)ForegroundService.TypeSpecialUse;
+					}
+					ServiceCompat.StartForeground(this, NotificationID, notification, type);
 				} else {
-					var notificationManager = (NotificationManager)GetSystemService(Context.NotificationService);
+					var notificationManager = NotificationManagerCompat.From(this);
 					notificationManager.Notify(NotificationID, notification);
 				}
 			} else {
-				StopForeground();
+				ServiceCompat.StopForeground(this, ServiceCompat.StopForegroundRemove);
 				StopSelf();
 			}
-		}
-
-		private void StopForeground() {
-			ServiceCompat.StopForeground(this, (int)StopForegroundFlags.Remove);
 		}
 
 		private void UpdateWidgets(ServerInfoMessage message) {
@@ -101,9 +101,9 @@ namespace JKChat.Android.Services {
 		private Notification CreateNotification(ServerListItemVM[] servers, int messages) {
 			var activityIntent = new Intent(this, typeof(MainActivity));
 			activityIntent.SetAction(ForegroundGameClientsService.ForegroundAction);
-			var activityPendingIntent = PendingIntent.GetActivity(this, 0, activityIntent, PendingIntentFlags.Immutable);
+			var activityPendingIntent = PendingIntentCompat.GetActivity(this, 0, activityIntent, 0, false);
 			var closeIntent = new Intent(this, typeof(ForegroundReceiver));
-			var closePendingIntent = PendingIntent.GetBroadcast(this, 2, closeIntent, PendingIntentFlags.Immutable);
+			var closePendingIntent = PendingIntentCompat.GetBroadcast(this, 2, closeIntent, 0, false);
 			string title = $"🌐 Connected to " + (servers.Length > 1 ? $"{servers.Length} servers" : servers[0].ServerName);
 			var notification = new NotificationCompat.Builder(this, NotificationChannelID)
 				.SetAutoCancel(false)

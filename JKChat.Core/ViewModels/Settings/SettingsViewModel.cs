@@ -34,14 +34,14 @@ namespace JKChat.Core.ViewModels.Settings {
 			Title = "Settings";
 			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
 			PrivacyPolicyCommand = new MvxAsyncCommand(PrivacyPolicyExecute);
-			Items = new() {
+			Items = [
 				new() {
-					Items = new() {
-						(playerNameItem = new() {
+					Items = [
+						playerNameItem = new() {
 							Title = "Player Name",
 							Value = AppSettings.PlayerName,
 							OnClick = PlayerNameExecute
-						}),
+						},
 						new TableToggleItemVM() {
 							Title = "OpenJK Colours",
 							IsChecked = AppSettings.OpenJKColours,
@@ -65,10 +65,10 @@ namespace JKChat.Core.ViewModels.Settings {
 							Title = "Minimap",
 							OnClick = MinimapExecute
 						}
-					}
+					]
 				},
 				new() {
-					Items = new() {
+					Items = [
 						new TableNavigationItemVM() {
 							Title = "Notifications",
 							OnClick = NotificationsExecute
@@ -83,9 +83,9 @@ namespace JKChat.Core.ViewModels.Settings {
 							Value = AppSettings.AppTheme.ToString(),
 							OnClick = AppThemeExecute
 						}
-					}
+					]
 				}
-			};
+			];
 			if (DeviceInfo.Platform.IsApple()) {
 				Items.Add(new() {
 					Items = new() {
@@ -135,11 +135,9 @@ namespace JKChat.Core.ViewModels.Settings {
 
 		private async Task EncodingExecute(TableValueItemVM item) {
 			var availableEncodings = jkclientService.AvailableEncodings;
-			var dialogList = new DialogListViewModel(availableEncodings.Select(encoding => {
-				return new DialogItemVM() {
-					Name = encoding.EncodingName,
-					IsSelected = encoding.Equals(jkclientService.Encoding)
-				};
+			var dialogList = new DialogListViewModel(availableEncodings.Select(encoding => new DialogItemVM() {
+				Name = encoding.EncodingName,
+				IsSelected = encoding.Equals(jkclientService.Encoding)
 			}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Select Encoding",
@@ -163,12 +161,10 @@ namespace JKChat.Core.ViewModels.Settings {
 					WidgetLink.Chat => 1,
 					WidgetLink.ChatIfConnected => 2,
 					_ => 3
-				}).Select(widgetLink => {
-					return new DialogItemVM() {
-						Id = widgetLink,
-						Name = widgetLink.ToDisplayString(),
-						IsSelected = widgetLink == AppSettings.WidgetLink
-					};
+				}).Select(widgetLink => new DialogItemVM() {
+					Id = widgetLink,
+					Name = widgetLink.ToDisplayString(),
+					IsSelected = widgetLink == AppSettings.WidgetLink
 				}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Widget Navigation",
@@ -186,12 +182,10 @@ namespace JKChat.Core.ViewModels.Settings {
 		}
 
 		private async Task AppThemeExecute(TableValueItemVM item) {
-			var dialogList = new DialogListViewModel(Enum.GetValues<Models.AppTheme>().Select(theme => {
-				return new DialogItemVM() {
-					Id = theme,
-					Name = theme.ToString(),
-					IsSelected = theme == AppSettings.AppTheme
-				};
+			var dialogList = new DialogListViewModel(Enum.GetValues<Models.AppTheme>().Select(theme => new DialogItemVM() {
+				Id = theme,
+				Name = theme.ToString(),
+				IsSelected = theme == AppSettings.AppTheme
 			}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Select Theme",

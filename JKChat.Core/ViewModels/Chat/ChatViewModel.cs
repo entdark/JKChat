@@ -32,10 +32,10 @@ using JAClientGame = JKClient.JAClientGame;
 [assembly: MvxNavigation(typeof(ChatViewModel), @"jkchat://chat\?address=(?<address>.*)")]
 namespace JKChat.Core.ViewModels.Chat {
 	public class ChatViewModel : ReportViewModel<ChatItemVM, ServerInfoParameter>, IFromRootNavigatingViewModel {
-		private static readonly string []commonCommands = new []{ "/rcon", "/callvote" };
-		private static readonly string []baseEnhancedCommands = new []{ "/whois", "/rules", "/mappool", "/ctfstats", "/toptimes", "/topaim", "/pugstats" };
-		private static readonly string []jaPlusCommands = new []{ "/aminfo", "/amsay" };
-		private static readonly string []mapHelperCommands = new []{ "/follownext", "/followprev", "/follow", "/team spectator" };
+		private static readonly string []commonCommands = ["/rcon", "/callvote"];
+		private static readonly string []baseEnhancedCommands = ["/whois", "/rules", "/mappool", "/ctfstats", "/toptimes", "/topaim", "/pugstats"];
+		private static readonly string []jaPlusCommands = ["/aminfo", "/amsay"];
+		private static readonly string []mapHelperCommands = ["/follownext", "/followprev", "/follow", "/team spectator"];
 		private readonly HashSet<string> commands = commonCommands.ToHashSet();
 		
 		private readonly ICacheService cacheService;
@@ -90,7 +90,6 @@ namespace JKChat.Core.ViewModels.Chat {
 			set => SetProperty(ref message, value, () => {
 				SendMessageCommand.RaiseCanExecuteChanged();
 				StartCommandCommand.RaiseCanExecuteChanged();
-				int oldCount = CommandItems.Count;
 				if (message?.StartsWith('/') ?? false) {
 					var commandsAll = MapData != null ? commands.Concat(mapHelperCommands) : commands;
 					var matchingCommands = commandsAll.Where(c => c.Contains(message) && string.Compare(c, message, StringComparison.OrdinalIgnoreCase) != 0);
@@ -240,7 +239,7 @@ namespace JKChat.Core.ViewModels.Chat {
 
 			ChatType = ChatType.Common;
 			SelectingChatType = false;
-			CommandItems = new();
+			CommandItems = [];
 		}
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
@@ -495,7 +494,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		private async Task ShareExecute() {
 			if (ServerInfo == null)
 				return;
-			await Share.RequestAsync($"{ColourTextHelper.CleanString(ServerInfo.HostName)}\n/connect {ServerInfo.Address}", $"Connect to {ServerInfo.Version.ToDisplayString()} server");
+			await Share.RequestAsync($"{ServerInfo.HostName.CleanString()}\n/connect {ServerInfo.Address}", $"Connect to {ServerInfo.Version.ToDisplayString()} server");
 		}
 
 		private async Task ReportServerExecute() {
@@ -563,7 +562,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			}
 		}
 
-		long lastFrameTime = 0L;
+		private long lastFrameTime = 0L;
 		private List<EntityData> ents;
 		private void FrameExecuted(long frameTime) {
 #if false
@@ -594,7 +593,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			IEnumerable<EntityData> getEntities(JKClient.ClientGame clientGame) {
 				var options = AppSettings.MinimapOptions;
 				if (!options.HasFlag(MinimapOptions.Enabled))
-					return Array.Empty<EntityData>();
+					return [];
 
 				var entities = clientGame.Entities;
 				ents?.Clear();
@@ -814,7 +813,7 @@ namespace JKChat.Core.ViewModels.Chat {
 			if (!forceLoad && sameMap)
 				return;
 
-			var resourceMapName = mapName = ServerInfo.MapName;
+			mapName = ServerInfo.MapName;
 
 			if (mapName == null) {
 				MapData = null;

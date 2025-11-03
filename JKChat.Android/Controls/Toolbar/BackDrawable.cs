@@ -52,9 +52,9 @@ namespace JKChat.Android.Controls.Toolbar {
 
 		public void SetRotation(float rotation, bool animated) {
 			lastFrameTime = 0;
-			if (currentRotation == 1) {
+			if (currentRotation == 1.0f) {
 				reverseAngle = true;
-			} else if (currentRotation == 0) {
+			} else if (currentRotation == 0.0f) {
 				reverseAngle = false;
 			}
 			lastFrameTime = 0;
@@ -98,7 +98,7 @@ namespace JKChat.Android.Controls.Toolbar {
 			paint.Color = Color.Rgb(color.R + rD, color.G + rG, color.B + rB);
 
 			canvas.Save();
-			canvas.Translate(IntrinsicWidth / 2, IntrinsicHeight / 2);
+			canvas.Translate(IntrinsicWidth >> 1, IntrinsicHeight >> 1);
 			if (arrowRotation != 0) {
 				canvas.Rotate(arrowRotation);
 			}

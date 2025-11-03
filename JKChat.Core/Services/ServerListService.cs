@@ -12,14 +12,14 @@ namespace JKChat.Core.Services {
 		private IEnumerable<ServerInfo> servers;
 
 		public ServerListService() {
-			serverBrowsers = new ServerBrowser[] {
+			serverBrowsers = [
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol25)),
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol26)),
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol15)),
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol16)),
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol68)),
 				new ServerBrowser(ServerBrowser.GetKnownBrowserHandler(ProtocolVersion.Protocol71))
-			};
+			];
 			foreach (var serverBrowser in serverBrowsers) {
 				serverBrowser.Start(Helpers.Common.ExceptionCallback, true);
 			}

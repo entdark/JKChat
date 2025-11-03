@@ -158,12 +158,11 @@ namespace JKChat.iOS.Controls.JKDialog {
 		private void ButtonTouchUpInside(Action<JKDialogConfig> action) {
 			action?.Invoke(config);
 			InvokeOnMainThread(() => {
-				Action action2 = () => { };
 				UIView.Animate(0.200, () => {
 //					DialogView.Transform = CGAffineTransform.MakeScale(1.337f, 1.337f);
 					DialogView.Alpha = 0.0f;
 				});
-				DismissViewController(true, action2);
+				DismissViewController(true, null);
 			});
 		}
 

@@ -1,8 +1,6 @@
 ﻿using Android.OS;
 using Android.Views;
 
-using AndroidX.Core.Content;
-
 using Google.Android.Material.Button;
 
 using JKChat.Android.Adapters;
@@ -17,9 +15,7 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 
 namespace JKChat.Android.Views.Favourites {
 	[TabFragmentPresentation("Favourites", Resource.Drawable.ic_favourites_states)]
-	public class FavouritesFragment : BaseFragment<FavouritesViewModel> {
-		public FavouritesFragment() : base(Resource.Layout.favourites_page) {}
-
+	public class FavouritesFragment() : BaseFragment<FavouritesViewModel>(Resource.Layout.favourites_page) {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 

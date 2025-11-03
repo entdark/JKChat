@@ -24,12 +24,7 @@ namespace JKChat.iOS.Views.Base {
 		public virtual CGRect EndKeyboardFrame { get; protected set; }
 		public virtual CGRect BeginKeyboardFrame { get; protected set; }
 
-		public bool HandleKeyboard { get; set; } = false;
-
-		public override string Title {
-			get => base.Title;
-			set => base.Title = value;
-		}
+		public bool HandleKeyboard { get; init; } = false;
 
 		protected BaseViewController() {}
 		protected BaseViewController(NativeHandle handle) : base(handle) { }

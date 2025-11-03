@@ -12,7 +12,7 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
 	public abstract class ReportViewModel<TItem> : BaseServerViewModel where TItem : class, ISelectableItemVM {
-		private static readonly string []reportReasons = { "Spam", "Violence", "Child abuse", "Pornography", "Other" };
+		private static readonly string []reportReasons = ["Spam", "Violence", "Child abuse", "Pornography", "Other"];
 		private static readonly Random reportDelayerRandom = new Random();
 		
 		public virtual IMvxCommand ReportCommand { get; init; }
@@ -25,7 +25,7 @@ namespace JKChat.Core.ViewModels.Base {
 
 		public override string Title {
 			get => base.Title;
-			set { base.Title = SelectedItem != null ? "Selected" : value; }
+			set => base.Title = SelectedItem != null ? "Selected" : value;
 		}
 
 		private MvxObservableCollection<TItem> items;
@@ -40,10 +40,10 @@ namespace JKChat.Core.ViewModels.Base {
 			set => SetProperty(ref selectedItem, value);
 		}
 
-		public ReportViewModel() {
+		protected ReportViewModel() {
 			ReportCommand = new MvxAsyncCommand<TItem>(ReportExecute);
 			SelectCommand = new MvxCommand<TItem>(SelectExecute);
-			Items = new MvxObservableCollection<TItem>();
+			Items = [];
 		}
 
 		private async Task ReportExecute(TItem item) {

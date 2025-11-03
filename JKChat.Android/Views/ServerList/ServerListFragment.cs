@@ -22,7 +22,7 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 
 namespace JKChat.Android.Views.ServerList {
 	[TabFragmentPresentation("Server List", Resource.Drawable.ic_server_list_states)]
-	public class ServerListFragment : ReportFragment<ServerListViewModel, ServerListItemVM> {
+	public class ServerListFragment() : ReportFragment<ServerListViewModel, ServerListItemVM>(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_items) {
 		//private IMenuItem copyItem;
 		private IMenuItem searchItem, filterItem;
 		private BadgeDrawable filterBadgeDrawable;
@@ -39,8 +39,6 @@ namespace JKChat.Android.Views.ServerList {
 				FilterBadgeSetVisible(value);
 			}
 		}
-
-		public ServerListFragment() : base(Resource.Layout.server_list_page, Resource.Menu.server_list_toolbar_items) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
@@ -88,7 +86,7 @@ namespace JKChat.Android.Views.ServerList {
 		private void Searched(object sender, TextView.EditorActionEventArgs ev) {
 			if (ev.ActionId == global::Android.Views.InputMethods.ImeAction.Search) {
 				if (sender is View view) {
-					HideKeyboard();
+					HideKeyboard(view);
 				}
 			}
 		}
@@ -204,11 +202,7 @@ namespace JKChat.Android.Views.ServerList {
 			filterBadgeDrawable.SetVisible(visible);
 		}
 
-		private class OnScrollListener : RecyclerView.OnScrollListener {
-			private readonly Action<int, int> onScrolled;
-			public OnScrollListener(Action<int, int> onScrolled) {
-				this.onScrolled = onScrolled;
-			}
+		private class OnScrollListener(Action<int, int> onScrolled) : RecyclerView.OnScrollListener {
 			public override void OnScrolled(RecyclerView recyclerView, int dx, int dy) {
 				base.OnScrolled(recyclerView, dx, dy);
 				onScrolled?.Invoke(dx, dy);

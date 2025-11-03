@@ -20,6 +20,7 @@ namespace JKChat.iOS.Helpers {
 			animationOptions = curve switch {
 				UIViewAnimationCurve.Linear => UIViewAnimationOptions.CurveLinear,
 				UIViewAnimationCurve.EaseIn => UIViewAnimationOptions.CurveEaseIn,
+				UIViewAnimationCurve.EaseOut => UIViewAnimationOptions.CurveEaseOut,
 				UIViewAnimationCurve.EaseInOut => UIViewAnimationOptions.CurveEaseInOut,
 				_ => UIViewAnimationOptions.CurveEaseOut,
 			};

@@ -15,7 +15,7 @@ namespace JKChat.Core.Helpers {
 		public const int ClientVersionJK = ClientVersionJA | ClientVersionJO;
 		public const int ClientVersionQ3 = 1 << (int)ClientVersion.Q3_v1_32;
 		public const int ClientVersionAll = ClientVersionQ3 | ClientVersionJK;
-		public static readonly ClientVersion []Versions = Enum.GetValues<ClientVersion>().ToArray();
+		public static readonly ClientVersion []Versions = Enum.GetValues<ClientVersion>();
 		public static string ToDisplayString(this int version, bool countMultiple = false) {
 			return version switch {
 				ClientVersionJA => "Jedi Academy",
@@ -55,7 +55,7 @@ namespace JKChat.Core.Helpers {
 	internal static class GameTypeExtensions {
 		public const int GameTypeAll = 1 << (int)GameType.FFA | 1 << (int)GameType.Holocron | 1 << (int)GameType.JediMaster | 1 << (int)GameType.Duel | 1 << (int)GameType.PowerDuel | 1 << (int)GameType.SinglePlayer
 			| 1 << (int)GameType.Team | 1 << (int)GameType.Siege | 1 << (int)GameType.CTF | 1 << (int)GameType.CTY | 1 << (int)GameType.OneFlagCTF | 1 << (int)GameType.Obelisk | 1 << (int)GameType.Harvester;
-		public static readonly GameType []GameTypes = Enum.GetValues<GameType>().ToArray();
+		public static readonly GameType []GameTypes = Enum.GetValues<GameType>();
 		public static string ToDisplayString(this int gameType, int version = ClientVersionExtensions.ClientVersionAll, bool countMultiple = false) {
 			bool isQ3 = version == ClientVersionExtensions.ClientVersionQ3;
 			bool isJK = (version & ClientVersionExtensions.ClientVersionJK) == version;
@@ -103,8 +103,8 @@ namespace JKChat.Core.Helpers {
 			return GetComparerKey(ci1) - GetComparerKey(ci2);
 		}
 		public static long GetComparerKey(this ClientInfo? ci) {
-			long score = ci.HasValue ? ci.Value.Score : 0;
-			var team = ci.HasValue ? ci.Value.Team : JKClient.Team.Spectator;
+			long score = ci?.Score ?? 0;
+			var team = ci?.Team ?? JKClient.Team.Spectator;
 			return score + team switch {
 				JKClient.Team.Red => (long)int.MaxValue << 2,
 				JKClient.Team.Blue => (long)int.MaxValue << 1,

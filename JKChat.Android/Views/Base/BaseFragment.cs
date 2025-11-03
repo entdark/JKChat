@@ -7,7 +7,6 @@ using Android.Views.Animations;
 
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
-using AndroidX.Core.View;
 
 using Google.Android.Material.Color;
 
@@ -41,13 +40,13 @@ namespace JKChat.Android.Views.Base {
 
 		protected IMenu Menu { get; private set; }
 
-		protected int LayoutId { get; private set; }
+		protected int LayoutId { get; init; }
 
-		protected int MenuId { get; private set; }
+		protected int MenuId { get; init; }
 
 		public int Order { get; set; }
 		public bool RegisterBackPressedCallback { get; set; }
-		public bool PostponeTransition { get; set; }
+		public bool PostponeTransition { get; init; }
 
 		private BackDrawable backArrow;
 		protected BackDrawable BackArrow {
@@ -87,8 +86,6 @@ namespace JKChat.Android.Views.Base {
 
 			if (savedInstanceState != null)
 				OnRestoreInstanceState(savedInstanceState);
-
-//			ViewCompat.SetTranslationZ(view, Order*0.1f);
 
 			if (PostponeTransition) {
 				PostponeEnterTransition(2, TimeUnit.Milliseconds);
@@ -169,10 +166,6 @@ namespace JKChat.Android.Views.Base {
 			base.OnSaveInstanceState(outState);
 			outState.PutInt(bundleOrder, Order);
 			outState.PutBoolean(bundleRegisterBackPressedCallback, RegisterBackPressedCallback);
-		}
-
-		public override void OnViewStateRestored(Bundle savedInstanceState) {
-			base.OnViewStateRestored(savedInstanceState);
 		}
 
 		public virtual void OnRestoreInstanceState(Bundle savedInstanceState) {

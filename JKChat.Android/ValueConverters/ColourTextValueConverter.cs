@@ -107,18 +107,11 @@ namespace JKChat.Android.ValueConverters {
 			};
 		}
 
-		public class ForegroundColorCodeSpan : ForegroundColorSpan {
-			public int ColorCode { get; init; }
-			public ForegroundColorCodeSpan(int code) : base(GetColor(code)) {
-				ColorCode = code;
-			}
+		public class ForegroundColorCodeSpan(int code) : ForegroundColorSpan(GetColor(code)) {
+			public int ColorCode { get; init; } = code;
 		}
 
-		public class LinkClickableSpan : ClickableSpan {
-			private readonly Uri uri;
-			public LinkClickableSpan(Uri uri) {
-				this.uri = uri;
-			}
+		public class LinkClickableSpan(Uri uri) : ClickableSpan {
 			public override void OnClick(View widget) {
 				try {
 					if (string.Compare(uri.Scheme, "http", StringComparison.OrdinalIgnoreCase) != 0
@@ -134,11 +127,9 @@ namespace JKChat.Android.ValueConverters {
 			}
 		}
 
-		public class ShadowSpan : MetricAffectingSpan {
-			public Color ShadowColor { get; init; }
-			public ShadowSpan(Color color) {
-				ShadowColor = color;
-			}
+		public class ShadowSpan(Color color) : MetricAffectingSpan {
+			public Color ShadowColor { get; init; } = color;
+
 			public override void UpdateDrawState(TextPaint tp) {
 				UpdateMeasureState(tp);
 				tp.SetShadowLayer(float.Epsilon, ShadowOffset.X.DpToPxF(), ShadowOffset.Y.DpToPxF(), ShadowColor);

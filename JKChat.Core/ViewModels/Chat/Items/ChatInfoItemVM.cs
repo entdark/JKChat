@@ -1,10 +1,10 @@
 ﻿using System.Timers;
 
 namespace JKChat.Core.ViewModels.Chat.Items {
-	public class ChatInfoItemVM : ChatItemVM {
+	public class ChatInfoItemVM(string text, bool shadow = false, bool mergeNext = false) : ChatItemVM {
 		private Timer timer;
 
-		private string text;
+		private string text = text;
 		public string Text {
 			get => text;
 			internal set {
@@ -19,13 +19,8 @@ namespace JKChat.Core.ViewModels.Chat.Items {
 			}
 		}
 
-		public bool Shadow { get; init; }
-		public bool MergeNext { get; set; }
-		public ChatInfoItemVM(string text, bool shadow = false, bool mergeNext = false) {
-			this.text = text;
-			Shadow = shadow;
-			MergeNext = mergeNext;
-		}
+		public bool Shadow { get; init; } = shadow;
+		public bool MergeNext { get; set; } = mergeNext;
 
 		private void TimerElapsed(object sender, ElapsedEventArgs ev) {
 			RaisePropertyChanged(nameof(Text));

@@ -67,14 +67,6 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		private bool selectingChatType;
-		public bool SelectingChatType {
-			get => selectingChatType;
-			set {
-				selectingChatType = value;
-			}
-		}
-
 		private ChatType chatType;
 		public ChatType ChatType {
 			get => chatType;
@@ -292,13 +284,13 @@ namespace JKChat.iOS.Views.Chat {
 				Font = UIFont.PreferredCaption1
 			};
 
-			var statusStackView = new UIStackView(new UIView[] { statusImageView, statusLabel }) {
+			var statusStackView = new UIStackView([statusImageView, statusLabel]) {
 				Axis = UILayoutConstraintAxis.Horizontal,
 				Spacing = 4.0f,
 				Alignment = UIStackViewAlignment.Center
 			};
 
-			titleStackView = new UIStackView(new UIView[] { titleLabel, statusStackView }) {
+			titleStackView = new UIStackView([titleLabel, statusStackView]) {
 				Axis = UILayoutConstraintAxis.Vertical,
 				Alignment = UIStackViewAlignment.Center
 			};
@@ -348,7 +340,7 @@ namespace JKChat.iOS.Views.Chat {
 				}
 				completion(menuElements.ToArray());
 			});
-			moreButtonItem.Menu = UIMenu.Create(new[] { uncachedAction });
+			moreButtonItem.Menu = UIMenu.Create([uncachedAction]);
 			mapProgressPercentButton = new UIButton(UIButtonType.System) {
 				Frame = new(0.0f, 0.0f, 44.0f, 44.0f)
 			};
@@ -359,7 +351,7 @@ namespace JKChat.iOS.Views.Chat {
 		}
 
 		[Export("gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:")]
-		private bool ShouldRecognizeSimultaneously(UIGestureRecognizer gestureRecognizer1, UIGestureRecognizer gestureRecognizer2) {
+		public bool ShouldRecognizeSimultaneously(UIGestureRecognizer gestureRecognizer1, UIGestureRecognizer gestureRecognizer2) {
 			return true;
 		}
 
@@ -376,7 +368,6 @@ namespace JKChat.iOS.Views.Chat {
 		};
 		private void UpdateCenterPrint() {
 			var text = ColourTextValueConverter.Convert(CenterPrint);
-			var parentFrame = CenterPrintView.Superview.Frame;
 			centerPrintLabel.Frame = new(0.0f, 0.0f, DeviceInfo.ScreenBounds.Width-DeviceInfo.SafeAreaInsets.Left-DeviceInfo.SafeAreaInsets.Right-64.0f, 0.0f);
 			centerPrintLabel.AttributedText = text;
 			centerPrintLabel.SizeToFit();
@@ -398,19 +389,19 @@ namespace JKChat.iOS.Views.Chat {
 					mapProgressPercentButton.LayoutIfNeeded();
 				});
 				if (set || NavigationItem.RightBarButtonItems?.Length == 1) {
-					NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+					NavigationItem.SetRightBarButtonItems([moreButtonItem, minimapButtonItem], true);
 				}
 			} else {
 				if (MapData != null) {
 					minimapButtonItem.Image = MapFocused ? Theme.Image.MapCircleFill : Theme.Image.MapCircle;
 					minimapButtonItem.CustomView = null;
 					if (set || NavigationItem.RightBarButtonItems?.Length == 1) {
-						NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem, minimapButtonItem }, true);
+						NavigationItem.SetRightBarButtonItems([moreButtonItem, minimapButtonItem], true);
 					}
 				} else {
 					minimapButtonItem.Image = null;
 					if (set || NavigationItem.RightBarButtonItems?.Length == 2) {
-						NavigationItem.SetRightBarButtonItems(new []{ moreButtonItem }, true);
+						NavigationItem.SetRightBarButtonItems([moreButtonItem], true);
 					}
 				}
 			}
@@ -441,7 +432,6 @@ namespace JKChat.iOS.Views.Chat {
 			set.Bind(ChatTypeTeamButton).To(vm => vm.TeamChatTypeCommand);
 			set.Bind(ChatTypePrivateButton).To(vm => vm.PrivateChatTypeCommand);
 			set.Bind(ChatTypeStackView).For("Visibility").To(vm => vm.SelectingChatType).WithConversion("Visibility");
-			set.Bind(this).For(v => v.SelectingChatType).To(vm => vm.SelectingChatType);
 			set.Bind(titleLabel).For(v => v.AttributedText).To(vm => vm.Title).WithConversion("ColourText");
 			set.Bind(statusLabel).For(v => v.Text).To("If(Players, Format('{0}, {1}', Status, Players), Status)");
 			set.Bind(statusLabel).For(v => v.TextColor).To(vm => vm.Status).WithDictionaryConversion(new Dictionary<ConnectionStatus, UIColor>() {
@@ -509,10 +499,6 @@ namespace JKChat.iOS.Views.Chat {
 			viewAppeared = true;
 		}
 
-		public override void ViewWillDisappear(bool animated) {
-			base.ViewWillDisappear(animated);
-		}
-
 		public override void ViewDidDisappear(bool animated) {
 			base.ViewDidDisappear(animated);
 			viewAppeared = false;
@@ -536,7 +522,7 @@ namespace JKChat.iOS.Views.Chat {
 			}
 		}
 
-		private void SwapMapAndChat(bool mapFocused, bool animated = true) {
+		private void SwapMapAndChat(bool mapFocused, bool animated) {
 			float minimapAlpha = mapFocused ? 1.0f : 0.3f,
 				chatAlpha = mapFocused ? 0.3f : 1.0f;
 			int i = Array.IndexOf(MinimapView.Superview.Subviews, MinimapView);
@@ -661,13 +647,13 @@ namespace JKChat.iOS.Views.Chat {
 
 			public override void ReloadTableData() {
 				base.ReloadTableData();
-				if (ItemsSource is IList listSource && listSource.Count > 0) {
+				if (ItemsSource is IList { Count: > 0 } listSource) {
 					TableView.ScrollToRow(NSIndexPath.FromRowSection(listSource.Count - 1, 0), UITableViewScrollPosition.Bottom, false);
 				}
 			}
 
 			private class CommandViewCell : MvxTableViewCell {
-				public static NSString Key = new(nameof(CommandViewCell));
+				public static readonly NSString Key = new(nameof(CommandViewCell));
 
 				public CommandViewCell(NativeHandle handle) : base(handle) {
 					SeparatorInset = new UIEdgeInsets(0.0f, 56.0f, 0.0f, 0.0f);
@@ -680,14 +666,11 @@ namespace JKChat.iOS.Views.Chat {
 		}
 	}
 
-	public class InputAccessoryView : UIView {
-		private readonly UIViewController parentViewController;
+	public class InputAccessoryView(UIViewController parentViewController) : UIView {
 		private NSLayoutConstraint leftConstraint, rightConstraint, bgBottomConstraint, bgRightConstraint, toolbarLeftConstraint, toolbarRightConstraint;
 		private CGSize intrinsicContentSize = CGSize.Empty;
 		public override CGSize IntrinsicContentSize => intrinsicContentSize;
-		public InputAccessoryView(UIViewController parentViewController) {
-			this.parentViewController = parentViewController;
-		}
+
 		public void SetSize(CGSize size) {
 			intrinsicContentSize = new CGSize(size.Width, size.Height/* + DeviceInfo.SafeAreaBottom*/);
 			InvalidateIntrinsicContentSize();

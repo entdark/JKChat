@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using JKChat.Core.Navigation;
 using JKChat.Core.Services;
@@ -10,9 +9,9 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core.ViewModels.Base {
 	public abstract class BaseViewModel : MvxViewModel, IBaseViewModel {
-		protected INavigationService NavigationService { get; init; }
-		protected IDialogService DialogService { get; init; }
-		protected IMvxMessenger Messenger { get; init; }
+		protected INavigationService NavigationService { get; init; } = Mvx.IoCProvider.Resolve<INavigationService>();
+		protected IDialogService DialogService { get; init; } = Mvx.IoCProvider.Resolve<IDialogService>();
+		protected IMvxMessenger Messenger { get; init; } = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 
 		private string title;
 		public virtual string Title {
@@ -24,12 +23,6 @@ namespace JKChat.Core.ViewModels.Base {
 		public bool IsLoading {
 			get => isLoading;
 			set => SetProperty(ref isLoading, value);
-		}
-
-		public BaseViewModel() {
-			NavigationService = Mvx.IoCProvider.Resolve<INavigationService>();
-			DialogService = Mvx.IoCProvider.Resolve<IDialogService>();
-			Messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 		}
 
 		public override Task Initialize() {

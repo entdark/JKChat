@@ -21,7 +21,7 @@ namespace JKChat.Core.Helpers {
 				Title = "Error",
 				Message = message,
 				OkText = "Copy",
-				OkAction = (_) => {
+				OkAction = _ => {
 					Clipboard.SetTextAsync(message);
 				},
 				CancelText = "OK"

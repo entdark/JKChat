@@ -1,8 +1,8 @@
 ﻿using JKChat.Android.Views.Main;
 
 namespace JKChat.Android.Presenter.Attributes {
-	public class PushFragmentPresentationAttribute : BaseFragmentPresentationAttribute {
-		public PushFragmentPresentationAttribute() : base(
+	public class PushFragmentPresentationAttribute()
+		: BaseFragmentPresentationAttribute(
 			typeof(MainActivityViewModel),
 			Resource.Id.content_detail,
 			true,
@@ -11,6 +11,5 @@ namespace JKChat.Android.Presenter.Attributes {
 			Resource.Animation.fragment_push_pop_enter,
 			Resource.Animation.fragment_push_pop_exit,
 			registerBackPressedCallback: true
-		) {}
-	}
+		);
 }

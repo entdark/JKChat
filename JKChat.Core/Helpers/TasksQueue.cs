@@ -7,7 +7,7 @@ using Microsoft.Maui.ApplicationModel;
 namespace JKChat.Core.Helpers {
 	//source: https://github.com/gentlee/SerialQueue
 	public class TasksQueue {
-		private readonly SpinLock spinLock = new(false);
+		private SpinLock spinLock = new(false);
 		private readonly WeakReference<Task> lastTaskRef = new(null);
 
 		public Task Enqueue(Action action) {

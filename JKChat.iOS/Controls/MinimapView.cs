@@ -145,13 +145,13 @@ public class MinimapView : UIView {
 		this.AddGestureRecognizer(tap);
 	}
 
-	public void ZoomToPoint(CGPoint point, float scale, bool animated) {
+	private void ZoomToPoint(CGPoint point, float scale, bool animated) {
 		var size = new CGSize(Bounds.Size.Width / scale, Bounds.Size.Height / scale);
 		var rect = new CGRect(new(point.X - size.Width * 0.5f, point.Y - size.Height * 0.5f), size);
 		this.minimapScrollView.ZoomToRect(rect, animated);
 	}
 
-	private static CGRect MakeAspectScaleToFitAlignToTopRect(CGSize containerSize, CGSize contentSize, bool fromLs) {
+	private static CGRect MakeAspectScaleToFitAlignToTopRect(CGSize containerSize, CGSize contentSize) {
 		nfloat x = 0.0f,
 			y = 0.0f,
 			width,
@@ -175,13 +175,10 @@ public class MinimapView : UIView {
 		return new CGRect(x, y, width, height);
 	}
 
-	private class MinimapDrawingView : UIView {
+	private class MinimapDrawingView(MinimapView minimapView) : UIView {
 		private const float fontSize = 12.0f;
 		private static readonly CGFont font = CGFont.CreateWithFontName(UIFont.SystemFontOfSize(fontSize, UIFontWeight.Regular).Name);
-		private readonly MinimapView minimapView;
-		public MinimapDrawingView(MinimapView minimapView) {
-			this.minimapView = minimapView;
-		}
+
 		public override void Draw(CGRect rect) {
 			base.Draw(rect);
 			
@@ -199,7 +196,7 @@ public class MinimapView : UIView {
 
 			var contentSize = minimapView.minimapContainerView.Layer.PresentationLayer.Frame.Size;//minimapView.minimapScrollView.ContentSize;
 			var contentOffset = minimapView.minimapScrollView.Layer.PresentationLayer.Bounds.Location;//minimapView.minimapScrollView.ContentOffset;
-			var frame = MakeAspectScaleToFitAlignToTopRect(contentSize, minimapView.minimapImageView.Image.Size, false);
+			var frame = MakeAspectScaleToFitAlignToTopRect(contentSize, minimapView.minimapImageView.Image.Size);
 			var size = frame.Size;
 			var posOffset = new Vector3(
 				(float)(frame.X-contentOffset.X+OutOfBoundsOffset),
@@ -228,11 +225,11 @@ public class MinimapView : UIView {
 						context.TranslateCTM(pos.X, pos.Y);
 						context.RotateCTM((float)-entity.Angles.Y.ToRadians());
 						path = new CGPath();
-						path.AddLines(new CGPoint[]{ new(0.0f, 0.0f), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * -viewTriMedian), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * viewTriMedian) });
+						path.AddLines([new(0.0f, 0.0f), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * -viewTriMedian), new(viewTriMedian, Math.Tan(viewTriAngle.ToRadians()) * viewTriMedian)]);
 						context.AddPath(path);
 						context.Clip();
 						var cs = CGColorSpace.CreateDeviceRGB();
-						var gradient = new CGGradient(cs, new []{ color.CGColor, color.ColorWithAlpha(0.0f).CGColor });
+						var gradient = new CGGradient(cs, [color.CGColor, color.ColorWithAlpha(0.0f).CGColor]);
 						context.DrawLinearGradient(gradient, new(0.0f, 0.0f), new(viewTriMedian, 0.0f), CGGradientDrawingOptions.None);
 						context.RestoreState();
 //player point
@@ -258,7 +255,7 @@ public class MinimapView : UIView {
 						context.SetStrokeColor(color.CGColor);
 						context.SetLineWidth(flagLineWidth);
 						path = new CGPath();
-						path.AddLines(new CGPoint[] { new(0.0f, 0.0f), new(0.0f, -flagHeight), new(flagWidth, -flagHeight*0.75f), new(0.0f, -flagHeight*0.5f) });
+						path.AddLines([new(0.0f, 0.0f), new(0.0f, -flagHeight), new(flagWidth, -flagHeight*0.75f), new(0.0f, -flagHeight*0.5f)]);
 						context.AddPath(path);
 						context.DrawPath(CGPathDrawingMode.FillStroke);
 						context.RestoreState();
@@ -274,7 +271,7 @@ public class MinimapView : UIView {
 						context.SetStrokeColor(color.CGColor);
 						context.SetLineWidth(shotLineWidth);
 						path = new CGPath();
-						path.AddLines(new CGPoint[] { new(pos.X, pos.Y), new(pos2.X, pos2.Y) });
+						path.AddLines([new(pos.X, pos.Y), new(pos2.X, pos2.Y)]);
 						context.AddPath(path);
 						context.DrawPath(CGPathDrawingMode.Stroke);
 						break;
@@ -289,7 +286,7 @@ public class MinimapView : UIView {
 							context.SetStrokeColor(color.CGColor);
 							context.SetLineWidth(projectileLineWidth);
 							path = new CGPath();
-							path.AddLines(new CGPoint[] { new(pos.X, pos.Y), new(pos2.X, pos2.Y) });
+							path.AddLines([new(pos.X, pos.Y), new(pos2.X, pos2.Y)]);
 							context.AddPath(path);
 							context.DrawPath(CGPathDrawingMode.Stroke);
 						}

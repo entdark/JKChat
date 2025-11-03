@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
-using JKChat.Core.Messages;
 using JKChat.Core.Models;
 using JKChat.Core.ViewModels.Base;
 using JKChat.Core.ViewModels.Base.Items;
@@ -29,36 +28,36 @@ namespace JKChat.Core.ViewModels.ServerList {
 			Title = "Filter";
 			ResetCommand = new MvxCommand(ResetExecute, ResetCanExecute);
 			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
-			Items = new() {
+			Items = [
 				new() {
-					Items = new() {
-						(showEmptyItem = new TableToggleItemVM() {
+					Items = [
+						showEmptyItem = new TableToggleItemVM() {
 							Title = "Not entirely empty ",
 							Toggled = item => Filter.ShowEmpty = item.IsChecked
-						}),
-						(showFullItem = new TableToggleItemVM() {
+						},
+						showFullItem = new TableToggleItemVM() {
 							Title = "Not entirely full ",
 							Toggled = item => Filter.ShowFull = item.IsChecked
-						})
-					}
+						}]
 				},
 				new() {
-					Items = new() {
-						(gameItem = new TableValueItemVM() {
+					Items = [
+						gameItem = new TableValueItemVM() {
 							Title = "Game",
 							OnClick = GameExecute
-						}),
-						(gameTypeItem = new TableValueItemVM() {
+						},
+						gameTypeItem = new TableValueItemVM() {
 							Title = "Game type",
 							OnClick = GameTypeExecute
-						}),
-						(gameModItem = new TableValueItemVM() {
+							
+						},
+						gameModItem = new TableValueItemVM() {
 							Title = "Game Mod",
 							OnClick = GameModExecute
-						})
-					}
+						}
+					]
 				}
-			};
+			];
 			Filter = AppSettings.Filter;
 			SetFilterProperties();
 		}
@@ -72,11 +71,11 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private void SetFilterProperties() {
 			string game = Filter.Game.ToDisplayString(true);
 			string gameType = Filter.GameType.ToDisplayString(Filter.Game, true);
-			var selectedGameMods = Filter.GameMod.Where(gm => gm.Value).Select(gm => HandleEmptyGameMod(gm.Key));
-			int selectedGameModsCount = selectedGameMods.Count();
+			string []selectedGameMods = Filter.GameMod.Where(gm => gm.Value).Select(gm => HandleEmptyGameMod(gm.Key)).ToArray();
+			int selectedGameModsCount = selectedGameMods.Length;
 			string gameMod = selectedGameModsCount switch {
 				0 => "All", //can happen only if initial server list loading has failed
-				1 => selectedGameMods.FirstOrDefault() ?? string.Empty, //should never be null
+				1 => selectedGameMods[0],
 				_ when Filter.GameMod.Count == selectedGameModsCount => "All",
 				_ => selectedGameModsCount.ToString()
 			};

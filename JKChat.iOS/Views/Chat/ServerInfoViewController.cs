@@ -21,7 +21,7 @@ using UIKit;
 namespace JKChat.iOS.Views.Chat;
 
 [MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = false)]
-public partial class ServerInfoViewController : BaseViewController<ServerInfoViewModel> {
+public partial class ServerInfoViewController() : BaseViewController<ServerInfoViewModel>(nameof(ServerInfoViewController), null) {
 	private UIBarButtonItem shareButtonItem, favouriteButtonItem;
 
 	public override string Title {
@@ -45,9 +45,6 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			isFavourite = value;
 			UpdateButtonItems();
 		}
-	}
-
-	public ServerInfoViewController() : base(nameof(ServerInfoViewController), null) {
 	}
 
 	public override void ViewDidLoad() {
@@ -104,7 +101,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 		favouriteButtonItem = new UIBarButtonItem(IsFavourite ? Theme.Image.StarFill : Theme.Image.Star, UIBarButtonItemStyle.Plain, (ev, sender) => {
 			ViewModel.FavouriteCommand?.Execute();
 		});
-		NavigationItem.SetRightBarButtonItems(new []{ shareButtonItem, favouriteButtonItem }, true);
+		NavigationItem.SetRightBarButtonItems([shareButtonItem, favouriteButtonItem], true);
 	}
 
 	private class ServerInfoViewSource : MvxStandardTableViewSource {
@@ -196,7 +193,7 @@ public partial class ServerInfoViewController : BaseViewController<ServerInfoVie
 			scoreboardView.SafeAreaLayoutGuide.TrailingAnchor.ConstraintEqualTo(scoreLabel.TrailingAnchor, 16.0f).Active = true;
 			scoreboardView.TopAnchor.ConstraintEqualTo(scoreLabel.TopAnchor, 0.0f).Active = true;
 			playerLabel.TrailingAnchor.ConstraintEqualTo(scoreLabel.LeadingAnchor, 16.0f).Active = true;
-			var headerStackView = new UIStackView(new []{ segmentsView, scoreboardView }) {
+			var headerStackView = new UIStackView([segmentsView, scoreboardView]) {
 				Axis = UILayoutConstraintAxis.Vertical
 			};
 			headerStackView.AddWithConstraintsTo(headerView);

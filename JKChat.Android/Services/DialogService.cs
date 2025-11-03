@@ -141,25 +141,13 @@ namespace JKChat.Android.Services {
 			dialogService.lastShownDialog = alert;
 		}
 
-		private class OnDismissListener : Java.Lang.Object, IDialogInterfaceOnDismissListener {
-			private readonly Action<IDialogInterface> onDismissAction;
-
-			public OnDismissListener(Action<IDialogInterface> onDismissAction) {
-				this.onDismissAction = onDismissAction;
-			}
-
+		private class OnDismissListener(Action<IDialogInterface> onDismissAction) : Java.Lang.Object, IDialogInterfaceOnDismissListener {
 			public void OnDismiss(IDialogInterface dialog) {
 				onDismissAction?.Invoke(dialog);
 			}
 		}
 
-		private class TextWatcher : Java.Lang.Object, ITextWatcher {
-			private readonly Action<string> afterTextChangedAction;
-
-			public TextWatcher(Action<string> afterTextChangedAction) {
-				this.afterTextChangedAction = afterTextChangedAction;
-			}
-
+		private class TextWatcher(Action<string> afterTextChangedAction) : Java.Lang.Object, ITextWatcher {
 			public void AfterTextChanged(IEditable s) {
 				afterTextChangedAction?.Invoke(s?.ToString());
 			}
@@ -169,24 +157,13 @@ namespace JKChat.Android.Services {
 			public void OnTextChanged(ICharSequence s, int start, int before, int count) {}
 		}
 
-		private class OnEditorActionListener : Java.Lang.Object, TextView.IOnEditorActionListener {
-			private readonly Func<ImeAction, bool> onEditorAction;
-
-			public OnEditorActionListener(Func<ImeAction, bool> onEditorAction) {
-				this.onEditorAction = onEditorAction;
-			}
-
+		private class OnEditorActionListener(Func<ImeAction, bool> onEditorAction) : Java.Lang.Object, TextView.IOnEditorActionListener {
 			public bool OnEditorAction(TextView tv, ImeAction actionId, KeyEvent ev) {
 				return onEditorAction?.Invoke(actionId) ?? true;
 			}
 		}
 
-		private class OnCancelListener : Java.Lang.Object, IDialogInterfaceOnCancelListener {
-			private readonly Action<IDialogInterface> onCancelAction;
-
-			public OnCancelListener(Action<IDialogInterface> onCancelAction) {
-				this.onCancelAction = onCancelAction;
-			}
+		private class OnCancelListener(Action<IDialogInterface> onCancelAction) : Java.Lang.Object, IDialogInterfaceOnCancelListener {
 			public void OnCancel(IDialogInterface dialog) {
 				onCancelAction?.Invoke(dialog);
 			}

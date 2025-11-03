@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using JKChat.Core.Helpers;
@@ -28,7 +29,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		private readonly IGameClientsService gameClientsService;
 		private readonly IServerListService serverListService;
 		private readonly ICacheService cacheService;
-		private readonly object serverInfoLocker = new();
+		private readonly Lock serverInfoLocker = new();
 		
 		private string address;
 		private GameClient gameClient;
@@ -99,18 +100,18 @@ namespace JKChat.Core.ViewModels.Chat {
 			FavouriteCommand = new MvxCommand(FavouriteExecute);
 			ShareCommand = new MvxAsyncCommand(ShareExecute);
 			ServerReportCommand = new MvxAsyncCommand(ReportServerExecute);
-			PrimaryInfoItems = new(new KeyValueItemVM[]{
+			PrimaryInfoItems = new([
 				new() { Key = "Game name & version" },
 				new() { Key = "Map" },
 				new() { Key = "Players online" },
 				new() { Key = "Game type" }
-			});
-			FullInfoItems = new();
-			PlayerItems = new();
-			AllSecondaryItems = new TabItems[] {
+			]);
+			FullInfoItems = [];
+			PlayerItems = [];
+			AllSecondaryItems = [
 				new(0, "Scoreboard", PlayerItems),
 				new(1, "Server info", FullInfoItems)
-			};
+			];
 			AllItems = new(PrimaryInfoItems);
 		}
 
@@ -156,7 +157,7 @@ namespace JKChat.Core.ViewModels.Chat {
 		protected override Task BackgroundInitialize() {
 			return LoadData();
 		}
-
+		
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
 			if (ServerInfo == message.ServerInfo) {
@@ -261,7 +262,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					});
 				}
 				if (ServerInfo.PlayersInfo != null) {
-					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new PlayerInfoItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Team = Status == Models.ConnectionStatus.Connected ? (JKChat.Core.Models.Team)player.Team : Models.Team.Spectator, Data = player }), (oldItem, newItem) => {
+					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new PlayerInfoItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Team = Status == Models.ConnectionStatus.Connected ? (Models.Team)player.Team : Models.Team.Spectator, Data = player }), (oldItem, newItem) => {
 						bool theSame = oldItem.Data is ClientInfo oldPlayer
 							&& newItem.Data is ClientInfo newPlayer
 							&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
@@ -351,22 +352,17 @@ namespace JKChat.Core.ViewModels.Chat {
 		private async Task ShareExecute() {
 			if (ServerInfo == null)
 				return;
-			await Share.RequestAsync($"{ColourTextHelper.CleanString(ServerInfo.HostName)}\n/connect {ServerInfo.Address}", $"Connect to {ServerInfo.Version.ToDisplayString()} server");
+			await Share.RequestAsync($"{ServerInfo.HostName.CleanString()}\n/connect {ServerInfo.Address}", $"Connect to {ServerInfo.Version.ToDisplayString()} server");
 		}
 
 		private async Task ReportServerExecute() {
 			//TODO: copy paste from ServerListViewModel
 		}
 
-		public class TabItems {
-			public int TabIndex { get; init; }
-			public string TabTitle { get; init; }
-			public IEnumerable<KeyValueItemVM> Items { get; init; }
-			public TabItems(int tab, string tabTitle, IEnumerable<KeyValueItemVM> items) {
-				TabIndex = tab;
-				TabTitle = tabTitle;
-				Items = items;
-			}
+		public class TabItems(int tab, string tabTitle, IEnumerable<KeyValueItemVM> items) {
+			public int TabIndex { get; init; } = tab;
+			public string TabTitle { get; init; } = tabTitle;
+			public IEnumerable<KeyValueItemVM> Items { get; init; } = items;
 		}
 	}
 }

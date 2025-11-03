@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
 using JKChat.Core.Navigation.Parameters;
@@ -61,7 +62,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			RefreshCommand = new MvxAsyncCommand(RefreshExecute);
 			AddServerCommand = new MvxAsyncCommand(AddServerExecute);
 			FilterCommand = new MvxAsyncCommand(FilterExecute);
-			items = new MvxObservableCollection<ServerListItemVM>();
+			items = [];
 			filter = AppSettings.Filter;
 			FilterApplied = !filter.IsReset;
 			this.cacheService = cacheService;
@@ -88,7 +89,10 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		protected override void OnServerInfoMessage(ServerInfoMessage message) {
 			base.OnServerInfoMessage(message);
-			var item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
+			ServerListItemVM item = null;
+			lock (this.items) {
+				item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
+			}
 			if (item != null) {
 				if (message.Status.HasValue
 					&& message.Status.Value != Models.ConnectionStatus.Disconnected
@@ -109,8 +113,10 @@ namespace JKChat.Core.ViewModels.ServerList {
 
 		protected override void OnFavouriteMessage(FavouriteMessage message) {
 			base.OnFavouriteMessage(message);
-			var item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
-			item?.SetFavourite(message.IsFavourite);
+			lock (this.items) {
+				var item = items.FirstOrDefault(it => it.ServerInfo == message.ServerInfo);
+				item?.SetFavourite(message.IsFavourite);
+			}
 		}
 
 		private async Task FilterExecute() {
@@ -134,7 +140,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 			async Task addServerContinue(string inputAddress) {
 				IsLoading = true;
 				NetAddress netAddress = null;
-				bool success = await JKChat.Core.Helpers.Common.ExceptionalTaskRun(() => {
+				bool success = await Helpers.Common.ExceptionalTaskRun(() => {
 					try {
 						netAddress = NetAddress.FromString(inputAddress);
 					} catch {
@@ -155,7 +161,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					});
 					return;
 				}
-				if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is ServerListItemVM item) {
+				if (Items.FirstOrDefault(item => item.ServerInfo.Address == netAddress) is { } item) {
 					IsLoading = false;
 					await DialogService.ShowAsync(new JKDialogConfig() {
 						Title = "Server Exists",
@@ -188,7 +194,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 					Message = $"Would you like to connect to \"{server.ServerName}{JKClient.Common.EscapeCharacter}\" (\"{inputAddress}\")?",
 					OkText = "Connect",
 					CancelText = "Cancel",
-					OkAction = config => {
+					OkAction = _ => {
 						Task.Run(server.Connect);
 					}
 				});
@@ -262,7 +268,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 		private async Task LoadServerList(Func<Task<IEnumerable<ServerInfo>>> loadingFunc) {
 			try {
 				var serverInfosWithStatus = Enum.GetValues<Models.ConnectionStatus>()
-					.SelectMany(status => (gameClientsService.ServerInfosWithStatus(status) ?? Enumerable.Empty<ServerInfo>()).Select(serverInfo => new { Status = status, ServerInfo = serverInfo }))
+					.SelectMany(status => (gameClientsService.ServerInfosWithStatus(status) ?? []).Select(serverInfo => new { Status = status, ServerInfo = serverInfo }))
 					.Where(serverInfoWithStatus => serverInfoWithStatus != null)
 					.ToDictionary(serverInfoWithStatus => serverInfoWithStatus.ServerInfo, serverInfoWithStatus => serverInfoWithStatus.Status);
 				IEnumerable<ServerListItemVM> newItems = null;
@@ -275,7 +281,7 @@ namespace JKChat.Core.ViewModels.ServerList {
 							.Where(server => server.Ping != 0)
 							.OrderByDescending(server => server.Clients)
 							.Select(server => new ServerListItemVM(server) {
-								Status = serverInfosWithStatus.TryGetValue(server, out var status) ? status : Models.ConnectionStatus.Disconnected
+								Status = serverInfosWithStatus.GetValueOrDefault(server, Models.ConnectionStatus.Disconnected)
 							})
 						, new ServerListItemVM.Comparer());
 					newItems = serverItems;
@@ -292,12 +298,14 @@ namespace JKChat.Core.ViewModels.ServerList {
 					ServerListItemVM []updatedCachedServers = null;
 					await InvokeOnMainThreadAsync(() => {
 						SetItems(newItems);
-						updatedCachedServers = this.items.Where(item => item.IsFavourite || recentServers.Any(recentServer => recentServer == item)).ToArray();
-						if (filter.AddGameMods(items.Select(item => item.ServerInfo.GameName))) {
-							AppSettings.Filter = filter;
+						lock (this.items) {
+							updatedCachedServers = this.items.Where(item => item.IsFavourite || recentServers.Any(recentServer => recentServer == item)).ToArray();
+							if (filter.AddGameMods(this.items.Select(item => item.ServerInfo.GameName))) {
+								AppSettings.Filter = filter;
+							}
 						}
 					});
-					await cacheService.UpdateServers(updatedCachedServers ?? Array.Empty<ServerListItemVM>());
+					await cacheService.UpdateServers(updatedCachedServers ?? []);
 				}
 			} catch (Exception exception) {
 				Helpers.Common.ExceptionCallback(exception);
@@ -355,13 +363,13 @@ namespace JKChat.Core.ViewModels.ServerList {
 	internal static class ServerListViewModelExtensions {
 		public static IEnumerable<ServerListItemVM> UpdateInfosAndStatuses(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerInfo> serverInfos, IDictionary<ServerInfo, Models.ConnectionStatus> serverInfosWithStatus) {
 			var serversArray = servers is ServerListItemVM []array ? array : servers.ToArray();
-			for (int i = 0; i < serversArray.Length; i++) {
-				var server = serversArray[i];
+			var serverInfosArray = serverInfos is ServerInfo []array2 ? array2 : serverInfos.ToArray();
+			foreach (var server in serversArray) {
 				var serverInfoAndStatus = serverInfosWithStatus.FirstOrDefault(kv => kv.Key == server.ServerInfo);
 				if (serverInfoAndStatus.Key is { } serverInfo && serverInfoAndStatus.Value != Models.ConnectionStatus.Disconnected) {
 					server.Set(serverInfo, serverInfoAndStatus.Value);
 				} else {
-					var updatedRecentServerInfo = serverInfos.FirstOrDefault(serverInfo => serverInfo.Ping != 0 && serverInfo == server.ServerInfo);
+					var updatedRecentServerInfo = serverInfosArray.FirstOrDefault(serverInfo => serverInfo.Ping != 0 && serverInfo == server.ServerInfo);
 					if (updatedRecentServerInfo != null) {
 						server.Set(updatedRecentServerInfo);
 					}
@@ -378,8 +386,9 @@ namespace JKChat.Core.ViewModels.ServerList {
 		}
 
 		public static IEnumerable<ServerListItemVM> UpdateFavourites(this IEnumerable<ServerListItemVM> servers, IEnumerable<ServerListItemVM> favouriteServers) {
+			var favouriteServersArray = favouriteServers.ToArray();
 			foreach (var server in servers) {
-				var updatedFavouriteItem = favouriteServers.FirstOrDefault(favouriteItem => favouriteItem == server);
+				var updatedFavouriteItem = favouriteServersArray.FirstOrDefault(favouriteItem => favouriteItem == server);
 				server.SetFavourite(updatedFavouriteItem != null);
 				yield return server;
 			}

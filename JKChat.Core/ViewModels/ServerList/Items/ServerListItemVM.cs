@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,7 +33,7 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 		public string ServerName {
 			get => serverName;
 			set => SetProperty(ref serverName, value, () => {
-				CleanServerName = ColourTextHelper.CleanString(value);
+				CleanServerName = value.CleanString();
 			});
 		}
 
@@ -100,7 +99,7 @@ namespace JKChat.Core.ViewModels.ServerList.Items {
 
 		public string []PlayersList => ServerInfo.PlayersInfo?.Select(p => p.Name).ToArray();
 
-		public ServerListItemVM() {
+		private ServerListItemVM() {
 			ConnectCommand = new MvxAsyncCommand(ConnectExecute);
 		}
 

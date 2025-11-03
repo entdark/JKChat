@@ -8,15 +8,14 @@ using JKChat.Core.ViewModels.Base.Items;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class ReportFragment<TViewModel, TItem> : BaseFragment<TViewModel> where TItem : class, ISelectableItemVM where TViewModel : ReportViewModel<TItem>, IMvxViewModel, IBaseViewModel {
+	public abstract class ReportFragment<TViewModel, TItem>(int layoutId, int menuId) : BaseFragment<TViewModel>(layoutId, menuId)
+		where TItem : class, ISelectableItemVM where TViewModel : ReportViewModel<TItem>, IMvxViewModel, IBaseViewModel {
 		private TItem selectedItem;
 		public virtual TItem SelectedItem {
 			get => selectedItem;
 			set { selectedItem = value; CheckSelection(); }
 		}
 		protected virtual IMenuItem ReportItem { get; set; }
-
-		public ReportFragment(int layoutId, int menuId) : base(layoutId, menuId) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);

@@ -25,9 +25,7 @@ using MvvmCross.Presenters.Attributes;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Presenter {
-	public class AndroidViewPresenter : MvxAndroidViewPresenter {
-		public AndroidViewPresenter(IEnumerable<Assembly> androidViewAssemblies) : base(androidViewAssemblies) {}
-
+	public class AndroidViewPresenter(IEnumerable<Assembly> androidViewAssemblies) : MvxAndroidViewPresenter(androidViewAssemblies) {
 		public override void RegisterAttributeTypes() {
 			base.RegisterAttributeTypes();
 			AttributeTypesToActionsDictionary.Register<RootFragmentPresentationAttribute>(ShowRootFragment, CloseRootFragment);

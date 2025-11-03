@@ -40,7 +40,7 @@ namespace JKChat.Android.Adapters {
 		}
 
 		protected override void ExecuteCommandOnItem(ICommand command, object itemDataContext) {
-			//switch gets executed twice since clicking on the item means toggling the switch, so ignore item click
+//switch gets executed twice since clicking on the item means toggling the switch, so ignore item click
 			if (itemDataContext is TableItemVM { Type: TableItemType.Toggle })
 				return;
 			base.ExecuteCommandOnItem(command, itemDataContext);
@@ -69,7 +69,7 @@ namespace JKChat.Android.Adapters {
 		}
 
 		protected override int GetViewPosition(int itemsSourcePosition) {
-			if (Items == null && Items.Count <= itemsSourcePosition)
+			if (Items == null || Items.Count <= itemsSourcePosition)
 				return itemsSourcePosition;
 			int viewPosition = 0;
 			for (int i = 0; i < Items.Count; i++) {
@@ -87,7 +87,7 @@ namespace JKChat.Android.Adapters {
 		}
 
 		protected virtual int GetGroupItemsCount(IList items) {
-			if (items == null && items.Count <= 0)
+			if (items is not { Count: > 0 })
 				return 0;
 			int count = 0;
 			for (int i = 0; i < items.Count; i++) {

@@ -9,10 +9,7 @@ using UIKit;
 namespace JKChat.iOS.Views.Settings;
 
 [MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
-public partial class MinimapSettingsViewController : BaseViewController<MinimapSettingsViewModel> {
-	public MinimapSettingsViewController() : base(nameof(MinimapSettingsViewController), null) {
-	}
-
+public partial class MinimapSettingsViewController() : BaseViewController<MinimapSettingsViewModel>(nameof(MinimapSettingsViewController), null) {
 	public override void ViewDidLoad () {
 		base.ViewDidLoad ();
 

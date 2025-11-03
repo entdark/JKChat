@@ -33,7 +33,7 @@ namespace JKChat.iOS {
 		}
 
 		protected override IMvxIosViewPresenter CreateViewPresenter() {
-			return new iOSViewPresenter(ApplicationDelegate, Window);
+			return new iOSViewPresenter(Window);
 		}
 
 		protected override void RegisterPresenter(IMvxIoCProvider iocProvider) {
@@ -55,8 +55,7 @@ namespace JKChat.iOS {
 
 		protected override void FillTargetFactories(IMvxTargetBindingFactoryRegistry registry) {
 			base.FillTargetFactories(registry);
-			registry.RegisterCustomBindingFactory<UIControl>("Selected",
-				view => new UIControlSelectedTargetBinding(view));
+			registry.RegisterCustomBindingFactory<UIControl>("Selected", view => new UIControlSelectedTargetBinding(view));
 		}
 
 		protected override ILoggerProvider CreateLogProvider() {

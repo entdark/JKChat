@@ -37,7 +37,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			}
 		}
 
-		public string text;
+		private string text;
 		public string Text {
 			get => text;
 			set {
@@ -122,7 +122,7 @@ namespace JKChat.iOS.Views.Chat.Cells {
 			public GradientView(UIColor startColor, UIColor endColor, CGPoint startPoint, CGPoint endPoint, CAGradientLayerType type = CAGradientLayerType.Axial) {
 				var gradientLayer = (this.Layer as CAGradientLayer);
 				gradientLayer.LayerType = type;
-				gradientLayer.Colors = new[] { startColor.CGColor, endColor.CGColor };
+				gradientLayer.Colors = [startColor.CGColor, endColor.CGColor];
 				gradientLayer.StartPoint = startPoint;
 				gradientLayer.EndPoint = endPoint;
 			}

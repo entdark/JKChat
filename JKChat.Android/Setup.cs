@@ -94,11 +94,8 @@ namespace JKChat.Android {
 			return new SerilogLoggerFactory();
 		}
 
-		private class InsetsAndroidBindingBuilder : MvxAndroidBindingBuilder {
-			public InsetsAndroidBindingBuilder(Action<IMvxValueConverterRegistry> fillValueConverters, Action<IMvxValueCombinerRegistry> fillValueCombiners, Action<IMvxTargetBindingFactoryRegistry> fillTargetFactories, Action<IMvxBindingNameRegistry> fillBindingNames, Action<IMvxTypeCache> fillViewTypes, Action<IMvxAxmlNameViewTypeResolver> fillAxmlViewTypeResolver, Action<IMvxNamespaceListViewTypeResolver> fillNamespaceListViewTypeResolver)
-				: base(fillValueConverters, fillValueCombiners, fillTargetFactories, fillBindingNames, fillViewTypes, fillAxmlViewTypeResolver, fillNamespaceListViewTypeResolver) {
-			}
-
+		private class InsetsAndroidBindingBuilder(Action<IMvxValueConverterRegistry> fillValueConverters, Action<IMvxValueCombinerRegistry> fillValueCombiners, Action<IMvxTargetBindingFactoryRegistry> fillTargetFactories, Action<IMvxBindingNameRegistry> fillBindingNames, Action<IMvxTypeCache> fillViewTypes, Action<IMvxAxmlNameViewTypeResolver> fillAxmlViewTypeResolver, Action<IMvxNamespaceListViewTypeResolver> fillNamespaceListViewTypeResolver)
+			: MvxAndroidBindingBuilder(fillValueConverters, fillValueCombiners, fillTargetFactories, fillBindingNames, fillViewTypes, fillAxmlViewTypeResolver, fillNamespaceListViewTypeResolver) {
 			protected override IMvxLayoutInflaterHolderFactoryFactory CreateLayoutInflaterFactoryFactory() {
 				return new InsetsLayoutInflaterFactoryFactory();
 			}
@@ -108,16 +105,13 @@ namespace JKChat.Android {
 					return new InsetsBindingLayoutInflaterFactory(source);
 				}
 
-				private class InsetsBindingLayoutInflaterFactory : MvxBindingLayoutInflaterFactory {
-					public InsetsBindingLayoutInflaterFactory(object source) : base(source) {
-					}
-
+				private class InsetsBindingLayoutInflaterFactory(object source) : MvxBindingLayoutInflaterFactory(source) {
 					public override View BindCreatedView(View view, Context context, global::Android.Util.IAttributeSet attrs) {
 						using var typedArray = context.ObtainStyledAttributes(attrs, Resource.Styleable.View);
 						int numStyles = typedArray.IndexCount;
 						WindowInsetsFlags flags = WindowInsetsFlags.None;
-						for (var i = 0; i < numStyles; ++i) {
-							var attributeId = typedArray.GetIndex(i);
+						for (int i = 0; i < numStyles; ++i) {
+							int attributeId = typedArray.GetIndex(i);
 
 							bool attributeValue = typedArray.GetBoolean(attributeId, false);
 							if (attributeValue) {
@@ -166,7 +160,7 @@ namespace JKChat.Android {
 					bool paddingLeft = flags.HasFlag(WindowInsetsFlags.PaddingLeft) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingLeftButExpanded));
 					bool paddingRight = flags.HasFlag(WindowInsetsFlags.PaddingRight) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingRightButExpanded));
 
-					bool isRtl = ViewCompat.GetLayoutDirection(view) == ViewCompat.LayoutDirectionRtl;
+					bool isRtl = view.LayoutDirection == LayoutDirection.Rtl;
 					var insets = insetsCompat.GetInsets(WindowInsetsCompat.Type.SystemBars());
 					int insetTop = insets.Top;
 					int insetBottom = insets.Bottom;

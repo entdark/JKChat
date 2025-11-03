@@ -23,9 +23,6 @@ namespace JKChat.Core.Services;
 public class MinimapService : IMinimapService {
 	private readonly ConcurrentDictionary<string, MapProgressData> mapProgresses = new(StringComparer.FromComparison(StringComparison.OrdinalIgnoreCase));
 
-	public MinimapService() {
-	}
-
 	MapData IMinimapService.GetMapData(ServerInfo serverInfo) {
 		var mapData = GetEmbeddedMapData(serverInfo);
 		return mapData ?? GetInternalMapData(serverInfo);
@@ -72,7 +69,6 @@ public class MinimapService : IMinimapService {
 	}
 
 	MapProgressData IMinimapService.GetActiveMapProgress(ServerInfo serverInfo) {
-		string mapName = serverInfo.MapName;
 		if (IsMapProgressActive(serverInfo, out var mapProgress)) {
 			return mapProgress;
 		}
@@ -103,9 +99,9 @@ public class MinimapService : IMinimapService {
 					requestUri = Path.Combine(baseUrl, cleanMapName+".pk3");
 				}
 
-				var fileName = mapName + ".pk3";
-				var tempFilePath = Path.Combine(FileSystem.CacheDirectory, fileName);
-				var pathDirectoryName = Path.GetDirectoryName(tempFilePath);
+				string fileName = mapName + ".pk3";
+				tempFilePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+				string pathDirectoryName = Path.GetDirectoryName(tempFilePath);
 			
 				mapProgress.IsDownloading = true;
 
@@ -119,7 +115,7 @@ public class MinimapService : IMinimapService {
 //if we reached here then we found something valid to download so notify the user about any exception
 				report = true;
 				long totalSize = response.Content.Headers.ContentLength ?? long.MaxValue;
-				using var contentStream = await response.Content.ReadAsStreamAsync(mapProgress.CancellationToken).ConfigureAwait(false);
+				await using var contentStream = await response.Content.ReadAsStreamAsync(mapProgress.CancellationToken).ConfigureAwait(false);
 				setProgress(0.1f);
 
 				byte []buffer = new byte[8192];
@@ -127,7 +123,7 @@ public class MinimapService : IMinimapService {
 				if (File.Exists(tempFilePath)) {
 					File.Delete(tempFilePath);
 				}
-				using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true)) {
+				await using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true)) {
 					int totalRead = 0;
 					do {
 						int read = await contentStream.ReadAsync(buffer, mapProgress.CancellationToken).ConfigureAwait(false);
@@ -144,8 +140,8 @@ public class MinimapService : IMinimapService {
 				mapProgress.IsGenerating = true;
 				mapProgress.IsDownloading = false;
 
-				var minimapPath = GetInternalPath(serverInfo);
-				var minimapMapPath = Path.Combine(minimapPath, mapName);
+				string minimapPath = GetInternalPath(serverInfo);
+				string minimapMapPath = Path.Combine(minimapPath, mapName);
 				if (new DirectoryInfo(minimapMapPath) is { Exists: true } d && d.GetFiles() is { Length: > 0 } files && Path.GetExtension(files[0].FullName) == ".png") {
 					File.Delete(files[0].FullName);
 				}
@@ -201,7 +197,7 @@ public class MinimapService : IMinimapService {
 								},
 								CancelText = "Cancel",
 							});
-						} else if(report) {
+						} else if (report) {
 							Helpers.Common.ExceptionCallback(t.Exception);
 						}
 					} else {
@@ -249,7 +245,7 @@ public class MinimapService : IMinimapService {
 	}
 
 	private static MapData ParseMapData(string path, int minMaxStart, ServerInfo serverInfo, Assembly assembly = null) {
-		string []minMax = path.Substring(minMaxStart).Replace(".png","").Split(',');
+		string []minMax = path[minMaxStart..].Replace(".png","").Split(',');
 		if (minMax?.Length == 6
 			&& int.TryParse(minMax[0], out int minX)
 			&& int.TryParse(minMax[1], out int minY)
@@ -302,7 +298,7 @@ internal class MapProgressData {
 			Message = this.IsDownloading ? $"Downloading \"{MapName}\", would you like to cancel?" : $"Generating \"{MapName}\" minimap, would you like to stop?",
 			OkText = this.IsDownloading ? "Cancel" : "Stop",
 			OkAction = _ => {
-				this?.Cancel();
+				this.Cancel();
 			},
 			CancelText = "Continue",
 		});

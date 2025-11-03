@@ -11,9 +11,11 @@ using AndroidX.Core.App;
 using AndroidX.Core.Content;
 
 using Google.Android.Material.Color;
+
 using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Main;
 using JKChat.Core;
+using JKChat.Core.Helpers;
 using JKChat.Core.Services;
 
 namespace JKChat.Android.Services {
@@ -62,7 +64,7 @@ namespace JKChat.Android.Services {
 				activityIntent.PutExtra(kv.Key, kv.Value);
 			}
 			int id = notificationId++;
-			var pendingIntent = PendingIntent.GetActivity(context, id, activityIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+			var pendingIntent = PendingIntentCompat.GetActivity(context, id, activityIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			var notification = new NotificationCompat.Builder(context, NotificationChannelID)
 				.SetContentTitle(ColourTextValueConverter.Convert(title))
 				.SetContentText(ColourTextValueConverter.Convert(message))

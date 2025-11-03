@@ -32,7 +32,6 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 
 	private CLLocationManager locationManager;
 	private NSUrl delayedOpenUrl;
-	private int lastActiveCount, lastMessages;
 	private MvxSubscriptionToken serverInfoMessageToken, locationUpdateMessageToken, widgetFavouritesMessageToken;
 	private IDisposable liveActivityDisconnectObserver = null;
 
@@ -78,11 +77,11 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 			serverInfoMessageToken = messenger.SubscribeOnMainThread<ServerInfoMessage>(OnServerInfoMessage);
 			locationUpdateMessageToken = messenger.Subscribe<LocationUpdateMessage>(OnLocationUpdateMessage);
 			widgetFavouritesMessageToken = messenger.Subscribe<WidgetFavouritesMessage>(OnWidgetFavouritesMessage);
-			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidBecomeMainNotification"), (notification) => {
+			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidBecomeMainNotification"), notification => {
 				base.WillEnterForeground(scene);
 				IsActive = true;
 			});
-			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidResignMainNotification"), (notification) => {
+			NSNotificationCenter.DefaultCenter.AddObserver(new NSString("NSWindowDidResignMainNotification"), notification => {
 				IsActive = false;
 				base.DidEnterBackground(scene);
 			});
@@ -119,10 +118,6 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 				}
 			});*/
 		}
-	}
-
-	protected override void RunAppStart() {
-		base.RunAppStart();
 	}
 
 	public override void DidDisconnect(UIScene scene) {
@@ -217,7 +212,7 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		if (url.Host == "liveactivity") {
 			var activeServers = Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.ToArray();
 			if (activeServers.Length == 1) {
-				var address = activeServers[0].Address;
+				string address = activeServers[0].Address;
 				var parameters = navigationService.MakeNavigationParameters($"jkchat://chat?address={address}", address);
 				navigationService.Navigate(parameters);
 			}
@@ -231,7 +226,7 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		var queryItems = new NSUrlComponents(url, true).QueryItems;
 		if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address2 }) || address2.Length == 0)
 			return;
-		var connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address2) == ConnectionStatus.Connected;
+		bool connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address2) == ConnectionStatus.Connected;
 		string path = string.Empty;
 		if (widgetLink == WidgetLink.Chat || (widgetLink == WidgetLink.ChatIfConnected && connected)) {
 			path = "chat";
@@ -280,7 +275,6 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		InvokeOnMainThread(() => {
 			var content = new UNMutableNotificationContent() {
 				Title = "JKChat is minimized",
-//					Subtitle = "Notification Subtitle",
 				Body = $"You have {time} seconds until it pauses the connection"
 			};
 			var trigger = UNTimeIntervalNotificationTrigger.CreateTrigger(double.Epsilon, false);
@@ -331,7 +325,7 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		favouritesQueue.Enqueue(add);
 		static async Task add() {
 			var servers = await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers();
-			var jsonString = servers.Select(s => new {
+			string jsonString = servers.Select(s => new {
 				address = s.Address.Split(':')[0],
 				port = ushort.TryParse(s.Address.Split(':')[1], out ushort port) ? port : 0,
 				serverName = s.CleanServerName

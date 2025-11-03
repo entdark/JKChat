@@ -36,9 +36,8 @@ namespace JKChat.iOS.Services {
 						});
 						alert.AddAction(cancelAction);
 					}
-					UIAlertAction okAction = null;
 					if (config.HasOk) {
-						okAction = UIAlertAction.Create(config.OkText, UIAlertActionStyle.Default, action => {
+						var okAction = UIAlertAction.Create(config.OkText, UIAlertActionStyle.Default, action => {
 							config.OkAction?.Invoke(config);
 						});
 						alert.AddAction(okAction);

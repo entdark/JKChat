@@ -97,6 +97,7 @@ public class MinimapView : FrameLayout {
 		minimapDrawingView = new(Context, this) {
 			LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent)
 		};
+		minimapDrawingView.SetLayerType(LayerType.Hardware, null);
 		AddView(minimapDrawingView);
 	}
 
@@ -136,17 +137,12 @@ public class MinimapView : FrameLayout {
 		base.Dispose(disposing);
 	}
 
-	private class MinimapDrawingView : View {
-		private readonly MinimapView minimapView;
-		public MinimapDrawingView(Context context, MinimapView minimapView) : base(context) {
-			this.minimapView = minimapView;
-			SetLayerType(LayerType.Hardware, null);
-		}
+	private class MinimapDrawingView(Context context, MinimapView minimapView) : View(context) {
+		private const float viewTriAngle = 30.0f;
 		private static readonly float flagHeight = 10.0f.DpToPxF();
 		private static readonly float flagWidth = 7.0f.DpToPxF();
 		private static readonly float flagLineWidth = 2.0f.DpToPxF();
 		private static readonly float viewTriMedian = 30.0f.DpToPxF();
-		private static readonly float viewTriAngle = 30.0f;
 		private static readonly float pointSize = 2.0f.DpToPxF();
 		private static readonly float textSize = 12.0f.SpToPxF();
 		private static readonly float vehRadius = pointSize*2.0f;
@@ -156,6 +152,7 @@ public class MinimapView : FrameLayout {
 		private static readonly float impactStartRadius = 2.0f.DpToPxF();
 		private static readonly float impactEndRadius = 10.0f.DpToPxF();
 		private static readonly float impactLineWidth = 2.0f.DpToPxF();
+		
 		private readonly TextPaint textPaint = new() {
 			TextSize = textSize,
 			Color = Color.White

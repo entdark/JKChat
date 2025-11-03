@@ -8,15 +8,18 @@ using Android.Util;
 
 using AndroidX.Core.OS;
 
+using Google.Android.Material.BottomNavigation;
+
 using Java.Interop;
 
 using JKChat.Core;
+using JKChat.Core.Helpers;
 
 using MvvmCross.Exceptions;
 
 namespace JKChat.Android.Controls {
 	[Register("JKChat.Android.Controls.TabsBottomNavigationView")]
-	public class TabsBottomNavigationView : Google.Android.Material.BottomNavigation.BottomNavigationView {
+	public class TabsBottomNavigationView : BottomNavigationView {
 		private const string bundlePages = nameof(TabsBottomNavigationView) + nameof(bundlePages);
 		private const string bundleCurrentIndex = nameof(TabsBottomNavigationView) + nameof(bundleCurrentIndex);
 		private const string bundleSavedState = nameof(TabsBottomNavigationView) + nameof(bundleSavedState);
@@ -161,7 +164,7 @@ namespace JKChat.Android.Controls {
 			public int MenuDrawableResourceId { get; init; }
 
 			[ExportField("CREATOR")]
-			public static TabsBottomNavigationViewPageParcelableCreator InititalizeCreator() {
+			public static TabsBottomNavigationViewPageParcelableCreator InitializeCreator() {
 				return new TabsBottomNavigationViewPageParcelableCreator();
 			}
 

@@ -11,8 +11,6 @@ namespace JKChat.Core.ViewModels.Main {
 	public class MainViewModel : BaseViewModel {
 		private bool initialNavigationDone = false;
 
-		public MainViewModel() {}
-
 		private async Task ShowInitialViewModelsExecute() {
 			if (initialNavigationDone)
 				return;

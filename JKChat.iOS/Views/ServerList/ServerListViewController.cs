@@ -85,14 +85,14 @@ namespace JKChat.iOS.Views.ServerList {
 		#endregion
 
 		private void UpdateButtonItems() {
-			var addButtomItem = new UIBarButtonItem(Theme.Image.PlusCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+			var addButtonItem = new UIBarButtonItem(Theme.Image.PlusCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
 				ViewModel.AddServerCommand?.Execute();
 			});
-			var filterButtomItem = new UIBarButtonItem(FilterApplied ? Theme.Image.Line3HorizontalDecreaseCircleFill : Theme.Image.Line3HorizontalDecreaseCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
+			var filterButtonItem = new UIBarButtonItem(FilterApplied ? Theme.Image.Line3HorizontalDecreaseCircleFill : Theme.Image.Line3HorizontalDecreaseCircle, UIBarButtonItemStyle.Plain, (sender, ev) => {
 				ViewModel.FilterCommand?.Execute();
 			});
 
-			NavigationItem.SetRightBarButtonItems(new []{ addButtomItem, filterButtomItem }, true);
+			NavigationItem.SetRightBarButtonItems([addButtonItem, filterButtonItem], true);
 		}
 
 		public override MvxBasePresentationAttribute PresentationAttribute(MvxViewModelRequest request) {

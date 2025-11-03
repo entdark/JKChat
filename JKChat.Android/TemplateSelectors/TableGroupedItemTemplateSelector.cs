@@ -5,16 +5,10 @@ using JKChat.Core.ViewModels.Base.Items;
 using MvvmCross.DroidX.RecyclerView.ItemTemplates;
 
 namespace JKChat.Android.TemplateSelectors {
-	public class TableGroupedItemTemplateSelector : MvxTemplateSelector<TableItemVM> {
+	public class TableGroupedItemTemplateSelector(bool detail) : MvxTemplateSelector<TableItemVM> {
 		private const int ToggleViewType = 0;
 		private const int ValueViewType = 1;
 		private const int NavigationViewType = 2;
-
-		private readonly bool detail;
-
-		public TableGroupedItemTemplateSelector(bool detail) {
-			this.detail = detail;
-		}
 
 		public override int GetItemLayoutId(int fromViewType) {
 			return fromViewType switch {

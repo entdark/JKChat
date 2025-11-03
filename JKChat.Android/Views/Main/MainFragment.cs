@@ -10,14 +10,12 @@ using JKChat.Core.ViewModels.Main;
 
 namespace JKChat.Android.Views.Main {
 	[RootFragmentPresentation(RegisterBackPressedCallback = true)]
-	public class MainFragment : TabsFragment<MainViewModel> {
+	public class MainFragment() : TabsFragment<MainViewModel>(Resource.Layout.main_page, Resource.Id.tabs_viewpager, Resource.Id.tabs_navigationview, 3) {
 		private int tabChanged = 0;
-
-		public MainFragment() : base(Resource.Layout.main_page, Resource.Id.tabs_viewpager, Resource.Id.tabs_navigationview, 3) {}
 
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
-
+			
 			BottomNavigationView.HandleItemSelection = (position) => {
 				if (position != CurrentTab) {
 					var animation = AnimationUtils.LoadAnimation(this.Context, position > CurrentTab ? Resource.Animation.fragment_tab_left_exit : Resource.Animation.fragment_tab_right_exit);

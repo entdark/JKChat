@@ -19,10 +19,7 @@ namespace JKChat.iOS.Helpers {
 			? UIApplication.SharedApplication.ConnectedScenes?.OfType<UIWindowScene>().SelectMany(s => s.Windows).ToArray()
 			: UIApplication.SharedApplication.Windows;
 		public static CGRect ScreenBounds => KeyWindow?.Bounds ?? UIScreen.MainScreen.Bounds;
-		public static UIEdgeInsets SafeAreaInsets => UIDevice.CurrentDevice.CheckSystemVersion(11, 0)
-			&& KeyWindow?.SafeAreaInsets is UIEdgeInsets safeAreaInsets
-			? safeAreaInsets
-			: UIEdgeInsets.Zero;
+		public static UIEdgeInsets SafeAreaInsets => KeyWindow?.SafeAreaInsets ?? UIEdgeInsets.Zero;
 		public static bool IsCollapsed => Mvx.IoCProvider.Resolve<IViewPresenter>().IsCollapsed;
 		public static bool IsRunningOnMacOS => (UIDevice.CurrentDevice.CheckSystemVersion(14, 0) && NSProcessInfo.ProcessInfo.IsiOSApplicationOnMac) || NSProcessInfo.ProcessInfo.IsMacCatalystApplication;
 	}

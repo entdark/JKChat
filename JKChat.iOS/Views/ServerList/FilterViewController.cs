@@ -9,10 +9,8 @@ using UIKit;
 namespace JKChat.iOS.Views.ServerList;
 
 [MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
-public partial class FilterViewController : BaseViewController<FilterViewModel> {
+public partial class FilterViewController() : BaseViewController<FilterViewModel>(nameof(FilterViewController), null) {
 	private UIBarButtonItem resetButtonItem;
-
-	public FilterViewController() : base(nameof(FilterViewController), null) {}
 
 	public override void LoadView() {
 		base.LoadView();

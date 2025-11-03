@@ -12,6 +12,7 @@ using Android.Views.Animations;
 
 using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
+using AndroidX.Core.App;
 using AndroidX.Core.Content;
 
 using Google.Android.Material.Internal;
@@ -43,14 +44,12 @@ namespace JKChat.Android.Views.Main {
 		WindowSoftInputMode = SoftInput.StateAlwaysHidden | SoftInput.AdjustResize
 	)]
 	[MvxActivityPresentation]
-	public class MainActivity : BaseActivity<MainActivityViewModel> {
+	public class MainActivity() : BaseActivity<MainActivityViewModel>(Resource.Layout.activity_main) {
+		private readonly Handler handler = new(Looper.MainLooper);
 		private ActivityResultLauncher notificationsPermissionActivityResultLauncher;
 		private MvxSubscriptionToken serverInfoMessageToken;
 		private View contentMasterView, contentDetailView;
 		private Intent pendingIntent;
-		private Handler handler = new(Looper.MainLooper);
-
-		public MainActivity() : base(Resource.Layout.activity_main) {}
 
 		protected override void OnCreate(Bundle savedInstanceState) {
 			var splashScreen = AndroidX.Core.SplashScreen.SplashScreen.InstallSplashScreen(this);
@@ -208,7 +207,7 @@ namespace JKChat.Android.Views.Main {
 			var permission = ContextCompat.CheckSelfPermission(this, Manifest.Permission.PostNotifications);
 			if (permission == Permission.Granted) {
 				//we are good
-			} else if (ShouldShowRequestPermissionRationale(Manifest.Permission.PostNotifications)) {
+			} else if (ActivityCompat.ShouldShowRequestPermissionRationale(this, Manifest.Permission.PostNotifications)) {
 				//don't bother
 			} else {
 				notificationsPermissionActivityResultLauncher.Launch(new Java.Lang.String(Manifest.Permission.PostNotifications));

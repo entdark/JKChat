@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 
 using Foundation;
 
-using JKChat.Core;
+using JKChat.Core.Helpers;
 using JKChat.Core.ViewModels.Base.Items;
 using JKChat.iOS.ValueConverters;
 
@@ -15,7 +14,7 @@ using MvvmCross.Platforms.Ios.Binding.Views;
 using UIKit;
 
 namespace JKChat.iOS.ViewSources {
-	public class TableGroupedViewSource : MvxStandardTableViewSource {
+	public class TableGroupedViewSource : MvxTableViewSource {
 		public IList<TableGroupedItemVM> Items => ItemsSource as IList<TableGroupedItemVM>;
 
 		public TableGroupedViewSource(UITableView tableView) : base(tableView) {
@@ -46,7 +45,7 @@ namespace JKChat.iOS.ViewSources {
 					TableItemType.Navigation => new TableNavigationViewCell()
 				};
 			}
-			return base.GetOrCreateCellFor(tableView, indexPath, item);
+			return null;
 		}
 
 		protected override void CollectionChangedOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args) {
@@ -83,7 +82,7 @@ namespace JKChat.iOS.ViewSources {
 
 		protected static NSIndexPath []CreateNSIndexPathArray(int startingPosition, IList items) {
 			if (items == null || items.Count <= 0)
-				return Array.Empty<NSIndexPath>();
+				return [];
 			var indexPaths = new List<NSIndexPath>();
 			for (int i = 0; i < items.Count; i++) {
 				if (items[i] is TableGroupedItemVM { Items: { Count: > 0 } groupedItems }) {
@@ -106,7 +105,7 @@ namespace JKChat.iOS.ViewSources {
 			}
 		}
 
-		private class TableValueViewCell : TableBaseViewCell {
+		private class TableValueViewCell() : TableBaseViewCell(UITableViewCellStyle.Value1, Key) {
 			public static readonly NSString Key = new(nameof(TableValueViewCell));
 
 			private string detail;
@@ -118,8 +117,6 @@ namespace JKChat.iOS.ViewSources {
 					LayoutSubviews();
 				}
 			}
-
-			public TableValueViewCell() : base(UITableViewCellStyle.Value1, Key) {}
 
 			protected override void BindView() {
 				base.BindView();
@@ -144,10 +141,8 @@ namespace JKChat.iOS.ViewSources {
 			}
 		}
 
-		private class TableNavigationViewCell : TableBaseViewCell {
+		private class TableNavigationViewCell() : TableBaseViewCell(UITableViewCellStyle.Default, Key, UITableViewCellAccessory.DisclosureIndicator) {
 			public static readonly NSString Key = new(nameof(TableNavigationViewCell));
-
-			public TableNavigationViewCell() : base(UITableViewCellStyle.Default, Key, UITableViewCellAccessory.DisclosureIndicator) {}
 		}
 	}
 }

@@ -26,25 +26,25 @@ namespace JKChat.Core.ViewModels.Settings {
 			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
 			TableGroupedItemVM groupItem = null;
 			var options = AppSettings.MinimapOptions;
-			Items = new() {
+			Items = [
 				new() {
-					Items = new() {
+					Items = [
 						new TableToggleItemVM() {
 							Title = "Show minimap",
 							IsChecked = options.HasFlag(MinimapOptions.Enabled),
 							Toggled = item => {
 								ToggleOptions(MinimapOptions.Enabled, item.IsChecked);
 								if (item.IsChecked && !Items.Contains(groupItem)) {
-									 Items.Insert(1, groupItem);
+									Items.Insert(1, groupItem);
 								} else if (!item.IsChecked && Items.Contains(groupItem)) {
-									 Items.Remove(groupItem);
+									Items.Remove(groupItem);
 								}
 							}
 						}
-					}
+					]
 				},
-				(groupItem = new() {
-					Items = new() {
+				groupItem = new() {
+					Items = [
 						new TableToggleItemVM() {
 							Title = "Show players",
 							IsChecked = options.HasFlag(MinimapOptions.Players),
@@ -116,9 +116,9 @@ namespace JKChat.Core.ViewModels.Settings {
 							Value = $"{AppSettings.MinimapSize}×{AppSettings.MinimapSize}",
 							OnClick = MinimapSizeExecute
 						}
-					}
-				})
-			};
+					]
+				}
+			];
 			if (DeviceInfo.Platform == DevicePlatform.Android) {
 				groupItem.Items.Add(
 					new TableToggleItemVM() {
@@ -150,7 +150,7 @@ namespace JKChat.Core.ViewModels.Settings {
 			}
 			var activeMapProgresses = minimapService.GetActiveMapProgresses();
 			mapProgressesGroup = new TableGroupedItemVM() {
-				Items = new()
+				Items = []
 			};
 			foreach (var mapProgress in activeMapProgresses) {
 				mapProgressesGroup.Items.Add(new TableValueItemVM() {

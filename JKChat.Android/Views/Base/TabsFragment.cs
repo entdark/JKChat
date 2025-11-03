@@ -8,36 +8,25 @@ using JKChat.Android.Controls;
 using JKChat.Core.ViewModels.Base;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class TabsFragment<TViewModel> : BaseFragment<TViewModel>, ITabsView where TViewModel : class, IBaseViewModel {
-		private readonly int tabsCount;
-
+	public abstract class TabsFragment<TViewModel>(int layoutId, int viewPagerId, int bottomNavigationViewId, int tabsCount) : BaseFragment<TViewModel>(layoutId), ITabsView where TViewModel : class, IBaseViewModel {
 		protected TabsViewPager ViewPager { get; private set; }
 		protected TabsBottomNavigationView BottomNavigationView { get; private set; }
 
 		public Fragment CurrentTabFragment => ViewPager?.CurrentFragment;
 		public int CurrentTab => ViewPager?.CurrentItem ?? -1;
-
-		public int ViewPagerId { get; init; }
-		public int BottomNavigationViewId { get; init; }
 		public int DefaultTab { get; init; } = 0;
 
-		public TabsFragment(int layoutId, int viewPagerId, int bottomNavigationViewId, int tabsCount) : base(layoutId) {
-			ViewPagerId = viewPagerId;
-			BottomNavigationViewId = bottomNavigationViewId;
-			this.tabsCount = tabsCount;
-			RegisterBackPressedCallback = true;
-		}
-
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
-			base.OnViewCreated(view, savedInstanceState);
-			ViewPager = view.FindViewById<TabsViewPager>(ViewPagerId);
+			RegisterBackPressedCallback = true;
+			ViewPager = view.FindViewById<TabsViewPager>(viewPagerId);
 			ViewPager.ScrollEnabled = false;
-			ViewPager.OffscreenPageLimit = this.tabsCount;
+			ViewPager.OffscreenPageLimit = tabsCount;
 			ViewPager.PageSelected += TabPageSelected;
 			if (ViewPager.Adapter == null)
-				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.ChildFragmentManager, this.tabsCount);
-			BottomNavigationView = view.FindViewById<TabsBottomNavigationView>(BottomNavigationViewId);
+				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.ChildFragmentManager, tabsCount);
+			BottomNavigationView = view.FindViewById<TabsBottomNavigationView>(bottomNavigationViewId);
 			BottomNavigationView.ViewPager = ViewPager;
+			base.OnViewCreated(view, savedInstanceState);
 		}
 
 		public override void OnDestroyView() {

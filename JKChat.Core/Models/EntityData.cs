@@ -13,7 +13,7 @@ public class EntityData {
 	public DateTime Life { get; init; }
 	public int LifeLength { get; init; }
 	public Color Color { get; init; }
-	public Team Team { get; init; }
+	internal Team Team { get; init; }
 	internal EntityData(EntityType type, int life = 0) {
 		Type = type;
 		if (life > 0) {

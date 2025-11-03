@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Linq;
 
 using Android.Animation;
 using Android.Content.Res;
@@ -161,7 +160,7 @@ namespace JKChat.Android.Views.Chat {
 
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
-				recyclerView.Adapter = scrollToBottomRecyclerAdapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
+				recyclerView.Adapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
 					AdjustHolderOnCreate = (viewHolder) => {
 						var textView = viewHolder.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
@@ -230,14 +229,6 @@ namespace JKChat.Android.Views.Chat {
 			base.OnDestroyView();
 		}
 
-		public override void OnDestroy() {
-			base.OnDestroy();
-		}
-
-		public override void OnPause() {
-			base.OnPause();
-		}
-
 		public override void OnResume() {
 			base.OnResume();
 			scrollToBottomRecyclerAdapter?.ScrollToBottom();
@@ -301,12 +292,14 @@ namespace JKChat.Android.Views.Chat {
 			disconnectItem.SetClickAction(() => {
 				ViewModel?.DisconnectCommand?.Execute();
 			});
-			var title = disconnectItem.TitleFormatted;
-			var newTitle = new SpannableString(title);
-			var errorColour = new Color(MaterialColors.GetColor(Context, Resource.Attribute.colorError, Color.Transparent));
-			newTitle.SetSpan(new ForegroundColorSpan(errorColour), 0, newTitle.Length(), SpanTypes.ExclusiveExclusive);
-			disconnectItem.SetTitle(newTitle);
-			disconnectItem.SetIconTintList(ColorStateList.ValueOf(errorColour));
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.O) {
+				var title = disconnectItem.TitleFormatted;
+				var newTitle = new SpannableString(title);
+				var errorColour = new Color(MaterialColors.GetColor(Context, Resource.Attribute.colorError, Color.Transparent));
+				newTitle.SetSpan(new ForegroundColorSpan(errorColour), 0, newTitle.Length(), SpanTypes.ExclusiveExclusive);
+				disconnectItem.SetTitle(newTitle);
+				disconnectItem.SetIconTintList(ColorStateList.ValueOf(errorColour));
+			}
 			copyItem = Menu.FindItem(Resource.Id.copy_item);
 			copyItem.SetClickAction(() => {
 				ViewModel?.CopyCommand?.Execute(SelectedItem);
@@ -365,7 +358,7 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		private static void ScaleButton(View view, bool show, bool animated = true) {
+		private static void ScaleButton(ImageButton view, bool show, bool animated = true) {
 			float scale = show ? 1.0f : 0.0f;
 			if (show)
 				view.Visibility = ViewStates.Visible;
@@ -417,7 +410,7 @@ namespace JKChat.Android.Views.Chat {
 				.Start();
 		}
 
-		private static void FadeCenterPrint(View view, bool show, bool animated = true) {
+		private static void FadeCenterPrint(TextSwitcher view, bool show, bool animated = true) {
 			float alpha = show ? 1.0f : 0.0f;
 			if (show)
 				view.Visibility = ViewStates.Visible;
@@ -438,15 +431,12 @@ namespace JKChat.Android.Views.Chat {
 				.Start();
 		}
 
-		private class ScrollToBottomRecyclerAdapter : BaseRecyclerViewAdapter {
+		private class ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext) : BaseRecyclerViewAdapter(bindingContext) {
 			private bool dragging = false, touched = false;
 			private MvxSubscriptionToken sentMessageMessageToken;
 			private ScrollToBottomOnScrollListener onScrollListener;
 
 			public bool ScrolledToBottom { get; set; } = true;
-
-			public ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext) : base(bindingContext) {
-			}
 
 			private void RecyclerViewTouch(object sender, View.TouchEventArgs ev) {
 				if (ev.Event.Action == MotionEventActions.Down) {
@@ -515,11 +505,7 @@ namespace JKChat.Android.Views.Chat {
 				base.OnDetachedFromRecyclerView(recyclerView);
 			}
 
-			private class ScrollToBottomOnScrollListener : RecyclerView.OnScrollListener {
-				private Action<bool> scrollStateChangedCallback;
-				public ScrollToBottomOnScrollListener(Action<bool> scrollStateChangedCallback) {
-					this.scrollStateChangedCallback = scrollStateChangedCallback;
-				}
+			private class ScrollToBottomOnScrollListener(Action<bool> scrollStateChangedCallback) : RecyclerView.OnScrollListener {
 				public override void OnScrollStateChanged(RecyclerView recyclerView, int newState) {
 					bool idle = newState == AndroidX.RecyclerView.Widget.RecyclerView.ScrollStateIdle;
 					scrollStateChangedCallback?.Invoke(idle);
@@ -528,7 +514,7 @@ namespace JKChat.Android.Views.Chat {
 			}
 		}
 
-		public class LongClickLinkMovementMethod : LinkMovementMethod {
+		private class LongClickLinkMovementMethod : LinkMovementMethod {
 			private static readonly int LongClickTime = ViewConfiguration.LongPressTimeout;
 			private readonly Handler longClickHandler = new(Looper.MainLooper);
 			private bool isLongPressed = false;
@@ -550,7 +536,7 @@ namespace JKChat.Android.Views.Chat {
 					x += widget.ScrollX;
 					y += widget.ScrollY;
 
-					Layout layout = widget.Layout;
+					var layout = widget.Layout;
 					int line = layout.GetLineForVertical(y);
 					int offset = layout.GetOffsetForHorizontal(line, x);
 

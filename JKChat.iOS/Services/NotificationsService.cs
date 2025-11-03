@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.Services;
 using JKChat.iOS.Helpers;

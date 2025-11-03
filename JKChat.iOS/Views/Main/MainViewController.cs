@@ -32,9 +32,6 @@ namespace JKChat.iOS.Views.Main {
 			PresentsWithGesture = true;
 		}
 
-		private void MainViewControllerWillChangeDisplayMode(object sender, UISplitViewControllerDisplayModeEventArgs ev) {
-		}
-
 		[Export("splitViewController:willChangeToDisplayMode:")]
 		public new void WillChangeDisplayMode(UISplitViewController svc, UISplitViewControllerDisplayMode displayMode) {
 		}

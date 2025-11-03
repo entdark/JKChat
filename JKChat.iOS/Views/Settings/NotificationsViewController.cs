@@ -16,7 +16,7 @@ using UserNotifications;
 namespace JKChat.iOS.Views.Settings;
 
 [MvxSplitViewPresentation(MasterDetailPosition.Detail, WrapInNavigationController = true)]
-public partial class NotificationsViewController : BaseViewController<NotificationsViewModel> {
+public partial class NotificationsViewController() : BaseViewController<NotificationsViewModel>(nameof(NotificationsViewController), null) {
 	private bool notificationsEnabled;
 	public bool NotificationsEnabled {
 		get => notificationsEnabled;
@@ -24,9 +24,6 @@ public partial class NotificationsViewController : BaseViewController<Notificati
 			notificationsEnabled = value;
 			CheckNotificationsPermission(notificationsEnabled);
 		}
-	}
-
-	public NotificationsViewController() : base(nameof(NotificationsViewController), null) {
 	}
 
 	public override void ViewDidLoad() {

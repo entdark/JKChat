@@ -16,9 +16,7 @@ using MvvmCross.Platforms.Android.Binding.BindingContext;
 
 namespace JKChat.Android.Views.Settings {
 	[TabFragmentPresentation("Settings", Resource.Drawable.ic_settings_states)]
-	public class SettingsFragment : BaseFragment<SettingsViewModel> {
-		public SettingsFragment() : base(Resource.Layout.settings_page) {}
-
+	public class SettingsFragment() : BaseFragment<SettingsViewModel>(Resource.Layout.settings_page) {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 

@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 
 using AndroidX.AppCompat.App;
+using AndroidX.Core.App;
 
 using JKChat.Android.Services;
 using JKChat.Android.ValueConverters;
@@ -148,20 +149,20 @@ namespace JKChat.Android.Widgets {
 			var serverInfoIntent = new Intent(context, typeof(MainActivity));
 			serverInfoIntent.SetAction(WidgetLinkAction);
 			serverInfoIntent.PutExtra(ServerAddressExtraKey, serverAddress);
-			var serverInfoPendingIntent = PendingIntent.GetActivity(context, appWidgetId, serverInfoIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+			var serverInfoPendingIntent = PendingIntentCompat.GetActivity(context, appWidgetId, serverInfoIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.widget_layout, serverInfoPendingIntent);
 
 			var refreshIntent = new Intent(context, typeof(ServerMonitorAppWidget));
 			refreshIntent.SetAction(RefreshAction);
 			refreshIntent.PutExtra(ServerAddressExtraKey, serverAddress);
 			refreshIntent.PutExtra(WidgetIdExtraKey, appWidgetId);
-			var refreshPendingIntent = PendingIntent.GetBroadcast(context, appWidgetId, refreshIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+			var refreshPendingIntent = PendingIntentCompat.GetBroadcast(context, appWidgetId, refreshIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.refresh_button, refreshPendingIntent);
 
 			var playersIntent = new Intent(context, typeof(ServerMonitorDialogActivity));
 			playersIntent.SetAction(PlayersAction);
-			playersIntent.PutExtra(PlayersExtraKey, server.PlayersList ?? Array.Empty<string>());
-			var playersPendingIntent = PendingIntent.GetActivity(context, appWidgetId, playersIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+			playersIntent.PutExtra(PlayersExtraKey, server.PlayersList ?? []);
+			var playersPendingIntent = PendingIntentCompat.GetActivity(context, appWidgetId, playersIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.players_button, playersPendingIntent);
 			
 			int minHeight = newOptions.GetInt(AppWidgetManager.OptionAppwidgetMinHeight),
@@ -193,7 +194,7 @@ namespace JKChat.Android.Widgets {
 			var addIntent = new Intent(context, typeof(ServerMonitorDialogActivity));
 			addIntent.SetAction(AddAction);
 			addIntent.PutExtra(WidgetIdExtraKey, appWidgetId);
-			var addPendingIntent = PendingIntent.GetActivity(context, appWidgetId, addIntent, PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
+			var addPendingIntent = PendingIntentCompat.GetActivity(context, appWidgetId, addIntent, (int)PendingIntentFlags.UpdateCurrent, false);
 			views.SetOnClickPendingIntent(Resource.Id.add_textview, addPendingIntent);
 
 			appWidgetManager.UpdateAppWidget(appWidgetId, views);
@@ -228,7 +229,7 @@ namespace JKChat.Android.Widgets {
 			} else if (Intent is { Action: ServerMonitorAppWidget.AddAction, Extras.IsEmpty: false } && Intent.Extras.GetInt(ServerMonitorAppWidget.WidgetIdExtraKey, -1) is int appWidgetId && appWidgetId != -1) {
 				Task.Run(add);
 				async Task add() {
-					var servers = await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers();
+					var servers = (await Mvx.IoCProvider.Resolve<ICacheService>().LoadFavouriteServers()).ToArray();
 					await MainThread.InvokeOnMainThreadAsync(() => {
 						if (!servers.IsNullOrEmpty()) {
 							DialogService.Show(new() {

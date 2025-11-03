@@ -48,7 +48,7 @@ namespace JKChat.Core.Models {
 		private readonly HashSet<string> blockedPlayers;
 		private readonly TasksQueue chatQueue = new();
 		private ChatViewModel viewModel;
-		private bool dialogOffsersReconnect = false;
+		private bool dialogOffersReconnect = false;
 		internal ChatViewModel ViewModel {
 			get => viewModel;
 			set {
@@ -61,7 +61,7 @@ namespace JKChat.Core.Models {
 					if (pendingDialogConfig != null) {
 						dialogService.Show(pendingDialogConfig);
 						pendingDialogConfig = null;
-						dialogOffsersReconnect = false;
+						dialogOffersReconnect = false;
 					}
 					RemoveNotifications();
 					addingPending = true;
@@ -133,7 +133,7 @@ namespace JKChat.Core.Models {
 			messenger = Mvx.IoCProvider.Resolve<IMvxMessenger>();
 			lifetime = Mvx.IoCProvider.Resolve<IMvxLifetime>();
 			pendingItems = new(MaxChatMessages);
-			blockedPlayers = new();
+			blockedPlayers = [];
 			ServerInfo = serverInfo;
 			Items = new(MaxChatMessages);
 			Status = ConnectionStatus.Disconnected;
@@ -182,7 +182,7 @@ namespace JKChat.Core.Models {
 		private void ClientFrameExecuted(long frameTime) {
 			if (Status == ConnectionStatus.Connected) {
 				if ((frameTime - lastScoresTime) > 2000L) {
-					ExecuteCommand("score", false);
+					ExecuteCommand("score");
 					lastScoresTime = frameTime;
 				}
 			}
@@ -191,8 +191,8 @@ namespace JKChat.Core.Models {
 			lastDisruptorEnd = Vector3.Zero;
 		}
 
-		internal async Task Connect(bool ignoreDialog = true) {
-			if (!ignoreDialog && pendingDialogConfig != null && dialogOffsersReconnect) {
+		internal async Task Connect(bool ignoreDialog) {
+			if (!ignoreDialog && pendingDialogConfig != null && dialogOffersReconnect) {
 				return;
 			}
 			if (Status != ConnectionStatus.Disconnected) {
@@ -205,7 +205,7 @@ namespace JKChat.Core.Models {
 				ShowDialog(new JKDialogConfig() {
 					Title = "Enter Password",
 					CancelText = "Cancel",
-					CancelAction = (_) => {
+					CancelAction = _ => {
 						Task.Run(disconnect);
 					},
 					OkText = "Connect",
@@ -241,7 +241,7 @@ namespace JKChat.Core.Models {
 		}
 
 		internal void Disconnect(bool showDisconnected = false) {
-			if (Client != null && Client.Started) {
+			if (Client is { Started: true }) {
 				Client.Disconnect();
 				Client.Stop();
 				//to make sure disconnect command is sent to the server
@@ -270,13 +270,13 @@ namespace JKChat.Core.Models {
 			ShowDialog(new JKDialogConfig() {
 				Title = "Disconnected",
 				CancelText = "OK",
-				CancelAction = (_) => {
+				CancelAction = _ => {
 					if (Status == ConnectionStatus.Disconnected) {
 						Task.Run(CloseViewModel);
 					}
 				},
 				OkText = "Reconnect",
-				OkAction = (_) => {
+				OkAction = _ => {
 					Task.Run(Connect);
 				}
 			}, true);
@@ -381,11 +381,11 @@ namespace JKChat.Core.Models {
 					Title = "Disconnected",
 					Message = reason,
 					CancelText = "OK",
-					CancelAction = (_) => {
+					CancelAction = _ => {
 						Task.Run(CloseViewModel);
 					},
 					OkText = "Reconnect",
-					OkAction = (_) => {
+					OkAction = _ => {
 						Task.Run(Connect);
 					}
 				}, true);
@@ -393,7 +393,7 @@ namespace JKChat.Core.Models {
 		}
 
 		private Vector3 lastDisruptorEnd = Vector3.Zero;
-		public List<EntityData> TempEntities { get; init; } = new();
+		public List<EntityData> TempEntities { get; init; } = [];
 		private void EntityEventExecuted(EntityEventArgs entityEventArgs) {
 			Vector3 start, end;
 			var entity = entityEventArgs.Entity;
@@ -560,7 +560,7 @@ namespace JKChat.Core.Models {
 			AddItem(chatItem);
 		}
 		
-		private static readonly char []wordsSeparators = new []{' ', ',', '.', ';', ':', '(', ')', '[', ']', '{', '}', '!', '?', '+', '-', '='};
+		private static readonly char []wordsSeparators = [' ', ',', '.', ';', ':', '(', ')', '[', ']', '{', '}', '!', '?', '+', '-', '='];
 		private void ProcessItemForNotifications(ChatMessageItemVM messageItem, Command command) {
 			var options = AppSettings.NotificationOptions;
 			bool show = false;
@@ -588,12 +588,12 @@ namespace JKChat.Core.Models {
 			var options = AppSettings.NotificationOptions;
 			string text = infoItem.Text;
 			if (options.HasFlag(NotificationOptions.PlayerConnects)) {
-				if (text.Contains("@@@PLCONNECT", StringComparison.OrdinalIgnoreCase) is bool stringEd && stringEd
+				if ((text.Contains("@@@PLCONNECT", StringComparison.OrdinalIgnoreCase) is bool stringEd && stringEd)
 					|| (Client?.Version == ClientVersion.Q3_v1_32 && text.Contains(" connected", StringComparison.OrdinalIgnoreCase))) {
 					string notification = text;
 					if (stringEd) {
 						notification = notification.Replace("@@@PLCONNECT", "connected", StringComparison.OrdinalIgnoreCase);
-					};
+					}
 					ShowNotification(notification.TrimEnd('\n'));
 				}
 			}
@@ -642,7 +642,6 @@ namespace JKChat.Core.Models {
 
 		internal void RemoveItem(ChatItemVM item) {
 			lock (Items) {
-				int removeIndex = Items.IndexOf(item);
 				Items.Remove(item);
 			}
 		}
@@ -662,10 +661,10 @@ namespace JKChat.Core.Models {
 		private JKDialogConfig pendingDialogConfig;
 		private void ShowDialog(JKDialogConfig config, bool offersReconnect = false) {
 			if (offersReconnect) {
-				if (dialogOffsersReconnect) {
+				if (dialogOffersReconnect) {
 					return;
 				} else {
-					dialogOffsersReconnect = true;
+					dialogOffersReconnect = true;
 				}
 			}
 			if (pendingDialogConfig != null) {
@@ -677,7 +676,7 @@ namespace JKChat.Core.Models {
 			}
 			dialogService.Show(config);
 			pendingDialogConfig = null;
-			dialogOffsersReconnect = false;
+			dialogOffersReconnect = false;
 		}
 
 		private void ExceptionCallback(JKClientException exception) {
@@ -688,7 +687,7 @@ namespace JKChat.Core.Models {
 				Title = "Error",
 				Message = message,
 				CancelText = "Copy",
-				CancelAction = (_) => {
+				CancelAction = _ => {
 					Clipboard.SetTextAsync(message);
 					Task.Run(CloseViewModel);
 				},

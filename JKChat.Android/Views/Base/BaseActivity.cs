@@ -7,7 +7,6 @@ using Android.Content.Res;
 using Android.Graphics;
 using Android.OS;
 using Android.Views;
-using Android.Views.Animations;
 
 using AndroidX.AppCompat.Widget;
 using AndroidX.Core.View;
@@ -24,19 +23,15 @@ using MvvmCross.Platforms.Android.Views;
 using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class BaseActivity<TViewModel> : MvxActivity<TViewModel>, IBaseActivity where TViewModel : class, IMvxViewModel {
+	public abstract class BaseActivity<TViewModel>(int layoutId) : MvxActivity<TViewModel>, IBaseActivity where TViewModel : class, IMvxViewModel {
 		public bool ExpandedWindow { get; private set; }
 		public Toolbar Toolbar { get; private set; }
-		public int LayoutId { get; private set; }
 
-		public BaseActivity(int layoutId) {
-			LayoutId = layoutId;
-		}
 
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
 
-			var view = this.BindingInflate(LayoutId, null);
+			var view = this.BindingInflate(layoutId, null);
 			SetContentView(view);
 			ViewCompat.SetOnApplyWindowInsetsListener(view, new OnApplyWindowInsetsListener());
 //TODO: try on Android 11 or above - laggy on Android 10

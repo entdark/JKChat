@@ -19,13 +19,13 @@ using MvvmCross.Platforms.Ios.Binding.Views;
 using UIKit;
 
 namespace JKChat.iOS.ViewSources {
-	public class ChatTableViewSource : MvxStandardTableViewSource {
+	public class ChatTableViewSource : MvxTableViewSource {
 		private CGRect initialKeyboardFrame;
 		private CGPoint initialContentOffset;
 		private nfloat dinsetY = nfloat.MinValue;
 		private bool dragging = false;
 
-		public IKeyboardViewController ViewControllerWithKeyboard { get; set; }
+		public IKeyboardViewController ViewControllerWithKeyboard { get; init; }
 
 		public ChatTableViewSource(UITableView tableView) : base(tableView) {
 			tableView.Source = this;
@@ -48,7 +48,7 @@ namespace JKChat.iOS.ViewSources {
 						}
 						initialContentOffset = scrollView.ContentOffset;
 					}
-					nfloat dy = dyLast = ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame).Y - initialKeyboardFrame.Y;
+					dyLast = ((ViewControllerWithKeyboard as UIViewController)?.InputAccessoryView?.Superview?.Frame ?? ViewControllerWithKeyboard.EndKeyboardFrame).Y - initialKeyboardFrame.Y;
 				}
 			}
 		}
@@ -115,7 +115,7 @@ namespace JKChat.iOS.ViewSources {
 				};
 				return cell;
 			}
-			return base.GetOrCreateCellFor(tableView, indexPath, item);
+			return null;
 		}
 
 		public override void ReloadTableData() {

@@ -39,25 +39,26 @@ namespace JKChat.Core.ViewModels.Settings {
 			ItemClickCommand = new MvxAsyncCommand<TableItemVM>(ItemClickExecute);
 			TableGroupedItemVM groupItem = null;
 			var options = AppSettings.NotificationOptions;
-			Items = new() {
+			Items = [
 				new() {
-					Items = new() {
-						(notificationsItem = new TableToggleItemVM() {
+					Items = [
+						notificationsItem = new TableToggleItemVM() {
 							Title = "Notifications",
 							IsChecked = (NotificationsEnabled = options.HasFlag(NotificationOptions.Enabled)),
 							Toggled = item => {
 								if (item.IsChecked && !Items.Contains(groupItem)) {
-									 Items.Add(groupItem);
+									Items.Add(groupItem);
 								} else if (!item.IsChecked && Items.Contains(groupItem)) {
-									 Items.Remove(groupItem);
+									Items.Remove(groupItem);
 								}
+
 								NotificationsEnabled = item.IsChecked;
 							}
-						})
-					}
+						}
+					]
 				},
-				(groupItem = new() {
-					Items = new() {
+				groupItem = new() {
+					Items = [
 						new TableToggleItemVM() {
 							Title = "Player connects",
 							IsChecked = options.HasFlag(NotificationOptions.PlayerConnects),
@@ -77,9 +78,9 @@ namespace JKChat.Core.ViewModels.Settings {
 							Value = GetSavedKeywordsValue(),
 							OnClick = KeywordsExecute
 						}
-					}
-				})
-			};
+					]
+				}
+			];
 			if (!NotificationsEnabled) {
 				Items.Remove(groupItem);
 			}
