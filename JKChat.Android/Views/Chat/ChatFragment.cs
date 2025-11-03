@@ -76,14 +76,12 @@ namespace JKChat.Android.Views.Chat {
 		public ChatType ChatType {
 			get => chatType;
 			set {
-				if (chatType != value) {
-					int tintColor = value switch {
-						ChatType.Team => Resource.Color.chat_type_team,
-						ChatType.Private => Resource.Color.chat_type_private,
-						_ => Resource.Color.chat_type_common,
-					};
-					chatTypeButton.ImageTintList = global::Android.Content.Res.ColorStateList.ValueOf(new(ContextCompat.GetColor(Context, tintColor)));
-				}
+				int tintColor = value switch {
+					ChatType.Team => Resource.Color.chat_type_team,
+					ChatType.Private => Resource.Color.chat_type_private,
+					_ => Resource.Color.chat_type_common,
+				};
+				chatTypeButton.ImageTintList = global::Android.Content.Res.ColorStateList.ValueOf(new(ContextCompat.GetColor(Context, tintColor)));
 				chatType = value;
 			}
 		}
@@ -145,8 +143,9 @@ namespace JKChat.Android.Views.Chat {
 			PostponeTransition = true;
 		}
 
-		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-			var view = base.OnCreateView(inflater, container, savedInstanceState);
+		public override void OnViewCreated(View view, Bundle savedInstanceState) {
+			base.OnViewCreated(view, savedInstanceState);
+			
 			using var set = this.CreateBindingSet();
 			set.Bind(this).For(v => v.Message).To(vm => vm.Message);
 			set.Bind(this).For(v => v.ChatType).To(vm => vm.ChatType);
@@ -155,11 +154,6 @@ namespace JKChat.Android.Views.Chat {
 			set.Bind(this).For(v => v.MapData).To(vm => vm.MapData);
 			set.Bind(this).For(v => v.MapFocused).To(vm => vm.MapFocused);
 			set.Bind(this).For(v => v.MapLoadingProgress).To(vm => vm.MapLoadingProgress);
-			return view;
-		}
-
-		public override void OnViewCreated(View view, Bundle savedInstanceState) {
-			base.OnViewCreated(view, savedInstanceState);
 
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
