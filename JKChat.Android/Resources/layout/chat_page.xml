@@ -12,11 +12,16 @@
         app:paddingRightFitsWindowInsets="true"
         app:paddingTopFitsWindowInsets="true"
         app:liftOnScroll="false">
+        <include layout="@layout/toolbar"/>
+    </com.google.android.material.appbar.AppBarLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <include layout="@layout/toolbar"/>
+            android:layout_height="match_parent">
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
@@ -26,6 +31,8 @@
                 android:paddingRight="24dp"
                 android:paddingVertical="12dp"
                 android:background="?attr/colorSurfaceContainerLow"
+                app:paddingLeftFitsWindowInsetsButExpanded="true"
+                app:paddingRightFitsWindowInsets="true"
                 app:MvxBind="Click ServerInfoCommand">
                 <com.google.android.material.textview.MaterialTextView
                     style="@style/OnSurfaceText.LabelMedium"
@@ -46,27 +53,17 @@
                     android:gravity="top|end"
                     app:MvxBind="Text Timer"/>
             </LinearLayout>
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/map_loading_progressindicator"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:min="0"
-            android:max="10000"
-            app:MvxBind="Progress Multiply(MapLoadingProgress, 10000); Visibility Visibility(MapLoadingProgress)"/>
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1">
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/map_loading_progressindicator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:min="0"
+                    android:max="10000"
+                    app:MvxBind="Progress Multiply(MapLoadingProgress, 10000); Visibility Visibility(MapLoadingProgress)"/>
                 <JKChat.Android.Controls.MinimapView
                     android:id="@+id/minimap_view"
                     android:layout_width="match_parent"

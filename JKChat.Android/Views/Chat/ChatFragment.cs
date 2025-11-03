@@ -19,6 +19,7 @@ using AndroidX.Lifecycle;
 using AndroidX.RecyclerView.Widget;
 
 using Google.Android.Material.Color;
+using Google.Android.Material.ProgressIndicator;
 
 using Java.Lang;
 using Java.Util.Concurrent;
@@ -55,6 +56,7 @@ namespace JKChat.Android.Views.Chat {
 		private ScrollToBottomRecyclerAdapter scrollToBottomRecyclerAdapter;
 		private MvxRecyclerView recyclerView;
 		private MinimapView minimapView;
+		private LinearProgressIndicator mapLoadingProgressIndicator;
 		private TextSwitcher centerPrintTextSwitcher;
 
 		private string message;
@@ -174,6 +176,7 @@ namespace JKChat.Android.Views.Chat {
 			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
 
 			minimapView = view.FindViewById<MinimapView>(Resource.Id.minimap_view);
+			mapLoadingProgressIndicator = view.FindViewById<LinearProgressIndicator>(Resource.Id.map_loading_progressindicator);
 			SwapMapAndChat(ViewModel.MapFocused, false);
 
 			sendButton = view.FindViewById<ImageButton>(Resource.Id.send_button);
@@ -388,7 +391,7 @@ namespace JKChat.Android.Views.Chat {
 		}
 
 		private void SwapMapAndChat(bool mapFocused, bool animated = true) {
-			if (recyclerView == null || minimapView == null)
+			if (recyclerView == null || minimapView == null || mapLoadingProgressIndicator == null)
 				return;
 			float minimapAlpha = mapFocused ? 1.0f : 0.3f,
 				recyclerAlpha = mapFocused ? 0.3f : 1.0f;
@@ -397,6 +400,7 @@ namespace JKChat.Android.Views.Chat {
 			} else {
 				recyclerView.BringToFront();
 			}
+			mapLoadingProgressIndicator.BringToFront();
 			if (!animated) {
 				minimapView.Alpha = minimapAlpha;
 				recyclerView.Alpha = recyclerAlpha;
