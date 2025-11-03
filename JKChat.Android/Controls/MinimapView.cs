@@ -353,11 +353,12 @@ public class MinimapView : FrameLayout {
 					}
 				}
 				StaticLayout MakeTextLayout(ISpannable source, TextPaint tp) {
+					int width = 10000.DpToPx();
 					if (Build.VERSION.SdkInt >= BuildVersionCodes.M) {
-						using var b = StaticLayout.Builder.Obtain(source, 0, source.Length(), tp, (int)width);
+						using var b = StaticLayout.Builder.Obtain(source, 0, source.Length(), tp, width);
 						return b.Build();
 					} else {
-						return new StaticLayout(source, tp, (int)width, global::Android.Text.Layout.Alignment.AlignNormal, 1.0f, 0.0f, false);
+						return new StaticLayout(source, tp, width, global::Android.Text.Layout.Alignment.AlignNormal, 1.0f, 0.0f, false);
 					}
 				}
 			}
