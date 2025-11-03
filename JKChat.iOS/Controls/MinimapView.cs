@@ -195,8 +195,9 @@ public class MinimapView : UIView {
 			context.ClearRect(rect);
 			context.TextMatrix = CGAffineTransform.MakeScale(1.0f, -1.0f);
 
-			var contentSize = minimapView.minimapContainerView.Layer.PresentationLayer.Frame.Size;//minimapView.minimapScrollView.ContentSize;
-			var contentOffset = minimapView.minimapScrollView.Layer.PresentationLayer.Bounds.Location;//minimapView.minimapScrollView.ContentOffset;
+//PresentationLayer properties for smooth animation
+			var contentSize = minimapView.minimapContainerView.Layer.PresentationLayer?.Frame.Size ?? minimapView.minimapScrollView.ContentSize;
+			var contentOffset = minimapView.minimapScrollView.Layer.PresentationLayer?.Bounds.Location ?? minimapView.minimapScrollView.ContentOffset;
 			var frame = MakeAspectScaleToFitAlignToTopRect(contentSize, minimapView.minimapImageView.Image.Size);
 			var size = frame.Size;
 			var posOffset = new Vector3(
