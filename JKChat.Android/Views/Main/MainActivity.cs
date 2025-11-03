@@ -56,6 +56,7 @@ namespace JKChat.Android.Views.Main {
 			var splashScreen = AndroidX.Core.SplashScreen.SplashScreen.InstallSplashScreen(this);
 			base.OnCreate(savedInstanceState);
 			EdgeToEdgeUtils.ApplyEdgeToEdge(this.Window, true);
+			SetNavigationBarContrastEnforced(false);
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 			}
@@ -164,6 +165,15 @@ namespace JKChat.Android.Views.Main {
 			}
 		}
 
+		public override void SetNavigationBarContrastEnforced(bool value) {
+			if (LastWindowInsets.IsNavigationBarOnRight()) {
+				value = true;
+			} else if (LastWindowInsets.IsNavigationBarOnLeft()) {
+				value = !ExpandedWindow;
+			}
+			base.SetNavigationBarContrastEnforced(value);
+		}
+
 		public override void Exit(int order) {
 			base.Exit(order);
 			if (!ExpandedWindow) {
@@ -186,6 +196,7 @@ namespace JKChat.Android.Views.Main {
 				if (order == 1) {
 					var popEnterAnimation = AnimationUtils.LoadAnimation(this, Resource.Animation.fragment_push_pop_enter);
 					contentMasterView.StartAnimation(popEnterAnimation);
+					SetNavigationBarContrastEnforced(false);
 				} else if (order > 1) {
 					handler.RemoveCallbacksAndMessages(null);
 					contentMasterView.Alpha = 0.0f;

@@ -328,6 +328,10 @@ namespace JKChat.Android.Views.Chat {
 			base.DisplayCustomTitle(SelectedItem == null);
 		}
 
+		protected override void SetNavigationBarContrastEnforced(bool value) {
+			base.SetNavigationBarContrastEnforced(false);
+		}
+
 		private void UpdateFavouriteItem() {
 			if (favouriteItem == null)
 				return;

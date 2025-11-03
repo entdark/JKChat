@@ -11,5 +11,6 @@ namespace JKChat.Android.Views.Base {
 		void Exit(int order);
 		void PopEnter(int order);
 		event Action<LayoutState, bool> ConfigurationChanged;
+		void SetNavigationBarContrastEnforced(bool value);
 	}
 }

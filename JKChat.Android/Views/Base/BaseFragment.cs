@@ -86,6 +86,8 @@ namespace JKChat.Android.Views.Base {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
+			SetNavigationBarContrastEnforced(true);
+			
 			if (savedInstanceState != null)
 				OnRestoreInstanceState(savedInstanceState);
 
@@ -222,6 +224,12 @@ namespace JKChat.Android.Views.Base {
 				HideKeyboard();
 			}
 			BaseActivity?.PopEnter(Order);
+		}
+
+		protected virtual void SetNavigationBarContrastEnforced(bool value) {
+			if (Order < 1)
+				return;
+			BaseActivity?.SetNavigationBarContrastEnforced(value);
 		}
 
 		protected virtual void OnConfigurationChanged(LayoutState layoutState, bool landscape) {}

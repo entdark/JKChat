@@ -107,6 +107,12 @@ namespace JKChat.Android.Views.Base {
 
 		public virtual void PopEnter(int order) {}
 
+		public virtual void SetNavigationBarContrastEnforced(bool value) {
+			if (Build.VERSION.SdkInt >= BuildVersionCodes.Q) {
+				Window.NavigationBarContrastEnforced = value;
+			}
+		}
+
 		private class OnApplyWindowInsetsListener(Func<View, WindowInsetsCompat, WindowInsetsCompat> callback) : Java.Lang.Object, IOnApplyWindowInsetsListener {
 			public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insets) {
 				return callback?.Invoke(view, insets) ?? insets;
