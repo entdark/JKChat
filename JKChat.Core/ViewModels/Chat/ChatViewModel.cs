@@ -834,6 +834,7 @@ namespace JKChat.Core.ViewModels.Chat {
 					OkAction = _ => {
 						AppSettings.MinimapOptions |= MinimapOptions.AutoDownload;
 						AppSettings.MinimapAutodownloadAsked = true;
+						DownloadAndGenerateMap(true);
 					},
 					CancelText = "Disable",
 					CancelAction = _ => {
