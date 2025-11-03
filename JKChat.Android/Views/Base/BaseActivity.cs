@@ -24,16 +24,21 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Android.Views.Base {
 	public abstract class BaseActivity<TViewModel>(int layoutId) : MvxActivity<TViewModel>, IBaseActivity where TViewModel : class, IMvxViewModel {
-		public bool ExpandedWindow { get; private set; }
+		public LayoutState LayoutState { get; private set; } = LayoutState.Small;
+		public bool Landscape { get; private set; } = false;
+		public bool ExpandedWindow => LayoutState != LayoutState.Small;
 		public Toolbar Toolbar { get; private set; }
 
+		protected WindowInsetsCompat LastWindowInsets { get; private set; }
+
+		public event Action<LayoutState, bool> ConfigurationChanged;
 
 		protected override void OnCreate(Bundle savedInstanceState) {
 			base.OnCreate(savedInstanceState);
 
 			var view = this.BindingInflate(layoutId, null);
 			SetContentView(view);
-			ViewCompat.SetOnApplyWindowInsetsListener(view, new OnApplyWindowInsetsListener());
+			ViewCompat.SetOnApplyWindowInsetsListener(view, new OnApplyWindowInsetsListener(OnApplyWindowInsets));
 //TODO: try on Android 11 or above - laggy on Android 10
 //			ViewCompat.SetWindowInsetsAnimationCallback(view, new WindowInsetsAnimationCallback(WindowInsetsAnimationCompat.Callback.DispatchModeStop, view));
 
@@ -51,7 +56,7 @@ namespace JKChat.Android.Views.Base {
 
 			var contentView = FindViewById<ViewGroup>(Resource.Id.content);
 			contentView.AddView(new ConfigurationChangedView(this) {
-				ConfigurationChanged = ConfigurationChanged
+				ConfigurationChanged = OnConfigurationChanged
 			});
 		}
 
@@ -63,7 +68,7 @@ namespace JKChat.Android.Views.Base {
 
 		protected override void OnResume() {
 			base.OnResume();
-			ConfigurationChanged(null);
+			OnConfigurationChanged(null);
 		}
 
 		public override bool OnSupportNavigateUp() {
@@ -71,28 +76,40 @@ namespace JKChat.Android.Views.Base {
 			return base.OnSupportNavigateUp();
 		}
 
-		protected virtual void ConfigurationChanged(Configuration configuration) {
-#if DEBUG
-			const float maxWidth = 640.0f, maxHeight = 320.0f;
+		protected virtual WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat windowInsets) {
+			LastWindowInsets = windowInsets;
+			int bottom = windowInsets.GetInsets(WindowInsetsCompat.Type.Ime()).Bottom
+				- windowInsets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Bottom;
+			view.SetPadding(0, 0, 0, Math.Max(bottom, 0));
+			return windowInsets;
+		}
+
+		protected new virtual void OnConfigurationChanged(Configuration configuration) {
+#if false && DEBUG
+			const float mediumWidth = 640.0f, largeWidth = 800.0f, maxHeight = 320.0f;
 #else
-			const float maxWidth = 960.0f, maxHeight = 480.0f;
+			const float mediumWidth = 960.0f, largeWidth = 1200.0f, maxHeight = 480.0f;
 #endif
 			var metrics = AndroidX.Window.Layout.WindowMetricsCalculator.Companion.OrCreate.ComputeCurrentWindowMetrics(this);
 			float width = metrics.Bounds.Width().PxToDp(),
 				height = metrics.Bounds.Height().PxToDp();
-			ExpandedWindow = width > maxWidth && height > maxHeight;
+			
+			LayoutState = width switch {
+				>= largeWidth => LayoutState.Large,
+				>= mediumWidth => LayoutState.Medium,
+				_ => LayoutState.Small
+			};
+			Landscape = width > height;
+			ConfigurationChanged?.Invoke(LayoutState, Landscape);
 		}
 
 		public virtual void Exit(int order) {}
 
 		public virtual void PopEnter(int order) {}
 
-		private class OnApplyWindowInsetsListener : Java.Lang.Object, IOnApplyWindowInsetsListener {
+		private class OnApplyWindowInsetsListener(Func<View, WindowInsetsCompat, WindowInsetsCompat> callback) : Java.Lang.Object, IOnApplyWindowInsetsListener {
 			public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insets) {
-				int bottom = insets.GetInsets(WindowInsetsCompat.Type.Ime()).Bottom
-					- insets.GetInsets(WindowInsetsCompat.Type.SystemBars()).Bottom;
-				view.SetPadding(0, 0, 0, Math.Max(bottom, 0));
-				return insets;
+				return callback?.Invoke(view, insets) ?? insets;
 			}
 		}
 
@@ -170,5 +187,11 @@ namespace JKChat.Android.Views.Base {
 				base.OnEnd(animation);
 			}
 		}
+	}
+		
+	public enum LayoutState {
+		Small,
+		Medium,
+		Large
 	}
 }

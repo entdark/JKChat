@@ -57,6 +57,7 @@ namespace JKChat.Android.Presenter {
 
 			TabsViewPager viewPager = null;
 			TabsBottomNavigationView bottomNavigationView = null;
+			TabsNavigationRailView navigationRailView = null;
 
 			// check for a ViewPager inside a Fragment
 			if (attribute.FragmentHostViewType != null) {
@@ -64,12 +65,14 @@ namespace JKChat.Android.Presenter {
 
 				viewPager = fragment?.View.FindViewById<TabsViewPager>(attribute.ViewPagerResourceId);
 				bottomNavigationView = fragment?.View.FindViewById<TabsBottomNavigationView>(attribute.BottomNavigationViewResourceId);
+				navigationRailView = fragment?.View.FindViewById<TabsNavigationRailView>(attribute.NavigationRailViewResourceId);
 			}
 
 			// check for a ViewPager inside an Activity
 			if (CurrentActivity.IsActivityAlive() && attribute?.ActivityHostViewModelType != null) {
 				viewPager = CurrentActivity?.FindViewById<TabsViewPager>(attribute.ViewPagerResourceId);
 				bottomNavigationView = CurrentActivity?.FindViewById<TabsBottomNavigationView>(attribute.BottomNavigationViewResourceId);
+				navigationRailView = CurrentActivity?.FindViewById<TabsNavigationRailView>(attribute.NavigationRailViewResourceId);
 			}
 
 			if (viewPager == null || bottomNavigationView == null)
@@ -78,6 +81,12 @@ namespace JKChat.Android.Presenter {
 			bottomNavigationView.ViewPager ??= viewPager;
 			if (!bottomNavigationView.TryRegisterViewModel(request.ViewModelType, attribute.Title, attribute.IconDrawableResourceId))
 				return false;
+
+			if (navigationRailView != null) {
+				navigationRailView.ViewPager ??= viewPager;
+				if (!navigationRailView.TryRegisterViewModel(request.ViewModelType, attribute.Title, attribute.IconDrawableResourceId))
+					return false;
+			}
 
 			return true;
 		}

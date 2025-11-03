@@ -9,7 +9,7 @@
     android:paddingLeft="16dp"
     android:paddingRight="24dp"
     android:foreground="?android:attr/selectableItemBackground"
-    app:paddingLeftFitsWindowInsets="true"
+    app:paddingLeftFitsWindowInsetsButExpanded="true"
     app:paddingRightFitsWindowInsetsButExpanded="true">
     <com.google.android.material.textview.MaterialTextView
         style="@style/OnSurfaceText.BodyLarge"

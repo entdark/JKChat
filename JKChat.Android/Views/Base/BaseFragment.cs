@@ -33,7 +33,9 @@ namespace JKChat.Android.Views.Base {
 
 		protected ActionBar ActionBar => (Activity as MvxActivity)?.SupportActionBar;
 
-		protected Toolbar ActivityToolbar => (Activity as IBaseActivity)?.Toolbar;
+		protected Toolbar ActivityToolbar => BaseActivity?.Toolbar;
+
+		protected IBaseActivity BaseActivity => Activity as IBaseActivity;
 
 		protected Toolbar Toolbar { get; private set; }
 		protected View ToolbarCustomTitleView { get; private set; }
@@ -124,6 +126,11 @@ namespace JKChat.Android.Views.Base {
 
 			using var set = this.CreateBindingSet();
 			BindTitle(set);
+
+			if (BaseActivity != null) {
+				OnConfigurationChanged(BaseActivity.LayoutState, BaseActivity.Landscape);
+				BaseActivity.ConfigurationChanged += OnConfigurationChanged;
+			}
 		}
 
 		public override void OnDestroyView() {
@@ -132,6 +139,10 @@ namespace JKChat.Android.Views.Base {
 			}
 			DestroyOptionsMenu();
 			onBackPressedCallback?.Remove();
+
+			if (BaseActivity != null) {
+				BaseActivity.ConfigurationChanged -= OnConfigurationChanged;
+			}
 
 			base.OnDestroyView();
 		}
@@ -203,15 +214,17 @@ namespace JKChat.Android.Views.Base {
 			if (Order == 1) {
 				HideKeyboard();
 			}
-			(Activity as IBaseActivity)?.Exit(Order);
+			BaseActivity?.Exit(Order);
 		}
 
 		protected virtual void ActivityPopEnter() {
 			if (Order == 1) {
 				HideKeyboard();
 			}
-			(Activity as IBaseActivity)?.PopEnter(Order);
+			BaseActivity?.PopEnter(Order);
 		}
+
+		protected virtual void OnConfigurationChanged(LayoutState layoutState, bool landscape) {}
 
 		private bool toolbarCustomTitleAdded = false;
 		protected virtual void SetCustomTitleView(View view) {

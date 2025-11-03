@@ -12,6 +12,7 @@ using Android.Views.InputMethods;
 
 using AndroidX.Core.Content;
 using AndroidX.Core.Util;
+using AndroidX.Core.View;
 
 using Google.Android.Material.Button;
 
@@ -111,6 +112,14 @@ namespace JKChat.Android.Helpers {
 		}
 		public static IDictionary<string, string> ToDictionary(this Bundle bundle) {
 			return bundle?.IsEmpty ?? true ? new Dictionary<string, string>() : bundle.KeySet().ToDictionary(key => key, bundle.GetString);
+		}
+		public static bool IsNavigationBarOnLeft(this WindowInsetsCompat windowInsets) {
+			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars());
+			return insets is { Left: > 0 };
+		}
+		public static bool IsNavigationBarOnRight(this WindowInsetsCompat windowInsets) {
+			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars());
+			return insets is { Right: > 0 };
 		}
 
 		private static Context Context => Platform.CurrentActivity ?? Application.Context;

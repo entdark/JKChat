@@ -11,6 +11,11 @@
     <attr name="paddingTopFitsWindowInsetsButExpanded" format="boolean"/>
     <attr name="paddingBottomFitsWindowInsetsButExpanded" format="boolean"/>
 
+    <attr name="paddingLeftFitsWindowInsetsWhenExpanded" format="boolean"/>
+    <attr name="paddingRightFitsWindowInsetsWhenExpanded" format="boolean"/>
+    <attr name="paddingTopFitsWindowInsetsWhenExpanded" format="boolean"/>
+    <attr name="paddingBottomFitsWindowInsetsWhenExpanded" format="boolean"/>
+
     <attr name="marginLeftFitsWindowInsets" format="boolean"/>
     <attr name="marginRightFitsWindowInsets" format="boolean"/>
     <attr name="marginTopFitsWindowInsets" format="boolean"/>

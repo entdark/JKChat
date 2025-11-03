@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
-        app:paddingLeftFitsWindowInsets="true"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
         app:paddingRightFitsWindowInsetsButExpanded="true"
         app:paddingTopFitsWindowInsets="true">
         <include layout="@layout/toolbar"/>
@@ -17,7 +17,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:paddingLeftFitsWindowInsets="true"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
         app:paddingRightFitsWindowInsetsButExpanded="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <MvvmCross.DroidX.MvxSwipeRefreshLayout
@@ -31,6 +31,7 @@
                 android:layout_height="match_parent"
                 android:paddingVertical="8dp"
                 android:clipToPadding="false"
+                app:paddingBottomFitsWindowInsetsWhenExpanded="true"
                 app:MvxItemTemplate="@layout/server_list_item"
                 app:MvxBind="ItemsSource Items; ItemClick ItemClickCommand; ItemLongClick SelectCommand"/>
         </MvvmCross.DroidX.MvxSwipeRefreshLayout>

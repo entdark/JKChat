@@ -108,7 +108,9 @@
                     android:id="@+id/tablayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorSurface"/>
+                    android:background="?attr/colorSurface"
+                    app:paddingLeftFitsWindowInsetsButExpanded="true"
+                    app:paddingRightFitsWindowInsets="true"/>
             </com.google.android.material.appbar.AppBarLayout>
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewpager"

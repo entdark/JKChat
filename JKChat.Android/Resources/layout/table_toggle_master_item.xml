@@ -9,6 +9,6 @@
     android:paddingLeft="16dp"
     android:paddingRight="24dp"
     android:foreground="?android:attr/selectableItemBackground"
-    app:paddingLeftFitsWindowInsets="true"
+    app:paddingLeftFitsWindowInsetsButExpanded="true"
     app:paddingRightFitsWindowInsetsButExpanded="true"
     app:MvxBind="Text Title; Checked IsChecked"/>

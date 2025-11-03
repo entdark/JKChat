@@ -14,6 +14,7 @@ using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
+using AndroidX.Core.View;
 
 using Google.Android.Material.Internal;
 
@@ -130,15 +131,35 @@ namespace JKChat.Android.Views.Main {
 			pendingIntent = null;
 		}
 
-		protected override void ConfigurationChanged(Configuration configuration) {
-			base.ConfigurationChanged(configuration);
-			const float primaryWidth = 480.0f;
+		protected override WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat windowInsets) {
+			windowInsets = base.OnApplyWindowInsets(view, windowInsets);
+			return windowInsets;
+		}
+
+		protected override void OnConfigurationChanged(Configuration configuration) {
+			bool wasExpandedWindow = ExpandedWindow;
+			base.OnConfigurationChanged(configuration);
+#if false && DEBUG
+			const float railCollapsedWidth = 128.0f, railExpandedWidth = 220.0f, masterWidth = 360.0f;
+#else
+			const float railCollapsedWidth = 128.0f, railExpandedWidth = 220.0f, masterCollapsedWidth = 320.0f, masterExpandedWidth = 480.0f;
+#endif
 			if (contentMasterView?.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters) {
-				marginLayoutParameters.Width = ExpandedWindow ? primaryWidth.DpToPx() : ViewGroup.LayoutParams.MatchParent;
+				int width = LayoutState switch {
+					LayoutState.Small => ViewGroup.LayoutParams.MatchParent,
+					LayoutState.Medium => (railCollapsedWidth + masterCollapsedWidth).DpToPx(),
+					LayoutState.Large => (railExpandedWidth + masterExpandedWidth).DpToPx()
+				};
+				marginLayoutParameters.Width = width;
 				contentMasterView.LayoutParameters = marginLayoutParameters;
 			}
 			if (contentDetailView?.LayoutParameters is ViewGroup.MarginLayoutParams marginLayoutParameters2) {
-				marginLayoutParameters2.LeftMargin = ExpandedWindow ? primaryWidth.DpToPx() : 0.0f.DpToPx();
+				int width = LayoutState switch {
+					LayoutState.Small => 0.0f.DpToPx(),
+					LayoutState.Medium => (railCollapsedWidth + masterCollapsedWidth).DpToPx(),
+					LayoutState.Large => (railExpandedWidth + masterExpandedWidth).DpToPx()
+				};
+				marginLayoutParameters2.LeftMargin = width;
 				contentDetailView.LayoutParameters = marginLayoutParameters2;
 			}
 		}

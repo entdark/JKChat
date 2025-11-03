@@ -10,12 +10,14 @@ namespace JKChat.Android.Presenter.Attributes {
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 	public class TabFragmentPresentationAttribute : MvxViewPagerFragmentPresentationAttribute {
 		public int BottomNavigationViewResourceId { get; set; }
+		public int NavigationRailViewResourceId { get; set; }
 		public int IconDrawableResourceId { get; set; }
 
 		public TabFragmentPresentationAttribute(string title, int iconDrawableResourceId) : this(
 			title,
 			Resource.Id.tabs_viewpager,
 			Resource.Id.tabs_navigationview,
+			Resource.Id.tabs_navigationrailview,
 			iconDrawableResourceId,
 			fragmentHostViewType: typeof(MainFragment)
 		) {}
@@ -24,6 +26,7 @@ namespace JKChat.Android.Presenter.Attributes {
 			string title,
 			int viewPagerResourceId,
 			int bottomNavigationViewResourceId,
+			int navigationRailViewResourceId = int.MinValue,
 			int iconDrawableResourceId = int.MinValue,
 			Type activityHostViewModelType = null,
 			bool addToBackStack = false,
@@ -34,6 +37,7 @@ namespace JKChat.Android.Presenter.Attributes {
 			addToBackStack, fragmentHostViewType, isCacheableFragment
 		) {
 			BottomNavigationViewResourceId = bottomNavigationViewResourceId;
+			NavigationRailViewResourceId = navigationRailViewResourceId;
 			IconDrawableResourceId = iconDrawableResourceId;
 		}
 
@@ -41,7 +45,8 @@ namespace JKChat.Android.Presenter.Attributes {
 			string title,
 			string viewPagerResourceId,
 			string bottomNavigationViewResourceId,
-			int iconDrawableResourceId = int.MinValue,
+			string navigationRailViewResourceId = null,
+			string iconDrawableResourceId = null,
 			Type activityHostViewModelType = null,
 			bool addToBackStack = false,
 			Type fragmentHostViewType = null,
@@ -56,7 +61,12 @@ namespace JKChat.Android.Presenter.Attributes {
 				? context.Resources!.GetIdentifier(bottomNavigationViewResourceId, "id", context.PackageName)
 				: global::Android.Resource.Id.Content;
 
-			IconDrawableResourceId = iconDrawableResourceId;
+			if (!string.IsNullOrEmpty(navigationRailViewResourceId)) {
+				NavigationRailViewResourceId = context.Resources!.GetIdentifier(navigationRailViewResourceId, "id", context.PackageName);
+			}
+			IconDrawableResourceId = !string.IsNullOrEmpty(iconDrawableResourceId)
+				? context.Resources!.GetIdentifier(iconDrawableResourceId, "drawable", context.PackageName)
+				: int.MinValue;
 		}
 	}
 }

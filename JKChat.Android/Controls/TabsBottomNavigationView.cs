@@ -12,7 +12,6 @@ using Google.Android.Material.BottomNavigation;
 
 using Java.Interop;
 
-using JKChat.Core;
 using JKChat.Core.Helpers;
 
 using MvvmCross.Exceptions;

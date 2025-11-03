@@ -126,6 +126,11 @@ namespace JKChat.Android {
 									Resource.Styleable.View_paddingTopFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingTopButExpanded,
 									Resource.Styleable.View_paddingBottomFitsWindowInsetsButExpanded => WindowInsetsFlags.PaddingBottomButExpanded,
 
+									Resource.Styleable.View_paddingLeftFitsWindowInsetsWhenExpanded => WindowInsetsFlags.PaddingLeftWhenExpanded,
+									Resource.Styleable.View_paddingRightFitsWindowInsetsWhenExpanded => WindowInsetsFlags.PaddingRightWhenExpanded,
+									Resource.Styleable.View_paddingTopFitsWindowInsetsWhenExpanded => WindowInsetsFlags.PaddingTopWhenExpanded,
+									Resource.Styleable.View_paddingBottomFitsWindowInsetsWhenExpanded => WindowInsetsFlags.PaddingBottomWhenExpanded,
+
 									Resource.Styleable.View_marginLeftFitsWindowInsets => WindowInsetsFlags.MarginLeft,
 									Resource.Styleable.View_marginRightFitsWindowInsets => WindowInsetsFlags.MarginRight,
 									Resource.Styleable.View_marginTopFitsWindowInsets => WindowInsetsFlags.MarginTop,
@@ -155,10 +160,10 @@ namespace JKChat.Android {
 
 				public WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat insetsCompat, ViewUtils.RelativePadding initialPadding) {
 					bool isExpanded = (Mvx.IoCProvider.Resolve<IMvxAndroidCurrentTopActivity>().Activity as IBaseActivity)?.ExpandedWindow ?? false;
-					bool paddingTop = flags.HasFlag(WindowInsetsFlags.PaddingTop) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingTopButExpanded));
-					bool paddingBottom = flags.HasFlag(WindowInsetsFlags.PaddingBottom) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingBottomButExpanded));
-					bool paddingLeft = flags.HasFlag(WindowInsetsFlags.PaddingLeft) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingLeftButExpanded));
-					bool paddingRight = flags.HasFlag(WindowInsetsFlags.PaddingRight) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingRightButExpanded));
+					bool paddingTop = flags.HasFlag(WindowInsetsFlags.PaddingTop) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingTopButExpanded)) || (isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingTopWhenExpanded));
+					bool paddingBottom = flags.HasFlag(WindowInsetsFlags.PaddingBottom) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingBottomButExpanded)) || (isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingBottomWhenExpanded));
+					bool paddingLeft = flags.HasFlag(WindowInsetsFlags.PaddingLeft) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingLeftButExpanded)) || (isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingLeftWhenExpanded));
+					bool paddingRight = flags.HasFlag(WindowInsetsFlags.PaddingRight) || (!isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingRightButExpanded)) || (isExpanded && flags.HasFlag(WindowInsetsFlags.PaddingRightWhenExpanded));
 
 					bool isRtl = view.LayoutDirection == LayoutDirection.Rtl;
 					var insets = insetsCompat.GetInsets(WindowInsetsCompat.Type.SystemBars());
@@ -213,10 +218,15 @@ namespace JKChat.Android {
 				PaddingTopButExpanded		= 1 << 6,
 				PaddingBottomButExpanded	= 1 << 7,
 
-				MarginLeft					= 1 << 8,
-				MarginRight					= 1 << 9,
-				MarginTop					= 1 << 10,
-				MarginBottom				= 1 << 11
+				PaddingLeftWhenExpanded		= 1 << 8,
+				PaddingRightWhenExpanded	= 1 << 9,
+				PaddingTopWhenExpanded		= 1 << 10,
+				PaddingBottomWhenExpanded	= 1 << 11,
+
+				MarginLeft					= 1 << 12,
+				MarginRight					= 1 << 13,
+				MarginTop					= 1 << 14,
+				MarginBottom				= 1 << 15
 			}
 		}
 	}

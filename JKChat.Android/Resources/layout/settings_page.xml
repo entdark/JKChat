@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:liftOnScrollTargetViewId="@id/mvxrecyclerview"
-        app:paddingLeftFitsWindowInsets="true"
+        app:paddingLeftFitsWindowInsetsButExpanded="true"
         app:paddingRightFitsWindowInsetsButExpanded="true"
         app:paddingTopFitsWindowInsets="true">
         <include layout="@layout/toolbar"/>
@@ -17,6 +17,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:paddingBottomFitsWindowInsetsWhenExpanded="true"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
         <mvvmcross.droidx.recyclerview.MvxRecyclerView
             android:id="@+id/mvxrecyclerview"
@@ -30,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:layout_gravity="bottom"
-            app:paddingLeftFitsWindowInsets="true"
+            app:paddingLeftFitsWindowInsetsButExpanded="true"
             app:paddingRightFitsWindowInsetsButExpanded="true">
             <com.google.android.material.button.MaterialButton
                 style="?attr/borderlessButtonStyle"

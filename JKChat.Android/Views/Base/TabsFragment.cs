@@ -8,9 +8,10 @@ using JKChat.Android.Controls;
 using JKChat.Core.ViewModels.Base;
 
 namespace JKChat.Android.Views.Base {
-	public abstract class TabsFragment<TViewModel>(int layoutId, int viewPagerId, int bottomNavigationViewId, int tabsCount) : BaseFragment<TViewModel>(layoutId), ITabsView where TViewModel : class, IBaseViewModel {
+	public abstract class TabsFragment<TViewModel>(int layoutId, int viewPagerId, int bottomNavigationViewId, int tabsCount, int navigationRailViewId = int.MinValue) : BaseFragment<TViewModel>(layoutId), ITabsView where TViewModel : class, IBaseViewModel {
 		protected TabsViewPager ViewPager { get; private set; }
 		protected TabsBottomNavigationView BottomNavigationView { get; private set; }
+		protected TabsNavigationRailView NavigationRailView { get; private set; }
 
 		public Fragment CurrentTabFragment => ViewPager?.CurrentFragment;
 		public int CurrentTab => ViewPager?.CurrentItem ?? -1;
@@ -26,6 +27,8 @@ namespace JKChat.Android.Views.Base {
 				ViewPager.Adapter = new TabsViewPager.TabsAdapter(this.ChildFragmentManager, tabsCount);
 			BottomNavigationView = view.FindViewById<TabsBottomNavigationView>(bottomNavigationViewId);
 			BottomNavigationView.ViewPager = ViewPager;
+			NavigationRailView = view.FindViewById<TabsNavigationRailView>(navigationRailViewId);
+			NavigationRailView.ViewPager = ViewPager;
 			base.OnViewCreated(view, savedInstanceState);
 		}
 
@@ -46,6 +49,7 @@ namespace JKChat.Android.Views.Base {
 
 		public void MoveToTab(int tab) {
 			BottomNavigationView.SelectedItemId = tab;
+			NavigationRailView.SelectedItemId = tab;
 		}
 
 		protected override void OnBackPressedCallback() {
@@ -61,6 +65,30 @@ namespace JKChat.Android.Views.Base {
 				ToggleBackPressedCallback(false);
 				Activity.OnBackPressedDispatcher.OnBackPressed();
 				ToggleBackPressedCallback(true);
+			}
+		}
+
+		protected override void OnConfigurationChanged(LayoutState layoutState, bool landscape) {
+			switch (layoutState) {
+				case LayoutState.Small:// when !landscape:
+					BottomNavigationView.Visibility = ViewStates.Visible;
+					NavigationRailView.Visibility = ViewStates.Gone;
+					break;
+/*				case LayoutState.Small when landscape:
+					BottomNavigationView.Visibility = ViewStates.Gone;
+					NavigationRailView.Visibility = ViewStates.Visible;
+					NavigationRailView.Collapse();
+					break;*/
+				case LayoutState.Medium:
+					BottomNavigationView.Visibility = ViewStates.Gone;
+					NavigationRailView.Visibility = ViewStates.Visible;
+					NavigationRailView.Collapse();
+					break;
+				case LayoutState.Large:
+					BottomNavigationView.Visibility = ViewStates.Gone;
+					NavigationRailView.Visibility = ViewStates.Visible;
+					NavigationRailView.Expand();
+					break;
 			}
 		}
 	}

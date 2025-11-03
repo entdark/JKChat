@@ -2,20 +2,36 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <JKChat.Android.Controls.TabsViewPager
-        android:id="@+id/tabs_viewpager"
+    <JKChat.Android.Controls.TabsNavigationRailView
+        android:id="@+id/tabs_navigationrailview"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        app:menuGravity="bottom"
+        app:paddingTopFitsWindowInsets="true"
+        app:paddingLeftFitsWindowInsets="true"
+        app:paddingBottomFitsWindowInsets="true"/>
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
-    <JKChat.Android.Controls.TabsBottomNavigationView
-        android:id="@+id/tabs_navigationview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        app:paddingLeftFitsWindowInsets="true"
-        app:paddingRightFitsWindowInsetsButExpanded="true"
-        app:paddingBottomFitsWindowInsets="true"/>
+        android:layout_weight="1">
+        <JKChat.Android.Controls.TabsViewPager
+            android:id="@+id/tabs_viewpager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+        <JKChat.Android.Controls.TabsBottomNavigationView
+            android:id="@+id/tabs_navigationview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            app:paddingLeftFitsWindowInsets="true"
+            app:paddingRightFitsWindowInsetsButExpanded="true"
+            app:paddingBottomFitsWindowInsets="true"/>
+    </LinearLayout>
 </LinearLayout>
