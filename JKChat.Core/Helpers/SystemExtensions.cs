@@ -3,14 +3,14 @@ using System.Numerics;
 
 namespace JKChat.Core.Helpers {
 	public static class SystemExtensions {
-		public static Vector3 ToViewPosition(this Vector3 gamePosition, Vector3 min, Vector3 max, double width, double height, bool flipVertically) {
+		public static Vector3 ToViewPosition(this Vector3 gamePosition, Vector3 min, Vector3 max, float width, float height, bool flipVertically) {
 			var bounds = max-min;
 			var normalizedPosition = (gamePosition-min)/bounds;
 			float boundsRatio = bounds.X / bounds.Y;
-			double viewRatio = width / height;
+			float viewRatio = width / height;
 			bool boundsLandscape = boundsRatio > 1.0f;
 			bool viewLandscape = viewRatio > 1.0f;
-			double boundsViewWidth, boundsViewHeight;
+			float boundsViewWidth, boundsViewHeight;
 			bool landscapeFit;
 			if (viewLandscape) {
 				if (boundsLandscape) {
@@ -32,12 +32,16 @@ namespace JKChat.Core.Helpers {
 				boundsViewHeight = height;
 				boundsViewWidth = boundsViewHeight * boundsRatio;
 			}
-			double xOffset = (width - boundsViewWidth) * 0.5,
-				yOffset = (height - boundsViewHeight) * 0.5;
-			double x = normalizedPosition.X*boundsViewWidth,
+			float xOffset = (width - boundsViewWidth) * 0.5f,
+				yOffset = (height - boundsViewHeight) * 0.5f;
+			float x = normalizedPosition.X*boundsViewWidth,
 				y = (flipVertically ? (1.0f-normalizedPosition.Y) : normalizedPosition.Y)*boundsViewHeight,
 				z = normalizedPosition.Z;
-			return new Vector3((float)(xOffset+x), (float)(yOffset+y), (float)z);
+			return new Vector3((xOffset+x), (yOffset+y), z);
+		}
+
+		public static Vector3 ToViewPosition(this Vector3 gamePosition, Vector3 min, Vector3 max, double width, double height, bool flipVertically) {
+			return gamePosition.ToViewPosition(min,max,(float)width,(float)height,flipVertically);
 		}
 		public static double ToRadians(this float angle) {
 			return (double)(angle * Math.PI / 180.0f);
