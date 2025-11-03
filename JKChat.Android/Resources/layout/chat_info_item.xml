@@ -4,22 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <FrameLayout
+    <View
         android:alpha="0.8"
         android:id="@+id/gradient_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginRight="76.5dp"
-        app:paddingRightFitsWindowInsets="true">
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/chat_info_background"/>
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/chat_info_overlay_background"/>
-    </FrameLayout>
+        app:marginRightFitsWindowInsets="true"/>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"

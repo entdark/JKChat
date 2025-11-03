@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using Android.Animation;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Text;
 using Android.Text.Method;
@@ -164,6 +165,16 @@ namespace JKChat.Android.Views.Chat {
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
 				recyclerView.Adapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
 					AdjustHolderOnCreate = (viewHolder) => {
+						var gradientView = viewHolder.ItemView.FindViewById<View>(Resource.Id.gradient_view);
+						if (gradientView != null) {
+							var gradientDrawable = new BlendedGradientDrawable();
+							gradientDrawable.SetColors([ContextCompat.GetColor(Context, Resource.Color.chat_info_start_background), ContextCompat.GetColor(Context, Resource.Color.chat_info_end_background)]);
+							gradientDrawable.SetShape(ShapeType.Rectangle);
+							gradientDrawable.SetGradientType(GradientType.LinearGradient);
+							gradientDrawable.SetOrientation(GradientDrawable.Orientation.LeftRight);
+							gradientView.Background = gradientDrawable;
+						}
+						
 						var textView = viewHolder.ItemView.FindViewById<LinkTextView>(Resource.Id.message);
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
 
@@ -439,6 +450,22 @@ namespace JKChat.Android.Views.Chat {
 				.Start();
 		}
 
+		private class BlendedGradientDrawable : GradientDrawable {
+			private readonly Paint paint = new Paint(PaintFlags.AntiAlias);
+
+			public BlendedGradientDrawable() {
+				paint.SetXfermode(new PorterDuffXfermode(PorterDuff.Mode.DstOut));
+			}
+			
+			public override void Draw(Canvas canvas) {
+				base.Draw(canvas);
+				using var rect = new RectF(Bounds);
+				using var gradient = new LinearGradient(rect.Left, rect.Top, rect.Right, rect.Top, global::Android.Graphics.Color.Transparent, global::Android.Graphics.Color.White, Shader.TileMode.Clamp);
+				paint.SetShader(gradient);
+				canvas.DrawRect(rect, paint);
+			}
+		}
+		
 		private class ScrollToBottomRecyclerAdapter(IMvxAndroidBindingContext bindingContext) : BaseRecyclerViewAdapter(bindingContext) {
 			private bool dragging = false, touched = false;
 			private MvxSubscriptionToken sentMessageMessageToken;
