@@ -61,8 +61,9 @@ namespace JKChat.Android.Views.Chat {
 		public override void OnViewCreated(View view, Bundle savedInstanceState) {
 			base.OnViewCreated(view, savedInstanceState);
 
-			var collpasingToolbarLayout = view.FindViewById<CollapsingToolbarLayout>(Resource.Id.collapsingtoolbarlayout);
-			ViewCompat.SetOnApplyWindowInsetsListener(collpasingToolbarLayout, null);
+//HACK: CollapsingToolbarLayout uses its own insets listener and does not pass insets changes to its children, so disable it
+			var collapsingToolbarLayout = view.FindViewById<CollapsingToolbarLayout>(Resource.Id.collapsingtoolbarlayout);
+			ViewCompat.SetOnApplyWindowInsetsListener(collapsingToolbarLayout, null);
 
 			connectButton = view.FindViewById<MaterialButton>(Resource.Id.connect_button);
 			disconnectButton = view.FindViewById<MaterialButton>(Resource.Id.disconnect_button);
