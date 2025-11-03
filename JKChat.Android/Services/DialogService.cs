@@ -105,6 +105,9 @@ namespace JKChat.Android.Services {
 				textInputLayout.HintFormatted = ColourTextValueConverter.Convert(input.Hint);
 				var textInputEditText = dialogInputView.FindViewById<TextInputEditText>(Resource.Id.dialog_input_edittext);
 				textInputEditText.Text = input.Text;
+				if (!string.IsNullOrEmpty(config.Message)) {
+					dialogInputView.SetPadding(dialogInputView.PaddingLeft, 0, dialogInputView.PaddingRight, dialogInputView.PaddingBottom);
+				}
 				textInputEditText.AddTextChangedListener(new TextWatcher(s => {
 					if (input.HintAsColourText)
 						textInputLayout.HintFormatted = ColourTextValueConverter.Convert(s);
