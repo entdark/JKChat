@@ -216,7 +216,7 @@ public class MinimapView : FrameLayout {
 
 				bool isHW = canvas.IsHardwareAccelerated;
 
-				var now = DateTime.UtcNow;
+				long now = App.Milliseconds;
 				Path path;
 
 				foreach (var entity in entities) {
@@ -225,8 +225,7 @@ public class MinimapView : FrameLayout {
 					var pos2 = entity.Origin2.ToViewPosition(mapData.Min,mapData.Max,width,height,true);
 					pos2 += posOffset;
 					var color = new Color(entity.Color.ToArgb());
-					var lifeDiff = entity.Life - now;
-					double lifeLeft = lifeDiff.TotalMilliseconds;
+					long lifeLeft = entity.Life - now;
 					switch (entity.Type) {
 						case EntityType.Player:
 //player triangle
@@ -271,10 +270,10 @@ public class MinimapView : FrameLayout {
 							break;
 						case EntityType.Shot:
 							const int shotFadeTime = 200;
-							if (lifeLeft <= 0.0) {
+							if (lifeLeft <= 0) {
 								break;
 							} else if (lifeLeft <= shotFadeTime) {
-								color.A = unchecked((byte)(255*(lifeLeft / shotFadeTime)));
+								color.A = unchecked((byte)(255*(lifeLeft / (float)shotFadeTime)));
 							}
 							path = new Path();
 							path.MoveTo(pos.X, pos.Y);
@@ -301,10 +300,10 @@ public class MinimapView : FrameLayout {
 							}
 							break;
 						case EntityType.Impact:
-							if (lifeLeft <= 0.0) {
+							if (lifeLeft <= 0) {
 								break;
 							} else {
-								float dl = (float)(lifeLeft / entity.LifeLength);
+								float dl = (lifeLeft / (float)entity.LifeLength);
 								float radius = impactStartRadius + (1.0f - dl) * (impactEndRadius - impactStartRadius);
 								color.A = unchecked((byte)(255*dl));
 								impactPaint.Color = color;

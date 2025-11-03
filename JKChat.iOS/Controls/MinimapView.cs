@@ -206,7 +206,7 @@ public class MinimapView : UIView {
 				0.0f
 			);
 
-			var now = DateTime.UtcNow;
+			long now = App.Milliseconds;
 			CGPath path;
 
 			foreach (var entity in entities) {
@@ -215,8 +215,7 @@ public class MinimapView : UIView {
 				var pos2 = entity.Origin2.ToViewPosition(mapData.Min,mapData.Max,size.Width,size.Height,true);
 				pos2 += posOffset;
 				var color = entity.Color.ToUIColor();
-				var lifeDiff = entity.Life - now;
-				double lifeLeft = lifeDiff.TotalMilliseconds;
+				long lifeLeft = entity.Life - now;
 				switch (entity.Type) {
 					case EntityType.Player:
 						const float viewTriMedian = 30.0f;
@@ -265,10 +264,10 @@ public class MinimapView : UIView {
 					case EntityType.Shot:
 						const float shotLineWidth = 2.0f;
 						const int shotFadeTime = 200;
-						if (lifeLeft <= 0.0) {
+						if (lifeLeft <= 0) {
 							break;
 						} else if (lifeLeft <= shotFadeTime) {
-							color = color.ColorWithAlpha((nfloat)(lifeLeft / shotFadeTime));
+							color = color.ColorWithAlpha((lifeLeft / (float)shotFadeTime));
 						}
 						context.SetStrokeColor(color.CGColor);
 						context.SetLineWidth(shotLineWidth);
@@ -297,10 +296,10 @@ public class MinimapView : UIView {
 						const float impactStartRadius = 2.0f;
 						const float impactEndRadius = 20.0f;
 						const float impactLineWidth = 2.0f;
-						if (lifeLeft <= 0.0) {
+						if (lifeLeft <= 0) {
 							break;
 						} else {
-							float dl = (float)(lifeLeft / entity.LifeLength);
+							float dl = (lifeLeft / (float)entity.LifeLength);
 							float radius = impactStartRadius + (1.0f - dl) * (impactEndRadius - impactStartRadius);
 							color = color.ColorWithAlpha(dl);
 							context.SetLineWidth(impactLineWidth);

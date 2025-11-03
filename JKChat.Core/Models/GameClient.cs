@@ -397,8 +397,8 @@ namespace JKChat.Core.Models {
 		private void EntityEventExecuted(EntityEventArgs entityEventArgs) {
 			Vector3 start, end;
 			var entity = entityEventArgs.Entity;
-			var now = DateTime.UtcNow;
-			TempEntities.RemoveAll(entity => (entity.Life - now).TotalMilliseconds <= 0);
+			long now = App.Milliseconds;
+			TempEntities.RemoveAll(entity => (entity.Life - now) <= 0);
 
 			var options = AppSettings.MinimapOptions;
 			if (!options.HasFlag(MinimapOptions.Weapons))

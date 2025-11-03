@@ -292,24 +292,27 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		CreateLiveActivity();
 	}
 
-	private DateTime nextWidgetsUpdateTime = default;
+	private long nextWidgetsUpdateTime = 0L, nextLiveActivityUpdateTime = 0L;
 	private void CreateLiveActivity() {
 		var gameClientsService = Mvx.IoCProvider.Resolve<IGameClientsService>();
 		var activeServers = gameClientsService.ActiveServers.ToArray();
 		InvokeOnMainThread(() => {
 			if (activeServers.Length > 0) {
-				var now = DateTime.Now;
+				long now = App.Milliseconds;
 				if (nextWidgetsUpdateTime < now) {
 					WidgetShared.LiveActivityShared.RefreshWidgetsOfKind(null);
-					nextWidgetsUpdateTime = now.AddSeconds(30.0);
+					nextWidgetsUpdateTime = now + 30000;
 				}
-				WidgetShared.LiveActivityShared.ShowLiveActivityWithServers(
-					activeServers.Select(s => s.ServerName).ToArray(),
-					(uint)gameClientsService.UnreadMessages,
-					(uint)activeServers[0].Players,
-					(uint)activeServers[0].MaxPlayers,
-					gameClientsService.DisconnectFromAll, () => {}
-				);
+				if (nextLiveActivityUpdateTime < now) {
+					WidgetShared.LiveActivityShared.ShowLiveActivityWithServers(
+						activeServers.Select(s => s.ServerName).ToArray(),
+						(uint)gameClientsService.UnreadMessages,
+						(uint)activeServers[0].Players,
+						(uint)activeServers[0].MaxPlayers,
+						gameClientsService.DisconnectFromAll, () => {}
+					);
+					nextLiveActivityUpdateTime = now + 1000;
+				}
 			} else {
 				WidgetShared.LiveActivityShared.StopLiveActivity(() => {});
 			}

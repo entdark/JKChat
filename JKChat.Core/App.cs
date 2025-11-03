@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
 
 using JKChat.Core.Services;
 using JKChat.Core.ViewModels.Main;
@@ -10,7 +11,10 @@ using MvvmCross.ViewModels;
 
 namespace JKChat.Core {
 	public class App : MvxApplication {
+		private static readonly Stopwatch stopwatch = Stopwatch.StartNew();
+
 		public static bool AllowReset { get; set; } = true;
+		public static long Milliseconds => stopwatch.ElapsedMilliseconds;
 
 		public override void LoadPlugins(IMvxPluginManager pluginManager) {
 			base.LoadPlugins(pluginManager);

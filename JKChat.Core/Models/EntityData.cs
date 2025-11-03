@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Numerics;
 
 namespace JKChat.Core.Models;
@@ -10,7 +9,7 @@ public class EntityData {
 	public Vector3 Angles { get; init; }
 	public string Name { get; init; }
 	public EntityType Type { get; init; }
-	public DateTime Life { get; init; }
+	public long Life { get; init; }
 	public int LifeLength { get; init; }
 	public Color Color { get; init; }
 	internal Team Team { get; init; }
@@ -18,7 +17,7 @@ public class EntityData {
 		Type = type;
 		if (life > 0) {
 			LifeLength = life;
-			Life = DateTime.UtcNow.AddMilliseconds(life);
+			Life = App.Milliseconds + life;
 		}
 	}
 	internal EntityData(EntityType type, Team team) {
