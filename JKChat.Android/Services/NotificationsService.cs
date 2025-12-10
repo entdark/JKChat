@@ -14,7 +14,6 @@ using Google.Android.Material.Color;
 
 using JKChat.Android.ValueConverters;
 using JKChat.Android.Views.Main;
-using JKChat.Core;
 using JKChat.Core.Helpers;
 using JKChat.Core.Services;
 
@@ -31,14 +30,14 @@ namespace JKChat.Android.Services {
 		}
 
 		public void CancelNotifications(string tag = null) {
-			var context = global::Android.App.Application.Context;
-			var notificationManager = (NotificationManager)context.GetSystemService(Context.NotificationService);
+			var context = Context;
+			var notificationManager = NotificationManagerCompat.From(context);
 			bool hasIdsSet = shownNotifications.TryGetValue(tag, out var idsSet) && !idsSet.IsNullOrEmpty();
 			if (string.IsNullOrEmpty(tag)) {
 				notificationManager.CancelAll();
 				shownNotifications.Clear();
 			} else if (Build.VERSION.SdkInt >= BuildVersionCodes.M) {
-				var notifications = notificationManager.GetActiveNotifications();
+				var notifications = notificationManager.ActiveNotifications;
 				if (notifications.IsNullOrEmpty())
 					return;
 				foreach (var notification in notifications) {
@@ -57,7 +56,7 @@ namespace JKChat.Android.Services {
 		}
 
 		public void ShowNotification(string title, string message, IDictionary<string, string> data, string tag = null) {
-			var context = global::Android.App.Application.Context;
+			var context = Context;
 			var activityIntent = new Intent(context, typeof(MainActivity));
 			activityIntent.SetAction(NotificationAction);
 			foreach (var kv in data) {
@@ -84,10 +83,10 @@ namespace JKChat.Android.Services {
 			idsSet.Add(id);
 		}
 
-		public bool NotificationsEnabled => ContextCompat.CheckSelfPermission(global::Android.App.Application.Context, Manifest.Permission.PostNotifications) == Permission.Granted;
+		public bool NotificationsEnabled => ContextCompat.CheckSelfPermission(Context, Manifest.Permission.PostNotifications) == Permission.Granted;
 
 		private void CreateNotificationChannel() {
-			var context = global::Android.App.Application.Context;
+			var context = Context;
 			var builder = new NotificationChannelCompat.Builder(NotificationChannelID, NotificationManagerCompat.ImportanceMax)
 				.SetName(NotificationChannelID)
 				.SetShowBadge(true)
@@ -98,5 +97,7 @@ namespace JKChat.Android.Services {
 			var notificationManager = NotificationManagerCompat.From(context);
 			notificationManager.CreateNotificationChannel(channel);
 		}
+
+		private Context Context => global::Android.App.Application.Context;
 	}
 }
