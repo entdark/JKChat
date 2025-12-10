@@ -4,9 +4,11 @@ using System.Linq;
 
 using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.InputMethodServices;
 using Android.OS;
+using Android.Util;
 using Android.Views;
 using Android.Views.InputMethods;
 
@@ -15,7 +17,8 @@ using AndroidX.Core.Util;
 using AndroidX.Core.View;
 
 using Google.Android.Material.Button;
-
+using Google.Android.Material.Color;
+using Google.Android.Material.Internal;
 using JKChat.Android.Controls.Listeners;
 using JKChat.Android.Controls.Toolbar;
 
@@ -120,6 +123,34 @@ namespace JKChat.Android.Helpers {
 		public static bool IsNavigationBarOnRight(this WindowInsetsCompat windowInsets) {
 			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars());
 			return insets is { Right: > 0 };
+		}
+
+		public static ViewGroup AddView(this ViewGroup vg, Func<Context, View> viewCreator) {
+			return vg.AddView(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent), viewCreator);
+		}
+		public static ViewGroup AddView(this ViewGroup vg, ViewGroup.LayoutParams parameters, Func<Context, View> viewCreator) {
+			parameters ??= new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
+			vg.AddView(viewCreator(vg.Context), parameters);
+			return vg;
+		}
+		public static ViewGroup AddView(this ViewGroup vg, int width = -1, int height = -1, Func<Context, View> viewCreator = null) {
+			return vg.AddView(new ViewGroup.LayoutParams(width, height), viewCreator);
+		}
+		public static T Adjust<T>(this T obj, Action<T> adjust) {
+			adjust(obj);
+			return obj;
+		}
+		public static void SetAttributeBackgroundColor(this View view, int colorAttributeResId) {
+			var drawable = new ColorDrawable(new(MaterialColors.GetColor(view.Context, colorAttributeResId, Color.Transparent)));
+			view.Background = drawable;
+		}
+		public static void SetAttributeBackgroundResource(this View view, int attributeResId) {
+			using var typedValue = new TypedValue();
+			view.Context.Theme.ResolveAttribute(attributeResId, typedValue, true);
+			view.SetBackgroundResource(typedValue.ResourceId);
+		}
+		public static void SetWindowInsetsFlags(this View view, WindowInsetsFlags flags) {
+			ViewUtils.DoOnApplyWindowInsets(view, new OnApplyWindowInsetsListener(flags));
 		}
 
 		private static Context Context => Platform.CurrentActivity ?? Application.Context;

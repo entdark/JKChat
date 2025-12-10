@@ -12,12 +12,18 @@ namespace JKChat.Android.Adapters {
 		public AdjustHolderDelegate AdjustHolderOnCreate { get; set; }
 		public AdjustHolderPositionDelegate AdjustHolderOnBind { get; set; }
 		public AdjustHolderDelegate AdjustHolderOnRecycle { get; set; }
+		public CreateHolderDelegate ViewHolderCreator { get; set; }
 
 		public BaseRecyclerViewAdapter(IMvxAndroidBindingContext bindingContext) : base(bindingContext) {}
 
 		public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) {
-			var viewHolder = base.OnCreateViewHolder(parent, viewType);
-			AdjustHolderOnCreate?.Invoke(viewHolder);
+			RecyclerView.ViewHolder viewHolder;
+			if (ViewHolderCreator != null) {
+				viewHolder = ViewHolderCreator(parent, viewType);
+			} else {
+				viewHolder = base.OnCreateViewHolder(parent, viewType);
+				AdjustHolderOnCreate?.Invoke(viewHolder);
+			}
 			return viewHolder;
 		}
 
@@ -44,4 +50,5 @@ namespace JKChat.Android.Adapters {
 
 	public delegate void AdjustHolderPositionDelegate(RecyclerView.ViewHolder viewHolder, int position);
 	public delegate void AdjustHolderDelegate(RecyclerView.ViewHolder viewHolder);
+	public delegate RecyclerView.ViewHolder CreateHolderDelegate(ViewGroup parent, int position);
 }
