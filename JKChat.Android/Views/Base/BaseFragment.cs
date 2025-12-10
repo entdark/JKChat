@@ -123,7 +123,7 @@ namespace JKChat.Android.Views.Base {
 			if (RegisterBackPressedCallback) {
 				onBackPressedCallback?.Remove();
 				onBackPressedCallback = new OnBackPressedCallback(OnBackPressedCallback);
-				Activity.OnBackPressedDispatcher.AddCallback(this, onBackPressedCallback);
+				Activity?.OnBackPressedDispatcher.AddCallback(this, onBackPressedCallback);
 			}
 
 			using var set = this.CreateBindingSet();

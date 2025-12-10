@@ -29,12 +29,12 @@ namespace JKChat.Core.Helpers {
 					toRemoveIndices.Add(i);
 				}
 			}
-			for (int i = toRemoveIndices.Count-1; i >= 0 ; i--) {
+			for (int i = toRemoveIndices.Count-1; i >= 0; i--) {
 				collection.RemoveAt(toRemoveIndices[i]);
 			}
-			for (int k = 0; k < newItems.Length; k++) {
-				if (!toNotInsertIndices.Contains(k)) {
-					collection.Add(newItems[k]);
+			for (int i = 0; i < newItems.Length; i++) {
+				if (!toNotInsertIndices.Contains(i)) {
+					collection.Add(newItems[i]);
 				}
 			}
 			if (keySelector != null) {

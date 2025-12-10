@@ -49,9 +49,9 @@ namespace JKChat.Android.Presenter {
 		protected Task<bool> CloseModalFragment(IMvxViewModel viewModel, ModalFragmentPresentationAttribute attribute) {
 			return base.CloseFragment(viewModel, attribute);
 		}
-
+        
 		protected virtual async Task<bool> ShowTabFragment(Type view, TabFragmentPresentationAttribute attribute, MvxViewModelRequest request) {
-			var showViewPagerFragment = await ShowViewPagerFragment(view, attribute, request).ConfigureAwait(true);
+			bool showViewPagerFragment = await ShowViewPagerFragment(view, attribute, request).ConfigureAwait(true);
 			if (!showViewPagerFragment)
 				return false;
 
@@ -99,7 +99,7 @@ namespace JKChat.Android.Presenter {
 			if (attribute.ActivityHostViewModelType == null) {
 				attribute.ActivityHostViewModelType = GetCurrentActivityViewModelType();
 			}
-			Type currentActivityViewModelType = GetCurrentActivityViewModelType();
+			var currentActivityViewModelType = GetCurrentActivityViewModelType();
 			if (attribute.ActivityHostViewModelType != currentActivityViewModelType) {
 				MvxLogHost.Default?.Log(LogLevel.Warning, "Activity host with ViewModelType {activityHostViewModelType} is not CurrentTopActivity. Showing Activity before showing Fragment for {viewModelType}", new object[2] { attribute.ActivityHostViewModelType, attribute.ViewModelType });
 				PendingRequest = request;
