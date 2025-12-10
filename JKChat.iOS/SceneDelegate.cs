@@ -217,9 +217,7 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		if (url.Host == "liveactivity") {
 			var activeServers = Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.ToArray();
 			if (activeServers.Length == 1) {
-				string address = activeServers[0].Address;
-				var parameters = navigationService.MakeNavigationParameters($"jkchat://chat?address={address}", address);
-				navigationService.Navigate(parameters);
+				navigationService.NavigateToChat(activeServers[0].Address);
 			}
 			return;
 		}
@@ -229,17 +227,19 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		if (url.Host != "widget")
 			return;
 		var queryItems = new NSUrlComponents(url, true).QueryItems;
-		if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address2 }) || address2.Length == 0)
+		if (queryItems.IsNullOrEmpty() || (queryItems.FirstOrDefault(item => item.Name == "address") is not { Value: {} address }) || address.Length == 0)
 			return;
-		bool connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address2) == ConnectionStatus.Connected;
-		string path = string.Empty;
-		if (widgetLink == WidgetLink.Chat || (widgetLink == WidgetLink.ChatIfConnected && connected)) {
-			path = "chat";
-		} else if (widgetLink == WidgetLink.ServerInfo || widgetLink == WidgetLink.ChatIfConnected) {
-			path = "info";
+		bool connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address) == ConnectionStatus.Connected;
+		switch (widgetLink) {
+			case WidgetLink.Chat:
+			case WidgetLink.ChatIfConnected when connected:
+				navigationService.NavigateToChat(address);
+				break;
+			case WidgetLink.ServerInfo:
+			case WidgetLink.ChatIfConnected:
+				navigationService.NavigateToServerInfo(address);
+				break;
 		}
-		var parameters2 = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address2}", address2);
-		navigationService.Navigate(parameters2);
 	}
 
 	private void ExecuteOnBackground() {

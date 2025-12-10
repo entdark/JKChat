@@ -9,7 +9,6 @@ using Android.Content.Res;
 using Android.OS;
 using Android.Views;
 using Android.Views.Animations;
-
 using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.Core.App;
@@ -24,6 +23,7 @@ using JKChat.Android.Services;
 using JKChat.Android.Views.Base;
 using JKChat.Android.Widgets;
 using JKChat.Core;
+using JKChat.Core.Helpers;
 using JKChat.Core.Messages;
 using JKChat.Core.Models;
 using JKChat.Core.Navigation;
@@ -109,32 +109,27 @@ namespace JKChat.Android.Views.Main {
 				} if (action == ForegroundGameClientsService.ForegroundAction) {
 					var activeServers = Mvx.IoCProvider.Resolve<IGameClientsService>().ActiveServers.ToArray();
 					if (activeServers.Length == 1) {
-						var address = activeServers[0].Address;
-						var parameters = navigationService.MakeNavigationParameters($"jkchat://chat?address={address}", address);
-						navigationService.Navigate(parameters);
+						navigationService.NavigateToChat(activeServers[0].Address);
 					}
 				} else if (action == ServerMonitorAppWidget.WidgetLinkAction && !isEmpty
 					&& extras.GetString(ServerMonitorAppWidget.ServerAddressExtraKey, null) is string address) {
 					var widgetLink = AppSettings.WidgetLink;
 					if (widgetLink != WidgetLink.Application) {
-						var connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address) == ConnectionStatus.Connected;
-						string path = string.Empty;
-						if (widgetLink == WidgetLink.Chat || (widgetLink == WidgetLink.ChatIfConnected && connected)) {
-							path = "chat";
-						} else if (widgetLink == WidgetLink.ServerInfo || widgetLink == WidgetLink.ChatIfConnected) {
-							path = "info";
+						bool connected = Mvx.IoCProvider.Resolve<IGameClientsService>().GetStatus(address) == ConnectionStatus.Connected;
+						switch (widgetLink) {
+							case WidgetLink.Chat:
+							case WidgetLink.ChatIfConnected when connected:
+								navigationService.NavigateToChat(address);
+								break;
+							case WidgetLink.ServerInfo:
+							case WidgetLink.ChatIfConnected:
+								navigationService.NavigateToServerInfo(address);
+								break;
 						}
-						var parameters = navigationService.MakeNavigationParameters($"jkchat://{path}?address={address}", address);
-						navigationService.Navigate(parameters);
 					}
 				}
 			}
 			pendingIntent = null;
-		}
-
-		protected override WindowInsetsCompat OnApplyWindowInsets(View view, WindowInsetsCompat windowInsets) {
-			windowInsets = base.OnApplyWindowInsets(view, windowInsets);
-			return windowInsets;
 		}
 
 		protected override void OnConfigurationChanged(Configuration configuration) {

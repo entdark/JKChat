@@ -710,11 +710,12 @@ namespace JKChat.Core.Models {
 			if (ViewModel != null && !minimized)
 				return;
 			string title = ServerInfo.HostName;
+			string address = Address.ToString();
 			notificationsService.ShowNotification(
 				title,
 				message,
-				Mvx.IoCProvider.Resolve<INavigationService>().MakeNavigationParameters($"jkchat://chat?address={Address}", Address.ToString()),
-				Address.ToString()
+				Mvx.IoCProvider.Resolve<INavigationService>().MakeChatNavigationParameters(address),
+				address
 			);
 		}
 
