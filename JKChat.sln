@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helper", "Helper\Helper.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Q3MinimapGenerator", "Q3MinimapGenerator\Q3MinimapGenerator.csproj", "{E49F7050-4671-496C-8C20-8FC9AF751642}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TouchImageView", "TouchImageView\TouchImageView.csproj", "{BA8B214A-BDAA-4877-87F1-19CDD6BF57CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{E49F7050-4671-496C-8C20-8FC9AF751642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E49F7050-4671-496C-8C20-8FC9AF751642}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E49F7050-4671-496C-8C20-8FC9AF751642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA8B214A-BDAA-4877-87F1-19CDD6BF57CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA8B214A-BDAA-4877-87F1-19CDD6BF57CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA8B214A-BDAA-4877-87F1-19CDD6BF57CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA8B214A-BDAA-4877-87F1-19CDD6BF57CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,7 +24,7 @@ namespace JKChat.Android.Controls;
 [Register("JKChat.Android.Controls.MinimapView")]
 public class MinimapView : FrameLayout {
 	private readonly Handler handler = new Handler(Looper.MainLooper);
-	private TouchImageView.TouchImageView minimapImageView;
+	private MinimapTouchImageView minimapImageView;
 	private MinimapDrawingView minimapDrawingView;
 		
 	private EntityData []entities;
@@ -136,6 +136,58 @@ public class MinimapView : FrameLayout {
 			minimapImageView.ImageMatrixChanged -= ImageMatrixChanged;
 		}
 		base.Dispose(disposing);
+	}
+
+	private class MinimapTouchImageView(Context context) : Com.Vlbor.TouchImageView.TouchImageView(context) {
+		protected override float ImageHeight => viewHeight * CurrentZoom;
+		public override float ScaledImageHeight => base.ImageHeight;
+
+		protected override void FitImageToView() {
+			if (touchScaleType != ScaleType.FitStart || IsZoomed || imageRenderedAtLeastOnce) {
+				base.FitImageToView();
+				return;
+			}
+			orientationJustChanged = false;
+			var drawable = Drawable;
+
+			if (drawable == null || drawable.IntrinsicWidth == 0 || drawable.IntrinsicHeight == 0)
+				return;
+
+			if (touchMatrix == null || prevMatrix == null)
+				return;
+
+			if (userSpecifiedMinScale == AutomaticMinZoom) {
+				MinZoom = AutomaticMinZoom;
+				if (CurrentZoom < minScale)
+					CurrentZoom = minScale;
+			}
+
+			int drawableWidth = GetDrawableWidth(drawable),
+				drawableHeight = GetDrawableHeight(drawable);
+
+			float scaleX = (float)viewWidth / drawableWidth,
+				scaleY = (float)viewHeight / drawableHeight;
+			scaleX = scaleY = Math.Min(scaleX, scaleY);
+
+			float redundantXSpace = viewWidth - (scaleX * drawableWidth),
+				redundantYSpace = viewHeight - (scaleY * drawableHeight);
+
+			matchViewWidth = viewWidth - redundantXSpace;
+			matchViewHeight = viewHeight - redundantYSpace;
+			
+			if (IsRotateImageToFitScreen && OrientationMismatch(drawable)) {
+				touchMatrix.SetRotate(90.0f);
+				touchMatrix.PostTranslate(drawableWidth, 0.0f);
+				touchMatrix.PostScale(scaleX, scaleY);
+			} else {
+				touchMatrix.SetScale(scaleX, scaleY);
+			}
+			touchMatrix.PostTranslate(redundantXSpace * 0.5f, 0.0f);
+			CurrentZoom = 1.0f;
+			
+			FixTrans();
+			ApplyTouchMatrix();
+		}
 	}
 
 	private class MinimapDrawingView(Context context, MinimapView minimapView) : View(context) {

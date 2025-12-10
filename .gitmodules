@@ -4,3 +4,6 @@
 [submodule "Q3MinimapGenerator"]
 	path = Q3MinimapGenerator
 	url = https://github.com/entdark/Q3MinimapGenerator
+[submodule "TouchImageView"]
+	path = TouchImageView
+	url = https://github.com/entdark/TouchImageView
