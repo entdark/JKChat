@@ -223,14 +223,18 @@ namespace JKChat.Android.Views.Main {
 
 		private bool IsServiceRunning(Type serviceClass) {
 			var manager = (ActivityManager)GetSystemService(Context.ActivityService);
+#pragma warning disable CA1422
 			foreach (var service in manager.GetRunningServices(int.MaxValue)) {
-				string className = service.Service.ClassName;
+#pragma warning restore CA1422
+				string className = service.Service?.ClassName;
+				if (string.IsNullOrEmpty(className))
+					continue;
 				if (className.Equals(serviceClass.Name, StringComparison.OrdinalIgnoreCase)
 					|| (className.Contains(serviceClass.Name, StringComparison.OrdinalIgnoreCase)/* && className.Contains("md5")*/)) {
 					return true;
 				}
 			}
-			return ForegroundGameClientsService.IsRunning;
+			return false;
 		}
 
 		private void CheckNotificationsPermission() {

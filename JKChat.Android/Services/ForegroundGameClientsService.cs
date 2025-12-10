@@ -33,10 +33,7 @@ namespace JKChat.Android.Services {
 
 		private MvxSubscriptionToken serverInfoMessageToken;
 
-		internal static bool IsRunning = false;
-
 		public override void OnCreate() {
-			IsRunning = true;
 			base.OnCreate();
 			CreateNotificationChannel();
 			if (serverInfoMessageToken != null) {
@@ -47,7 +44,6 @@ namespace JKChat.Android.Services {
 		}
 
 		public override void OnDestroy() {
-			IsRunning = false;
 			if (serverInfoMessageToken != null) {
 				Mvx.IoCProvider.Resolve<IMvxMessenger>().Unsubscribe<ServerInfoMessage>(serverInfoMessageToken);
 				serverInfoMessageToken = null;
