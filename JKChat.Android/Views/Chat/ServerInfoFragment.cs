@@ -1,7 +1,9 @@
 ﻿//#define PROGRAMMATICAL_VIEW
 
 using System;
+using System.Collections;
 
+using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Text;
@@ -173,263 +175,216 @@ namespace JKChat.Android.Views.Chat {
 		private View CreateView(LayoutInflater inflater) {
 			this.EnsureBindingContextIsSet(inflater);
 			using var _ = new MvxBindingContextStackRegistration<IMvxAndroidBindingContext>((IMvxAndroidBindingContext)BindingContext);
-			var view = new FrameLayout(Context) {
-					LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent)
-				}
-				.AddView(context =>
-					new LinearLayout(context)
-						.Adjust(layout => {
-							layout.Orientation = Orientation.Vertical;
-							layout.SetAttributeBackgroundColor(global::Android.Resource.Attribute.ColorBackground);
-						})
-						.AddView(
-							height: ViewGroup.LayoutParams.WrapContent,
-							viewCreator: context => new RelativeLayout(context)
-								.Adjust(layout => {
-									layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurfaceContainerHighest);\
-								})
-								.AddView(
-									new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent)
-										.Adjust(lp => {
-											lp.AddRule(LayoutRules.AlignLeft, Resource.Id.appbarlayout);
-											lp.AddRule(LayoutRules.AlignRight, Resource.Id.appbarlayout);
-											lp.AddRule(LayoutRules.AlignTop, Resource.Id.appbarlayout);
-											lp.AddRule(LayoutRules.AlignBottom, Resource.Id.appbarlayout);
-										}),
-									context => new AppCompatImageView(context)
-										.Adjust(imageView => {
-											imageView.SetScaleType(ImageView.ScaleType.CenterCrop);
-											imageView.ImageTintList = ContextCompat.GetColorStateList(context, Resource.Color.bg_preview_tint);
-											imageView.ImageTintMode = PorterDuff.Mode.SrcOver;
-										})
-										.Bind(this, "DrawableName ServerPreview(Game)")
-								)
-								.AddView(
-									height: ViewGroup.LayoutParams.WrapContent,
-									viewCreator: context => new LinearLayout(context)
-										.Adjust(layout => {
-											layout.Id = Resource.Id.appbarlayout;
-											layout.Orientation = Orientation.Vertical;
-											layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight | WindowInsetsFlags.PaddingTop);
-										})
-										.AddView(
-											height: ViewGroup.LayoutParams.WrapContent,
-											viewCreator: context => new MaterialToolbar(new ContextThemeWrapper(context, Resource.Style.ToolbarTitle), null, 0) {
-												Id = Resource.Id.toolbar
-											}
-										)
-										.AddView(
-											height: ViewGroup.LayoutParams.WrapContent,
-											viewCreator: context => new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_HeadlineSmall), null, 0)
-												.Adjust(textView => {
-													textView.SetPadding(16.DpToPx(), 0, 16.DpToPx(), 0);
-												})
-												.Bind(this, "TextFormatted ColourText(Title)")
-										)
-										.AddView(
-											height: ViewGroup.LayoutParams.WrapContent,
-											viewCreator: context => new LinearLayout(context)
-												.Adjust(layout => {
-													layout.Orientation = Orientation.Horizontal;
-													layout.SetPadding(16.DpToPx(), 4.DpToPx(), 16.DpToPx(), 12.DpToPx());
-													layout.SetGravity(GravityFlags.CenterVertical);
-												})
-												.AddView(
-													new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
-														Weight = 1.0f
-													},
-													context => new Space(context)
-												)
-												.AddView(
-													new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
-														Weight = 0.0f
-													},
-													context => new MaterialButton(context, null, Resource.Attribute.materialButtonTonalStyle) {
-														Id = Resource.Id.connect_button,
-														Text = "Connect",
-														IconPadding = 8.DpToPx()
-													}
-													.Bind(this, "Click ConnectCommand; Visibility EnumVisibility(Status, 'Disconnected')")
-												)
-												.AddView(
-													new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
-														Weight = 0.0f
-													},
-													context => new MaterialButton(context, null, Resource.Attribute.materialButtonOutlinedStyle) {
-														Id = Resource.Id.disconnect_button,
-														Text = "Disconnect",
-														IconPadding = 8.DpToPx()
-													}
-													.Bind(this, "Click ConnectCommand; Visibility EnumInvertedVisibility(Status, 'Disconnected')")
-												)
-										
-										)
-								)
-						)
-						.AddView(
-							new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
-								Weight = 1.0f
+			var context = Context;
+			var view = new FrameLayoutX(context) {
+				layout => {
+					layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
+				},
+				new LinearLayoutX(context) {
+					layout => {
+						layout.Orientation = Orientation.Vertical;
+						layout.SetAttributeBackgroundColor(global::Android.Resource.Attribute.ColorBackground);
+					},
+					new RelativeLayoutX(context) {
+						layout => {
+							layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+							layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurfaceContainerHighest);
+						},
+						new AppCompatImageView(context)
+							.Adjust(imageView => {
+								imageView.LayoutParameters = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent)
+									.Adjust(lp => {
+										lp.AddRule(LayoutRules.AlignLeft, Resource.Id.appbarlayout);
+										lp.AddRule(LayoutRules.AlignRight, Resource.Id.appbarlayout);
+										lp.AddRule(LayoutRules.AlignTop, Resource.Id.appbarlayout);
+										lp.AddRule(LayoutRules.AlignBottom, Resource.Id.appbarlayout);
+									});
+								imageView.SetScaleType(ImageView.ScaleType.CenterCrop);
+								imageView.ImageTintList =
+									ContextCompat.GetColorStateList(context, Resource.Color.bg_preview_tint);
+								imageView.ImageTintMode = PorterDuff.Mode.SrcOver;
+							})
+							.Bind(this, "DrawableName ServerPreview(Game)"),
+						
+						new LinearLayoutX(context) {
+							layout => {
+								layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+								layout.Id = Resource.Id.appbarlayout;
+								layout.Orientation = Orientation.Vertical;
+								layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight | WindowInsetsFlags.PaddingTop);
 							},
-							context => new CoordinatorLayout(context)
-								.AddView(
-									height: ViewGroup.LayoutParams.WrapContent,
-									viewCreator: context => new AppBarLayout(context) {
-										Background = null
+							new MaterialToolbar(new ContextThemeWrapper(context, Resource.Style.ToolbarTitle), null, 0) {
+								LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent),
+								Id = Resource.Id.toolbar
+							},
+							new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_HeadlineSmall), null, 0)
+								.Adjust(textView => {
+									textView.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+									textView.SetPadding(16.DpToPx(), 0, 16.DpToPx(), 0);
+								})
+								.Bind(this, "TextFormatted ColourText(Title)"),
+							new LinearLayoutX(context) {
+								layout => {
+									layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+									layout.Orientation = Orientation.Horizontal;
+									layout.SetPadding(16.DpToPx(), 4.DpToPx(), 16.DpToPx(), 12.DpToPx());
+									layout.SetGravity(GravityFlags.CenterVertical);
+								},
+								new Space(context) {
+									LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
+										Weight = 1.0f
 									}
-									.AddView(
-										new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent) {
-											BottomMargin = 12.DpToPx(),
-											ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagScroll | AppBarLayout.LayoutParams.ScrollFlagExitUntilCollapsed | AppBarLayout.LayoutParams.ScrollFlagSnap | AppBarLayout.LayoutParams.ScrollFlagSnapMargins
-										},
-										context =>
-										new CollapsingToolbarLayout(context) {
-											Id = Resource.Id.collapsingtoolbarlayout,
-											Background = null
-										}
-										.AddView(
-											height: ViewGroup.LayoutParams.WrapContent,
-											viewCreator: context => new MvxLinearLayout(context, null)
-//TODO: MvxLinearLayout items are not much adjustable from code, inflating for now
-/*											viewCreator: context => new MvxLinearLayout(context, null, new BaseAdapterWithChangedEvent(context) {
-												ViewItemCreator = (parent, bindingContextOwner) => {
-													var bindigContext = new MvxAndroidBindingContext(parent.Context, (BindingContext as IMvxAndroidBindingContext)?.LayoutInflaterHolder);
-													var view = new LinearLayout(parent.Context)
-														.Adjust(layout => {
-															layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
-															layout.Orientation = Orientation.Vertical;
-															layout.SetPadding(16.DpToPx(), 4.DpToPx(), 24.DpToPx(), 4.DpToPx());
-															layout.Clickable = true;
-															layout.SetAttributeBackgroundResource(Resource.Attribute.selectableItemBackground);
-															layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight);
-														})
-														.AddView(
-															new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent),
-															context => new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_BodyLarge), null, 0)
-																.Bind(bindingContextOwner, "Text Value")
-														)
-														.AddView(
-															new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent),
-															context => new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_BodyLarge), null, 0)
-																.Bind(bindingContextOwner, "Text Key")
-														);
-													return view;
-												}
-											})*/
-											.Adjust(layout => {
-												layout.Orientation = Orientation.Vertical;
-												layout.SetPadding(0, 8.DpToPx(), 0, 8.DpToPx());
-												layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurface);
-												layout.ItemTemplateId = Resource.Layout.server_info_primary_item;
-											})
-											.Bind(this, "ItemsSource PrimaryInfoItems")
-										)
-									)
-									.AddView(
-										height: ViewGroup.LayoutParams.WrapContent,
-										viewCreator: context => new TabLayout(context)
-											.Adjust(layout => {
-												layout.Id = Resource.Id.tablayout;
-												layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurface);
-												layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight);
-											})
-									)
-								)
-								.AddView(
-									new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
-										Behavior = new AppBarLayout.ScrollingViewBehavior()
+								},
+								new MaterialButton(context, null, Resource.Attribute.materialButtonTonalStyle) {
+									LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
+										Weight = 0.0f
 									},
-									context => new ViewPager2(context) {
-										Id = Resource.Id.viewpager
-									}
-								)
-						)
-				);
+									Id = Resource.Id.connect_button,
+									Text = "Connect",
+									IconPadding = 8.DpToPx()
+								}
+								.Bind(this, "Click ConnectCommand; Visibility EnumVisibility(Status, 'Disconnected')"),
+								new MaterialButton(context, null, Resource.Attribute.materialButtonOutlinedStyle) {
+									LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
+										Weight = 0.0f
+									},
+									Id = Resource.Id.disconnect_button,
+									Text = "Disconnect",
+									IconPadding = 8.DpToPx()
+								}
+								.Bind(this, "Click ConnectCommand; Visibility EnumInvertedVisibility(Status, 'Disconnected')")
+							}
+
+						}
+					},
+					new CoordinatorLayoutX(context) {
+						layout => {
+							layout.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
+								Weight = 1.0f
+							};
+						},
+						new AppBarLayoutX(context) {
+							layout => {
+								layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+								layout.Background = null;
+							},
+							new CollapsingToolbarLayoutX(context) {
+								layout => {
+									layout.LayoutParameters = new AppBarLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent) {
+										BottomMargin = 12.DpToPx(),
+										ScrollFlags = AppBarLayout.LayoutParams.ScrollFlagScroll | AppBarLayout.LayoutParams.ScrollFlagExitUntilCollapsed | AppBarLayout.LayoutParams.ScrollFlagSnap | AppBarLayout.LayoutParams.ScrollFlagSnapMargins
+									};
+									layout.Id = Resource.Id.collapsingtoolbarlayout;
+									layout.Background = null;
+								},
+								new MvxLinearLayout(context, null)
+									.Adjust(layout => {
+										layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+										layout.Orientation = Orientation.Vertical;
+										layout.SetPadding(0, 8.DpToPx(), 0, 8.DpToPx());
+										layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurface);
+										layout.ItemTemplateId = Resource.Layout.server_info_primary_item;
+									})
+									.Bind(this, "ItemsSource PrimaryInfoItems")
+							},
+							new TabLayout(context)
+								.Adjust(layout => {
+									layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+									layout.Id = Resource.Id.tablayout;
+									layout.SetAttributeBackgroundColor(Resource.Attribute.colorSurface);
+									layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight);
+								})
+						},
+						new ViewPager2(context) {
+							LayoutParameters = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent) {
+								Behavior = new AppBarLayout.ScrollingViewBehavior()
+							},
+							Id = Resource.Id.viewpager
+						}
+					}
+				}
+			};
 			return view;
 		}
 
 		private MvxRecyclerViewHolder CreateViewPagerHolder(ViewGroup parent, int viewType) {
 			View view;
+			var context = parent.Context;
 			if (viewType == Resource.Layout.server_info_players) {
-				view = new LinearLayout(parent.Context)
-					.Adjust(layout => {
+				view = new LinearLayoutX(context) {
+					layout => {
 						layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
 						layout.Orientation = Orientation.Vertical;
-					})
-					.AddView(
-						new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 40.DpToPx()) {
-							Weight = 0.0f
+					},
+					new LinearLayoutX(context) {
+						layout => {
+							layout.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 40.DpToPx()) {
+								Weight = 0.0f
+							};
+							layout.Orientation = Orientation.Horizontal;
+							layout.SetPadding(16.DpToPx(), 0, 24.DpToPx(), 0);
+							layout.SetGravity(GravityFlags.CenterVertical);
+							layout.SetAttributeBackgroundColor(global::Android.Resource.Attribute.ColorBackground);
 						},
-						context => new LinearLayout(context)
-							.Adjust(layout => {
-								layout.Orientation = Orientation.Horizontal;
-								layout.SetPadding(16.DpToPx(), 0, 24.DpToPx(), 0);
-								layout.SetGravity(GravityFlags.CenterVertical);
-								layout.SetAttributeBackgroundColor(global::Android.Resource.Attribute.ColorBackground);
-							})
-							.AddView(
-								new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent) {
+						new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_LabelMedium), null, 0)
+							.Adjust(textView => {
+								textView.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent) {
 									Weight = 1.0f
-								},
-								context => new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_LabelMedium), null, 0)
-									.Adjust(textView => {
-										textView.Text = "Player";
-										textView.SetLines(1);
-										textView.Ellipsize = TextUtils.TruncateAt.End;
-										textView.Gravity = GravityFlags.Start;
-									})
-							)
-							.AddView(
-								new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
+								};
+								textView.Text = "Player";
+								textView.SetLines(1);
+								textView.Ellipsize = TextUtils.TruncateAt.End;
+								textView.Gravity = GravityFlags.Start;
+							}),
+						new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_LabelMedium), null, 0)
+							.Adjust(textView => {
+								textView.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent) {
 									Weight = 0.0f
-								},
-								context => new MaterialTextView(new ContextThemeWrapper(context, Resource.Style.OnSurfaceText_LabelMedium), null, 0)
-									.Adjust(textView => {
-										textView.Text = "Score/Death";
-										textView.SetLines(1);
-										textView.Ellipsize = null;
-										textView.Gravity = GravityFlags.End;
-									})
-							)
-					)
-					.AddView(
-						new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 40.DpToPx()) {
-							Weight = 1.0f
-						},
-						context => new MvxRecyclerView(context, null, 0, new BaseRecyclerViewAdapter((IMvxAndroidBindingContext)this.BindingContext) {
-								ViewHolderCreator = (parent, viewType) => {
-									var view = new FrameLayout(parent.Context) {
-										LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent)
-									};
-									
-									var bindigContext = new MvxAndroidBindingContext(parent.Context, (BindingContext as IMvxAndroidBindingContext)?.LayoutInflaterHolder);
-									var viewHolder = new MvxRecyclerViewHolder(view, bindigContext);
-									
-									view
-										.Bind(viewHolder, "Background PlayerTeamBackground(Team)")
-										.AddView(
-											height: 40.DpToPx(),
-											viewCreator: context => new LinearLayout(context)
-												.Adjust(layout => {
-													layout.Orientation = Orientation.Horizontal;
-													layout.SetPadding(16.DpToPx(), 0, 24.DpToPx(), 0);
-													layout.SetGravity(GravityFlags.CenterVertical);
-													layout.SetAttributeBackgroundResource(Resource.Attribute.selectableItemBackground);
-													layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight);
+								};
+								textView.Text = "Score/Death";
+								textView.SetLines(1);
+								textView.Ellipsize = null;
+								textView.Gravity = GravityFlags.End;
+							})
+					},
+					new MvxRecyclerView(context, null, 0, new BaseRecyclerViewAdapter((IMvxAndroidBindingContext)this.BindingContext) {
+							ViewHolderCreator = (parent, viewType) => {
+								var view = new FrameLayout(parent.Context) {
+									LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent)
+								};
+								
+								var bindigContext = new MvxAndroidBindingContext(parent.Context, (BindingContext as IMvxAndroidBindingContext)?.LayoutInflaterHolder);
+								var viewHolder = new MvxRecyclerViewHolder(view, bindigContext);
+								
+								view
+									.Bind(viewHolder, "Background PlayerTeamBackground(Team)")
+									.AddView(
+										height: 40.DpToPx(),
+										viewCreator: context => new LinearLayout(context)
+											.Adjust(layout => {
+												layout.Orientation = Orientation.Horizontal;
+												layout.SetPadding(16.DpToPx(), 0, 24.DpToPx(), 0);
+												layout.SetGravity(GravityFlags.CenterVertical);
+												layout.SetAttributeBackgroundResource(Resource.Attribute.selectableItemBackground);
+												layout.SetWindowInsetsFlags(WindowInsetsFlags.PaddingLeftButExpanded | WindowInsetsFlags.PaddingRight);
 
-													addServerInfoItem(layout, viewHolder);
-												})
-										);
+												addServerInfoItem(layout, viewHolder);
+											})
+									);
 
-									return viewHolder;
-								}
+								return viewHolder;
 							}
-						)
-						.Adjust(recyclerView => {
-							recyclerView.Id = Resource.Id.mvxrecyclerview;
-							recyclerView.SetClipToPadding(false);
-							recyclerView.SetWindowInsetsFlags(WindowInsetsFlags.PaddingBottom);
-						})
-					);
+						}
+					)
+					.Adjust(recyclerView => {
+						recyclerView.LayoutParameters = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, 40.DpToPx()) {
+							Weight = 1.0f
+						};
+						recyclerView.Id = Resource.Id.mvxrecyclerview;
+						recyclerView.SetClipToPadding(false);
+						recyclerView.SetWindowInsetsFlags(WindowInsetsFlags.PaddingBottom);
+					})
+				};
 			} else {
 				view = new MvxRecyclerView(parent.Context, null, 0, new BaseRecyclerViewAdapter((IMvxAndroidBindingContext)this.BindingContext) {
 						ViewHolderCreator = (parent, viewType) => {
@@ -459,7 +414,7 @@ namespace JKChat.Android.Views.Chat {
 				});
 			}
 
-			void addServerInfoItem(ViewGroup layout, IMvxBindingContextOwner bindingContextOwner) {
+			void addServerInfoItem(LinearLayout layout, IMvxBindingContextOwner bindingContextOwner) {
 				layout
 					.AddView(
 						new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent) {
@@ -496,5 +451,47 @@ namespace JKChat.Android.Views.Chat {
 			return viewHolder;
 		}
 #endregion
+	}
+
+	public class FrameLayoutX(Context context) : LayoutX<FrameLayout>(context);
+	public class LinearLayoutX(Context context) : LayoutX<LinearLayout>(context);
+	public class RelativeLayoutX(Context context) : LayoutX<RelativeLayout>(context);
+	public class CoordinatorLayoutX(Context context) : LayoutX<CoordinatorLayout>(context);
+	public class AppBarLayoutX(Context context) : LayoutX<AppBarLayout>(context);
+	public class CollapsingToolbarLayoutX(Context context) : LayoutX<CollapsingToolbarLayout>(context);
+
+	public abstract class LayoutX<TViewGroup> : IEnumerable where TViewGroup : ViewGroup {
+		private readonly ViewGroup viewGroup;
+		
+		public LayoutX(Context context) {
+			viewGroup = (TViewGroup)Activator.CreateInstance(typeof(TViewGroup), context);
+		}
+		
+		public void Add(View view) {
+			viewGroup.AddView(view);
+		}
+		public void Add(Action<TViewGroup> adjust) {
+			adjust?.Invoke(viewGroup as TViewGroup);
+		}
+
+		public static implicit operator TViewGroup(LayoutX<TViewGroup> layout) => layout.viewGroup as TViewGroup;
+		
+		public IEnumerator GetEnumerator() => new ViewGroupEnumerator(this);
+	}
+
+	public class ViewGroupEnumerator(ViewGroup vg) : IEnumerator {
+		private int index = -1;
+		public bool MoveNext() {
+			int i = index + 1;
+			int length = vg.ChildCount;
+			if (i >= length) {
+				index = length;
+				return false;
+			}
+			index = i;
+			return true;
+		}
+		public void Reset() => index = -1;
+		public object Current => vg.GetChildAt(index);
 	}
 }
