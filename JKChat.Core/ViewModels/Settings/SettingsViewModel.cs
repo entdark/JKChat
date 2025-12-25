@@ -155,6 +155,7 @@ namespace JKChat.Core.ViewModels.Settings {
 		}
 
 		private async Task WidgetLinkExecute(TableValueItemVM item) {
+			var currentWidgetLink = AppSettings.WidgetLink;
 			var dialogList = new DialogListViewModel(Enum.GetValues<WidgetLink>()
 				.OrderBy(widgetLink => widgetLink switch {
 					WidgetLink.ServerInfo => 0,
@@ -164,7 +165,7 @@ namespace JKChat.Core.ViewModels.Settings {
 				}).Select(widgetLink => new DialogItemVM() {
 					Id = widgetLink,
 					Name = widgetLink.ToDisplayString(),
-					IsSelected = widgetLink == AppSettings.WidgetLink
+					IsSelected = widgetLink == currentWidgetLink
 				}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Widget Navigation",
@@ -182,10 +183,11 @@ namespace JKChat.Core.ViewModels.Settings {
 		}
 
 		private async Task AppThemeExecute(TableValueItemVM item) {
+			var currentTheme = AppSettings.AppTheme;
 			var dialogList = new DialogListViewModel(Enum.GetValues<Models.AppTheme>().Select(theme => new DialogItemVM() {
 				Id = theme,
 				Name = theme.ToString(),
-				IsSelected = theme == AppSettings.AppTheme
+				IsSelected = theme == currentTheme
 			}), DialogSelectionType.SingleSelection);
 			await DialogService.ShowAsync(new JKDialogConfig() {
 				Title = "Select Theme",
