@@ -68,8 +68,7 @@ namespace JKChat.Android.Controls {
 
 			public override int Count => FragmentsInfo?.Count != tabsCount ? 0 : base.Count;
 
-			protected TabsAdapter(IntPtr javaReference, JniHandleOwnership transfer)
-				: base(javaReference, transfer) { }
+			protected TabsAdapter(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer) { }
 
 			public TabsAdapter(FragmentManager fragmentManager, int tabsCount) : base(fragmentManager, new()) {
 				this.tabsCount = tabsCount;

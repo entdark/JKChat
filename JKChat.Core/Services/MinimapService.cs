@@ -36,7 +36,7 @@ public class MinimapService : IMinimapService {
 //special case for mappers who cannot properly recreate a map
 //		const string siege_hoth = "siege_hoth";
 //		if (mapName.StartsWith(siege_hoth) && mapName.Length > siege_hoth.Length && mapName[siege_hoth.Length] is char c && char.IsDigit(c) && (c - '0') >= 3)
-//			resourceMapName = "mp/siege_hoth2";
+//			mapName = "mp/siege_hoth2";
 		var assembly = this.GetType().Assembly;
 		string path = $"JKChat.Core.Resources.Minimaps.{serverInfo.Version.ToGame()}.{mapName.Replace('/','.').Replace('-', '_')}.xy,";
 		foreach (var resourceName in assembly.GetManifestResourceNames()) {

@@ -88,7 +88,7 @@ namespace JKChat.Core.ViewModels.Settings {
 			];
 			if (DeviceInfo.Platform.IsApple()) {
 				Items.Add(new() {
-					Items = new() {
+					Items = [
 						new TableToggleItemVM() {
 							Title = "Location Updates",
 							IsChecked = AppSettings.LocationUpdate,
@@ -101,7 +101,7 @@ namespace JKChat.Core.ViewModels.Settings {
 							Toggled = item => AppSettings.NativeAlertController = item.IsChecked
 						}
 #endif
-					}
+					]
 				});
 			}
 			playerNameMessageToken ??= Messenger.Subscribe<PlayerNameMessage>(OnPlayerNameMessage);

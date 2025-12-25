@@ -4,7 +4,6 @@ namespace JKChat.Core.ViewModels.Chat.Items {
 	public class ChatInfoItemVM(string text, bool shadow = false, bool mergeNext = false) : ChatItemVM {
 		private Timer timer;
 
-		private string text = text;
 		public string Text {
 			get => text;
 			internal set {

@@ -18,7 +18,7 @@ namespace JKChat.Android.Views.Main {
 			
 			BottomNavigationView.HandleItemSelection = (position) => {
 				if (position != CurrentTab) {
-					var animation = AnimationUtils.LoadAnimation(this.Context, position > CurrentTab ? Resource.Animation.fragment_tab_left_exit : Resource.Animation.fragment_tab_right_exit);
+					using var animation = AnimationUtils.LoadAnimation(this.Context, position > CurrentTab ? Resource.Animation.fragment_tab_left_exit : Resource.Animation.fragment_tab_right_exit);
 					CurrentTabFragment.View.StartAnimation(animation);
 					tabChanged = position > CurrentTab ? 1 : -1;
 				}
@@ -27,7 +27,7 @@ namespace JKChat.Android.Views.Main {
 
 			NavigationRailView.HandleItemSelection = (position) => {
 				if (position != CurrentTab) {
-					var animation = AnimationUtils.LoadAnimation(this.Context, position > CurrentTab ? Resource.Animation.fragment_rail_top_exit : Resource.Animation.fragment_rail_bottom_exit);
+					using var animation = AnimationUtils.LoadAnimation(this.Context, position > CurrentTab ? Resource.Animation.fragment_rail_top_exit : Resource.Animation.fragment_rail_bottom_exit);
 					CurrentTabFragment.View.StartAnimation(animation);
 					tabChanged = position > CurrentTab ? 1 : -1;
 				}
@@ -38,12 +38,13 @@ namespace JKChat.Android.Views.Main {
 		protected override void TabPageSelected(object sender, ViewPager.PageSelectedEventArgs ev) {
 			base.TabPageSelected(sender, ev);
 			if (tabChanged != 0) {
-				Animation animation;
-				if (BaseActivity is { ExpandedWindow: true } activity) {
-					animation = AnimationUtils.LoadAnimation(this.Context, tabChanged > 0 ? Resource.Animation.fragment_rail_bottom_enter : Resource.Animation.fragment_rail_top_enter);
+				int animationId;
+				if (BaseActivity is { ExpandedWindow: true }) {
+					animationId = tabChanged > 0 ? Resource.Animation.fragment_rail_bottom_enter : Resource.Animation.fragment_rail_top_enter;
 				} else {
-					animation = AnimationUtils.LoadAnimation(this.Context, tabChanged > 0 ? Resource.Animation.fragment_tab_right_enter : Resource.Animation.fragment_tab_left_enter);
+					animationId = tabChanged > 0 ? Resource.Animation.fragment_tab_right_enter : Resource.Animation.fragment_tab_left_enter;
 				}
+				using var animation = AnimationUtils.LoadAnimation(this.Context, animationId);
 				CurrentTabFragment.View.StartAnimation(animation);
 				tabChanged = 0;
 			}

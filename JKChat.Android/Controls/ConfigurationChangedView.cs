@@ -5,11 +5,9 @@ using Android.Content.Res;
 using Android.Views;
 
 namespace JKChat.Android.Controls {
-	public class ConfigurationChangedView : View {
+	public class ConfigurationChangedView(Context context) : View(context)
+	{
 		public Action<Configuration> ConfigurationChanged { get; set; }
-
-		public ConfigurationChangedView(Context context) : base(context) {
-		}
 
 		protected override void OnConfigurationChanged(Configuration newConfig) {
 			base.OnConfigurationChanged(newConfig);

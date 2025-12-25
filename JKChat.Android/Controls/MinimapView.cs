@@ -53,6 +53,7 @@ public class MinimapView : FrameLayout {
 					}
 					minimapImageView.SetImageDrawable(drawable);
 					minimapImageView.ResetZoom();
+					drawable?.Dispose();
 				} catch (Exception exception) {
 					System.Diagnostics.Debug.WriteLine(exception);
 				}
@@ -106,7 +107,7 @@ public class MinimapView : FrameLayout {
 		minimapDrawingView.Invalidate();
 	}
 
-	Java.Lang.Thread t;
+	private Java.Lang.Thread t;
 	protected override void OnAttachedToWindow() {
 		base.OnAttachedToWindow();
 		if (AppSettings.MinimapOptions.HasFlag(MinimapOptions.HighPerformance)) {
@@ -124,6 +125,7 @@ public class MinimapView : FrameLayout {
 	protected override void OnDetachedFromWindow() {
 		try {
 			t?.Interrupt();
+			t?.Dispose();
 			t = null;
 		} catch (Exception exception) {
 			System.Diagnostics.Debug.WriteLine(exception);
