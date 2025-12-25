@@ -125,6 +125,14 @@ namespace JKChat.Android.Views.ServerList {
 			filterBadgeDrawable.BadgeGravity = BadgeDrawable.TopStart;
 			filterBadgeDrawable.HorizontalOffset = 36.DpToPx();
 			filterBadgeDrawable.VerticalOffset = 18.DpToPx();
+			
+			var parent = filterItem.ActionView as FrameLayout;
+			var anchor = parent?.FindViewById(Resource.Id.toolbar_menu_item);
+			anchor.LayoutChange += OnLayoutChange;
+			void OnLayoutChange(object sender, View.LayoutChangeEventArgs ev) {
+				filterBadgeDrawable.UpdateBadgeCoordinates(anchor, parent);
+				anchor.LayoutChange -= OnLayoutChange;
+			}
 		}
 
 		protected override void ActivityExit() {
