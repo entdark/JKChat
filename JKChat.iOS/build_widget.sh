@@ -16,4 +16,4 @@ cp -rf ../JKChat.iOS.Widget.Native/build/$configuration-$sdk/WidgetExtension.app
 #xcodebuild -create-xcframework -archive ../JKChat.iOS.Widget.Native/build/WidgetShared-iOS.xcarchive -framework WidgetShared.framework -archive ../JKChat.iOS.Widget.Native/build/WidgetShared-iOS-Simulator.xcarchive -framework WidgetShared.framework -output ../JKChat.iOS.Widget.Native/build/WidgetShared.xcframework
 configuration="Release"
 dotnet build ../JKChat.iOS.Widget.Native/Binding/WidgetShared/WidgetShared.csproj --configuration $configuration
-cp -rf ../JKChat.iOS.Widget.Native/Binding/WidgetShared/bin/$configuration/net8.0-ios ../JKChat.iOS.Widget.Native/Binding/WidgetShared/bin/WidgetShared
+cp -rf ../JKChat.iOS.Widget.Native/Binding/WidgetShared/bin/$configuration/net9.0-ios ../JKChat.iOS.Widget.Native/Binding/WidgetShared/bin/WidgetShared

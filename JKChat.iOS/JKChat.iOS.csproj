@@ -68,8 +68,6 @@
       <Name>WidgetExtension</Name>
       <BuildOutput>build</BuildOutput>
     </AdditionalAppExtensions>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="WidgetShared">
       <HintPath>..\JKChat.iOS.Widget.Native\Binding\WidgetShared\bin\WidgetShared\WidgetShared.dll</HintPath>
     </Reference>
