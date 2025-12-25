@@ -94,13 +94,11 @@ namespace JKChat.Core.ViewModels.Settings {
 							IsChecked = AppSettings.LocationUpdate,
 							Toggled = item => AppSettings.LocationUpdate = item.IsChecked
 						},
-#if DEBUG
 						new TableToggleItemVM() {
 							Title = "Native AlertController",
 							IsChecked = AppSettings.NativeAlertController,
 							Toggled = item => AppSettings.NativeAlertController = item.IsChecked
 						}
-#endif
 					]
 				});
 			}
