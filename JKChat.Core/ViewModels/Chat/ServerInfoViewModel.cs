@@ -18,9 +18,10 @@ using JKChat.Core.ViewModels.ServerList.Items;
 using JKClient;
 
 using Microsoft.Maui.ApplicationModel.DataTransfer;
-
+using MvvmCross;
 using MvvmCross.Commands;
 using MvvmCross.Navigation;
+using MvvmCross.Plugin.Messenger;
 using MvvmCross.ViewModels;
 
 [assembly: MvxNavigation(typeof(ServerInfoViewModel), @"jkchat://info\?address=(?<address>.*)")]
@@ -218,18 +219,19 @@ namespace JKChat.Core.ViewModels.Chat {
 				if (ServerInfo != null) {
 					var server = await cacheService.GetCachedServer(ServerInfo);
 					IsFavourite = server?.IsFavourite == true;
-					bool update = false;
 					var status = gameClientsService.GetStatus(serverInfo);
 					if (status == null || status == Models.ConnectionStatus.Disconnected) {
 						IsLoading = true;
 						var newServerInfo = await this.serverListService.GetServerInfo(serverInfo).ExecuteWithin(delay);
 						if (newServerInfo != null) {
-							ServerInfo = newServerInfo;
-							update = true;
+							if (server != null) {
+								ServerInfo = newServerInfo;
+								await cacheService.UpdateServer(ServerInfo);
+							} else {
+//OnServerInfoMessage will set ServerInfo
+								Mvx.IoCProvider.Resolve<IMvxMessenger>().Publish(new ServerInfoMessage(this, newServerInfo, Models.ConnectionStatus.Disconnected));
+							}
 						}
-					}
-					if (update) {
-						await cacheService.UpdateServer(ServerInfo);
 					}
 				}
 			} catch (Exception exception) {
@@ -265,8 +267,8 @@ namespace JKChat.Core.ViewModels.Chat {
 					PlayerItems.MergeWith(ServerInfo.PlayersInfo.Select(player => new PlayerInfoItemVM() { Key = player.Name, Value = player.Score.ToString() + (hasDeaths ? $"/{(player.ModData is int deaths ? deaths : 0)}" : string.Empty), Team = Status == Models.ConnectionStatus.Connected ? (Models.Team)player.Team : Models.Team.Spectator, Data = player }), (oldItem, newItem) => {
 						bool theSame = oldItem.Data is ClientInfo oldPlayer
 							&& newItem.Data is ClientInfo newPlayer
-							&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
-							&& oldPlayer.ClientNum == newPlayer.ClientNum;
+							&& ((oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0 && oldPlayer.ClientNum == newPlayer.ClientNum)
+								|| (oldPlayer.ClientNum == -1 && newPlayer.ClientNum == -1 && string.Compare(oldPlayer.Name, newPlayer.Name, StringComparison.OrdinalIgnoreCase) == 0));
 						if (theSame) {
 							oldItem.Key = newItem.Key;
 							oldItem.Value = newItem.Value;
@@ -290,8 +292,8 @@ namespace JKChat.Core.ViewModels.Chat {
 									&& newItem is PlayerInfoItemVM
 									&& oldItem.Data is ClientInfo oldPlayer
 									&& newItem.Data is ClientInfo newPlayer
-									&& oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0
-									&& oldPlayer.ClientNum == newPlayer.ClientNum;
+									&& ((oldPlayer.ClientNum >= 0 && newPlayer.ClientNum >= 0 && oldPlayer.ClientNum == newPlayer.ClientNum)
+									    || (oldPlayer.ClientNum == -1 && newPlayer.ClientNum == -1 && string.Compare(oldPlayer.Name, newPlayer.Name, StringComparison.OrdinalIgnoreCase) == 0));
 								if (theSame) {
 									oldItem.Key = newItem.Key;
 									oldItem.Value = newItem.Value;
