@@ -55,7 +55,7 @@ namespace JKChat.Core.Models {
 				bool? oldMapFocused = ViewModel?.MapFocused;
 				viewModel = value;
 				if (value != null) {
-					if (AppSettings.MinimapOptions.HasFlag(MinimapOptions.RememberFocus)) {
+					if (AppSettings.MinimapOptions.HasFlag(MinimapOptions.Enabled | MinimapOptions.RememberFocus)) {
 						viewModel.MapFocused = this.MapFocused;
 					}
 					if (pendingDialogConfig != null) {
