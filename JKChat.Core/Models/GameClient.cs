@@ -18,11 +18,11 @@ using JKChat.Core.ViewModels.Dialog;
 
 using JKClient;
 
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 using Microsoft.Maui.Devices;
 
 using MvvmCross;
-using MvvmCross.Base;
 using MvvmCross.Core;
 using MvvmCross.Navigation;
 using MvvmCross.Plugin.Messenger;
@@ -35,7 +35,6 @@ namespace JKChat.Core.Models {
 		private const int MaxChatMessages = 512;
 		private JKClient.JKClient Client;
 		private Dictionary<string, string> pendingUserInfo;
-		private readonly IMvxMainThreadAsyncDispatcher mainThread;
 		private readonly IMvxNavigationService navigationService;
 		private readonly IDialogService dialogService;
 		private readonly INotificationsService notificationsService;
@@ -74,14 +73,14 @@ namespace JKChat.Core.Models {
 					}
 					if (pendingItemsCopy.Length > 0) {
 						if (DeviceInfo.Platform == DevicePlatform.Android) {
-							mainThread.ExecuteOnMainThreadAsync(() => {
+							MainThread.BeginInvokeOnMainThread(() => {
 								lock (Items) {
 									Items.AddRange(pendingItemsCopy);
 								}
 								addingPending = false;
 							});
 						} else if (DeviceInfo.Platform.IsApple()) {
-							mainThread.ExecuteOnMainThreadAsync(() => {
+							MainThread.BeginInvokeOnMainThread(() => {
 								lock (Items) {
 									Items.InsertRange(0, pendingItemsCopy);
 								}
@@ -126,7 +125,6 @@ namespace JKChat.Core.Models {
 		internal event Action<long> FrameExecuted;
 
 		internal GameClient(ServerInfo serverInfo) {
-			mainThread = Mvx.IoCProvider.Resolve<IMvxMainThreadAsyncDispatcher>();
 			navigationService = Mvx.IoCProvider.Resolve<IMvxNavigationService>();
 			dialogService = Mvx.IoCProvider.Resolve<IDialogService>();
 			notificationsService = Mvx.IoCProvider.Resolve<INotificationsService>();
