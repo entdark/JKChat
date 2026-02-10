@@ -419,3 +419,13 @@ public class SceneDelegate : MvxSceneDelegate<Setup, App>, IUNUserNotificationCe
 		GC.Collect();
 	}
 }
+
+#if !WIDGETS
+public static class WidgetShared {
+	public static class LiveActivityShared {
+		public static void RefreshWidgetsOfKind(string kind) {}
+		public static void ShowLiveActivityWithServers(string[] servers, uint unreadMessages, uint players, uint maxPlayers, Action disconnectCallback, Action completionCallback) {}
+		public static void StopLiveActivity(Action completionCallback) {}
+	}
+}
+#endif

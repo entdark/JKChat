@@ -1,11 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>$(DefineConstants);WIDGETS;</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>net9.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
     <LangVersion>latest</LangVersion>
     <CreatePackage>false</CreatePackage>
     <Nullable>disable</Nullable>
-    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <CodesignEntitlements Condition="$(DefineConstants.Contains('WIDGETS'))">Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
   <PropertyGroup Condition=" $(TargetFramework.StartsWith('net8.0-ios')) ">
     <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
@@ -63,7 +66,7 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.8" />
     <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.100" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="$(DefineConstants.Contains('WIDGETS'))">
     <AdditionalAppExtensions Include="$(MSBuildProjectDirectory)\..\JKChat.iOS.Widget.Native">
       <Name>WidgetExtension</Name>
       <BuildOutput>build</BuildOutput>
