@@ -89,17 +89,17 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 		<key>UISceneConfigurations</key>
-        <dict>
-            <key>UIWindowSceneSessionRoleApplication</key>
-            <array>
-                <dict>
-                    <key>UISceneDelegateClassName</key>
-                    <string>SceneDelegate</string>
-                    <key>UISceneConfigurationName</key>
-                    <string>MvxSceneConfiguration</string>
-                </dict>
-            </array>
-        </dict>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneDelegateClassName</key>
+					<string>SceneDelegate</string>
+					<key>UISceneConfigurationName</key>
+					<string>MvxSceneConfiguration</string>
+				</dict>
+			</array>
+		</dict>
 	</dict>
 </dict>
 </plist>
