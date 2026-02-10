@@ -13,7 +13,6 @@ using AndroidX.Activity.Result;
 using AndroidX.Activity.Result.Contract;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
-using AndroidX.Core.View;
 
 using Google.Android.Material.Internal;
 

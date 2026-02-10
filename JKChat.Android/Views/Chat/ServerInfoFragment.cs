@@ -200,12 +200,10 @@ namespace JKChat.Android.Views.Chat {
 										lp.AddRule(LayoutRules.AlignBottom, Resource.Id.appbarlayout);
 									});
 								imageView.SetScaleType(ImageView.ScaleType.CenterCrop);
-								imageView.ImageTintList =
-									ContextCompat.GetColorStateList(context, Resource.Color.bg_preview_tint);
+								imageView.ImageTintList = ContextCompat.GetColorStateList(context, Resource.Color.bg_preview_tint);
 								imageView.ImageTintMode = PorterDuff.Mode.SrcOver;
 							})
 							.Bind(this, "DrawableName ServerPreview(Game)"),
-						
 						new LinearLayoutX(context) {
 							layout => {
 								layout.LayoutParameters = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
@@ -476,7 +474,7 @@ namespace JKChat.Android.Views.Chat {
 
 		public static implicit operator TViewGroup(LayoutX<TViewGroup> layout) => layout.viewGroup as TViewGroup;
 		
-		public IEnumerator GetEnumerator() => new ViewGroupEnumerator(this);
+		public IEnumerator GetEnumerator() => new ViewGroupEnumerator(viewGroup);
 	}
 
 	public class ViewGroupEnumerator(ViewGroup vg) : IEnumerator {
