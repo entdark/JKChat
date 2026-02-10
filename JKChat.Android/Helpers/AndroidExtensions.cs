@@ -117,11 +117,11 @@ namespace JKChat.Android.Helpers {
 			return bundle?.IsEmpty ?? true ? new Dictionary<string, string>() : bundle.KeySet().ToDictionary(key => key, bundle.GetString);
 		}
 		public static bool IsNavigationBarOnLeft(this WindowInsetsCompat windowInsets) {
-			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars());
+			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars() | WindowInsetsCompat.Type.DisplayCutout());
 			return insets is { Left: > 0 };
 		}
 		public static bool IsNavigationBarOnRight(this WindowInsetsCompat windowInsets) {
-			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars());
+			var insets = windowInsets?.GetInsets(WindowInsetsCompat.Type.SystemBars() | WindowInsetsCompat.Type.DisplayCutout());
 			return insets is { Right: > 0 };
 		}
 
