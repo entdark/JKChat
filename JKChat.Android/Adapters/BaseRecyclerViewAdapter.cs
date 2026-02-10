@@ -10,6 +10,7 @@ namespace JKChat.Android.Adapters {
 		protected MvxRecyclerView RecyclerView { get; private set; }
 
 		public AdjustHolderDelegate AdjustHolderOnCreate { get; set; }
+		public AdjustHolderPositionDelegate AdjustHolderBeforeBind { get; set; }
 		public AdjustHolderPositionDelegate AdjustHolderOnBind { get; set; }
 		public AdjustHolderDelegate AdjustHolderOnRecycle { get; set; }
 		public CreateHolderDelegate ViewHolderCreator { get; set; }
@@ -28,6 +29,7 @@ namespace JKChat.Android.Adapters {
 		}
 
 		public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+			AdjustHolderBeforeBind?.Invoke(holder, position);
 			base.OnBindViewHolder(holder, position);
 			AdjustHolderOnBind?.Invoke(holder, position);
 		}

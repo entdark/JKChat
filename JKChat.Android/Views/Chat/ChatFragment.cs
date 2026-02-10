@@ -156,6 +156,7 @@ namespace JKChat.Android.Views.Chat {
 			set.Bind(this).For(v => v.MapLoadingProgress).To(vm => vm.MapLoadingProgress);
 
 			recyclerView = view.FindViewById<MvxRecyclerView>(Resource.Id.mvxrecyclerview);
+			recyclerView.SetItemViewCacheSize(10);
 			if (recyclerView.Adapter is not ScrollToBottomRecyclerAdapter) {
 				recyclerView.Adapter = new ScrollToBottomRecyclerAdapter((IMvxAndroidBindingContext)BindingContext) {
 					AdjustHolderOnCreate = (viewHolder) => {
@@ -173,14 +174,34 @@ namespace JKChat.Android.Views.Chat {
 						textView.MovementMethod = LongClickLinkMovementMethod.Instance;
 
 						var scrollView = viewHolder.ItemView.FindViewById<HorizontalScrollView>(Resource.Id.message_scrollview);
-						scrollView?.LayoutTransition?.EnableTransitionType(LayoutTransitionType.Changing);
 						scrollView?.SetOnTouchListener(new MessageScrollListener());
+						if (scrollView?.LayoutTransition is { } layoutTransition) {
+							setTransitionTypes(layoutTransition.EnableTransitionType);
+						}
 					},
-					AdjustHolderOnBind = (viewHolder, position) => {
+					AdjustHolderBeforeBind = (viewHolder, _) => {
+						var scrollView = viewHolder.ItemView.FindViewById<HorizontalScrollView>(Resource.Id.message_scrollview);
+						if (scrollView?.LayoutTransition is { } layoutTransition) {
+							setTransitionTypes(layoutTransition.DisableTransitionType);
+						}
+					},
+					AdjustHolderOnBind = (viewHolder, _) => {
 						var scrollView = viewHolder.ItemView.FindViewById<HorizontalScrollView>(Resource.Id.message_scrollview);
 						scrollView?.ScrollTo(0, 0);
+						scrollView?.PostDelayed(() => {
+							if (scrollView.LayoutTransition is { } layoutTransition) {
+								setTransitionTypes(layoutTransition.EnableTransitionType);
+							}
+						}, 2);
 					}
 				};
+				static void setTransitionTypes(Action<LayoutTransitionType> setter) {
+					setter(LayoutTransitionType.ChangeAppearing);
+					setter(LayoutTransitionType.ChangeDisappearing);
+					setter(LayoutTransitionType.Appearing);
+					setter(LayoutTransitionType.Disappearing);
+					setter(LayoutTransitionType.Changing);	
+				}
 			}
 			scrollToBottomRecyclerAdapter = recyclerView.Adapter as ScrollToBottomRecyclerAdapter;
 
